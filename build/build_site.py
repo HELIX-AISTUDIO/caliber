@@ -649,6 +649,35 @@ th .hm{font-size:9px;letter-spacing:.04em;text-transform:none;color:#5A6069;font
   .g5,.g2{grid-template-columns:1fr 1fr}
   .ctrl{gap:14px}
   input[type=range]{width:100%}
+  /* ── 主表改卡片形态（竖屏）──────────────────────────────────
+     44 行 x 7 列在 390px 宽下要横向拖很远才能读完一行，这是数据密度决定的，
+     压缩列宽解决不了。改为每档一张竖排卡片：首行「名次 平台 档位」，
+     下面四行「标签 — 数值」，上下滑即可。 */
+  .tw.tw-main{max-height:none}
+  #main{min-width:0;background:transparent;border:0;box-shadow:none;border-radius:0;
+    overflow:visible}
+  #main thead{display:none}
+  #main tbody tr{display:flex;flex-wrap:wrap;align-items:center;
+    margin-bottom:10px;padding:12px 14px;border-radius:14px;
+    border:1px solid rgba(255,255,255,.12);
+    background:linear-gradient(158deg,rgba(255,255,255,.055),rgba(0,0,0,.3))}
+  #main tbody tr.top{border-color:rgba(209,254,23,.42);box-shadow:inset 3px 0 0 #D1FE17}
+  #main tbody tr.top td:first-child{box-shadow:none}
+  #main tbody td{border:0;padding:0;white-space:normal}
+  #main tbody td:nth-child(-n+3){flex:0 0 auto;text-align:left;padding-right:8px}
+  #main tbody td:nth-child(1) b{font-size:14px}
+  #main tbody td:nth-child(1) s{font-size:10px;margin-left:3px}
+  #main tbody td:nth-child(2){font-weight:600;color:#fff;font-size:13.5px}
+  #main tbody td:nth-child(3){color:#9AA0A8;font-size:12.5px}
+  #main tbody td:nth-child(n+4){flex:1 0 100%;display:block;position:relative;
+    padding:7px 0 7px 80px;border-top:1px dashed rgba(255,255,255,.075)}
+  #main tbody td:nth-child(n+4)::before{content:attr(data-l);position:absolute;
+    left:0;top:7px;color:#767C85;font-size:10.5px;font-weight:700;
+    letter-spacing:.06em;white-space:nowrap}
+  #main tbody td:nth-child(n+4) s{font-size:10.5px}
+  #main tbody td:nth-child(6) .mini{max-width:170px;margin-left:auto;margin-top:5px}
+  #main tbody td:nth-child(6) s{display:block;text-align:right}
+
 }
 @media (max-width:520px){ .g5,.g2{grid-template-columns:1fr} }
 """
@@ -1137,11 +1166,11 @@ for r in sorted(ROWS, key=lambda x: x["perVideo"]):
         f'<td class="ctr rk"><b>{r["rank"]}</b><s>{r["rel"]:.2f}×</s></td>'
         f'<td><span class="dot" style="background:{r["color"]}"></span>{r["plat"]}{usd}</td>'
         f'<td>{r["tier"]}{vl}</td>'
-        f'<td class="num cell2"><b>{price_disp}</b><s>{sub}</s></td>'
-        f'<td class="num">{r["monthly"]:,}</td>'
-        f'<td class="num cell2" data-rated="{r["perVideo"]:.2f}"><span class="{"strong" if r["rank"]==1 else "nm"}">¥{f2(r["perVideo"])}</span>'f'<s>{("该产量 ¥" + f2(delivered(r)) + "/条") if delivered(r) else "该产量下产能过低"}</s>'
+        f'<td class="num cell2" data-l="年费"><b>{price_disp}</b><s>{sub}</s></td>'
+        f'<td class="num" data-l="月积分">{r["monthly"]:,}</td>'
+        f'<td class="num cell2" data-l="单条成本" data-rated="{r["perVideo"]:.2f}"><span class="{"strong" if r["rank"]==1 else "nm"}">¥{f2(r["perVideo"])}</span>'f'<s>{("该产量 ¥" + f2(delivered(r)) + "/条") if delivered(r) else "该产量下产能过低"}</s>'
         f'<div class="mini{mc}"><i style="--w:{w:.1f}%;width:{w:.1f}%"></i></div></td>'
-        f'<td class="num cell2"><b>{r["perSec"]:.3f}</b><s>元/秒</s></td></tr>')
+        f'<td class="num cell2" data-l="元/秒"><b>{r["perSec"]:.3f}</b><s>元/秒</s></td></tr>')
 
 lad_rows = ""
 for i, x in enumerate(LADDER):
