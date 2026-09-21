@@ -432,12 +432,12 @@ table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
   border:1px solid rgba(255,255,255,.12);border-radius:18px;overflow:hidden;
   box-shadow:inset 0 0 0 .61px rgba(255,255,255,.06),0 16px 40px rgba(0,0,0,.5)}
 th{background:transparent;color:#767C85;font-weight:700;font-size:10.5px;text-align:left;
-  padding:14px;white-space:nowrap;letter-spacing:.095em;text-transform:uppercase;
+  padding:10px 14px;white-space:nowrap;letter-spacing:.095em;text-transform:uppercase;
   border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer;user-select:none;
   transition:color .2s}
 th:hover{color:#D1FE17}
 th.ctr,td.ctr{text-align:center}
-td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap;
+td{padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap;
   color:#C9CDD2;letter-spacing:0;vertical-align:middle}
 tbody tr{transition:background .18s}
 tbody tr:last-child td{border-bottom:none}
@@ -508,6 +508,16 @@ summary .warnbadge{font-size:10px;font-weight:800;color:#0B0B0B;background:#FFC9
 
 /* ── 控件 ── */
 .ctrl{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:16px}
+.toolbar{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:12px;
+  padding:11px 15px;border-radius:12px;background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.09)}
+.cqin{width:88px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
+  border-radius:8px;color:#fff;font-family:%%F_MONO%%;font-size:13px;font-weight:600;
+  padding:6px 9px;outline:none;letter-spacing:-.02em}
+.cqin:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}
+.cqhint{color:#767C85}
+.cq-best{color:#0B0B0B;background:#D1FE17;font-weight:800;padding:1px 7px;border-radius:5px}
+.cq-no{color:#5A6069}
 input[type=range]{-webkit-appearance:none;appearance:none;width:320px;height:4px;border-radius:999px;
   outline:none;background:rgba(255,255,255,.12)}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;border-radius:50%;
@@ -679,6 +689,28 @@ function sortBy(k, el){
   rs.sort(function(a,b){ return (parseFloat(a.dataset[k]) - parseFloat(b.dataset[k])) * dir; });
   rs.forEach(function(r){ tb.appendChild(r); });
 }
+/* ── 主表自定义产量列 ── */
+function syncCq(){
+  var inp = document.getElementById('cq'); if(!inp) return;
+  var N = Math.max(1, parseInt(inp.value || '30', 10));
+  var th = document.getElementById('cqth'), hint = document.getElementById('cqhint');
+  var secs = N * 30, mins = secs / 60;
+  if(th) th.textContent = '月产 ' + N + ' 条的年支出';
+  if(hint) hint.textContent = '= ' + secs.toLocaleString() + ' 秒 ≈ ' +
+    (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '（1 条 = 30 秒）';
+  var cells = document.querySelectorAll('.cqcell'), best = Infinity;
+  Array.prototype.forEach.call(cells, function(td){
+    var p = parseFloat(td.dataset.p), c = parseFloat(td.dataset.c);
+    if(c >= N && p < best) best = p;
+  });
+  Array.prototype.forEach.call(cells, function(td){
+    var p = parseFloat(td.dataset.p), c = parseFloat(td.dataset.c);
+    if(c < N){ td.innerHTML = '<span class="cq-no">产能不足</span>'; return; }
+    var t = '\u00a5' + p.toLocaleString();
+    td.innerHTML = (p === best) ? '<span class="cq-best">' + t + ' 最省</span>' : t;
+  });
+}
+
 /* ── 产量测算 ── */
 var PLANS = __DATA__;
 function pk(t){
@@ -698,7 +730,11 @@ function render(){
   var el = document.getElementById('tgt'), out = document.getElementById('rec');
   if(!el || !out) return;
   var t = parseFloat(el.value);
+  var secs = t * 30, mins = secs / 60;
   document.getElementById('tgtv').textContent = t + ' 条/月';
+  var dv = document.getElementById('tgtsec');
+  if(dv) dv.textContent = '= ' + secs.toLocaleString() + ' 秒 ≈ ' +
+    (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '素材';
   var h = '', s = pk(t);
   if(s){
     h += '<tr><td>单一订阅最省</td>'
@@ -721,6 +757,8 @@ function render(){
 document.addEventListener('DOMContentLoaded', function(){
   var el = document.getElementById('tgt');
   if(el){ el.addEventListener('input', render); render(); }
+  var cq = document.getElementById('cq');
+  if(cq){ cq.addEventListener('input', syncCq); syncCq(); }
   /* 点击子导航时立即高亮，不等 scrollspy 节流 */
   Array.prototype.forEach.call(document.querySelectorAll('.subnav a[href^="#"]'), function(a){
     a.addEventListener('click', function(){
@@ -907,7 +945,8 @@ for p in sorted(plans, key=lambda x: x["perVideoCNY"]):
         f'<td class="num">{p["monthly"]:,}</td>'
         f'<td class="num cbar"><span class="strong">¥{f2(p["perVideoCNY"])}</span>{mini_bar(p["perVideoCNY"])}</td>'
         f'<td class="num cell2"><b>{p["perSecCNY"]:.3f}</b><s>元/秒</s></td>'
-        f'<td class="num cell2"><b>{p["mCap"]:.2f}</b><s>条/月</s></td></tr>')
+        f'<td class="num cell2"><b>{p["mCap"]:.2f}</b><s>条/月</s></td>'
+        f'<td class="num cqcell" data-p="{p["priceCNY"]:.2f}" data-c="{p["mCap"]:.4f}"></td></tr>')
 
 lad_rows = ""
 for i, r in enumerate(ladder):
@@ -1042,16 +1081,40 @@ cost_body = f"""
   </div>
 </section>
 
+<section id="calc" class="reveal">
+  <div class="sechead">
+    <h2><span class="ey">01</span>按产量反查最省方案</h2>
+    <div class="sd">先填月产量，直接看结论。1 条 = 30 秒，10 条就是 300 秒（5 分钟）素材。</div>
+  </div>
+  <div class="card">
+    <div class="ctrl">
+      <span class="sub">目标月产量</span>
+      <input type="range" id="tgt" min="1" max="200" value="30">
+      <span class="big" id="tgtv">30 条/月</span>
+      <span class="sub" id="tgtsec">= 900 秒 ≈ 15 分钟素材</span>
+    </div>
+    <table><thead><tr><th>方案类型</th><th>档位组合</th><th class="ctr">年支出</th>
+    <th class="ctr">实际产能</th><th class="ctr">单条成本</th></tr></thead><tbody id="rec"></tbody></table>
+    <div class="sub" style="margin-top:10px">「组合订阅」允许多份订阅叠加（多账号），用于产量超出单档位上限时；多账号运营成本未计入。</div>
+  </div>
+</section>
+
 <section id="table" class="reveal">
   <div class="sechead">
-    <h2><span class="ey">01</span>全档位对比</h2>
+    <h2><span class="ey">02</span>全档位对比</h2>
     <div class="sd">条形越长＝越省（以全场最优价为 100%）。点表头可排序，左右滑动查看完整表格。</div>
+  </div>
+  <div class="toolbar">
+    <span class="sub">自定义月产量</span>
+    <input type="number" id="cq" class="cqin" min="1" max="2000" step="1" value="30">
+    <span class="sub cqhint" id="cqhint">= 900 秒 ≈ 15 分钟素材（1 条 = 30 秒）</span>
   </div>
   <div class="tw"><table id="main"><thead><tr>
     <th onclick="sortBy('v',this)">#</th><th>平台</th><th>档位</th>
     <th onclick="sortBy('p',this)" class="ctr">年费</th><th class="ctr">月积分</th>
     <th onclick="sortBy('v',this)" class="ctr">单条成本 ↓</th><th class="ctr">元/秒</th>
     <th onclick="sortBy('c',this)" class="ctr">月产能 ↓</th>
+    <th class="ctr" id="cqth">月产 30 条的年支出</th>
   </tr></thead><tbody>
 {main_rows}
   </tbody></table></div>
@@ -1059,7 +1122,7 @@ cost_body = f"""
 
 <section id="ladder" class="reveal">
   <div class="sechead">
-    <h2><span class="ey">02</span>达标总支出阶梯</h2>
+    <h2><span class="ey">03</span>达标总支出阶梯</h2>
     <div class="sd">「单条成本最省」≠「花钱最省」。按目标月产量反查覆盖该产能的最低年费档位（单一订阅）。</div>
   </div>
   <div class="tw"><table><thead><tr>
@@ -1081,13 +1144,13 @@ cost_body = f"""
 
 <section id="margin" class="reveal">
   <div class="sechead">
-    <h2><span class="ey">03</span>边际成本：升档值不值</h2>
+    <h2><span class="ey">04</span>边际成本：升档值不值</h2>
     <div class="sd">从下一档升到上一档，每多买一条产能实际多花多少钱。标尺为全场最优 ¥{f2(best)}/条。</div>
   </div>
-  <div class="tw"><table><thead><tr>
+  <details><summary>展开完整边际成本对照（16 行）<span class="chev">›</span></summary><div class="dbody"><div class="tw"><table><thead><tr>
     <th>平台</th><th>升档路径</th><th class="ctr">Δ年费</th><th class="ctr">Δ年产</th>
     <th class="ctr">边际单条</th><th class="ctr">达档均值</th><th class="ctr">判定</th>
-  </tr></thead><tbody>{marg_rows}</tbody></table></div>
+  </tr></thead><tbody>{marg_rows}</tbody></table></div></div></details>
   <details style="margin-top:14px">
     <summary>价格陷阱拐点在哪？<span class="chev">›</span></summary>
     <div class="dbody">
@@ -1102,13 +1165,13 @@ cost_body = f"""
 
 <section id="discount" class="reveal">
   <div class="sechead">
-    <h2><span class="ey">04</span>折扣结构：优势是真是假</h2>
+    <h2><span class="ey">05</span>折扣结构：优势是真是假</h2>
     <div class="sd">用官方公示原价重算。原价下单价收敛成水平线 → 说明优势全部来自折扣力度，活动一结束就消失。「原价」列为页面划线价或次年续费全额，二者口径不同，仅用于判断「优势是否依赖活动」。</div>
   </div>
-  <div class="tw"><table><thead><tr>
+  <details><summary>展开折扣结构原始数据（5 行）<span class="chev">›</span></summary><div class="dbody"><div class="tw"><table><thead><tr>
     <th>平台</th><th class="ctr">折扣区间</th><th class="ctr">原价下单条（CNY）</th>
     <th class="ctr">原价单价极差</th><th class="ctr">折扣力度极差</th>
-  </tr></thead><tbody>{disc_rows}</tbody></table></div>
+  </tr></thead><tbody>{disc_rows}</tbody></table></div></div></details>
   <details style="margin-top:14px">
     <summary>谁的「规模经济」是假的？<span class="chev">›</span></summary>
     <div class="dbody">
@@ -1123,31 +1186,16 @@ cost_body = f"""
   </details>
 </section>
 
-<section id="calc" class="reveal">
-  <div class="sechead">
-    <h2><span class="ey">05</span>按产量反查最省方案</h2>
-    <div class="sd">拖动滑块填入你的目标月产量。</div>
-  </div>
-  <div class="card">
-    <div class="ctrl">
-      <span class="sub">目标月产量</span>
-      <input type="range" id="tgt" min="1" max="200" value="30">
-      <span class="big" id="tgtv">30 条/月</span>
-    </div>
-    <table><thead><tr><th>方案类型</th><th>档位组合</th><th class="ctr">年支出</th>
-    <th class="ctr">实际产能</th><th class="ctr">单条成本</th></tr></thead><tbody id="rec"></tbody></table>
-    <div class="sub" style="margin-top:10px">「组合订阅」允许多份订阅叠加（多账号），用于产量超出单档位上限时；多账号运营成本未计入。</div>
-  </div>
-</section>
+
 
 <section id="official" class="reveal">
   <div class="sechead">
-    <h2><span class="ey">06</span>海报宣传价 vs 实际到手价</h2>
+    <h2><span class="ey">07</span>海报宣传价 vs 实际到手价</h2>
     <div class="sd">各平台「低至 X 元/秒」均按非全能参考档位计算，与统一口径不可混用。</div>
   </div>
-  <div class="tw"><table><thead><tr>
+  <details><summary>展开海报价与实际到手价对照（4 行）<span class="chev">›</span></summary><div class="dbody"><div class="tw"><table><thead><tr>
     <th>平台</th><th>顶级档位</th><th class="ctr">海报「低至」</th><th class="ctr">全能参考实算</th><th class="ctr">倍差</th>
-  </tr></thead><tbody>{clm_rows}</tbody></table></div>
+  </tr></thead><tbody>{clm_rows}</tbody></table></div></div></details>
   <div class="note" style="margin-top:14px">
     <b>即梦与小云雀都报「¥0.40/秒」，倍差同为 1.69×，但小云雀实算 {XQ['perSecCNY']:.3f} 元/秒、即梦 {JM['perSecCNY']:.3f} 元/秒 —— 同一句「低至 0.40 元/秒」，小云雀实际成本高出 {XQ['perSecCNY']/JM['perSecCNY']-1:+.1%}。</b>
     Neowow {[c for c in claims if c['plat']=='Neowow'][0]['ratio']:.2f}× 的倍差为五家最高。
@@ -1156,7 +1204,7 @@ cost_body = f"""
 
 <section id="retry" class="reveal">
   <div class="sechead">
-    <h2><span class="ey">07</span>失败重试成本</h2>
+    <h2><span class="ey">06</span>失败重试成本</h2>
     <div class="sd">失败是否退分，决定「实际单条成本」要乘多少。此项此前未纳入计算 —— 若某平台失败不退分，其真实成本需按失败率上浮。</div>
   </div>
   <div class="tw"><table><thead><tr>

@@ -161,15 +161,14 @@ w("cost-seedance25.json", {
              {"monthlyCredits": 6000, "price": 2328, "label": "$194/月档"},
              {"monthlyCredits": 9000, "price": 3240, "label": "$270/月档"}
          ],
-         "creditsOptionsNote": "价格为「按月付折年付」口径的月费×12；原价按各档月付价×12 计。"}
+         "creditsOptionsNote": "Higgsfield Ultra 档提供积分滑档，三档为 3,000 / 6,000 / 9,000 分。依据官方定价页截图：Ultra $99/月，划线原价 $129，billed annually；Plus $39/月，划线原价 $49；Starter $15/月固定 200 分。"
+                               "价格为「按月付折年付」口径的月费 x 12；原价按各档月付价 x 12 计。"}
     ],
 
     # 待补数据清单（价格未知的积分档与平台，补齐后自动进入计算）
     "pending": [
         {"item": "五家的失败重试是否扣积分",
          "why": "影响最大：失败率 20% 且不退分 = 实际成本 +25%，足以反转全部排名"},
-        {"item": "Higgsfield Pro（600–900）与 Max（1,800–5,400）滑块各档价格",
-         "why": "Ultra 三档已录入；Pro/Max 仍仅知起步价 $23 / $59"},
         {"item": "Neowow ULTRA 是否有联动积分档",
          "why": "Pro（3 档）与 MAX（2 档）已确认联动，ULTRA 当前按固定 368,000/月"},
         {"item": "libtv 至尊版是否也有联动积分档",

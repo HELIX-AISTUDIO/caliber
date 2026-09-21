@@ -365,17 +365,13 @@
           "label": "$270/月档"
         }
       ],
-      "creditsOptionsNote": "价格为「按月付折年付」口径的月费×12；原价按各档月付价×12 计。"
+      "creditsOptionsNote": "Higgsfield Ultra 档提供积分滑档，三档为 3,000 / 6,000 / 9,000 分。依据官方定价页截图：Ultra $99/月，划线原价 $129，billed annually；Plus $39/月，划线原价 $49；Starter $15/月固定 200 分。价格为「按月付折年付」口径的月费 x 12；原价按各档月付价 x 12 计。"
     }
   ],
   "pending": [
     {
       "item": "五家的失败重试是否扣积分",
       "why": "影响最大：失败率 20% 且不退分 = 实际成本 +25%，足以反转全部排名"
-    },
-    {
-      "item": "Higgsfield Pro（600–900）与 Max（1,800–5,400）滑块各档价格",
-      "why": "Ultra 三档已录入；Pro/Max 仍仅知起步价 $23 / $59"
     },
     {
       "item": "Neowow ULTRA 是否有联动积分档",
