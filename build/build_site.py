@@ -966,6 +966,7 @@ cost_body = f"""
   <a href="#discount">折扣结构</a>
   <a href="#calc">按产量测算</a>
   <a href="#official">官方公示对照</a>
+  <a href="#retry">失败退分</a>
   <a href="#risk">风险</a>
   <a href="#pending">待补数据</a>
   <a href="#appendix">原始数据</a>
@@ -1121,9 +1122,39 @@ cost_body = f"""
   </div>
 </section>
 
+<section id="retry" class="reveal">
+  <div class="sechead">
+    <h2><span class="ey">07</span>失败重试成本</h2>
+    <div class="sd">失败是否退分，决定「实际单条成本」要乘多少。此项此前未纳入计算 —— 若某平台失败不退分，其真实成本需按失败率上浮。</div>
+  </div>
+  <div class="tw"><table><thead><tr>
+    <th>平台</th><th class="ctr">失败是否退分</th><th class="ctr">成本影响</th><th class="ctr">置信度</th><th>依据</th>
+  </tr></thead><tbody>
+  {"".join(f'<tr><td><span class="dot" style="background:{COLOR.get(x["plat"], "#767C85")}"></span>{x["plat"]}</td>'
+           f'<td class="ctr"><span class="tag {"v-good" if x["penalty"]=="0%" else ("v-bad" if "×" in x["penalty"] else "v-warn")}">{x["retry"]}</span></td>'
+           f'<td class="ctr num">{x["penalty"]}</td>'
+           f'<td class="ctr" style="white-space:normal">{x["confidence"]}</td>'
+           f'<td style="white-space:normal">{x["source"]}</td></tr>' for x in COST.get("retryPolicy", []))}
+  </tbody></table></div>
+  <details style="margin-top:14px">
+    <summary>逐家说明与实测建议<span class="chev">›</span></summary>
+    <div class="dbody">
+      {"".join(f'<h3>{x["plat"]}</h3><p><b>{x["retry"]}</b>　成本影响 {x["penalty"]}　置信度 {x["confidence"]}</p><p>{x["detail"]}</p>' for x in COST.get("retryPolicy", []))}
+      <h3>跨零点扣分陷阱</h3>
+      <p>{COST.get("crossMidnightNote", "")}</p>
+      <h3>这对本表结论意味着什么</h3>
+      <p>上表全部单价均按「成功出片才扣分」计算。<b>若某平台失败不退分且失败率 20%，其实际单条成本需上浮 25%</b>，
+      足以改变排名。目前唯一有官方明确保证的是 <b>Higgsfield（失败自动退还）</b> ——
+      这是它在单价劣势之外的一项隐性优势，尤其适合需要反复抽卡的高失败率工作流。</p>
+      <p class="sub">置信度说明：Higgsfield 为官方文档原文；即梦与小云雀为第三方整理与投诉案例交叉印证，<b>不是官方用户协议</b>，
+      下单前建议实测一次并保留任务 ID。libtv 与 Neowow 未检索到公开规则。</p>
+    </div>
+  </details>
+</section>
+
 <section id="risk" class="reveal">
   <div class="sechead">
-    <h2><span class="ey">07</span>风险与待核实项</h2>
+    
     <div class="sd">这 {len(COST.get("risks", []))} 项里任何一项变动都可能改变上表结论。</div>
   </div>
   {RISK_HTML}
@@ -1133,7 +1164,7 @@ cost_body = f"""
   <div class="sechead">
     <section id="pending" class="reveal">
   <div class="sechead">
-    <h2><span class="ey">08</span>待补数据</h2>
+    <h2><span class="ey">09</span>待补数据</h2>
     <div class="sd">以下项目尚未获取或需确认，补齐后自动进入计算，页面无需改动。</div>
   </div>
   <details open>
@@ -1148,7 +1179,7 @@ cost_body = f"""
   </details>
 </section>
 
-<h2><span class="ey">09</span>方法论与原始数据</h2>
+<h2><span class="ey">10</span>方法论与原始数据</h2>
     <div class="sd">本节列出全部原始输入与计算链条，不含推算值，便于复核与复用。</div>
   </div>
   <details>
@@ -1197,7 +1228,7 @@ cost_body = f"""
 
 <section class="reveal">
   <div class="sechead">
-    <h2><span class="ey">10</span>执行建议</h2>
+    <h2><span class="ey">11</span>执行建议</h2>
     <div class="sd">决策顺序：先定月产量 → 查达标阶梯 → 落到唯一档位 → 用原价排序做压力测试。</div>
   </div>
   <div class="note good">
