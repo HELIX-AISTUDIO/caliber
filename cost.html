@@ -283,6 +283,34 @@ input[type=number]{width:110px;background:rgba(255,255,255,.06);
 input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}
 .big{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:21px;font-weight:700;color:#D1FE17;letter-spacing:-.03em}
 .presets{display:inline-flex;gap:5px}
+/* ── 表格上方的月产量工具条 ── */
+.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;
+  padding:11px 15px;border-radius:13px;background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.09)}
+.cqr{-webkit-appearance:none;appearance:none;width:190px;height:4px;border-radius:999px;
+  outline:none;background:rgba(255,255,255,.12);cursor:pointer}
+.cqr::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:#D1FE17;border:3px solid #000;cursor:pointer;
+  transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.cqr::-webkit-slider-thumb:hover{transform:scale(1.12)}
+.cqr::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#D1FE17;
+  border:3px solid #000;cursor:pointer}
+.qv{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:700;color:#D1FE17;letter-spacing:-.03em;
+  min-width:78px}
+.tb-hint{flex-basis:100%;margin:0}
+/* ── 覆盖平台清单 ── */
+.pcard{padding:15px 17px}
+.pcard .pn{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;color:#fff}
+.pcard .pn .dot{margin:0}
+.pcard .pmeta{font-size:11px;color:#767C85;margin-top:6px;letter-spacing:.02em}
+.pcard .prange{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;font-weight:700;color:#D1FE17;
+  margin-top:10px;letter-spacing:-.03em}
+.pcard .prange s{text-decoration:none;font-size:10px;color:#5A6069;font-weight:500;
+  margin-left:5px;letter-spacing:0}
+.pcard .pbest{font-size:11px;color:#8A9099;margin-top:5px;line-height:1.5}
+.pcard .pochip{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;
+  font-size:9.5px;font-weight:700;color:#D1FE17;background:rgba(209,254,23,.1);
+  border:1px solid rgba(209,254,23,.24)}
 .cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
   font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;
   cursor:pointer;transition:color .2s,border-color .2s,background .2s}
@@ -380,6 +408,44 @@ input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,2
 </div>
 
 <div class="wrap">
+<div class="grid g5" style="margin-top:30px">
+  <div class="card pcard">
+    <div class="pn"><span class="dot" style="background:#FABC00"></span>小云雀
+      <span class="pochip">联动档</span></div>
+    <div class="pmeta">4 个会员档 · 9 个可选积分档</div>
+    <div class="prange">¥19.31<s>– ¥27.29 / 条</s></div>
+    <div class="pbest">最优：高级会员 · 27.7K 档<br>46.17 条/月 · 0.644 元/秒</div>
+  </div><div class="card pcard">
+    <div class="pn"><span class="dot" style="background:#3280FF"></span>即梦
+      <span class="pochip">联动档</span></div>
+    <div class="pmeta">4 个会员档 · 7 个可选积分档</div>
+    <div class="prange">¥20.00<s>– ¥45.45 / 条</s></div>
+    <div class="pbest">最优：超级会员<br>91.00 条/月 · 0.667 元/秒</div>
+  </div><div class="card pcard">
+    <div class="pn"><span class="dot" style="background:#00C65A"></span>Neowow
+      <span class="pochip">联动档</span></div>
+    <div class="pmeta">4 个会员档 · 7 个可选积分档</div>
+    <div class="prange">¥20.21<s>– ¥41.60 / 条</s></div>
+    <div class="pbest">最优：ULTRA<br>49.07 条/月 · 0.674 元/秒</div>
+  </div><div class="card pcard">
+    <div class="pn"><span class="dot" style="background:#9CE6F3"></span>libtv
+      <span class="pochip">联动档</span></div>
+    <div class="pmeta">5 个会员档 · 7 个可选积分档</div>
+    <div class="prange">¥21.78<s>– ¥43.62 / 条</s></div>
+    <div class="pbest">最优：至尊版 · 66K 档<br>47.83 条/月 · 0.726 元/秒</div>
+  </div><div class="card pcard">
+    <div class="pn"><span class="dot" style="background:#ED1572"></span>Higgsfield
+      <span class="pochip">联动档</span></div>
+    <div class="pmeta">3 个会员档 · 5 个可选积分档</div>
+    <div class="prange">¥42.52<s>– ¥106.29 / 条</s></div>
+    <div class="pbest">最优：Ultra · 9K 档<br>42.86 条/月 · 1.417 元/秒</div>
+  </div>
+</div>
+<div class="sub" style="margin-top:12px">
+  共 <b style="color:#C9CDD2">5 个平台 · 16 个会员档 · 35 个可选积分档</b>
+  ——「可选积分档」指同一会员档下平台提供的不同积分/价格组合（联动定价），各档单价不同，故逐档列出。
+</div>
+
 <div class="note warn" style="margin-top:28px">
   <b>数据范围说明：</b>本表目前仅覆盖各平台的<b>年费（连续包年）档位</b>。
   平台上另有<b>月度会员、季度会员</b>等更短周期选项，因计价单位与折扣结构不同，
@@ -446,6 +512,21 @@ input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,2
 
 <section id="table" class="reveal">
   <div class="sechead"><h2><span class="ey">02</span>全档位对比</h2><div class="sd">条形越长＝越省（以全场最优价为 100%）。「排名」格副行显示<b>当前月产量下</b>该档的年支出——拖动上方滑块，排名与副行会一起重算。</div></div>
+  <div class="toolbar">
+    <span class="sub">月产量</span>
+    <input type="range" id="q" class="cqr" min="1" max="200" step="1" value="30"
+           aria-label="月产量">
+    <span class="qv" id="qv">30 条/月</span>
+    <span class="sub" id="qd">= 900 秒 ≈ 15 分钟素材</span>
+    <span class="presets" id="qpresets">
+      <button type="button" class="cqp" data-n="5">5</button>
+      <button type="button" class="cqp" data-n="10">10</button>
+      <button type="button" class="cqp" data-n="30">30</button>
+      <button type="button" class="cqp" data-n="50">50</button>
+      <button type="button" class="cqp" data-n="100">100</button>
+    </span>
+    <span class="sub tb-hint">拖动即按该产量的年支出重排全表；产能过低者沉底。全场单档上限 91 条/月，超出按同档多份叠加（最多 4 份）。</span>
+  </div>
   <div class="tw scroll-y tw-main"><table id="main"><thead><tr><th onclick="sortBy('v',this)" class="ctr">#</th><th class="ctr">平台</th><th class="ctr">档位</th><th onclick="sortBy('p',this)" class="ctr">年费</th><th class="ctr">月积分</th><th onclick="sortBy('v',this)" class="ctr">单条成本</th><th class="ctr">元/秒</th></tr></thead><tbody><tr class="top" data-v="19.3123" data-p="10699.00" data-c="46.1667"><td class="ctr rk"><b>1</b><s>1.00×</s></td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>高级会员<span class="vlabel">27.7K 档</span></td><td class="num cell2"><b>¥10,699</b><s>CNY</s></td><td class="num">27,700</td><td class="num"><span class="strong">¥19.31</span><div class="mini"><i style="--w:100.0%;width:100.0%"></i></div></td><td class="num cell2"><b>0.644</b><s>元/秒</s></td></tr><tr class="" data-v="20.0000" data-p="21840.00" data-c="91.0000"><td class="ctr rk"><b>2</b><s>1.04×</s></td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>超级会员</td><td class="num cell2"><b>¥21,840</b><s>CNY</s></td><td class="num">54,600</td><td class="num"><span class="strong">¥20.00</span><div class="mini"><i style="--w:96.6%;width:96.6%"></i></div></td><td class="num cell2"><b>0.667</b><s>元/秒</s></td></tr><tr class="" data-v="20.0000" data-p="21840.00" data-c="91.0000"><td class="ctr rk"><b>3</b><s>1.04×</s></td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>超级会员</td><td class="num cell2"><b>¥21,840</b><s>CNY</s></td><td class="num">54,600</td><td class="num"><span class="strong">¥20.00</span><div class="mini"><i style="--w:96.6%;width:96.6%"></i></div></td><td class="num cell2"><b>0.667</b><s>元/秒</s></td></tr><tr class="" data-v="20.2089" data-p="11899.00" data-c="49.0667"><td class="ctr rk"><b>4</b><s>1.05×</s></td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>ULTRA</td><td class="num cell2"><b>¥11,899</b><s>CNY</s></td><td class="num">368,000</td><td class="num"><span class="strong">¥20.21</span><div class="mini"><i style="--w:95.6%;width:95.6%"></i></div></td><td class="num cell2"><b>0.674</b><s>元/秒</s></td></tr><tr class="" data-v="20.5833" data-p="4199.00" data-c="17.0000"><td class="ctr rk"><b>5</b><s>1.07×</s></td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>高级会员<span class="vlabel">10.2K 档</span></td><td class="num cell2"><b>¥4,199</b><s>CNY</s></td><td class="num">10,200</td><td class="num"><span class="strong">¥20.58</span><div class="mini m2"><i style="--w:93.8%;width:93.8%"></i></div></td><td class="num cell2"><b>0.686</b><s>元/秒</s></td></tr><tr class="" data-v="20.8292" data-p="4999.00" data-c="20.0000"><td class="ctr rk"><b>6</b><s>1.08×</s></td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>高级会员<span class="vlabel">12K 档</span></td><td class="num cell2"><b>¥4,999</b><s>CNY</s></td><td class="num">12,000</td><td class="num"><span class="strong">¥20.83</span><div class="mini m2"><i style="--w:92.7%;width:92.7%"></i></div></td><td class="num cell2"><b>0.694</b><s>元/秒</s></td></tr><tr class="" data-v="20.9244" data-p="3599.00" data-c="14.3333"><td class="ctr rk"><b>7</b><s>1.08×</s></td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>高级会员<span class="vlabel">8.6K 档</span></td><td class="num cell2"><b>¥3,599</b><s>CNY</s></td><td class="num">8,600</td><td class="num"><span class="strong">¥20.92</span><div class="mini m2"><i style="--w:92.3%;width:92.3%"></i></div></td><td class="num cell2"><b>0.697</b><s>元/秒</s></td></tr><tr class="" data-v="20.9597" data-p="2599.00" data-c="10.3333"><td class="ctr rk"><b>8</b><s>1.09×</s></td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>高级会员<span class="vlabel">6.2K 档</span></td><td class="num cell2"><b>¥2,599</b><s>CNY</s></td><td class="num">6,200</td><td class="num"><span class="strong">¥20.96</span><div class="mini m2"><i style="--w:92.1%;width:92.1%"></i></div></td><td class="num cell2"><b>0.699</b><s>元/秒</s></td></tr><tr class="" data-v="21.0238" data-p="2649.00" data-c="10.5000"><td class="ctr rk"><b>9</b><s>1.09×</s></td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>高级会员<span class="vlabel">6.3K 档</span></td><td class="num cell2"><b>¥2,649</b><s>CNY</s></td><td class="num">6,300</td><td class="num"><span class="strong">¥21.02</span><div class="mini m2"><i style="--w:91.9%;width:91.9%"></i></div></td><td class="num cell2"><b>0.701</b><s>元/秒</s></td></tr><tr class="" data-v="21.0784" data-p="7799.00" data-c="30.8333"><td class="ctr rk"><b>10</b><s>1.09×</s></td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>高级会员<span class="vlabel">18.5K 档</span></td><td class="num cell2"><b>¥7,799</b><s>CNY</s></td><td class="num">18,500</td><td class="num"><span class="strong">¥21.08</span><div class="mini m2"><i style="--w:91.6%;width:91.6%"></i></div></td><td class="num cell2"><b>0.703</b><s>元/秒</s></td></tr><tr class="" data-v="21.0784" data-p="7799.00" data-c="30.8333"><td class="ctr rk"><b>11</b><s>1.09×</s></td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>高级会员<span class="vlabel">18.5K 档</span></td><td class="num cell2"><b>¥7,799</b><s>CNY</s></td><td class="num">18,500</td><td class="num"><span class="strong">¥21.08</span><div class="mini m2"><i style="--w:91.6%;width:91.6%"></i></div></td><td class="num cell2"><b>0.703</b><s>元/秒</s></td></tr><tr class="" data-v="21.0998" data-p="5199.00" data-c="20.5333"><td class="ctr rk"><b>12</b><s>1.09×</s></td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>高级会员<span class="vlabel">12.3K 档</span></td><td class="num cell2"><b>¥5,199</b><s>CNY</s></td><td class="num">12,320</td><td class="num"><span class="strong">¥21.10</span><div class="mini m2"><i style="--w:91.5%;width:91.5%"></i></div></td><td class="num cell2"><b>0.703</b><s>元/秒</s></td></tr><tr class="" data-v="21.1173" data-p="11699.00" data-c="46.1667"><td class="ctr rk"><b>13</b><s>1.09×</s></td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>高级会员<span class="vlabel">27.7K 档</span></td><td class="num cell2"><b>¥11,699</b><s>CNY</s></td><td class="num">27,700</td><td class="num"><span class="strong">¥21.12</span><div class="mini m2"><i style="--w:91.5%;width:91.5%"></i></div></td><td class="num cell2"><b>0.704</b><s>元/秒</s></td></tr><tr class="" data-v="21.7786" data-p="12499.00" data-c="47.8261"><td class="ctr rk"><b>14</b><s>1.13×</s></td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>至尊版<span class="vlabel">66K 档</span></td><td class="num cell2"><b>¥12,499</b><s>CNY</s></td><td class="num">66,000</td><td class="num"><span class="strong">¥21.78</span><div class="mini m2"><i style="--w:88.7%;width:88.7%"></i></div></td><td class="num cell2"><b>0.726</b><s>元/秒</s></td></tr><tr class="" data-v="21.8591" data-p="9599.00" data-c="36.5942"><td class="ctr rk"><b>15</b><s>1.13×</s></td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>至尊版<span class="vlabel">50.5K 档</span></td><td class="num cell2"><b>¥9,599</b><s>CNY</s></td><td class="num">50,500</td><td class="num"><span class="strong">¥21.86</span><div class="mini m2"><i style="--w:88.3%;width:88.3%"></i></div></td><td class="num cell2"><b>0.729</b><s>元/秒</s></td></tr><tr class="" data-v="23.4873" data-p="6699.00" data-c="23.7681"><td class="ctr rk"><b>16</b><s>1.22×</s></td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>豪华版</td><td class="num cell2"><b>¥6,699</b><s>CNY</s></td><td class="num">32,800</td><td class="num"><span class="strong">¥23.49</span><div class="mini m2"><i style="--w:82.2%;width:82.2%"></i></div></td><td class="num cell2"><b>0.783</b><s>元/秒</s></td></tr><tr class="" data-v="23.9996" data-p="11059.00" data-c="38.4000"><td class="ctr rk"><b>17</b><s>1.24×</s></td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>MAX<span class="vlabel">28.8W 档</span></td><td class="num cell2"><b>¥11,059</b><s>CNY</s></td><td class="num">288,000</td><td class="num"><span class="strong">¥24.00</span><div class="mini m2"><i style="--w:80.5%;width:80.5%"></i></div></td><td class="num cell2"><b>0.800</b><s>元/秒</s></td></tr><tr class="" data-v="24.2653" data-p="7299.00" data-c="25.0667"><td class="ctr rk"><b>18</b><s>1.26×</s></td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>MAX<span class="vlabel">18.8W 档</span></td><td class="num cell2"><b>¥7,299</b><s>CNY</s></td><td class="num">188,000</td><td class="num"><span class="strong">¥24.27</span><div class="mini m2"><i style="--w:79.6%;width:79.6%"></i></div></td><td class="num cell2"><b>0.809</b><s>元/秒</s></td></tr><tr class="" data-v="25.8405" data-p="1199.00" data-c="3.8667"><td class="ctr rk"><b>19</b><s>1.34×</s></td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>标准会员</td><td class="num cell2"><b>¥1,199</b><s>CNY</s></td><td class="num">2,320</td><td class="num"><span class="strong">¥25.84</span><div class="mini m2"><i style="--w:74.7%;width:74.7%"></i></div></td><td class="num cell2"><b>0.861</b><s>元/秒</s></td></tr><tr class="" data-v="27.0023" data-p="4666.00" data-c="14.4000"><td class="ctr rk"><b>20</b><s>1.40×</s></td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>Pro<span class="vlabel">10.8W 档</span></td><td class="num cell2"><b>¥4,666</b><s>CNY</s></td><td class="num">108,000</td><td class="num"><span class="strong">¥27.00</span><div class="mini m2"><i style="--w:71.5%;width:71.5%"></i></div></td><td class="num cell2"><b>0.900</b><s>元/秒</s></td></tr><tr class="" data-v="27.0952" data-p="2289.00" data-c="7.0400"><td class="ctr rk"><b>21</b><s>1.40×</s></td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>Pro<span class="vlabel">52.8K 档</span></td><td class="num cell2"><b>¥2,289</b><s>CNY</s></td><td class="num">52,800</td><td class="num"><span class="strong">¥27.10</span><div class="mini m2"><i style="--w:71.3%;width:71.3%"></i></div></td><td class="num cell2"><b>0.903</b><s>元/秒</s></td></tr><tr class="" data-v="27.2892" data-p="453.00" data-c="1.3833"><td class="ctr rk"><b>22</b><s>1.41×</s></td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>基础会员</td><td class="num cell2"><b>¥453</b><s>CNY</s></td><td class="num">830</td><td class="num"><span class="strong">¥27.29</span><div class="mini m2"><i style="--w:70.8%;width:70.8%"></i></div></td><td class="num cell2"><b>0.910</b><s>元/秒</s></td></tr><tr class="" data-v="27.5083" data-p="3899.00" data-c="11.8116"><td class="ctr rk"><b>23</b><s>1.42×</s></td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>高级版<span class="vlabel">16.3K 档</span></td><td class="num cell2"><b>¥3,899</b><s>CNY</s></td><td class="num">16,300</td><td class="num"><span class="strong">¥27.51</span><div class="mini m2"><i style="--w:70.2%;width:70.2%"></i></div></td><td class="num cell2"><b>0.917</b><s>元/秒</s></td></tr><tr class="" data-v="29.4774" data-p="2999.00" data-c="8.4783"><td class="ctr rk"><b>24</b><s>1.53×</s></td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>高级版<span class="vlabel">11.7K 档</span></td><td class="num cell2"><b>¥2,999</b><s>CNY</s></td><td class="num">11,700</td><td class="num"><span class="strong">¥29.48</span><div class="mini m2"><i style="--w:65.5%;width:65.5%"></i></div></td><td class="num cell2"><b>0.983</b><s>元/秒</s></td></tr><tr class="" data-v="29.9750" data-p="1199.00" data-c="3.3333"><td class="ctr rk"><b>25</b><s>1.55×</s></td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>进阶版</td><td class="num cell2"><b>¥1,199</b><s>CNY</s></td><td class="num">4,600</td><td class="num"><span class="strong">¥29.97</span><div class="mini m2"><i style="--w:64.4%;width:64.4%"></i></div></td><td class="num cell2"><b>0.999</b><s>元/秒</s></td></tr><tr class="" data-v="30.4688" data-p="1599.00" data-c="4.3733"><td class="ctr rk"><b>26</b><s>1.58×</s></td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>Pro<span class="vlabel">32.8K 档</span></td><td class="num cell2"><b>¥1,599</b><s>CNY</s></td><td class="num">32,800</td><td class="num"><span class="strong">¥30.47</span><div class="mini m3"><i style="--w:63.4%;width:63.4%"></i></div></td><td class="num cell2"><b>1.016</b><s>元/秒</s></td></tr><tr class="" data-v="41.5972" data-p="599.00" data-c="1.2000"><td class="ctr rk"><b>27</b><s>2.15×</s></td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>PLUS</td><td class="num cell2"><b>¥599</b><s>CNY</s></td><td class="num">9,000</td><td class="num"><span class="strong">¥41.60</span><div class="mini m3"><i style="--w:46.4%;width:46.4%"></i></div></td><td class="num cell2"><b>1.387</b><s>元/秒</s></td></tr><tr class="" data-v="42.5168" data-p="21865.79" data-c="42.8571"><td class="ctr rk"><b>28</b><s>2.20×</s></td><td><span class="dot" style="background:#ED1572"></span>Higgsfield<span class="tagu">USD</span></td><td>Ultra<span class="vlabel">9K 档</span></td><td class="num cell2"><b>$3,240</b><s>≈¥21,866</s></td><td class="num">9,000</td><td class="num"><span class="strong">¥42.52</span><div class="mini m3"><i style="--w:45.4%;width:45.4%"></i></div></td><td class="num cell2"><b>1.417</b><s>元/秒</s></td></tr><tr class="" data-v="42.9638" data-p="1899.00" data-c="3.6833"><td class="ctr rk"><b>29</b><s>2.22×</s></td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>标准会员</td><td class="num cell2"><b>¥1,899</b><s>CNY</s></td><td class="num">2,210</td><td class="num"><span class="strong">¥42.96</span><div class="mini m3"><i style="--w:45.0%;width:45.0%"></i></div></td><td class="num cell2"><b>1.432</b><s>元/秒</s></td></tr><tr class="" data-v="43.6233" data-p="569.00" data-c="1.0870"><td class="ctr rk"><b>30</b><s>2.26×</s></td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>标准版</td><td class="num cell2"><b>¥569</b><s>CNY</s></td><td class="num">1,500</td><td class="num"><span class="strong">¥43.62</span><div class="mini m3"><i style="--w:44.3%;width:44.3%"></i></div></td><td class="num cell2"><b>1.454</b><s>元/秒</s></td></tr><tr class="" data-v="45.4483" data-p="659.00" data-c="1.2083"><td class="ctr rk"><b>31</b><s>2.35×</s></td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>基础会员</td><td class="num cell2"><b>¥659</b><s>CNY</s></td><td class="num">725</td><td class="num"><span class="strong">¥45.45</span><div class="mini m3"><i style="--w:42.5%;width:42.5%"></i></div></td><td class="num cell2"><b>1.515</b><s>元/秒</s></td></tr><tr class="" data-v="45.8237" data-p="15710.97" data-c="28.5714"><td class="ctr rk"><b>32</b><s>2.37×</s></td><td><span class="dot" style="background:#ED1572"></span>Higgsfield<span class="tagu">USD</span></td><td>Ultra<span class="vlabel">6K 档</span></td><td class="num cell2"><b>$2,328</b><s>≈¥15,711</s></td><td class="num">6,000</td><td class="num"><span class="strong">¥45.82</span><div class="mini m3"><i style="--w:42.1%;width:42.1%"></i></div></td><td class="num cell2"><b>1.527</b><s>元/秒</s></td></tr><tr class="" data-v="46.7685" data-p="8017.46" data-c="14.2857"><td class="ctr rk"><b>33</b><s>2.42×</s></td><td><span class="dot" style="background:#ED1572"></span>Higgsfield<span class="tagu">USD</span></td><td>Ultra<span class="vlabel">3K 档</span></td><td class="num cell2"><b>$1,188</b><s>≈¥8,017</s></td><td class="num">3,000</td><td class="num"><span class="strong">¥46.77</span><div class="mini m3"><i style="--w:41.3%;width:41.3%"></i></div></td><td class="num cell2"><b>1.559</b><s>元/秒</s></td></tr><tr class="" data-v="55.2719" data-p="3158.39" data-c="4.7619"><td class="ctr rk"><b>34</b><s>2.86×</s></td><td><span class="dot" style="background:#ED1572"></span>Higgsfield<span class="tagu">USD</span></td><td>Plus</td><td class="num cell2"><b>$468</b><s>≈¥3,158</s></td><td class="num">1,000</td><td class="num"><span class="strong">¥55.27</span><div class="mini m3"><i style="--w:34.9%;width:34.9%"></i></div></td><td class="num cell2"><b>1.842</b><s>元/秒</s></td></tr><tr class="" data-v="106.2920" data-p="1214.77" data-c="0.9524"><td class="ctr rk"><b>35</b><s>5.50×</s></td><td><span class="dot" style="background:#ED1572"></span>Higgsfield<span class="tagu">USD</span></td><td>Starter</td><td class="num cell2"><b>$180</b><s>≈¥1,215</s></td><td class="num">200</td><td class="num"><span class="strong">¥106.29</span><div class="mini m3"><i style="--w:18.2%;width:18.2%"></i></div></td><td class="num cell2"><b>3.543</b><s>元/秒</s></td></tr></tbody></table></div>
 </section>
 
@@ -623,6 +704,24 @@ var PLANS = [{"plat": "libtv", "tier": "标准版", "label": "", "color": "#9CE6
 var MAX_STACK = 4;          /* 同档最多叠加份数 */
 var CQ_LOCK = false, CQ_LAST = null, VAL_LAST = null;
 
+/* 两个滑块（按产量测算 #tgt / 全档位对比 #q）控制同一个量。
+   不联动它们会互相打架：上面拖到 50、下面还显示 10，表格按谁算都不对。 */
+function linkN(N, src){
+  CQ_LOCK = true;
+  var a = document.getElementById('tgt'), b = document.getElementById('q');
+  if(a && a !== src) a.value = N;
+  if(b && b !== src) b.value = N;
+  CQ_LOCK = false;
+}
+
+/* 取值：以「非触发方」为准，保证两侧始终一致 */
+function readN(src){
+  var other = src && src.id === 'tgt' ? document.getElementById('q')
+                                      : document.getElementById('tgt');
+  var el = (src && src.value) ? src : (other || src);
+  return Math.max(1, Math.min(200, parseInt(el && el.value || '30', 10)));
+}
+
 /* 单档覆盖目标产量的最低支出：可行返回 {n,total}，不可行返回 null */
 function needOf(cap, price, N){
   if(!(cap > 0)) return null;
@@ -678,10 +777,10 @@ function comboLabel(b){
 function money(v, cur){ return (cur === 'USD' ? '$' : '\u00a5') + Math.round(v).toLocaleString(); }
 
 /* ── 主渲染 ── */
-function renderRec(){
-  var s = document.getElementById('tgt'), v = document.getElementById('val');
-  if(!s || !v) return;
-  var N = Math.max(1, Math.min(200, parseInt(s.value || '30', 10)));
+function renderRec(src){
+  var v = document.getElementById('val');
+  if(!v) return;
+  var N = readN(src);
   var V = Math.max(0, parseFloat(v.value || '0'));
   if(CQ_LAST === N && VAL_LAST === V) return;   /* 节流：拖动时 input 高频触发 */
   CQ_LAST = N; VAL_LAST = V;
@@ -692,7 +791,11 @@ function renderRec(){
   var nd = document.getElementById('ndur');
   if(nd) nd.textContent = '= ' + secs.toLocaleString() + ' 秒 \u2248 ' +
     (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '素材';
-  Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp'), function(b){
+  var qv = document.getElementById('qv'), qd = document.getElementById('qd');
+  if(qv) qv.textContent = N + ' 条/月';
+  if(qd) qd.textContent = '= ' + secs.toLocaleString() + ' 秒 ≈ ' +
+    (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '素材';
+  Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp, #qpresets .cqp'), function(b){
     b.classList.toggle('on', parseInt(b.dataset.n, 10) === N);
   });
 
@@ -747,11 +850,10 @@ function renderRec(){
 }
 
 /* ── 全档位对比：按该产量的年支出重排（不新增列，成本并入排名格副行）── */
-function rerank(){
-  var s = document.getElementById('tgt');
+function rerank(src){
   var tb = document.querySelector('#main tbody');
-  if(!s || !tb) return;
-  var N = Math.max(1, Math.min(200, parseInt(s.value || '30', 10)));
+  if(!tb) return;
+  var N = readN(src);
   var rs = Array.prototype.slice.call(tb.querySelectorAll('tr'));
   var best = Infinity;
   rs.forEach(function(r){
@@ -796,20 +898,38 @@ function sortBy(k, el){
 }
 
 document.addEventListener('DOMContentLoaded', function(){
-  var s = document.getElementById('tgt'), v = document.getElementById('val');
-  if(s){
-    s.addEventListener('input', function(){ CQ_LAST = null; renderRec(); rerank(); });
-    CQ_LAST = null; renderRec(); rerank();
-  }
-  if(v){
-    v.addEventListener('change', function(){ VAL_LAST = null; renderRec(); });
-    v.addEventListener('input', function(){ VAL_LAST = null; renderRec(); });
-  }
-  Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp'), function(b){
-    b.addEventListener('click', function(){
-      if(s){ s.value = b.dataset.n; CQ_LAST = null; renderRec(); rerank(); }
+  function onSlide(el){
+    if(!el) return;
+    el.addEventListener('input', function(){
+      if(CQ_LOCK) return;
+      CQ_LAST = null;
+      linkN(readN(el), el);
+      renderRec(el); rerank(el);
     });
-  });
+  }
+  onSlide(document.getElementById('tgt'));
+  onSlide(document.getElementById('q'));
+
+  function bindPresets(sel){
+    Array.prototype.forEach.call(document.querySelectorAll(sel), function(b){
+      b.addEventListener('click', function(){
+        var N = parseInt(b.dataset.n, 10);
+        CQ_LAST = null;
+        linkN(N, null);
+        renderRec(); rerank();
+      });
+    });
+  }
+  bindPresets('#presets .cqp');
+  bindPresets('#qpresets .cqp');
+
+  var v = document.getElementById('val');
+  if(v){
+    v.addEventListener('input', function(){ VAL_LAST = null; renderRec(); });
+    v.addEventListener('change', function(){ VAL_LAST = null; renderRec(); });
+  }
+  CQ_LAST = null;
+  renderRec(); rerank();
 });
 
 </script>

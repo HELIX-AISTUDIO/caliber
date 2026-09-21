@@ -220,6 +220,23 @@ DISCOUNT = build_discount()
 MARG_WORST = max(MARGINAL, key=lambda x: x["mCost"])
 MAX_CAP = max(r["mCap"] for r in ROWS)
 
+# 平台汇总：供页面开头的「覆盖平台清单」使用
+PLAT_SUM = []
+for _p in PLATFORMS:
+    _rs = [r for r in ROWS if r["plat"] == _p]
+    if not _rs:
+        continue
+    _b = min(_rs, key=lambda r: r["perVideo"])
+    PLAT_SUM.append({
+        "plat": _p, "color": COLOR[_p],
+        "tiers": len({r["tier"] for r in _rs}), "opts": len(_rs),
+        "lo": min(r["perVideo"] for r in _rs), "hi": max(r["perVideo"] for r in _rs),
+        "best": _b, "multi": sum(1 for t in {r["tier"] for r in _rs}
+                                 if len([x for x in _rs if x["tier"] == t]) > 1),
+        "region": PLATFORMS[_p]["region"],
+    })
+PLAT_SUM.sort(key=lambda x: x["lo"])
+
 # 指纹：随数据集变化
 import hashlib
 _sig = json.dumps([COST["plans"], RATE, SPEC, BRAND], ensure_ascii=False, sort_keys=True)
@@ -501,6 +518,34 @@ input[type=number]{width:110px;background:rgba(255,255,255,.06);
 input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}
 .big{font-family:__MONO__;font-size:21px;font-weight:700;color:#D1FE17;letter-spacing:-.03em}
 .presets{display:inline-flex;gap:5px}
+/* ── 表格上方的月产量工具条 ── */
+.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;
+  padding:11px 15px;border-radius:13px;background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.09)}
+.cqr{-webkit-appearance:none;appearance:none;width:190px;height:4px;border-radius:999px;
+  outline:none;background:rgba(255,255,255,.12);cursor:pointer}
+.cqr::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:#D1FE17;border:3px solid #000;cursor:pointer;
+  transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.cqr::-webkit-slider-thumb:hover{transform:scale(1.12)}
+.cqr::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#D1FE17;
+  border:3px solid #000;cursor:pointer}
+.qv{font-family:__MONO__;font-size:15px;font-weight:700;color:#D1FE17;letter-spacing:-.03em;
+  min-width:78px}
+.tb-hint{flex-basis:100%;margin:0}
+/* ── 覆盖平台清单 ── */
+.pcard{padding:15px 17px}
+.pcard .pn{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;color:#fff}
+.pcard .pn .dot{margin:0}
+.pcard .pmeta{font-size:11px;color:#767C85;margin-top:6px;letter-spacing:.02em}
+.pcard .prange{font-family:__MONO__;font-size:16px;font-weight:700;color:#D1FE17;
+  margin-top:10px;letter-spacing:-.03em}
+.pcard .prange s{text-decoration:none;font-size:10px;color:#5A6069;font-weight:500;
+  margin-left:5px;letter-spacing:0}
+.pcard .pbest{font-size:11px;color:#8A9099;margin-top:5px;line-height:1.5}
+.pcard .pochip{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;
+  font-size:9.5px;font-weight:700;color:#D1FE17;background:rgba(209,254,23,.1);
+  border:1px solid rgba(209,254,23,.24)}
 .cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
   font-family:__MONO__;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;
   cursor:pointer;transition:color .2s,border-color .2s,background .2s}
@@ -664,6 +709,24 @@ var PLANS = __PLANS__;
 var MAX_STACK = 4;          /* 同档最多叠加份数 */
 var CQ_LOCK = false, CQ_LAST = null, VAL_LAST = null;
 
+/* 两个滑块（按产量测算 #tgt / 全档位对比 #q）控制同一个量。
+   不联动它们会互相打架：上面拖到 50、下面还显示 10，表格按谁算都不对。 */
+function linkN(N, src){
+  CQ_LOCK = true;
+  var a = document.getElementById('tgt'), b = document.getElementById('q');
+  if(a && a !== src) a.value = N;
+  if(b && b !== src) b.value = N;
+  CQ_LOCK = false;
+}
+
+/* 取值：以「非触发方」为准，保证两侧始终一致 */
+function readN(src){
+  var other = src && src.id === 'tgt' ? document.getElementById('q')
+                                      : document.getElementById('tgt');
+  var el = (src && src.value) ? src : (other || src);
+  return Math.max(1, Math.min(200, parseInt(el && el.value || '30', 10)));
+}
+
 /* 单档覆盖目标产量的最低支出：可行返回 {n,total}，不可行返回 null */
 function needOf(cap, price, N){
   if(!(cap > 0)) return null;
@@ -719,10 +782,10 @@ function comboLabel(b){
 function money(v, cur){ return (cur === 'USD' ? '$' : '\u00a5') + Math.round(v).toLocaleString(); }
 
 /* ── 主渲染 ── */
-function renderRec(){
-  var s = document.getElementById('tgt'), v = document.getElementById('val');
-  if(!s || !v) return;
-  var N = Math.max(1, Math.min(200, parseInt(s.value || '30', 10)));
+function renderRec(src){
+  var v = document.getElementById('val');
+  if(!v) return;
+  var N = readN(src);
   var V = Math.max(0, parseFloat(v.value || '0'));
   if(CQ_LAST === N && VAL_LAST === V) return;   /* 节流：拖动时 input 高频触发 */
   CQ_LAST = N; VAL_LAST = V;
@@ -733,7 +796,11 @@ function renderRec(){
   var nd = document.getElementById('ndur');
   if(nd) nd.textContent = '= ' + secs.toLocaleString() + ' 秒 \u2248 ' +
     (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '素材';
-  Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp'), function(b){
+  var qv = document.getElementById('qv'), qd = document.getElementById('qd');
+  if(qv) qv.textContent = N + ' 条/月';
+  if(qd) qd.textContent = '= ' + secs.toLocaleString() + ' 秒 ≈ ' +
+    (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '素材';
+  Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp, #qpresets .cqp'), function(b){
     b.classList.toggle('on', parseInt(b.dataset.n, 10) === N);
   });
 
@@ -788,11 +855,10 @@ function renderRec(){
 }
 
 /* ── 全档位对比：按该产量的年支出重排（不新增列，成本并入排名格副行）── */
-function rerank(){
-  var s = document.getElementById('tgt');
+function rerank(src){
   var tb = document.querySelector('#main tbody');
-  if(!s || !tb) return;
-  var N = Math.max(1, Math.min(200, parseInt(s.value || '30', 10)));
+  if(!tb) return;
+  var N = readN(src);
   var rs = Array.prototype.slice.call(tb.querySelectorAll('tr'));
   var best = Infinity;
   rs.forEach(function(r){
@@ -837,20 +903,38 @@ function sortBy(k, el){
 }
 
 document.addEventListener('DOMContentLoaded', function(){
-  var s = document.getElementById('tgt'), v = document.getElementById('val');
-  if(s){
-    s.addEventListener('input', function(){ CQ_LAST = null; renderRec(); rerank(); });
-    CQ_LAST = null; renderRec(); rerank();
-  }
-  if(v){
-    v.addEventListener('change', function(){ VAL_LAST = null; renderRec(); });
-    v.addEventListener('input', function(){ VAL_LAST = null; renderRec(); });
-  }
-  Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp'), function(b){
-    b.addEventListener('click', function(){
-      if(s){ s.value = b.dataset.n; CQ_LAST = null; renderRec(); rerank(); }
+  function onSlide(el){
+    if(!el) return;
+    el.addEventListener('input', function(){
+      if(CQ_LOCK) return;
+      CQ_LAST = null;
+      linkN(readN(el), el);
+      renderRec(el); rerank(el);
     });
-  });
+  }
+  onSlide(document.getElementById('tgt'));
+  onSlide(document.getElementById('q'));
+
+  function bindPresets(sel){
+    Array.prototype.forEach.call(document.querySelectorAll(sel), function(b){
+      b.addEventListener('click', function(){
+        var N = parseInt(b.dataset.n, 10);
+        CQ_LAST = null;
+        linkN(N, null);
+        renderRec(); rerank();
+      });
+    });
+  }
+  bindPresets('#presets .cqp');
+  bindPresets('#qpresets .cqp');
+
+  var v = document.getElementById('val');
+  if(v){
+    v.addEventListener('input', function(){ VAL_LAST = null; renderRec(); });
+    v.addEventListener('change', function(){ VAL_LAST = null; renderRec(); });
+  }
+  CQ_LAST = null;
+  renderRec(); rerank();
 });
 """
 
@@ -1171,6 +1255,20 @@ cost_body = f"""
 </div>
 
 <div class="wrap">
+<div class="grid g5" style="margin-top:30px">
+  {"".join(f'''<div class="card pcard">
+    <div class="pn"><span class="dot" style="background:{p["color"]}"></span>{p["plat"]}
+      {"<span class=\"pochip\">联动档</span>" if p["multi"] else ""}</div>
+    <div class="pmeta">{p["tiers"]} 个会员档 · {p["opts"]} 个可选积分档</div>
+    <div class="prange">¥{f2(p["lo"])}<s>– ¥{f2(p["hi"])} / 条</s></div>
+    <div class="pbest">最优：{tname(p["best"])}<br>{p["best"]["mCap"]:.2f} 条/月 · {p["best"]["perSec"]:.3f} 元/秒</div>
+  </div>''' for p in PLAT_SUM)}
+</div>
+<div class="sub" style="margin-top:12px">
+  共 <b style="color:#C9CDD2">{len(PLAT_SUM)} 个平台 · {len({r["tier"] for r in ROWS})} 个会员档 · {len(ROWS)} 个可选积分档</b>
+  ——「可选积分档」指同一会员档下平台提供的不同积分/价格组合（联动定价），各档单价不同，故逐档列出。
+</div>
+
 <div class="note warn" style="margin-top:28px">
   <b>数据范围说明：</b>本表目前仅覆盖各平台的<b>{SCOPE["current"]}</b>。
   平台上另有<b>月度会员、季度会员</b>等更短周期选项，因计价单位与折扣结构不同，
@@ -1237,6 +1335,21 @@ cost_body = f"""
 
 <section id="table" class="reveal">
   {sec_head("02", "全档位对比", "条形越长＝越省（以全场最优价为 100%）。「排名」格副行显示<b>当前月产量下</b>该档的年支出——拖动上方滑块，排名与副行会一起重算。")}
+  <div class="toolbar">
+    <span class="sub">月产量</span>
+    <input type="range" id="q" class="cqr" min="1" max="200" step="1" value="30"
+           aria-label="月产量">
+    <span class="qv" id="qv">30 条/月</span>
+    <span class="sub" id="qd">= 900 秒 ≈ 15 分钟素材</span>
+    <span class="presets" id="qpresets">
+      <button type="button" class="cqp" data-n="5">5</button>
+      <button type="button" class="cqp" data-n="10">10</button>
+      <button type="button" class="cqp" data-n="30">30</button>
+      <button type="button" class="cqp" data-n="50">50</button>
+      <button type="button" class="cqp" data-n="100">100</button>
+    </span>
+    <span class="sub tb-hint">拖动即按该产量的年支出重排全表；产能过低者沉底。全场单档上限 91 条/月，超出按同档多份叠加（最多 4 份）。</span>
+  </div>
   {table([("#", "v"), ("平台", None), ("档位", None), ("年费", "p"), ("月积分", None),
           ("单条成本", "v"), ("元/秒", None)], main_rows, "tw scroll-y tw-main", "main")}
 </section>

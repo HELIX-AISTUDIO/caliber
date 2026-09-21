@@ -283,6 +283,34 @@ input[type=number]{width:110px;background:rgba(255,255,255,.06);
 input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}
 .big{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:21px;font-weight:700;color:#D1FE17;letter-spacing:-.03em}
 .presets{display:inline-flex;gap:5px}
+/* ── 表格上方的月产量工具条 ── */
+.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;
+  padding:11px 15px;border-radius:13px;background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.09)}
+.cqr{-webkit-appearance:none;appearance:none;width:190px;height:4px;border-radius:999px;
+  outline:none;background:rgba(255,255,255,.12);cursor:pointer}
+.cqr::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:#D1FE17;border:3px solid #000;cursor:pointer;
+  transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.cqr::-webkit-slider-thumb:hover{transform:scale(1.12)}
+.cqr::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#D1FE17;
+  border:3px solid #000;cursor:pointer}
+.qv{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:700;color:#D1FE17;letter-spacing:-.03em;
+  min-width:78px}
+.tb-hint{flex-basis:100%;margin:0}
+/* ── 覆盖平台清单 ── */
+.pcard{padding:15px 17px}
+.pcard .pn{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;color:#fff}
+.pcard .pn .dot{margin:0}
+.pcard .pmeta{font-size:11px;color:#767C85;margin-top:6px;letter-spacing:.02em}
+.pcard .prange{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;font-weight:700;color:#D1FE17;
+  margin-top:10px;letter-spacing:-.03em}
+.pcard .prange s{text-decoration:none;font-size:10px;color:#5A6069;font-weight:500;
+  margin-left:5px;letter-spacing:0}
+.pcard .pbest{font-size:11px;color:#8A9099;margin-top:5px;line-height:1.5}
+.pcard .pochip{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;
+  font-size:9.5px;font-weight:700;color:#D1FE17;background:rgba(209,254,23,.1);
+  border:1px solid rgba(209,254,23,.24)}
 .cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
   font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;
   cursor:pointer;transition:color .2s,border-color .2s,background .2s}
