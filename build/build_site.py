@@ -255,6 +255,16 @@ body{background:#000;color:#C9CDD2;font:14px/1.7 %%F_SANS%%;overflow-x:hidden;
   padding:0 0 72px;padding-bottom:calc(72px + env(safe-area-inset-bottom,0px));
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
   letter-spacing:-.005em;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+/* 环境光晕：纯黑底上叠模糊等于没效果，必须先给玻璃一层可折射的底光 */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  transform:translate3d(0,0,0);will-change:transform;
+  background:
+    radial-gradient(1150px 640px at 6% -12%,rgba(209,254,23,.145),transparent 62%),
+    radial-gradient(860px 540px at 105% 3%,rgba(237,21,114,.105),transparent 64%),
+    radial-gradient(920px 580px at 44% 108%,rgba(156,230,243,.075),transparent 64%)}
+/* 磨砂噪点：极低透明度的分形噪声，给面板与整页一层"砂面"颗粒 */
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
 [id]{scroll-margin-top:132px}
 ::selection{background:#D1FE17;color:#0B0B0B}
 
@@ -266,9 +276,11 @@ body{background:#000;color:#C9CDD2;font:14px/1.7 %%F_SANS%%;overflow-x:hidden;
 .promo .tag2{border:1.5px solid #0B0B0B;border-radius:999px;padding:2px 11px;font-size:11px;font-weight:700;white-space:nowrap}
 
 /* ── 顶栏（sticky） ── */
-.nav{position:sticky;top:0;z-index:40;background:rgba(0,0,0,.86);
-  -webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);
-  border-bottom:1px solid rgba(255,255,255,.08)}
+.nav{position:sticky;top:0;z-index:40;
+  background:linear-gradient(180deg,rgba(255,255,255,.07) 0%,rgba(0,0,0,.42) 100%);
+  -webkit-backdrop-filter:blur(34px) saturate(165%);backdrop-filter:blur(34px) saturate(165%);
+  border-bottom:1px solid rgba(255,255,255,.11);
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.04),0 10px 30px rgba(0,0,0,.45)}
 .nav .inner{max-width:1280px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:16px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex:0 0 auto}
 .brand i{width:24px;height:24px;border-radius:8px;background:#D1FE17;display:inline-block;flex:0 0 24px;
@@ -294,9 +306,11 @@ body{background:#000;color:#C9CDD2;font:14px/1.7 %%F_SANS%%;overflow-x:hidden;
   flex:0 0 auto}
 
 /* ── 二级子导航（页内锚点，sticky） ── */
-.subnav{position:sticky;top:57px;z-index:35;background:rgba(0,0,0,.86);
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  border-bottom:1px solid rgba(255,255,255,.07)}
+.subnav{position:sticky;top:57px;z-index:35;
+  background:linear-gradient(180deg,rgba(255,255,255,.055) 0%,rgba(0,0,0,.46) 100%);
+  -webkit-backdrop-filter:blur(30px) saturate(160%);backdrop-filter:blur(30px) saturate(160%);
+  border-bottom:1px solid rgba(255,255,255,.1);
+  box-shadow:0 8px 26px rgba(0,0,0,.4)}
 .subnav .inner{max-width:1280px;margin:0 auto;padding:9px 24px;display:flex;gap:6px;
   overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .subnav .inner::-webkit-scrollbar{display:none}
@@ -344,7 +358,29 @@ section{margin-top:60px}
 h3{font-family:%%F_DISP%%;font-size:14.5px;font-weight:700;color:#fff;letter-spacing:-.015em;margin:26px 0 12px}
 
 /* ── 卡片 ── */
-.card,.kpi,.note,.legal,.entry{background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:18px}
+/* ── 玻璃面板 ────────────────────────────────────────────────
+   规格来源（higgsfield 实测）：
+     .bg-glass-card               backdrop-filter:blur(40px)
+                                  background:linear-gradient(#a6a6a633 0%,#0003 100%)
+     .post-content-asset-download backdrop-filter:blur(16px)
+                                  background:#0b0b0ba3  border:1px solid #ffffff24
+     __countdown                  box-shadow:inset 0 0 0 .61px <4% 白>
+   签名写法是「白→黑渐透底 + 大半径模糊」，不是单纯调透明度 —— 这才是磨砂感的来源。 */
+.glass,.card,.kpi,.note,.entry,.legal,details{
+  background:linear-gradient(158deg,rgba(255,255,255,.075) 0%,rgba(255,255,255,.022) 46%,rgba(0,0,0,.30) 100%);
+  -webkit-backdrop-filter:blur(28px) saturate(150%);backdrop-filter:blur(28px) saturate(150%);
+  border:1px solid rgba(255,255,255,.12);border-radius:18px;
+  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.07),
+             inset 0 1px 0 rgba(255,255,255,.045),
+             0 18px 46px rgba(0,0,0,.52)}
+.glass-strong,.hero .disc,.pending-card{
+  -webkit-backdrop-filter:blur(40px) saturate(160%);backdrop-filter:blur(40px) saturate(160%)}
+/* 无 backdrop-filter（微信 X5 / 旧 WebView）：退化为同亮度的实心渐变面，
+   保留同样的描边与内高光，视觉上仍是有意为之的面，而非"玻璃失效" */
+@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){
+  .glass,.card,.kpi,.note,.entry,.legal,details,.nav,.subnav{
+    background:linear-gradient(158deg,#161B18 0%,#0D110F 100%)}
+}
 .card{padding:20px 22px}
 .grid{display:grid;gap:14px}
 .g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
@@ -362,7 +398,12 @@ h3{font-family:%%F_DISP%%;font-size:14.5px;font-weight:700;color:#fff;letter-spa
 /* ── 首页入口卡 ── */
 .entry{display:block;text-decoration:none;padding:26px 26px 24px;position:relative;overflow:hidden;
   transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .3s}
-.entry:hover{transform:translateY(-4px);border-color:rgba(209,254,23,.4)}
+.entry:hover{transform:translateY(-4px);border-color:rgba(209,254,23,.42);
+  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.09),0 26px 60px rgba(0,0,0,.62),0 0 42px rgba(209,254,23,.09)}
+.kpi{transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s,border-color .35s}
+.kpi:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.18);
+  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.09),0 24px 54px rgba(0,0,0,.6)}
+details:hover{transform:translateY(-1px)}
 .entry .et{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#767C85;
   font-family:%%F_MONO%%;margin-bottom:12px}
 .entry h3{margin:0 0 9px;font-size:18px;font-weight:750;color:#fff;letter-spacing:-.022em}
@@ -381,7 +422,9 @@ h3{font-family:%%F_DISP%%;font-size:14.5px;font-weight:700;color:#fff;letter-spa
 
 /* ── 表格 ── */
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
-  background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden}
+  background:linear-gradient(158deg,rgba(22,27,24,.86) 0%,rgba(10,13,11,.92) 100%);
+  border:1px solid rgba(255,255,255,.12);border-radius:18px;overflow:hidden;
+  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.06),0 16px 40px rgba(0,0,0,.5)}
 th{background:transparent;color:#767C85;font-weight:700;font-size:10.5px;text-align:left;
   padding:14px;white-space:nowrap;letter-spacing:.095em;text-transform:uppercase;
   border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer;user-select:none;
@@ -439,8 +482,8 @@ code{background:rgba(209,254,23,.09);border:1px solid rgba(209,254,23,.2);paddin
   border-radius:6px;font-family:%%F_MONO%%;font-size:12.5px;color:#D1FE17;font-weight:500;letter-spacing:-.02em}
 
 /* ── 折叠块（长文收纳，默认收起） ── */
-details{border:1px solid rgba(255,255,255,.08);border-radius:16px;background:#0B0B0B;
-  margin-bottom:12px;overflow:hidden;transition:border-color .25s}
+details{margin-bottom:12px;overflow:hidden;border-radius:16px;
+  transition:border-color .25s,box-shadow .3s,transform .3s cubic-bezier(.22,1,.36,1)}
 details[open]{border-color:rgba(255,255,255,.13)}
 details:hover{border-color:rgba(209,254,23,.28)}
 summary{cursor:pointer;padding:16px 22px;font-size:13.5px;font-weight:650;color:#E4E7EA;
@@ -508,6 +551,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
 /* ── 打印 ── */
 @media print{
   body{background:#fff!important;color:#000!important;padding:0}
+  body::before,body::after{display:none!important}
+  .glass,.card,.kpi,.note,.entry,.legal,details,.nav,.subnav,table{
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    box-shadow:none!important;background:#fff!important}
   .nav,.subnav{position:static!important;background:#fff!important}
   .promo{background:#D1FE17!important;color:#000!important}
   .brand b,.menu a{color:#000!important}
@@ -1195,7 +1242,7 @@ if ENTRIES:
     lb_main = (f'<div class="tw"><table><thead><tr><th class="ctr">#</th><th>模型</th><th>授权</th>'
                f'{dim_cols}<th class="ctr">总分 ↓</th></tr></thead><tbody>{lb_rows}</tbody></table></div>')
 else:
-    lb_main = (f'<div class="card" style="text-align:center;padding:52px 26px">'
+    lb_main = (f'<div class="glass glass-strong card" style="text-align:center;padding:52px 26px">'
                f'<div class="eyebrow" style="margin-bottom:13px">{VLM["emptyState"]["title"]}</div>'
                f'<div style="color:#8A9099;font-size:13px;line-height:1.75;max-width:540px;margin:0 auto">'
                f'{VLM["emptyState"]["body"]}</div></div>')
