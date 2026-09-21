@@ -456,6 +456,7 @@ tbody tr.top td:first-child{box-shadow:inset 3px 0 0 #D1FE17}
 .num{text-align:right;font-variant-numeric:tabular-nums;font-family:__MONO__;font-weight:500;
   letter-spacing:-.022em}
 .strong{color:#D1FE17;font-weight:600}
+.nm{color:#E4E7EA;font-weight:600}
 .ybest{color:#0B0B0B;font-weight:800;background:#D1FE17}
 .rk b{display:block;font-family:__MONO__;font-size:15px;color:#fff;font-weight:700}
 .rk s{text-decoration:none;font-size:10px;color:#5A6069;font-family:__MONO__}
@@ -464,18 +465,20 @@ tbody tr.top td:first-child{box-shadow:inset 3px 0 0 #D1FE17}
 .cell2 b{font-weight:600;color:#E4E7EA}
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;vertical-align:middle}
 .vlabel{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;font-size:10px;
-  font-weight:700;color:#D1FE17;background:rgba(209,254,23,.1);
-  border:1px solid rgba(209,254,23,.24);white-space:nowrap}
+  font-weight:600;color:#9AA0A8;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.14);white-space:nowrap}
 .tagu{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:999px;font-size:9.5px;
   font-weight:700;color:#FF4D8D;border:1px solid rgba(255,77,141,.45)}
 .cq-no{color:#5A6069}
 .mini{height:5px;border-radius:999px;background:rgba(255,255,255,.07);margin-top:6px;overflow:hidden}
-.mini i{display:block;height:100%;border-radius:999px;background:#D1FE17;
+.mini i{display:block;height:100%;border-radius:999px;background:rgba(255,255,255,.20);
   transition:width .9s cubic-bezier(.22,1,.36,1)}
 .js .reveal .mini i{width:0!important}
 .js .reveal.in .mini i{width:var(--w)!important}
-.mini.m2 i{background:linear-gradient(90deg,#3A3F47,#6E7681)}
-.mini.m3 i{background:linear-gradient(90deg,#23272D,#3A3F47)}
+.mini.m2 i{background:rgba(255,255,255,.13)}
+.mini.m3 i{background:rgba(255,255,255,.09)}
+/* lime 只标最重要的一件事 —— 强调色一旦满地都是，就等于没有强调 */
+tr.top .mini i{background:#D1FE17}
 
 .tag{display:inline-block;padding:3px 11px;border-radius:999px;font-size:10.5px;font-weight:700}
 .v-good{background:#D1FE17;color:#0B0B0B}
@@ -550,18 +553,28 @@ input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,2
 .tb-hint{flex-basis:100%;margin:0}
 th .hm{font-size:9px;letter-spacing:.04em;text-transform:none;color:#5A6069;font-weight:600}
 /* ── 覆盖平台清单 ── */
+.guide{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  margin-top:30px}
+.gstep{display:flex;gap:13px;align-items:flex-start;padding:15px 17px;border-radius:15px;
+  background:rgba(209,254,23,.05);border:1px solid rgba(209,254,23,.18)}
+.gstep .gn{flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:#D1FE17;color:#0B0B0B;
+  font-family:__MONO__;font-size:13px;font-weight:800;display:flex;align-items:center;
+  justify-content:center}
+.gstep b{display:block;color:#fff;font-size:13.5px;font-weight:700;margin-bottom:3px}
+.gstep span{display:block;color:#8A9099;font-size:11.5px;line-height:1.6}
 .pcard{padding:15px 17px}
 .pcard .pn{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;color:#fff}
 .pcard .pn .dot{margin:0}
 .pcard .pmeta{font-size:11px;color:#767C85;margin-top:6px;letter-spacing:.02em}
-.pcard .prange{font-family:__MONO__;font-size:16px;font-weight:700;color:#D1FE17;
+.pcard .prange{font-family:__MONO__;font-size:16px;font-weight:700;color:#E4E7EA;
   margin-top:10px;letter-spacing:-.03em}
 .pcard .prange s{text-decoration:none;font-size:10px;color:#5A6069;font-weight:500;
   margin-left:5px;letter-spacing:0}
 .pcard .pbest{font-size:11px;color:#8A9099;margin-top:5px;line-height:1.5}
+.pcard.best .prange{color:#D1FE17}
 .pcard .pochip{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;
-  font-size:9.5px;font-weight:700;color:#D1FE17;background:rgba(209,254,23,.1);
-  border:1px solid rgba(209,254,23,.24)}
+  font-size:9.5px;font-weight:600;color:#9AA0A8;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.14)}
 .cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
   font-family:__MONO__;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;
   cursor:pointer;transition:color .2s,border-color .2s,background .2s}
@@ -1122,7 +1135,7 @@ for r in sorted(ROWS, key=lambda x: x["perVideo"]):
         f'<td>{r["tier"]}{vl}</td>'
         f'<td class="num cell2"><b>{price_disp}</b><s>{sub}</s></td>'
         f'<td class="num">{r["monthly"]:,}</td>'
-        f'<td class="num cell2" data-rated="{r["perVideo"]:.2f}"><span class="strong">¥{f2(r["perVideo"])}</span>'f'<s>{("该产量 ¥" + f2(delivered(r)) + "/条") if delivered(r) else "该产量下产能过低"}</s>'
+        f'<td class="num cell2" data-rated="{r["perVideo"]:.2f}"><span class="{"strong" if r["rank"]==1 else "nm"}">¥{f2(r["perVideo"])}</span>'f'<s>{("该产量 ¥" + f2(delivered(r)) + "/条") if delivered(r) else "该产量下产能过低"}</s>'
         f'<div class="mini{mc}"><i style="--w:{w:.1f}%;width:{w:.1f}%"></i></div></td>'
         f'<td class="num cell2"><b>{r["perSec"]:.3f}</b><s>元/秒</s></td></tr>')
 
@@ -1239,8 +1252,17 @@ cost_body = f"""
 </div>
 
 <div class="wrap">
-<div class="grid g5" style="margin-top:30px">
-  {"".join(f'''<div class="card pcard">
+<div class="guide">
+  <div class="gstep"><span class="gn">1</span>
+    <div><b>拖月产量</b><span>填你每月实际要出几条视频</span></div></div>
+  <div class="gstep"><span class="gn">2</span>
+    <div><b>看推荐</b><span>下方立刻给出该买哪档、年费多少、单条成本</span></div></div>
+  <div class="gstep"><span class="gn">3</span>
+    <div><b>要细节</b><span>展开「更多数据」看完整算法、折扣与风险</span></div></div>
+</div>
+
+<div class="grid g5" style="margin-top:18px">
+  {"".join(f'''<div class="card pcard{" best" if p is PLAT_SUM[0] else ""}">
     <div class="pn"><span class="dot" style="background:{p["color"]}"></span>{p["plat"]}
       {"<span class=\"pochip\">联动档</span>" if p["multi"] else ""}</div>
     <div class="pmeta">{p["tiers"]} 个会员档 · {p["opts"]} 个可选积分档</div>
@@ -1259,18 +1281,19 @@ cost_body = f"""
   月度／季度会员后续补充。<b style="color:#C9CDD2">故「最省」结论仅在年费口径内成立。</b>
 </div>
 
-<section id="overview" class="reveal" style="margin-top:42px">
+<section id="overview" class="reveal" style="margin-top:44px">
+  {sec_head("", "结论速览", "先说结论：下面五张卡是全场极值与两处最优解。想知道「我该买哪个」，直接看下一节。")}
   <div class="grid g5">
     {kpi("单条成本最优", f"¥{f2(BEST)}", f"{_best['plat']} {tname(_best)}<br>{_best['mCap']:.2f} 条/月 · ¥{_best['perSec']:.3f}/秒", "hi")}
-    {kpi("中产能最省", f"¥{_mid['priceCNY']:,.0f}", f"{_mid['plat']} {tname(_mid)}<br>{_mid['mCap']:.2f} 条/月 · ¥{f2(_mid['perVideo'])}/条", "good")}
-    {kpi("大产能最省", f"¥{_top['priceCNY']:,.0f}", f"{_top['plat']} {tname(_top)}<br>{_top['mCap']:.2f} 条/月 · ¥{f2(_top['perVideo'])}/条", "good")}
+    {kpi("中产能最省", f"¥{_mid['priceCNY']:,.0f}", f"{_mid['plat']} {tname(_mid)}<br>{_mid['mCap']:.2f} 条/月 · ¥{f2(_mid['perVideo'])}/条")}
+    {kpi("大产能最省", f"¥{_top['priceCNY']:,.0f}", f"{_top['plat']} {tname(_top)}<br>{_top['mCap']:.2f} 条/月 · ¥{f2(_top['perVideo'])}/条")}
     {kpi("海外平台溢价", f"{_hg['perVideo']/BEST:.2f}×", f"Higgsfield {_hg['tier']} ¥{f2(_hg['perVideo'])}/条<br>含税后约 ¥{_hg['perVideo']*1.08:.2f}")}
     {kpi("最差档位", f"{WORST/BEST:.2f}×", f"Higgsfield Starter ¥{f2(WORST)}/条<br>低档位多是高价试用")}
   </div>
 </section>
 
 <section id="calc" class="reveal">
-  {sec_head("01", "按产量反查最省方案", "先填月产量，直接看结论。1 条 = " + str(SEC_PER_CLIP) + " 秒。")}
+  {sec_head("01", "我该买哪个？", "先填月产量，直接看结论。1 条 = " + str(SEC_PER_CLIP) + " 秒。")}
   <div class="card">
     <div class="ctrl">
       <div class="field">
@@ -1306,7 +1329,7 @@ cost_body = f"""
 </section>
 
 <section id="table" class="reveal">
-  {sec_head("02", "全档位对比", "条形越长＝越省（以全场最优价为 100%）。「排名」格副行显示<b>当前月产量下</b>该档的年支出——拖动上方滑块，排名与副行会一起重算。「单条成本」列上行＝<b>产能用满时的单价</b>（档位固有属性，不随产量变）；下行＝<b>按你当前产量折算的实际每条</b>（买多了用不满就会变贵）。排名依据是年支出，故两者次序可能不同。")}
+  {sec_head("02", "各平台年费与单条成本", "条形越长＝越省（以全场最优价为 100%）。「排名」格副行显示<b>当前月产量下</b>该档的年支出——拖动上方滑块，排名与副行会一起重算。「单条成本」列上行＝<b>产能用满时的单价</b>（档位固有属性，不随产量变）；下行＝<b>按你当前产量折算的实际每条</b>（买多了用不满就会变贵）。排名依据是年支出，故两者次序可能不同。")}
   <div class="toolbar">
     <span class="sub">月产量</span>
     <input type="range" id="q" class="cqr" min="1" max="200" step="1" value="30"
