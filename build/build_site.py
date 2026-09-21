@@ -328,10 +328,30 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;opac
 
 /* ── 布局 ── */
 .wrap{max-width:1280px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
-.hero{max-width:1280px;margin:0 auto;padding:58px 24px 6px}
+/* ── Hero 光场 ────────────────────────────────────────────────
+   higgsfield 的高级感首要来源：lime 是【光源】而非涂料。
+   做法：径向光核 + 泛光溢出 + 透视网格地板 + 径向遮罩渐晕。
+   仅用于 hero 区，不铺全站 —— 铺开就稀释了。 */
+.hero{max-width:1280px;margin:0 auto;padding:58px 24px 6px;
+  position:relative;z-index:1}
+.hero::before{content:"";position:absolute;left:50%;top:-14%;z-index:-1;pointer-events:none;
+  width:min(1180px,140vw);height:150%;transform:translateX(-50%);
+  background:
+    radial-gradient(42% 34% at 50% 30%,rgba(209,254,23,.26),rgba(209,254,23,.09) 48%,transparent 74%),
+    radial-gradient(76% 62% at 50% 2%,rgba(209,254,23,.085),transparent 72%);
+  -webkit-filter:blur(4px);filter:blur(4px)}
+.hero::after{content:"";position:absolute;left:-12%;right:-12%;bottom:-4%;height:46%;
+  z-index:-1;pointer-events:none;opacity:.42;
+  background-image:
+    linear-gradient(rgba(209,254,23,.13) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(209,254,23,.13) 1px,transparent 1px);
+  background-size:58px 58px,58px 58px;
+  transform:perspective(400px) rotateX(63deg);transform-origin:50% 100%;
+  -webkit-mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%);
+  mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%)}
 .eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
   color:#D1FE17;margin-bottom:15px;font-family:%%F_MONO%%}
-h1{font-family:%%F_DISP%%;font-size:clamp(28px,4.6vw,48px);font-weight:800;color:#fff;
+h1{font-family:%%F_DISP%%;font-size:clamp(31px,5.3vw,60px);font-weight:800;color:#fff;
   letter-spacing:-.038em;line-height:1.07}
 h1 em{font-style:normal;color:#D1FE17}
 .hero .lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75;letter-spacing:0}
@@ -345,6 +365,10 @@ h1 em{font-style:normal;color:#D1FE17}
   transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s,background .22s}
 .btn-fill{background:#D1FE17;color:#0B0B0B}
 .btn-fill:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(209,254,23,.3)}
+/* higgsfield 的做法：主 CTA 用白色，lime 留给氛围与数据高亮。
+   若主按钮也用 lime，lime 就同时承担「动作」与「强调」两个语义，必然廉价化。 */
+.btn-white{background:#fff;color:#0B0B0B}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,255,255,.2)}
 .btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}
 .btn-ghost:hover{border-color:rgba(255,255,255,.45);transform:translateY(-2px)}
 .disc{display:flex;gap:11px;align-items:flex-start;max-width:840px;margin-top:26px;
@@ -377,8 +401,10 @@ h3{font-family:%%F_DISP%%;font-size:14.5px;font-weight:700;color:#fff;letter-spa
   -webkit-backdrop-filter:blur(28px) saturate(150%);backdrop-filter:blur(28px) saturate(150%);
   border:1px solid rgba(255,255,255,.12);border-radius:18px;
   box-shadow:inset 0 0 0 .61px rgba(255,255,255,.07),
-             inset 0 1px 0 rgba(255,255,255,.045),
-             0 18px 46px rgba(0,0,0,.52)}
+             inset 0 1px 0 rgba(255,255,255,.05),
+             0 1px 2px rgba(0,0,0,.45),
+             0 10px 24px rgba(0,0,0,.4),
+             0 30px 60px rgba(0,0,0,.48)}
 .glass-strong,.hero .disc,.pending-card{
   -webkit-backdrop-filter:blur(40px) saturate(160%);backdrop-filter:blur(40px) saturate(160%)}
 /* 无 backdrop-filter（微信 X5 / 旧 WebView）：退化为同亮度的实心渐变面，
@@ -393,8 +419,8 @@ h3{font-family:%%F_DISP%%;font-size:14.5px;font-weight:700;color:#fff;letter-spa
 .g3{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .g5{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
 .kpi{padding:18px 20px}
-.kpi .t{font-size:10.5px;color:#767C85;font-weight:700;letter-spacing:.095em;text-transform:uppercase}
-.kpi .v{font-family:%%F_MONO%%;font-size:25px;font-weight:700;color:#fff;margin:10px 0 5px;
+.kpi .t{font-size:9.5px;color:#767C85;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+.kpi .v{font-family:%%F_MONO%%;font-size:clamp(30px,3.2vw,46px);font-weight:700;color:#fff;margin:12px 0 6px;
   letter-spacing:-.032em;line-height:1.15}
 .kpi.good .v,.kpi.hi .v{color:#D1FE17}
 .kpi.hi{border-color:rgba(209,254,23,.45)}
@@ -430,7 +456,11 @@ details:hover{transform:translateY(-1px)}
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
   background:linear-gradient(158deg,rgba(22,27,24,.86) 0%,rgba(10,13,11,.92) 100%);
   border:1px solid rgba(255,255,255,.12);border-radius:18px;overflow:hidden;
-  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.06),0 16px 40px rgba(0,0,0,.5)}
+  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.06),
+             inset 0 1px 0 rgba(255,255,255,.05),
+             0 1px 2px rgba(0,0,0,.5),
+             0 8px 20px rgba(0,0,0,.42),
+             0 26px 56px rgba(0,0,0,.46)}
 th{background:transparent;color:#767C85;font-weight:700;font-size:10.5px;text-align:left;
   padding:10px 14px;white-space:nowrap;letter-spacing:.095em;text-transform:uppercase;
   border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer;user-select:none;
@@ -464,7 +494,11 @@ tbody tr.top td:first-child{box-shadow:inset 3px 0 0 #D1FE17}
 .cbar{min-width:118px}
 .mini{height:5px;border-radius:999px;background:rgba(255,255,255,.07);margin-top:6px;overflow:hidden}
 .mini i{display:block;height:100%;border-radius:999px;background:#D1FE17;
-  transition:width .6s cubic-bezier(.22,1,.36,1)}
+  transition:width .9s cubic-bezier(.22,1,.36,1)}
+/* 仅在脚本可用时才做 0 -> 目标宽度 的生长动画。
+   若无 JS，.js 类不会加上，条宽保持内联的目标值，不会变成空条。 */
+.js .reveal .mini i{width:0!important}
+.js .reveal.in .mini i{width:var(--w)!important}
 .mini.m2 i{background:linear-gradient(90deg,#3A3F47,#6E7681)}
 .mini.m3 i{background:linear-gradient(90deg,#23272D,#3A3F47)}
 
@@ -594,6 +628,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
 @media print{
   body{background:#fff!important;color:#000!important;padding:0}
   body::before,body::after{display:none!important}
+  .hero::before,.hero::after{display:none!important}
   .glass,.card,.kpi,.note,.entry,.legal,details,.nav,.subnav,table{
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
     box-shadow:none!important;background:#fff!important}
@@ -656,6 +691,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
 # 脚本
 # ══════════════════════════════════════════════════════════════
 JS = r"""
+/* 标记脚本可用：驱动纯 CSS 的渐进增强（JS 失效时自动降级，不会出现空条） */
+document.documentElement.classList.add('js');
+
 /* ── 吸顶偏移实测 ──
    导航与子导航的实际高度会随视口宽度与文案换行变化，
    写死 top / scroll-margin-top 会在某些宽度下错位，故运行时测量。 */
@@ -930,7 +968,7 @@ home_body = f"""
   <h1>把 AI 平台<br>放在<em>同一把尺子</em>上</h1>
   <p class="lead">各平台用自己的积分币计价，币值互不相同。{BRAND} 先把它们压平到同一口径，再折算成可比较的现金成本与能力得分 — 不采信宣传数字，只给可复核的结果。</p>
   <div class="btns">
-    <a class="btn btn-fill" href="cost.html">进入平台成本对比</a>
+    <a class="btn btn-white" href="cost.html">进入平台成本对比</a>
     <a class="btn btn-ghost" href="cost.html#ladder">按产量反查最省方案</a>
   </div>
 </div>
@@ -1001,7 +1039,7 @@ home_body = f"""
 def mini_bar(per_video):
     w = best / per_video * 100
     cls = "" if per_video <= best * 1.06 else (" m2" if per_video <= 30 else " m3")
-    return f'<div class="mini{cls}"><i style="width:{w:.1f}%"></i></div>'
+    return f'<div class="mini{cls}"><i style="--w:{w:.1f}%;width:{w:.1f}%"></i></div>'
 
 main_rows = ""
 for p in sorted(plans, key=lambda x: x["perVideoCNY"]):
