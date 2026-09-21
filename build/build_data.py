@@ -1,359 +1,250 @@
 # -*- coding: utf-8 -*-
-"""建立数据层：把散在生成脚本里的数据抽成 JSON。
-内容模型：平台(platform) / 模型(model) / 评测项(dimension) / 数据点(entry)
 """
+CALIBER · 数据层（唯一真相源）
+
+设计原则
+  1. 本文件是全部业务数据的【唯一真相源】，data/*.json 是它的产物。
+  2. 每个档位的积分选项统一为 credits 列表，每项必带 credits / price
+     —— 消除旧版「档位级价格 vs 选项级价格」的歧义（该歧义曾导致把两个
+        不同价的档位误判为同价，进而产出错误结论）。
+  3. 只存「列表价 + 币种」这类原始事实；年费折算、汇率、单条成本、达标阶梯
+     等派生量全部由 build_site.py 现算，本文件不存任何派生量。
+
+运行：python build/build_data.py
+"""
+import io
 import json
 import os
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-D = os.path.join(ROOT, "data")
-os.makedirs(D, exist_ok=True)
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # site/
+DATA = os.path.join(ROOT, "data")
+UPDATED = "2026-09-21"
 
-
-def w(name, obj):
-    p = os.path.join(D, name)
-    with open(p, "w", encoding="utf-8") as f:
-        json.dump(obj, f, ensure_ascii=False, indent=2)
-        f.write("\n")
-    print(f"  data/{name:<26} {os.path.getsize(p):>7} B")
-
-
-# ── 站点元数据 ────────────────────────────────────────────────
-w("site.json", {
-    "brand": "CALIBER",
-    "brandCn": "统一口径基准",
-    "studio": "HELIX AI Studio",
+# ═══════════ 站点 ═══════════
+SITE = {
+    "brand": "CALIBER", "brandCn": "统一口径基准",
+    "studio": "HELIX AI Studio", "owner": "HELIX AI Studio", "year": "2026",
     "tagline": "AI 平台与模型 · 用同一把尺子横量",
     "positions": "把 AI 平台放在同一把尺子上",
     "intro": "各平台用自己的积分币计价，币值互不相同。CALIBER 先把它们压平到同一口径，"
-             "再折算成可比较的现金成本与能力得分 — 不采信宣传数字，只给可复核的结果。",
-    "owner": "HELIX AI Studio",
-    "year": "2026",
+             "再折算成可比较的现金成本与能力得分 —— 不采信宣传数字，只给可复核的结果。",
     "nav": [
         {"key": "home", "label": "首页", "href": "index.html"},
         {"key": "cost", "label": "平台成本对比", "href": "cost.html"},
-        {"key": "leaderboard-vlm", "label": "视觉理解模型排行榜", "href": "leaderboard-vlm.html"}
-    ]
-})
-
-# ── 平台元数据（一处定义，全站引用） ──────────────────────────
-w("platforms.json", {
-    "libtv": {"name": "libtv", "cn": "libtv", "color": "#9CE6F3", "currency": "CNY", "region": "cn"},
-    "Neowow": {"name": "Neowow", "cn": "Neowow", "color": "#00C65A", "currency": "CNY", "region": "cn"},
-    "即梦": {"name": "即梦", "cn": "即梦", "color": "#3280FF", "currency": "CNY", "region": "cn"},
-    "小云雀": {"name": "小云雀", "cn": "小云雀", "color": "#FABC00", "currency": "CNY", "region": "cn"},
-    "Higgsfield": {"name": "Higgsfield", "cn": "Higgsfield", "color": "#ED1572",
-                   "currency": "USD", "region": "global", "excludeTax": True}
-})
-
-# ── 成本数据集 ────────────────────────────────────────────────
-w("cost-seedance25.json", {
-    "id": "cost-seedance25",
-    "type": "cost",
-    "title": "平台成本对比",
-    "eyebrow": "Cost Benchmark · Seedance 2.5",
-    "updatedAt": "2026-09-21",
-    "spec": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考",
-    "specNote": "全部平台的单条积分消耗均在此口径下测得，是本次对比成立的唯一前提。",
-    "fx": {"pair": "USD_CNY", "rate": 6.7487, "asOf": "2026-09-21",
-           "source": "中国外汇交易中心（CFETS）人民币对美元中间价",
-           "note": "选用中间价而非银行牌价：中间价是当日官方定价，可引用可复核；"
-                   "实际结算按各银行现汇卖出价通常再高 0.5–1%。"},
-
-    # 单条消耗积分（生成页实测）
-    "creditsPerVideo": {"Neowow": 7500, "libtv": 1380, "即梦": 600, "小云雀": 600, "Higgsfield": 210},
-    "creditsSource": {
-        "Neowow": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考 · 分镜栏编辑",
-        "libtv": "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s",
-        "即梦": "即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s",
-        "小云雀": "Seedance 2.5 · 16:9 · 720P · 30s → 600 积分（用户已确认）",
-        "Higgsfield": "Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard"
-    },
-
-    # 平台自行公示的兑换率（仅用于反向校验归一化口径）
-    "officialRate": {
-        "Neowow": {"PLUS": 180.0, "Pro": 282.0, "MAX": 350.0, "ULTRA": 371.0},
-        "即梦": {"基础会员": 13.0, "标准会员": 14.0},
-        "libtv": {"标准版": 31.25, "进阶版": 45.45},
-        "小云雀": {"基础会员": 21.9, "标准会员": 23.2, "高级会员": 28.8, "超级会员": 30.0}
-    },
-
-    # 海报宣传「低至 X 元/秒」
-    "adClaim": {
-        "libtv": {"tier": "至尊版", "perSec": 0.36},
-        "Neowow": {"tier": "ULTRA", "perSec": 0.26},
-        "即梦": {"tier": "超级会员", "perSec": 0.40},
-        "小云雀": {"tier": "超级会员", "perSec": 0.40}
-    },
-
-    # 档位清单（原价 = 划线原价 / 次年续费全额 / Higgsfield 月付×12）
-    "plans": [
-        {"platform": "libtv", "tier": "标准版", "price": 569, "renewal": 759, "currency": "CNY",
-         "monthlyCredits": 1500, "original": 729, "originalNote": "划线原价"},
-        {"platform": "libtv", "tier": "进阶版", "price": 1199, "renewal": 1799, "currency": "CNY",
-         "monthlyCredits": 4600, "original": 2199, "originalNote": "划线原价"},
-        {"platform": "libtv", "tier": "高级版", "price": 3899, "currency": "CNY",
-         "monthlyCredits": 16300, "renewal": 5099, "original": 7399, "originalNote": "划线原价",
-         "creditsOptions": [
-             {"monthlyCredits": 11700, "price": 2999, "label": "11.7K 档"},
-             {"monthlyCredits": 16300, "price": 3899, "label": "16.3K 档"}
-         ]},
-        {"platform": "libtv", "tier": "豪华版", "price": 6699, "renewal": 7399, "currency": "CNY",
-         "monthlyCredits": 32800, "original": 14999, "originalNote": "划线原价"},
-        {"platform": "libtv", "tier": "至尊版", "price": 9599, "currency": "CNY",
-         "renewal": 9599, "monthlyCredits": 50500, "original": 22999, "originalNote": "划线原价",
-         "creditsOptions": [
-             {"monthlyCredits": 50500, "price": 9599, "label": "50.5K 档"},
-             {"monthlyCredits": 66000, "price": 12499, "label": "66K 档"}
-         ]},
-        {"platform": "Neowow", "tier": "PLUS", "price": 599, "currency": "CNY",
-         "monthlyCredits": 9000, "original": 1080, "originalNote": "划线原价"},
-        {"platform": "Neowow", "tier": "Pro", "price": 4666, "currency": "CNY",
-         "monthlyCredits": 108000, "original": 12950, "originalNote": "划线原价",
-         "creditsOptions": [
-             {"monthlyCredits": 32800, "price": 1599, "label": "3.28W 档"},
-             {"monthlyCredits": 52800, "price": 2289, "label": "5.28W 档"},
-             {"monthlyCredits": 108000, "price": 4666, "label": "10.8W 档"}
-         ]},
-        {"platform": "Neowow", "tier": "MAX", "price": 11059, "currency": "CNY",
-         "monthlyCredits": 288000, "original": 34560, "originalNote": "划线原价",
-         "creditsOptions": [
-             {"monthlyCredits": 188000, "price": 7299, "label": "18.8W 档"},
-             {"monthlyCredits": 288000, "price": 11059, "label": "28.8W 档"}
-         ]},
-        {"platform": "Neowow", "tier": "ULTRA", "price": 11899, "currency": "CNY",
-         "monthlyCredits": 368000, "original": 44160, "originalNote": "划线原价"},
-        {"platform": "即梦", "tier": "基础会员", "price": 659, "currency": "CNY",
-         "monthlyCredits": 725, "original": None, "originalNote": "页面未公示"},
-        {"platform": "即梦", "tier": "标准会员", "price": 1899, "currency": "CNY",
-         "monthlyCredits": 2210, "original": None, "originalNote": "页面未公示"},
-        {"platform": "即梦", "tier": "高级会员", "price": 5199, "currency": "CNY",
-         "monthlyCredits": 12320, "original": 10398, "originalNote": "次年续费全额",
-         "creditsOptions": [
-             {"monthlyCredits": 6200, "price": 2599, "label": "6.2K 档"},
-             {"monthlyCredits": 12320, "price": 5199, "label": "12.3K 档"},
-             {"monthlyCredits": 18500, "price": 7799, "label": "18.5K 档"},
-             {"monthlyCredits": 27700, "price": 11699, "label": "27.7K 档"}
-         ]},
-        {"platform": "即梦", "tier": "超级会员", "price": 21840, "currency": "CNY",
-         "monthlyCredits": 54600, "original": 43680, "originalNote": "次年续费全额",
-         "creditsOptionsNote": "页面未见联动积分档，按单档计。"},
-        {"platform": "小云雀", "tier": "基础会员", "price": 453, "currency": "CNY",
-         "monthlyCredits": 830, "original": 759, "originalNote": "划线原价"},
-        {"platform": "小云雀", "tier": "标准会员", "price": 1199, "currency": "CNY",
-         "monthlyCredits": 2320, "original": 1999, "originalNote": "划线原价"},
-        {"platform": "小云雀", "tier": "高级会员", "price": 4999, "currency": "CNY",
-         "monthlyCredits": 12000, "original": 9999, "originalNote": "划线原价",
-         "creditsOptions": [
-             {"monthlyCredits": 6300, "price": 2649, "label": "6.3K 档"},
-             {"monthlyCredits": 8600, "price": 3599, "label": "8.6K 档"},
-             {"monthlyCredits": 10200, "price": 4199, "label": "10.2K 档"},
-             {"monthlyCredits": 12000, "price": 4999, "label": "12K 档"},
-             {"monthlyCredits": 18500, "price": 7799, "label": "18.5K 档"},
-             {"monthlyCredits": 27700, "price": 10699, "label": "27.7K 档"}
-         ]},
-        {"platform": "小云雀", "tier": "超级会员", "price": 21840, "currency": "CNY",
-         "monthlyCredits": 54600, "original": 43680, "originalNote": "划线原价"},
-        {"platform": "Higgsfield", "tier": "Starter", "price": 180, "currency": "USD",
-         "monthlyCredits": 200, "original": 180, "originalNote": "年付无折扣"},
-        {"platform": "Higgsfield", "tier": "Plus", "price": 468, "currency": "USD",
-         "monthlyCredits": 1000, "original": 588, "originalNote": "月付×12"},
-        {"platform": "Higgsfield", "tier": "Ultra", "price": 1188, "currency": "USD",
-         "monthlyCredits": 3000, "original": 1548, "originalNote": "月付×12",
-         "creditsOptions": [
-             {"monthlyCredits": 3000, "price": 1188, "label": "$99/月档"},
-             {"monthlyCredits": 6000, "price": 2328, "label": "$194/月档"},
-             {"monthlyCredits": 9000, "price": 3240, "label": "$270/月档"}
-         ],
-         "creditsOptionsNote": "Higgsfield Ultra 档提供积分滑档，三档为 3,000 / 6,000 / 9,000 分。依据官方定价页截图：Ultra $99/月，划线原价 $129，billed annually；Plus $39/月，划线原价 $49；Starter $15/月固定 200 分。"
-                               "价格为「按月付折年付」口径的月费 x 12；原价按各档月付价 x 12 计。"}
+        {"key": "leaderboard-vlm", "label": "视觉理解模型排行榜", "href": "leaderboard-vlm.html"},
     ],
+}
 
-    # 待补数据清单（价格未知的积分档与平台，补齐后自动进入计算）
-    "pending": [
-        {"item": "五家的失败重试是否扣积分",
-         "why": "影响最大：失败率 20% 且不退分 = 实际成本 +25%，足以反转全部排名"},
-        {"item": "Neowow ULTRA 是否有联动积分档",
-         "why": "Pro（3 档）与 MAX（2 档）已确认联动，ULTRA 当前按固定 368,000/月"},
-        {"item": "libtv 至尊版是否也有联动积分档",
-         "why": "高级版已确认双档，其余四档按当前所见为固定值"},
-        {"item": "即梦基础/标准 与 小云雀 的次年续费价",
-         "why": "用户暂不提供，暂用划线原价代替；影响跨年使用的真实成本估算"}
-    ],
+# ═══════════ 平台 ═══════════
+PLATFORMS = {
+    "libtv":      {"name": "libtv",      "color": "#9CE6F3", "currency": "CNY", "region": "cn"},
+    "Neowow":     {"name": "Neowow",     "color": "#00C65A", "currency": "CNY", "region": "cn"},
+    "即梦":        {"name": "即梦",        "color": "#3280FF", "currency": "CNY", "region": "cn"},
+    "小云雀":      {"name": "小云雀",      "color": "#FABC00", "currency": "CNY", "region": "cn"},
+    "Higgsfield": {"name": "Higgsfield", "color": "#ED1572", "currency": "USD", "region": "global",
+                   "excludeTax": True},
+}
 
-    # 失败重试是否扣积分（调研结果，含置信度与出处）
-    "retryPolicy": [
-        {"plat": "Higgsfield", "retry": "不扣，自动退还", "penalty": "0%",
-         "confidence": "高（官方文档）",
-         "detail": "官方 API 文档明确：请求以 failed 或 nsfw 结束不计费，受理时预扣的积分自动返还；"
-                   "排队中取消也退。超时同样标记失败、不扣费。唯一例外是 Grok —— 一经开始生成即扣费。",
-         "source": "docs.higgsfield.ai /docs/help/faq 与 /docs/concepts/billing-and-retention"},
-        {"plat": "即梦", "retry": "扣，不可逆", "penalty": "失败率 × 成本",
-         "confidence": "中（多来源一致，非官方协议）",
-         "detail": "提交瞬间即冻结扣除，失败或超时均不退。只有纯读取操作（播放、浏览、下载）不扣分。"
-                   "扣分顺序为 免费积分 → 订阅积分 → 充值积分。",
-         "source": "自媒体整理 + 消费保投诉案例交叉印证"},
-        {"plat": "小云雀", "retry": "分情况", "penalty": "0–100%",
-         "confidence": "中（自媒体 + 黑猫投诉佐证）",
-         "detail": "① 部分成功（渲染中断、模型超时、显存溢出、角色图未加载完就提交）—— 扣分不退；"
-                   "② 平台侧故障（HTTP 503 / Agent core offline）且落在官方公告故障窗口内 —— 2 小时内自动补回；"
-                   "③ 前端拦截（违规内容、未实名）—— 不扣分；④ 可走人工申诉。"
-                   "注意：高级模式下即使只跑完前 2 秒，也按整段时长计费。",
-         "source": "自媒体整理 + 黑猫投诉案例（平台确有「失败全额返还」规则但被指执行双标）"},
-        {"plat": "libtv", "retry": "未找到公开规则", "penalty": "未知",
-         "confidence": "无",
-         "detail": "用户协议与帮助中心未检索到明确条款。建议下单前向客服书面确认，并保留失败任务 ID。",
-         "source": "—"},
-        {"plat": "Neowow", "retry": "未找到公开规则", "penalty": "未知",
-         "confidence": "无",
-         "detail": "同上。建议实测：生成一条必然失败的请求（如超长提示词），对比积分余额变化。",
-         "source": "—"}
-    ],
+# ═══════════ 汇率 ═══════════
+FX = {"pair": "USD_CNY", "rate": 6.7487, "asOf": UPDATED,
+      "source": "中国外汇交易中心（CFETS）人民币对美元中间价",
+      "note": "选用中间价而非银行牌价：中间价是当日官方定价，可引用可复核；"
+              "实际结算按各银行现汇卖出价通常再高 0.5–1%。"}
 
-    # 跨零点扣分陷阱（实操影响）
-    "crossMidnightNote": "跨零点提交任务时，两家字节系平台的扣分归属日不同：23:55 提交、0:05 完成时，"
-                         "即梦扣前一天的分，小云雀扣后一天的分；若小云雀未在零点前完成，会把当天未用完的积分作废并扣新一天的。",
+# ═══════════ 统一口径 ═══════════
+SPEC = {"text": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考", "secondsPerClip": 30,
+        "note": "全部平台的单条积分消耗均在此口径下测得，是本次对比成立的唯一前提。"}
 
-    # 数据来源截图
-    "sources": [
-        {"page": "Neowow 生成页", "data": "Seedance 2.5 / 720p / 16:9 / 30s / 全能参考 → 7,500 积分"},
-        {"page": "libtv 生成页", "data": "Seedance 2.5 / 全能参考 / 16:9 · 720P · 30s → 1,380 积分"},
-        {"page": "即梦生成页", "data": "即梦 Seedance 2.5 / 16:9 / 720P / 全能参考 / 30s → 600 积分"},
-        {"page": "libtv 订阅页", "data": "标准/进阶/高级/豪华/至尊 五档年费 + 划线原价 + 兑换率"},
-        {"page": "Neowow 订阅页", "data": "PLUS/Pro/MAX/ULTRA 四档年费 + 划线原价 + 1元=X积分"},
-        {"page": "即梦订阅页", "data": "基础/标准/高级/超级 四档年费 + 首年5折与次年全额"},
-        {"page": "小云雀 订阅页", "data": "基础 ¥453 / 标准 ¥1,199 / 高级 ¥4,999 / 超级 ¥21,840（含划线原价）"},
-        {"page": "小云雀 生成页", "data": "Seedance 2.5 / 16:9 / 720P / 30s → 界面显示 600（用户口径 800）"},
-        {"page": "Higgsfield 订阅页", "data": "Starter $15 / Plus $39 / Ultra $99（月付折年付口径）"},
-        {"page": "Higgsfield 生成页", "data": "Model: Seedance 2.5 / 30s / 16:9 / 720p / Bitrate Standard → 210 积分"}
-    ],
+CREDITS_PER_VIDEO = {"libtv": 1380, "Neowow": 7500, "即梦": 600, "小云雀": 600, "Higgsfield": 210}
 
-    # 风险与待核实项（页面用折叠块呈现）
-    "risks": [
-        {"level": "high", "title": "小云雀与即梦的超级会员完全同规格，二者已无法区分",
-         "body": ["用户确认小云雀单条为 600 积分。据此，小云雀超级与即梦超级在全部关键维度上一致："
-                  "同为 ¥21,840 首年 / ¥43,680 次年、同为 54,600 积分/月、同为 ¥1 = 30 积分、"
-                  "同为 600 积分/条 —— 折算后单条成本完全相同（¥20.00）。",
-                  "两家均为字节系、同用 Seedance 全家桶。本表按同规格分别列出，"
-                  "但实际采购时二者可视为同一档位，差异只在非价格能力（工作流、API、客服）。",
-                  "另需注意：即梦超级会员的积分由 54,000 更正为 54,600 —— "
-                  "依据是 21,840 ÷ (54,600 × 12) = 1/30，与页面标注的「¥1 = 30 积分」精确吻合。"]},
-        {"level": "warn", "title": "年费档位均为限时活动价，恢复原价后结论会变",
-         "body": ["按官方原价重算，Neowow ULTRA 单条成本由 ¥20.21 升至 ¥75.00，"
-                  "全场最优解变为即梦超级会员（¥40.44/条）。详见「折扣结构」一节的逐家拆解。",
-                  "libtv 高级版两档（11.7K / 16.3K）与即梦高级四档（6.2K–27.7K）均为联动定价，"
-                  "活动结束后各档价格可能同步调整，届时需按新价重算。"]},
-        {"level": "warn", "title": "Higgsfield 的税务与跨境结算成本未计入",
-         "body": ["页面明示报价不含 VAT 与地方税；跨境支付按现汇卖出价结算（高于中间价约 0.5–1%）"
-                  "并可能叠加境外交易手续费。综合实际成本比本表高约 6–10%。",
-                  "另注意：Higgsfield 积分一年过期不结转，订阅积分每个计费周期重置。"]},
-        {"level": "high", "title": "失败重试是否扣积分 —— 隐性成本影响最大",
-         "body": ["本表全部单价均按「成功出片才扣分」计算。若某平台失败不退分且失败率 20%，"
-                  "其实际单条成本需上浮 25%，足以反转排名。",
-                  "已单独立节调研，见「失败重试成本」。结论：Higgsfield 官方保证失败自动退还；"
-                  "即梦失败不退；小云雀分情况。libtv 与 Neowow 未查到公开规则，建议实测。"]},
-        {"level": "", "title": "其余未纳入的变量",
-         "body": ["并发数与排队优先级、素材上传与存储配额、商用授权与版权归属、"
-                  "分镜栏编辑等是否为付费加项、积分是否跨月结转。",
-                  "另据公开反馈，小云雀无官方客服渠道，积分返还与权益咨询无反馈路径 —— "
-                  "不进单价，但会吃掉实际收益。"]}
-    ],
+CREDITS_SOURCE = {
+    "libtv":      "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s",
+    "Neowow":     "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考 · 分镜栏编辑",
+    "即梦":        "即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s",
+    "小云雀":      "Seedance 2.5 · 16:9 · 720P · 30s（用户确认 600 积分）",
+    "Higgsfield": "Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard",
+}
 
-    # 失败重试是否扣积分（调研结果，含置信度与出处）
-    "retryPolicy": [
-        {"plat": "Higgsfield", "retry": "不扣，自动退还", "penalty": "0%",
-         "confidence": "高（官方文档）",
-         "detail": "官方 API 文档明确：请求以 failed 或 nsfw 结束不计费，受理时预扣的积分自动返还；"
-                   "排队中取消也退。超时同样标记失败、不扣费。唯一例外是 Grok —— 一经开始生成即扣费。",
-         "source": "docs.higgsfield.ai /docs/help/faq 与 /docs/concepts/billing-and-retention"},
-        {"plat": "即梦", "retry": "扣，不可逆", "penalty": "失败率 x 成本",
-         "confidence": "中（多来源一致，非官方协议）",
-         "detail": "提交瞬间即冻结扣除，失败或超时均不退。只有纯读取操作（播放、浏览、下载）不扣分。"
-                   "扣分顺序为 免费积分 -> 订阅积分 -> 充值积分。",
-         "source": "自媒体整理 + 消费保投诉案例交叉印证"},
-        {"plat": "小云雀", "retry": "分情况", "penalty": "0–100%",
-         "confidence": "中（自媒体 + 黑猫投诉佐证）",
-         "detail": "① 部分成功（渲染中断、模型超时、显存溢出、角色图未加载完就提交）—— 扣分不退；"
-                   "② 平台侧故障（HTTP 503 / Agent core offline）且落在官方公告故障窗口内 —— 2 小时内自动补回；"
-                   "③ 前端拦截（违规内容、未实名）—— 不扣分；④ 可走人工申诉。"
-                   "注意：高级模式下即使只跑完前 2 秒，也按整段时长计费。",
-         "source": "自媒体整理 + 黑猫投诉案例（平台确有「失败全额返还」规则但被指执行双标）"},
-        {"plat": "libtv", "retry": "未找到公开规则", "penalty": "未知",
-         "confidence": "无",
-         "detail": "用户协议与帮助中心未检索到明确条款。建议下单前向客服书面确认，并保留失败任务 ID。",
-         "source": "—"},
-        {"plat": "Neowow", "retry": "未找到公开规则", "penalty": "未知",
-         "confidence": "无",
-         "detail": "同上。建议实测：生成一条必然失败的请求（如超长提示词），对比积分余额变化。",
-         "source": "—"}
-    ],
+# ═══════════ 档位清单 ═══════════
+#   credits: [{"credits": 月积分, "price": 列表价, "label": 可选展示名}, ...]
+#   单选项档位也写成列表，保持结构统一。
+#   renewal = 次年续费价；original = 划线原价（判断「优势是否依赖活动」）
+PLANS = [
+    {"platform": "libtv", "tier": "标准版", "renewal": 759, "original": 729,
+     "credits": [{"credits": 1500, "price": 569}]},
+    {"platform": "libtv", "tier": "进阶版", "renewal": 1799, "original": 2199,
+     "credits": [{"credits": 4600, "price": 1199}]},
+    {"platform": "libtv", "tier": "高级版", "renewal": 5099, "original": 7399,
+     "credits": [{"credits": 11700, "price": 2999}, {"credits": 16300, "price": 3899}]},
+    {"platform": "libtv", "tier": "豪华版", "renewal": 7399, "original": 14999,
+     "credits": [{"credits": 32800, "price": 6699}]},
+    {"platform": "libtv", "tier": "至尊版", "renewal": 9599, "original": 22999,
+     "credits": [{"credits": 50500, "price": 9599}, {"credits": 66000, "price": 12499}]},
 
-    # 跨零点扣分陷阱（实操影响）
-    "crossMidnightNote": "跨零点提交任务时，两家字节系平台的扣分归属日不同：23:55 提交、0:05 完成时，"
-                         "即梦扣前一天的分，小云雀扣后一天的分；若小云雀未在零点前完成，"
-                         "会把当天未用完的积分作废并扣新一天的。",
+    {"platform": "Neowow", "tier": "PLUS", "original": 1080,
+     "credits": [{"credits": 9000, "price": 599}]},
+    {"platform": "Neowow", "tier": "Pro", "original": 12950,
+     "credits": [{"credits": 32800, "price": 1599}, {"credits": 52800, "price": 2289},
+                 {"credits": 108000, "price": 4666}]},
+    {"platform": "Neowow", "tier": "MAX", "original": 34560,
+     "credits": [{"credits": 188000, "price": 7299}, {"credits": 288000, "price": 11059}]},
+    {"platform": "Neowow", "tier": "ULTRA", "original": 44160,
+     "credits": [{"credits": 368000, "price": 11899}]},
 
-    # 数据来源截图
-    "sources": [
-        {"page": "Neowow 生成页", "data": "Seedance 2.5 / 720p / 16:9 / 30s / 全能参考 -> 7,500 积分"},
-        {"page": "libtv 生成页", "data": "Seedance 2.5 / 全能参考 / 16:9 · 720P · 30s -> 1,380 积分"},
-        {"page": "即梦生成页", "data": "即梦 Seedance 2.5 / 16:9 / 720P / 全能参考 / 30s -> 600 积分"},
-        {"page": "libtv 订阅页", "data": "五档年费 + 划线原价 + 兑换率；高级版为 11.7K / 16.3K 联动双档"},
-        {"page": "Neowow 订阅页", "data": "四档年费 + 划线原价 + 1元=X积分；Pro 三档、MAX 两档联动"},
-        {"page": "即梦订阅页", "data": "四档年费 + 首年5折与次年全额；高级会员为 6.2K–27.7K 四档联动"},
-        {"page": "小云雀 订阅页", "data": "四档年费；高级会员为 6.3K–27.7K 六档联动"},
-        {"page": "小云雀 生成页", "data": "Seedance 2.5 / 16:9 / 720P / 30s -> 600 积分（用户已确认）"},
-        {"page": "Higgsfield 订阅页", "data": "Starter $15 / Plus $39（划线 $49）/ Ultra $99（划线 $129），"
-                                              "Ultra 为 3,000–9,000 分三档滑块（官方定价页截图）"},
-        {"page": "Higgsfield 生成页", "data": "Model: Seedance 2.5 / 30s / 16:9 / 720p / Bitrate Standard -> 210 积分"}
-    ]
-})
+    {"platform": "即梦", "tier": "基础会员", "original": None,
+     "credits": [{"credits": 725, "price": 659}]},
+    {"platform": "即梦", "tier": "标准会员", "original": None,
+     "credits": [{"credits": 2210, "price": 1899}]},
+    {"platform": "即梦", "tier": "高级会员", "original": 10398,
+     "credits": [{"credits": 6200, "price": 2599}, {"credits": 12320, "price": 5199},
+                 {"credits": 18500, "price": 7799}, {"credits": 27700, "price": 11699}]},
+    {"platform": "即梦", "tier": "超级会员", "original": 43680,
+     "credits": [{"credits": 54600, "price": 21840}]},
 
-# ── 排行榜数据集骨架（先把字段定死，有数据后只填 entries） ─────
-w("leaderboard-vlm.json", {
-    "id": "leaderboard-vlm",
-    "type": "leaderboard",
-    "title": "视觉理解模型排行榜",
-    "eyebrow": "Vision-Language Benchmark",
-    "status": "coming-soon",
-    "updatedAt": None,
+    {"platform": "小云雀", "tier": "基础会员", "original": 759,
+     "credits": [{"credits": 830, "price": 453}]},
+    {"platform": "小云雀", "tier": "标准会员", "original": 1999,
+     "credits": [{"credits": 2320, "price": 1199}]},
+    {"platform": "小云雀", "tier": "高级会员", "original": 9999,
+     "credits": [{"credits": 6300, "price": 2649}, {"credits": 8600, "price": 3599},
+                 {"credits": 10200, "price": 4199}, {"credits": 12000, "price": 4999},
+                 {"credits": 18500, "price": 7799}, {"credits": 27700, "price": 10699}]},
+    {"platform": "小云雀", "tier": "超级会员", "original": 43680,
+     "credits": [{"credits": 54600, "price": 21840}]},
+
+    {"platform": "Higgsfield", "tier": "Starter", "original": 180,
+     "credits": [{"credits": 200, "price": 180}]},
+    {"platform": "Higgsfield", "tier": "Plus", "original": 588,
+     "credits": [{"credits": 1000, "price": 468}]},
+    {"platform": "Higgsfield", "tier": "Ultra", "original": 1548,
+     "credits": [{"credits": 3000, "price": 1188}, {"credits": 6000, "price": 2328},
+                 {"credits": 9000, "price": 3240}]},
+]
+
+# ═══════════ 平台公示兑换率（仅作口径反向校验）═══════════
+OFFICIAL_RATE = {
+    "libtv":  {"标准版": 31.25, "进阶版": 45.45},
+    "Neowow": {"PLUS": 180.0, "Pro": 282.0, "MAX": 350.0, "ULTRA": 371.0},
+    "即梦":    {"基础会员": 13.0, "标准会员": 14.0},
+    "小云雀":  {"基础会员": 21.9, "标准会员": 23.2, "高级会员": 28.8, "超级会员": 30.0},
+}
+OFFICIAL_RATE_NOTE = ("部分公示值按调价前的年费计算（Neowow MAX/Pro 尤为明显），"
+                      "按现价实算低于公示值。故本表全部结论以「年费 ÷ (月积分 × 12)」"
+                      "的实算值为准，公示值仅作口径校验。")
+
+# ═══════════ 海报宣传「低至 X 元/秒」═══════════
+AD_CLAIM = {
+    "libtv":  {"tier": "至尊版",   "perSec": 0.36},
+    "Neowow": {"tier": "ULTRA",   "perSec": 0.26},
+    "即梦":    {"tier": "超级会员", "perSec": 0.40},
+    "小云雀":  {"tier": "超级会员", "perSec": 0.40},
+}
+
+# ═══════════ 失败重试是否扣积分（用户实测口径）═══════════
+RETRY_POLICY = [
+    {"plat": "libtv",      "retry": "不扣", "basis": "用户实测"},
+    {"plat": "Neowow",     "retry": "不扣", "basis": "用户实测"},
+    {"plat": "即梦",        "retry": "不扣", "basis": "用户实测"},
+    {"plat": "小云雀",      "retry": "不扣", "basis": "用户实测"},
+    {"plat": "Higgsfield", "retry": "不扣，自动退还", "basis": "官方文档 + 用户实测"},
+]
+RETRY_NOTE = ("五家平台失败均不消耗积分（用户实测口径），故本表全部单价与实际计费一致，"
+              "排名不受失败率影响，可直接按单价决策。Higgsfield 另有官方文档保证："
+              "failed / nsfw 请求不计费，预扣积分自动退还，排队取消亦退，超时标记失败不扣费"
+              "（唯一例外 Grok —— 一经开始生成即扣费）。")
+CROSS_MIDNIGHT = ("跨零点提交时两家字节系平台的积分归属日不同：23:55 提交、0:05 完成时，"
+                  "即梦计入前一天、小云雀计入后一天；小云雀若未在零点前完成，"
+                  "未用完的当日积分会作废。")
+
+# ═══════════ 风险（按用户答复收敛）═══════════
+RISKS = [
+    {"level": "warn", "title": "年费档位均为限时活动价，恢复原价后结论会变",
+     "body": ["用户确认：各平台年费均为限时活动价。按官方划线原价重算，"
+              "Neowow 各档单条成本大幅上升，全场最优解将转移 —— 详见「折扣结构」一节。",
+              "libtv 高级版与至尊版、即梦高级四档、小云雀高级六档、"
+              "Neowow Pro 三档与 MAX 两档均为联动定价，活动结束后可能同步调整。"]},
+]
+
+# ═══════════ 数据来源 ═══════════
+SOURCES = [
+    {"page": "libtv 生成页",      "data": "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s → 1,380 积分"},
+    {"page": "libtv 订阅页",      "data": "五档年费 + 次年续费 + 划线原价；高级版 11.7K/16.3K、至尊版 50.5K/66K 联动"},
+    {"page": "Neowow 生成页",     "data": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考 → 7,500 积分"},
+    {"page": "Neowow 订阅页",     "data": "四档年费 + 划线原价；Pro 三档、MAX 两档联动；ULTRA 无联动"},
+    {"page": "即梦生成页",        "data": "即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s → 600 积分"},
+    {"page": "即梦订阅页",        "data": "四档年费；高级会员 6.2K–27.7K 四档联动；超级会员单档"},
+    {"page": "小云雀生成页",      "data": "Seedance 2.5 · 16:9 · 720P · 30s → 600 积分（用户确认）"},
+    {"page": "小云雀 订阅页",      "data": "四档年费；高级会员 6.3K–27.7K 六档联动"},
+    {"page": "Higgsfield 订阅页", "data": "Starter $15 / Plus $39（划线 $49）/ Ultra $99（划线 $129）；Ultra 为 3,000–9,000 分三档滑块"},
+    {"page": "Higgsfield 生成页", "data": "Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard → 210 积分"},
+]
+
+# ═══════════ 排行榜骨架（字段已锁定，回填 entries 即出榜）═══════════
+LEADERBOARD = {
+    "id": "leaderboard-vlm", "type": "leaderboard",
+    "title": "视觉理解模型排行榜", "eyebrow": "Vision-Language Benchmark",
+    "status": "coming-soon", "updatedAt": None,
     "intro": "同一套口径下横向评测各模型的视觉理解能力，输出可复核的排名与置信区间。",
-    "emptyState": {
-        "title": "评测进行中",
-        "body": "评测集与打分脚本已就位，数据回填后本节将自动渲染为排行榜。字段结构已锁定，"
-                "后续只需向 entries 追加记录，无需改动页面。"
-    },
+    "emptyState": {"title": "评测进行中",
+                   "body": "评测集与打分脚本已就位，数据回填后本节将自动渲染为排行榜。"
+                           "字段结构已锁定，后续只需向 entries 追加记录，无需改动页面。"},
     "methodology": {
         "scoring": "每维度 0–100 分，按权重加权为总分；每项至少 5 次独立运行取中位数，报 95% 置信区间。",
         "dimensions": [
-            {"key": "chart", "label": "图表识别", "weight": 0.30,
+            {"key": "chart",   "label": "图表识别",   "weight": 0.30,
              "desc": "柱/折/饼/散点图的数值读取与趋势判断，含刻度反推"},
-            {"key": "ocr", "label": "OCR 文字提取", "weight": 0.25,
+            {"key": "ocr",     "label": "OCR 文字提取", "weight": 0.25,
              "desc": "截图、扫描件、手写体、低对比度与小字号文字的准确率"},
-            {"key": "spatial", "label": "空间推理", "weight": 0.25,
+            {"key": "spatial", "label": "空间推理",   "weight": 0.25,
              "desc": "相对位置、遮挡关系、计数与方位判断"},
-            {"key": "longdoc", "label": "长图细节", "weight": 0.20,
-             "desc": "超长截图与多栏排版中的信息定位与跨区关联"}
-        ]
-    },
-    "fieldSchema": {
-        "entries[]": {
-            "rank": "integer — 由 score 降序自动生成，不必手填",
-            "model": "string — 模型名，如 'GPT-6'",
-            "variant": "string|null — 变体标记，如 'High' / 'Thinking'",
-            "provider": "string — 供应方，如 'OpenAI'",
-            "license": "string — 'proprietary' | 'open'",
-            "score": "number — 加权总分 0–100",
-            "ci": "number — 95% 置信区间半宽",
-            "dims": "object — {chart, ocr, spatial, longdoc} 各维度得分",
-            "runs": "integer — 独立运行次数",
-            "evaluatedAt": "string — YYYY-MM-DD",
-            "note": "string|null — 备注",
-            "source": "string|null — 数据来源说明"
-        }
-    },
-    "models": [],
-    "entries": []
-})
+            {"key": "longdoc", "label": "长图细节",   "weight": 0.20,
+             "desc": "超长截图与多栏排版中的信息定位与跨区关联"},
+        ]},
+    "fieldSchema": {"entries[]": {
+        "model": "string — 模型名", "variant": "string|null — 变体标记",
+        "provider": "string — 供应方", "license": "string — 'proprietary' | 'open'",
+        "score": "number — 加权总分 0–100", "ci": "number — 95% 置信区间半宽",
+        "dims": "object — {chart, ocr, spatial, longdoc}", "runs": "integer — 独立运行次数",
+        "evaluatedAt": "string — YYYY-MM-DD", "note": "string|null", "source": "string|null"}},
+    "models": [], "entries": [],
+}
 
-print("\n数据层已建立。内容模型：平台 / 模型 / 评测项 / 数据点")
+COST = {
+    "id": "cost-seedance25", "type": "cost", "title": "平台成本对比",
+    "eyebrow": "Cost Benchmark · Seedance 2.5", "updatedAt": UPDATED,
+    "spec": SPEC, "fx": FX,
+    "creditsPerVideo": CREDITS_PER_VIDEO, "creditsSource": CREDITS_SOURCE,
+    "plans": PLANS,
+    "officialRate": OFFICIAL_RATE, "officialRateNote": OFFICIAL_RATE_NOTE,
+    "adClaim": AD_CLAIM,
+    "retryPolicy": RETRY_POLICY, "retryNote": RETRY_NOTE,
+    "crossMidnightNote": CROSS_MIDNIGHT,
+    "risks": RISKS, "sources": SOURCES,
+}
+
+
+def main():
+    os.makedirs(DATA, exist_ok=True)
+    for name, obj in [("site.json", SITE), ("platforms.json", PLATFORMS),
+                      ("cost-seedance25.json", COST), ("leaderboard-vlm.json", LEADERBOARD)]:
+        p = os.path.join(DATA, name)
+        with io.open(p, "w", encoding="utf-8") as f:
+            json.dump(obj, f, ensure_ascii=False, indent=2)
+            f.write("\n")
+        print("  data/%-24s %7d B" % (name, os.path.getsize(p)))
+
+    # 结构自检：任何档位缺选项、选项缺键、价格为 None 都在此拦截
+    assert len(PLATFORMS) == 5
+    n_opt = 0
+    for p in PLANS:
+        assert p["credits"], "%s %s 无积分选项" % (p["platform"], p["tier"])
+        assert p["platform"] in PLATFORMS, "未知平台 " + p["platform"]
+        for c in p["credits"]:
+            assert set(c) >= {"credits", "price"}, "%s %s 选项缺键" % (p["platform"], p["tier"])
+            assert c["price"] is not None and c["credits"] > 0
+            n_opt += 1
+    print("\n数据层已建立：%d 平台 / %d 档位 / %d 个可选积分档" % (len(PLATFORMS), len(PLANS), n_opt))
+
+
+if __name__ == "__main__":
+    main()

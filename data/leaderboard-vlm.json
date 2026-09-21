@@ -41,18 +41,17 @@
   },
   "fieldSchema": {
     "entries[]": {
-      "rank": "integer — 由 score 降序自动生成，不必手填",
-      "model": "string — 模型名，如 'GPT-6'",
-      "variant": "string|null — 变体标记，如 'High' / 'Thinking'",
-      "provider": "string — 供应方，如 'OpenAI'",
+      "model": "string — 模型名",
+      "variant": "string|null — 变体标记",
+      "provider": "string — 供应方",
       "license": "string — 'proprietary' | 'open'",
       "score": "number — 加权总分 0–100",
       "ci": "number — 95% 置信区间半宽",
-      "dims": "object — {chart, ocr, spatial, longdoc} 各维度得分",
+      "dims": "object — {chart, ocr, spatial, longdoc}",
       "runs": "integer — 独立运行次数",
       "evaluatedAt": "string — YYYY-MM-DD",
-      "note": "string|null — 备注",
-      "source": "string|null — 数据来源说明"
+      "note": "string|null",
+      "source": "string|null"
     }
   },
   "models": [],
