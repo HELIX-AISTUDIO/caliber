@@ -218,6 +218,28 @@ async function run(browser) {
                                           && el.querySelector('b').textContent.indexOf('libtv') === 0),
                seg: path ? path.getAttribute('d').split('L').length : 0 };
     });
+    // 散点朝向：两个轴都按优度画，右上角必须是最优档
+    // （曾经用「该周期实付」当横轴 —— 它与产能强正相关，右上角是空的，与直觉冲突）
+    const ori = await p.evaluate(() => {
+      const d = [...document.querySelectorAll('#pplot .pp')].map(e => ({
+        x: parseFloat(e.style.left), y: parseFloat(e.style.bottom),
+        t: e.querySelector('b').innerText.replace(/\s+/g, ' ').split('第')[0].trim() }));
+      return {
+        tr: d.filter(q => q.x > 85 && q.y > 85).map(q => q.t),
+        maxX: d.reduce((a2, c) => c.x > a2.x ? c : a2, d[0]).t,
+        minX: d.reduce((a2, c) => c.x < a2.x ? c : a2, d[0]).t,
+        corner: !!document.querySelector('.pcorner'),
+        ax0: (document.getElementById('px0') || {}).textContent || '',
+        ax1: (document.getElementById('px1') || {}).textContent || '',
+      };
+    });
+    check('右上角存在「又能做又便宜」的档位', ori.tr.length > 0, ori.tr.join(' ／ ') || '（空）');
+    // 断言「方向」而不是「具体数值」——写死数值会在换周期/换平台时误报，
+    // 而这里真正要保的性质是：左端＝最差、右端＝最好。
+    check('横轴左端指向「更差」、右端指向「更好」', ori.ax0.indexOf('更少') > 0 && ori.ax1.indexOf('更多') > 0,
+      `${ori.ax0} | ${ori.ax1}`);
+    check('有「最好 ↗」角标', ori.corner === true);
+
     check('散点跟随平台筛选（点数减少）', pare.n === Number(QROWS_EXP) - Number(LIBTV_Q_EXP), `${pare.n} 点`);
     check('散点已排除被筛掉的平台', pare.hasLibtv === false);
 

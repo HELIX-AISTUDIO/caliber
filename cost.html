@@ -264,6 +264,9 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
     repeating-linear-gradient(to bottom,rgba(255,255,255,.05) 0 1px,transparent 1px 25%),
     rgba(0,0,0,.25)}
 /* .pline 已移除（连线机制取消）—— 散点只靠点本身表达 */
+/* 右上角标：轴已反转成「右上最好」，这里再明确钉一句，免得读者自己推断 */
+.pcorner{position:absolute;right:9px;top:8px;z-index:1;font-size:10.5px;letter-spacing:.04em;
+  color:rgba(209,254,23,.55);pointer-events:none;user-select:none}
 .pp{position:absolute;transform:translate(-50%,50%);cursor:default;z-index:2}
 .pp:hover{z-index:9}
 .pp i{width:19px;height:19px;border-radius:5px;opacity:.85;display:block;
@@ -1229,10 +1232,10 @@ var PERLB = {y: '年付', q: '季付', m: '月付'};
 var MI2 = MI;                                       /* v 的下标 */
 var MLOW = {cost: true, cap: false, sec: true, pay: true};
 /* 两轴不能取同一个量，否则退化成对角线 —— 所以「每月可生成」配的是单条成本 */
-/* 与 Python 侧 PARETO_AXES 必须一致：预算轴 × 指标轴。
-   成本与产能强反相关，配在一起前沿会退化。 */
-var PAXES = {cost: ['pay', 'cost'], cap: ['pay', 'cap'],
-             sec: ['pay', 'sec'], pay: ['pay', 'cap']};
+/* 与 Python 侧 PARETO_AXES 必须一致：产能 × 指标，两轴都按优度画（右上角最好）。
+   不用「实付」当横轴 —— 它与产能强正相关，右上角会是空的。 */
+var PAXES = {cost: ['cap', 'cost'], cap: ['cap', 'cost'],
+             sec: ['cap', 'sec'], pay: ['cap', 'pay']};
 var CT = {m: 'cost', k: 'y', o: 'best'};
 var CP = {};
 
@@ -1317,8 +1320,11 @@ function renderPareto(){
     var a = lg ? Math.log(lo) : lo, b = lg ? Math.log(hi) : hi, sp = (b - a) || 1;
     pts.forEach(function(q){
       var t = ((lg ? Math.log(sel(q)) : sel(q)) - a) / sp;
-      q['p' + (sel === XS ? 'x' : 'y')] = 3 + t * 94;   /* 与 pareto_block() 同一公式 */
-      q['b' + (sel === XS ? 'x' : 'y')] = lowBetter ? (1 - t) : t;
+      var bt = lowBetter ? (1 - t) : t;                 /* 优度：1＝最好 */
+      /* ⚠ 位置用优度，不用原始值 —— 两轴统一「右上角最好」。
+         与 pareto_block() 必须同一公式。 */
+      q['p' + (sel === XS ? 'x' : 'y')] = 3 + bt * 94;
+      q['b' + (sel === XS ? 'x' : 'y')] = bt;
     });
   }
   function XS(q){ return q.x; }
@@ -1352,14 +1358,15 @@ function renderPareto(){
       +  '<b>' + q.d.p + ' ' + q.d.t + (q.d.l ? ' · ' + q.d.l : '')
       +  '<s>第 ' + qrk + ' 名 · ' + CM[mx].f(q.x) + ' · ' + CM[my].f(q.y) + '</s></b></span>';
   }
-  box.innerHTML = h;
+  box.innerHTML = '<span class="pcorner" aria-hidden="true">最好 ↗</span>' + h;
   var a0 = document.getElementById('px0'), a1 = document.getElementById('px1');
-  if(a0) a0.textContent = '← ' + (MLOW[mx] ? '更低' : '更少') + ' ' + CM[mx].f(x0);
-  if(a1) a1.textContent = CM[mx].f(x1) + (MLOW[mx] ? ' 更高' : ' 更多') + ' →';
+  /* 轴已按优度反转：左端＝最差，右端＝最优 */
+  if(a0) a0.textContent = '← ' + (MLOW[mx] ? '更贵' : '更少') + ' ' + CM[mx].f(x1);
+  if(a1) a1.textContent = CM[mx].f(x0) + (MLOW[mx] ? ' 更省' : ' 更多') + ' →';
   /* 标题随指标变 —— 否则用户切了指标，图变了标题还写着「花多少钱买到多少产能」 */
-  if(fld) fld.innerHTML = '横轴＝<i>该周期实付</i>（对数刻度，越左越省）｜纵轴＝'
-    + CM[my].lb + '（' + (MLOW[my] ? '越低越好' : '越高越好') + '）｜'
-    + '每个点是一个档位 —— 越靠左上越划算';
+  if(fld) fld.innerHTML = '两个轴都是<b style="color:#D1FE17">越右／越上越好</b> —— '
+    + '<i>右上角＝又能做又便宜</i>，左下角＝又贵又做不动。横轴＝月产能（越右越多）｜纵轴＝'
+    + CM[my].lb + '（' + (MLOW[my] ? '越上越省' : '越上越多') + '）｜每个点是一个档位';
 }
 
 /* 指标元信息：标题、副标、轴方向 —— 用户要求「切指标时标题要变成解释标题」 */

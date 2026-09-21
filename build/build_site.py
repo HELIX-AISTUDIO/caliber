@@ -751,6 +751,9 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
     repeating-linear-gradient(to bottom,rgba(255,255,255,.05) 0 1px,transparent 1px 25%),
     rgba(0,0,0,.25)}
 /* .pline 已移除（连线机制取消）—— 散点只靠点本身表达 */
+/* 右上角标：轴已反转成「右上最好」，这里再明确钉一句，免得读者自己推断 */
+.pcorner{position:absolute;right:9px;top:8px;z-index:1;font-size:10.5px;letter-spacing:.04em;
+  color:rgba(209,254,23,.55);pointer-events:none;user-select:none}
 .pp{position:absolute;transform:translate(-50%,50%);cursor:default;z-index:2}
 .pp:hover{z-index:9}
 .pp i{width:19px;height:19px;border-radius:5px;opacity:.85;display:block;
@@ -1526,10 +1529,10 @@ var PERLB = {y: '年付', q: '季付', m: '月付'};
 var MI2 = MI;                                       /* v 的下标 */
 var MLOW = {cost: true, cap: false, sec: true, pay: true};
 /* 两轴不能取同一个量，否则退化成对角线 —— 所以「每月可生成」配的是单条成本 */
-/* 与 Python 侧 PARETO_AXES 必须一致：预算轴 × 指标轴。
-   成本与产能强反相关，配在一起前沿会退化。 */
-var PAXES = {cost: ['pay', 'cost'], cap: ['pay', 'cap'],
-             sec: ['pay', 'sec'], pay: ['pay', 'cap']};
+/* 与 Python 侧 PARETO_AXES 必须一致：产能 × 指标，两轴都按优度画（右上角最好）。
+   不用「实付」当横轴 —— 它与产能强正相关，右上角会是空的。 */
+var PAXES = {cost: ['cap', 'cost'], cap: ['cap', 'cost'],
+             sec: ['cap', 'sec'], pay: ['cap', 'pay']};
 var CT = {m: 'cost', k: 'y', o: 'best'};
 var CP = {};
 
@@ -1614,8 +1617,11 @@ function renderPareto(){
     var a = lg ? Math.log(lo) : lo, b = lg ? Math.log(hi) : hi, sp = (b - a) || 1;
     pts.forEach(function(q){
       var t = ((lg ? Math.log(sel(q)) : sel(q)) - a) / sp;
-      q['p' + (sel === XS ? 'x' : 'y')] = 3 + t * 94;   /* 与 pareto_block() 同一公式 */
-      q['b' + (sel === XS ? 'x' : 'y')] = lowBetter ? (1 - t) : t;
+      var bt = lowBetter ? (1 - t) : t;                 /* 优度：1＝最好 */
+      /* ⚠ 位置用优度，不用原始值 —— 两轴统一「右上角最好」。
+         与 pareto_block() 必须同一公式。 */
+      q['p' + (sel === XS ? 'x' : 'y')] = 3 + bt * 94;
+      q['b' + (sel === XS ? 'x' : 'y')] = bt;
     });
   }
   function XS(q){ return q.x; }
@@ -1649,14 +1655,15 @@ function renderPareto(){
       +  '<b>' + q.d.p + ' ' + q.d.t + (q.d.l ? ' · ' + q.d.l : '')
       +  '<s>第 ' + qrk + ' 名 · ' + CM[mx].f(q.x) + ' · ' + CM[my].f(q.y) + '</s></b></span>';
   }
-  box.innerHTML = h;
+  box.innerHTML = '<span class="pcorner" aria-hidden="true">最好 ↗</span>' + h;
   var a0 = document.getElementById('px0'), a1 = document.getElementById('px1');
-  if(a0) a0.textContent = '← ' + (MLOW[mx] ? '更低' : '更少') + ' ' + CM[mx].f(x0);
-  if(a1) a1.textContent = CM[mx].f(x1) + (MLOW[mx] ? ' 更高' : ' 更多') + ' →';
+  /* 轴已按优度反转：左端＝最差，右端＝最优 */
+  if(a0) a0.textContent = '← ' + (MLOW[mx] ? '更贵' : '更少') + ' ' + CM[mx].f(x1);
+  if(a1) a1.textContent = CM[mx].f(x0) + (MLOW[mx] ? ' 更省' : ' 更多') + ' →';
   /* 标题随指标变 —— 否则用户切了指标，图变了标题还写着「花多少钱买到多少产能」 */
-  if(fld) fld.innerHTML = '横轴＝<i>该周期实付</i>（对数刻度，越左越省）｜纵轴＝'
-    + CM[my].lb + '（' + (MLOW[my] ? '越低越好' : '越高越好') + '）｜'
-    + '每个点是一个档位 —— 越靠左上越划算';
+  if(fld) fld.innerHTML = '两个轴都是<b style="color:#D1FE17">越右／越上越好</b> —— '
+    + '<i>右上角＝又能做又便宜</i>，左下角＝又贵又做不动。横轴＝月产能（越右越多）｜纵轴＝'
+    + CM[my].lb + '（' + (MLOW[my] ? '越上越省' : '越上越多') + '）｜每个点是一个档位';
 }
 
 /* 指标元信息：标题、副标、轴方向 —— 用户要求「切指标时标题要变成解释标题」 */
@@ -2256,13 +2263,14 @@ def page(title, desc, nav_html, body, cost_js=False):
 METRIC_IDX = {"cost": 0, "cap": 1, "sec": 2, "pay": 3}
 METRIC_LOW = {"cost": True, "cap": False, "sec": True, "pay": True}   # 越低越好?
 METRIC_UNIT = {"cost": "元/条", "cap": "条/月", "sec": "元/秒", "pay": "元"}
-# 两轴＝（预算轴「该周期实付」× 当前指标）。
-# ⚠ 不能把「单条成本」和「月产能」配在一起：单条成本 = 实付 ÷ 产能，两者强反相关，
-#   前沿会退化成 1~2 个点（年付实测 2 点、月付 1 点），图等于没有。
-#   预算与产出才是独立维度，前沿才有台阶。
-#   指标本身就是「该周期实付」时，Y 换成产能 —— 否则 X≡Y 退化成一条对角线。
-PARETO_AXES = {"cost": ("pay", "cost"), "cap": ("pay", "cap"),
-               "sec": ("pay", "sec"), "pay": ("pay", "cap")}
+# 两轴＝（月产能 × 当前指标），两个轴都按【优度】画 —— 右上角永远最好。
+# ⚠ 曾经的配对是「该周期实付 × 当前指标」，但实付与产能强正相关：
+#   花得多才做得多，于是点云从左上斜到右下，**【右上角是空的】**，
+#   与用户「右上角最厉害」的直觉冲突。
+#   换成「产能 × 单条成本」后，最优档位（便宜且能做）真正落在右上角。
+#   指标本身就是「月产能」时，Y 用单条成本 —— 否则 X≡Y 退化成对角线。
+PARETO_AXES = {"cost": ("cap", "cost"), "cap": ("cap", "cost"),
+               "sec": ("cap", "sec"), "pay": ("cap", "pay")}
 
 
 def _title(m):
@@ -2314,9 +2322,10 @@ def pareto_block(key="y", metric="cost"):
     by = [(1 - t) if METRIC_LOW[my] else t for t in yp]
     for i, q in enumerate(pts):
         q["bx"], q["by"] = bx[i], by[i]
-        # 内缩 3%~97%：点宽 19px 且 translate(-50%) 居中，
-        # 直接映射 0~100 会让最左/最右/最上的点探出绘图框
-        q["px"], q["py"] = 3 + xp[i] * 94, 3 + yp[i] * 94
+        # ⚠ 位置用【优度】而不是原始数值：两轴统一「越右/越上越好」。
+        #   按原始值映射时，成本类指标（越低越好）会让最优点落在左下角，与直觉相反。
+        #   内缩 3%~97%：点宽 19px 且 translate(-50%) 居中，直接映射 0~100 会让边缘点探头。
+        q["px"], q["py"] = 3 + bx[i] * 94, 3 + by[i] * 94
         q["xlog"], q["ylog"] = xlog, ylog
 
     # 连线机制已按用户要求移除，只保留散点与交互。
@@ -2343,17 +2352,20 @@ def pareto_block(key="y", metric="cost"):
                 f'<b>{r["plat"]} {r["tier"]}{sub}'
                 f'<s>第 {rk} 名 · {_fmt_axis(mx, q["x"])} · {_fmt_axis(my, q["y"])}</s></b></span>')
 
-    x0, x1 = min(xs_raw), max(xs_raw)
-    xdir = "更便宜" if METRIC_LOW[mx] else "更少"
-    xdir2 = "更贵" if METRIC_LOW[mx] else "更多"
-    xl = (f'<span id="px0">← {xdir} {_fmt_axis(mx, x0)}</span>'
-          f'<span id="px1">{_fmt_axis(mx, x1)} {xdir2} →</span>')
-    yl = f'纵轴＝{_title(my)}（{"越低越好" if METRIC_LOW[my] else "越高越好"}）'
+    x_lo, x_hi = min(xs_raw), max(xs_raw)
+    _better = "更省" if METRIC_LOW[mx] else "更多"
+    _worse = "更贵" if METRIC_LOW[mx] else "更少"
+    # 轴已按优度反转：左端＝最差值，右端＝最优值
+    xl = (f'<span id="px0">← {_worse} {_fmt_axis(mx, x_hi)}</span>'
+          f'<span id="px1">{_fmt_axis(mx, x_lo)} {_better} →</span>')
+    yl = f'纵轴＝{_title(my)}（{"越上越省" if METRIC_LOW[my] else "越上越多"}）'
     return ('<div class="pareto">'
             f'<div class="phd" id="paretoHd"><b>同样的预算，能换到什么</b>'
-            f'<span>横轴＝<i>该周期实付</i>（对数刻度，越左越省）｜{yl}｜'
-            f'每个点是一个档位 —— 越靠左上越划算。悬停看明细，也可与下方排名列表互相联动</span></div>'
-            f'<div class="pplot" id="pplot" data-metric="{metric}">{out}</div>'
+            f'<span>两个轴都是<b style="color:#D1FE17">越右／越上越好</b> —— '
+            f'<i>右上角＝又能做又便宜</i>，左下角＝又贵又做不动。'
+            f'横轴＝月产能（越右越多）｜{yl}｜每个点是一个档位。悬停看真实数值，也可与下方排名列表互相联动</span></div>'
+            f'<div class="pplot" id="pplot" data-metric="{metric}">'
+            f'<span class="pcorner" aria-hidden="true">最好 ↗</span>{out}</div>'
             f'<div class="pfoot">{xl}</div></div>')
 
 
