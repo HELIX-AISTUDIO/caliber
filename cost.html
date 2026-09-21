@@ -218,6 +218,20 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
 .gs{font-size:13px;color:#C9CDD2;line-height:1.75;margin-top:6px}
 .gl{font-size:12.5px;color:#8A9098;line-height:1.85;margin-top:9px;max-width:860px}
 .tmx a{color:#D1FE17}.vmeta b{color:#C9CDD2;font-weight:600}/* KPI 条三套（年/季/月），同一时刻只显示当前周期那套 */
+/* ── 首访阅读路径条：常驻、可关 ──
+   弹窗是「主动讲一次」，这条是「一直在那儿」—— 互不替代。 */
+.guide{display:flex;flex-wrap:wrap;align-items:center;gap:9px 20px;
+  margin:0 0 16px;padding:12px 15px;border-radius:14px;
+  background:rgba(209,254,23,.045);border:1px solid rgba(209,254,23,.2);
+  font-size:12.5px;line-height:1.7;color:#A8AEB5}
+.guide .g-lead{color:#D1FE17;font-weight:600}
+.guide .g-step{white-space:nowrap}
+.guide .g-link{color:#A8AEB5;border-bottom:1px dashed rgba(255,255,255,.3);text-decoration:none}
+.guide .g-link:hover{color:#D1FE17}
+.guide .g-x{margin-left:auto;-webkit-appearance:none;appearance:none;cursor:pointer;
+  font-family:inherit;font-size:11.5px;padding:5px 11px;border-radius:8px;
+  border:1px solid rgba(255,255,255,.16);background:transparent;color:#8A9098;white-space:nowrap}
+.guide .g-x:hover{background:rgba(255,255,255,.07);color:#C9CDD2}
 .kbar{display:none;gap:10px;grid-template-columns:repeat(auto-fit,minmax(148px,1fr))}
 .kbar.on{display:grid}.kb{padding:12px 14px;border-radius:13px;background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.085)}.kb.hi{border-color:rgba(209,254,23,.3);background:rgba(209,254,23,.055)}.kb s{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
@@ -610,6 +624,16 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
     </div>
   </div>
 
+  
+<div class="guide" id="guide">
+  <span class="g-lead">第一次来？</span>
+  <span class="g-step">① 先看上面的结论条</span>
+  <span class="g-step">② 拖动「月产量」看你的场景</span>
+  <span class="g-step">③ 看不懂的词点一下就有解释</span>
+  <a href="glossary.html" class="g-link">术语表</a>
+  <button type="button" class="g-x" id="guideX">不再提示</button>
+</div>
+
   <div class="kbar on" data-kbar="y"><div class="kb hi"><s>单条成本最优</s><b>¥19.30</b><em>小云雀 高级会员 · 27.7K 档</em></div><div class="kb"><s>30 条/月 · 最省</s><b>¥7,797<i class="u">/年</i></b><em>即梦 高级会员 · 6.2K 档 × 3</em></div><div class="kb"><s>90 条/月 · 最省</s><b>¥21,398<i class="u">/年</i></b><em>小云雀 高级会员 · 27.7K 档 × 2</em></div><div class="kb"><s>海外平台溢价</s><b>2.20×</b><em>Higgsfield Ultra</em></div><div class="kb"><s>最差 ÷ 最省</s><b>5.51×</b><em>Higgsfield Starter</em></div></div>
 <div class="kbar" data-kbar="q"><div class="kb hi"><s>单条成本最优</s><b>¥30.00</b><em>即梦 超级会员</em></div><div class="kb"><s>30 条/月 · 最省</s><b>¥2,939<i class="u">/季</i></b><em>即梦 高级会员 · 18.5K 档</em></div><div class="kb"><s>90 条/月 · 最省</s><b>¥8,189<i class="u">/季</i></b><em>即梦 超级会员</em></div><div class="kb"><s>最差 ÷ 最省</s><b>2.16×</b><em>Tapnow PRO · 3.5K 档</em></div></div>
 <div class="kbar" data-kbar="m"><div class="kb hi"><s>单条成本最优</s><b>¥24.56</b><em>小云雀 超级会员</em></div><div class="kb"><s>30 条/月 · 最省</s><b>¥779<i class="u">/月</i></b><em>小云雀 高级会员 · 18.5K 档</em></div><div class="kb"><s>90 条/月 · 最省</s><b>¥2,235<i class="u">/月</i></b><em>小云雀 超级会员</em></div><div class="kb"><s>海外平台溢价</s><b>1.99×</b><em>Higgsfield Ultra</em></div><div class="kb"><s>最差 ÷ 最省</s><b>4.33×</b><em>Higgsfield Starter</em></div></div>
@@ -657,7 +681,7 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
     <div class="tw tw-rec"><table><thead><tr>
       <th>方案类型</th><th>档位组合</th><th class="ctr">该周期支出</th>
       <th class="ctr">实际产能</th><th class="ctr">单条成本</th></tr></thead>
-      <tbody id="rec"><tr><td>单一账号最省<br><span class="sub">1 个平台 · 1 个账号</span></td><td><span class="dot" style="background:#3280FF"></span>即梦 高级会员 × 3</td><td class="num strong" data-l="该周期支出">¥7,797</td><td class="num" data-l="实际产能">30.8 条/月</td><td class="num" data-l="单条成本">¥260</td></tr><tr><td>组合订阅最省<br><span class="sub">可跨平台 + 同平台多账号</span></td><td data-l="档位组合"><span class="dot" style="background:#FABC00"></span>小云雀 高级会员<span class="combo-plus">+</span><span class="dot" style="background:#3280FF"></span>即梦 高级会员<span class="combo-note">共 2 个账号 · 2 个平台</span></td><td class="num strong" data-l="该周期支出">¥7,598</td><td class="num" data-l="实际产能">30.3 条/月 <span class="sub">合计产能</span></td><td class="num" data-l="单条成本">¥253</td></tr></tbody></table></div>
+      <tbody id="rec"><tr><td>单一账号最省<br><span class="sub">1 个平台 · 1 个账号</span></td><td data-l="档位组合"><span class="dot" style="background:#3280FF"></span>即梦 高级会员 × 3</td><td class="num strong" data-l="该周期支出">¥7,797</td><td class="num" data-l="实际产能">30.8 条/月</td><td class="num" data-l="单条成本">¥260</td></tr><tr><td>组合订阅最省<br><span class="sub">可跨平台 + 同平台多账号</span></td><td data-l="档位组合"><span class="dot" style="background:#FABC00"></span>小云雀 高级会员<span class="combo-plus">+</span><span class="dot" style="background:#3280FF"></span>即梦 高级会员<span class="combo-note">共 2 个账号 · 2 个平台</span></td><td class="num strong" data-l="该周期支出">¥7,598</td><td class="num" data-l="实际产能">30.3 条/月 <span class="sub">合计产能</span></td><td class="num" data-l="单条成本">¥253</td></tr></tbody></table></div>
     <details class="tiny">
       <summary>组合订阅怎么算的<span class="chev">›</span></summary>
       <div class="dbody">
@@ -819,6 +843,28 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   });
 });
+
+/* ══════════ 阅读路径条：可关闭，记住选择 ══════════ */
+(function(){
+  var el = document.getElementById('guide');
+  if(!el) return;
+  var KEY = 'caliber.guide.v1';
+  function hide(){ el.style.display = 'none'; }
+  var off = false;
+  try{ off = localStorage.getItem(KEY) === '0'; }catch(e){ off = false; }
+  if(off){ hide(); return; }
+  var x = document.getElementById('guideX');
+  if(x) x.addEventListener('click', function(){
+    hide();
+    try{ localStorage.setItem(KEY, '0'); }catch(e){}
+  });
+  /* 页脚「新手引导」同时恢复路径条 —— 与弹窗共用一个入口，行为更一致 */
+  var again = document.getElementById('introAgain');
+  if(again) again.addEventListener('click', function(){
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    el.style.display = '';
+  });
+})();
 
 /* ══════════ 全站通用：新人引导弹窗 ══════════
    只在首次访问出现；第 1 步就有 ✕，不强迫看完；页脚有入口可随时重看。 */
@@ -1150,7 +1196,7 @@ function renderRec(src){
   var h = '';
   if(single){
     h += '<tr><td>单一账号最省<br><span class="sub">1 个平台 · 1 个账号</span></td>'
-      +  '<td><span class="dot" style="background:' + single.p.color + '"></span>' + single.p.plat + ' ' +
+      +  '<td data-l="档位组合"><span class="dot" style="background:' + single.p.color + '"></span>' + single.p.plat + ' ' +
          single.p.tier + (single.n > 1 ? ' \u00d7 ' + single.n : '') + '</td>'
       +  '<td class="num strong" data-l="该周期支出">' + money(single.total) + '</td>'
       +  '<td class="num" data-l="实际产能">' + single.cap.toFixed(1) + ' 条/月</td>'
@@ -1162,9 +1208,10 @@ function renderRec(src){
   if(combo){
     h += '<tr><td>组合订阅最省<br><span class="sub">可跨平台 + 同平台多账号</span></td>'
       +  '<td data-l="档位组合">' + comboLabel(combo) + '</td>'
-      +  '<td class="num strong">' + money(combo.total) + '</td>'
-      +  '<td class="num">' + combo.cap.toFixed(1) + ' 条/月<br><span class="sub">合计产能</span></td>'
-      +  '<td class="num">' + money(combo.total / N) + '</td></tr>';
+      +  '<td class="num strong" data-l="该周期支出">' + money(combo.total) + '</td>'
+      +  '<td class="num" data-l="实际产能">' + combo.cap.toFixed(1)
+      +  ' 条/月<br><span class="sub">合计产能</span></td>'
+      +  '<td class="num" data-l="单条成本">' + money(combo.total / N) + '</td></tr>';
   }
   var rec = document.getElementById('rec');
   if(rec) rec.innerHTML = h;

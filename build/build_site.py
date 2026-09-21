@@ -705,6 +705,20 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
 .gs{font-size:13px;color:#C9CDD2;line-height:1.75;margin-top:6px}
 .gl{font-size:12.5px;color:#8A9098;line-height:1.85;margin-top:9px;max-width:860px}
 .tmx a{color:#D1FE17}.vmeta b{color:#C9CDD2;font-weight:600}/* KPI 条三套（年/季/月），同一时刻只显示当前周期那套 */
+/* ── 首访阅读路径条：常驻、可关 ──
+   弹窗是「主动讲一次」，这条是「一直在那儿」—— 互不替代。 */
+.guide{display:flex;flex-wrap:wrap;align-items:center;gap:9px 20px;
+  margin:0 0 16px;padding:12px 15px;border-radius:14px;
+  background:rgba(209,254,23,.045);border:1px solid rgba(209,254,23,.2);
+  font-size:12.5px;line-height:1.7;color:#A8AEB5}
+.guide .g-lead{color:#D1FE17;font-weight:600}
+.guide .g-step{white-space:nowrap}
+.guide .g-link{color:#A8AEB5;border-bottom:1px dashed rgba(255,255,255,.3);text-decoration:none}
+.guide .g-link:hover{color:#D1FE17}
+.guide .g-x{margin-left:auto;-webkit-appearance:none;appearance:none;cursor:pointer;
+  font-family:inherit;font-size:11.5px;padding:5px 11px;border-radius:8px;
+  border:1px solid rgba(255,255,255,.16);background:transparent;color:#8A9098;white-space:nowrap}
+.guide .g-x:hover{background:rgba(255,255,255,.07);color:#C9CDD2}
 .kbar{display:none;gap:10px;grid-template-columns:repeat(auto-fit,minmax(148px,1fr))}
 .kbar.on{display:grid}.kb{padding:12px 14px;border-radius:13px;background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.085)}.kb.hi{border-color:rgba(209,254,23,.3);background:rgba(209,254,23,.055)}.kb s{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
@@ -1114,6 +1128,28 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 
+/* ══════════ 阅读路径条：可关闭，记住选择 ══════════ */
+(function(){
+  var el = document.getElementById('guide');
+  if(!el) return;
+  var KEY = 'caliber.guide.v1';
+  function hide(){ el.style.display = 'none'; }
+  var off = false;
+  try{ off = localStorage.getItem(KEY) === '0'; }catch(e){ off = false; }
+  if(off){ hide(); return; }
+  var x = document.getElementById('guideX');
+  if(x) x.addEventListener('click', function(){
+    hide();
+    try{ localStorage.setItem(KEY, '0'); }catch(e){}
+  });
+  /* 页脚「新手引导」同时恢复路径条 —— 与弹窗共用一个入口，行为更一致 */
+  var again = document.getElementById('introAgain');
+  if(again) again.addEventListener('click', function(){
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    el.style.display = '';
+  });
+})();
+
 /* ══════════ 全站通用：新人引导弹窗 ══════════
    只在首次访问出现；第 1 步就有 ✕，不强迫看完；页脚有入口可随时重看。 */
 (function(){
@@ -1447,7 +1483,7 @@ function renderRec(src){
   var h = '';
   if(single){
     h += '<tr><td>单一账号最省<br><span class="sub">1 个平台 · 1 个账号</span></td>'
-      +  '<td><span class="dot" style="background:' + single.p.color + '"></span>' + single.p.plat + ' ' +
+      +  '<td data-l="档位组合"><span class="dot" style="background:' + single.p.color + '"></span>' + single.p.plat + ' ' +
          single.p.tier + (single.n > 1 ? ' \u00d7 ' + single.n : '') + '</td>'
       +  '<td class="num strong" data-l="该周期支出">' + money(single.total) + '</td>'
       +  '<td class="num" data-l="实际产能">' + single.cap.toFixed(1) + ' 条/月</td>'
@@ -1459,9 +1495,10 @@ function renderRec(src){
   if(combo){
     h += '<tr><td>组合订阅最省<br><span class="sub">可跨平台 + 同平台多账号</span></td>'
       +  '<td data-l="档位组合">' + comboLabel(combo) + '</td>'
-      +  '<td class="num strong">' + money(combo.total) + '</td>'
-      +  '<td class="num">' + combo.cap.toFixed(1) + ' 条/月<br><span class="sub">合计产能</span></td>'
-      +  '<td class="num">' + money(combo.total / N) + '</td></tr>';
+      +  '<td class="num strong" data-l="该周期支出">' + money(combo.total) + '</td>'
+      +  '<td class="num" data-l="实际产能">' + combo.cap.toFixed(1)
+      +  ' 条/月<br><span class="sub">合计产能</span></td>'
+      +  '<td class="num" data-l="单条成本">' + money(combo.total / N) + '</td></tr>';
   }
   var rec = document.getElementById('rec');
   if(rec) rec.innerHTML = h;
@@ -2156,7 +2193,7 @@ _init_combo_html = ""
 if _init_s:
     _init_combo_html += (
         f'<tr><td>单一账号最省<br><span class="sub">1 个平台 · 1 个账号</span></td>'
-        f'<td><span class="dot" style="background:{_init_s["row"]["color"]}"></span>'
+        f'<td data-l="档位组合"><span class="dot" style="background:{_init_s["row"]["color"]}"></span>'
         f'{_init_s["row"]["plat"]} {_init_s["row"]["tier"]}'
         f'{" × " + str(_init_s["n"]) if _init_s["n"] > 1 else ""}</td>'
         f'<td class="num strong" data-l="该周期支出">¥{_init_s["total"]:,.0f}</td>'
@@ -2225,6 +2262,18 @@ INTRO = """
       </div>
     </div>
   </div>
+</div>
+"""
+
+
+GUIDE = """
+<div class="guide" id="guide">
+  <span class="g-lead">第一次来？</span>
+  <span class="g-step">① 先看上面的结论条</span>
+  <span class="g-step">② 拖动「月产量」看你的场景</span>
+  <span class="g-step">③ 看不懂的词点一下就有解释</span>
+  <a href="glossary.html" class="g-link">术语表</a>
+  <button type="button" class="g-x" id="guideX">不再提示</button>
 </div>
 """
 
@@ -2460,6 +2509,7 @@ cycles_body = f"""
     </div>
   </div>
 
+  {GUIDE}
   {pareto_block("y")}
   <div class="chart" id="chart">{chart_rows("cost", "y")}</div>
 
@@ -2624,6 +2674,7 @@ cost_body = f"""
     </div>
   </div>
 
+  {GUIDE}
   {KPI_BARS}
 
   <div class="vnote"><b>价格锚定</b>·本表价格锚定各平台官网【当前实时显示价】，该显示价已是活动价 / 优惠价 / 限时价的最终成交价。<details class="tiny"><summary>完整声明<span class="chev">›</span></summary><div class="dbody">{COST["liveNote"]}</div></details></div>

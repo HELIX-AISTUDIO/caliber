@@ -473,6 +473,24 @@ async function run(browser) {
     await p.waitForTimeout(300);
 
     // 抽屉
+    // 阅读路径条：常驻、可关、记住选择
+    const gd = await p.evaluate(() => {
+      const g = document.getElementById('guide');
+      if(!g) return { none: true };
+      const r = g.getBoundingClientRect();
+      return { vis: getComputedStyle(g).display !== 'none', steps: g.querySelectorAll('.g-step').length,
+               x: !!document.getElementById('guideX'), h: Math.round(r.height),
+               beforeKpi: !!(g.compareDocumentPosition(document.querySelector('.kbar.on')) & Node.DOCUMENT_POSITION_FOLLOWING) };
+    });
+    check('阅读路径条存在且在结论之后', gd.vis === true && gd.steps === 3 && gd.beforeKpi === true,
+      `${gd.steps} 步 · 高 ${gd.h}px`);
+    await p.click('#guideX'); await p.waitForTimeout(300);
+    const gd2 = await p.evaluate(() => ({
+      vis: getComputedStyle(document.getElementById('guide')).display !== 'none',
+      flag: localStorage.getItem('caliber.guide.v1'),
+    }));
+    check('「不再提示」可关闭并记住', gd2.vis === false && gd2.flag === '0');
+
     await p.click('#moOpen');
     await p.waitForTimeout(450);
     const sh = await p.evaluate(() => ({
@@ -501,6 +519,15 @@ async function run(browser) {
                label: td ? td.getAttribute('data-l') : '' };
     });
     check('反查表卡片式、不横滑', recf.fits && recf.block, `标签「${recf.label}」`);
+
+    // 两个区块结构必须对称：每行都带 data-l 标签
+    // （JS 重建 #rec 时曾漏掉，导致「组合订阅」的值没有标签、看着和上面那块不一样）
+    const sym = await p.evaluate(() => {
+      const rs = [...document.querySelectorAll('.tw-rec tbody tr')].map(tr =>
+        [...tr.querySelectorAll('td')].map(td => td.getAttribute('data-l') || '-'));
+      return { rows: rs.length, labels: rs.map(r => r.join('/')), same: rs.length > 1 && rs.every(r => r.join('/') === rs[0].join('/')) };
+    });
+    check('反查表两块结构对称（每行都带标签）', sym.same === true, sym.labels.join('  ‖  '));
 
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，
