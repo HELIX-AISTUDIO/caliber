@@ -1190,7 +1190,7 @@ cost_body = f"""
 
 <section id="official" class="reveal">
   <div class="sechead">
-    <h2><span class="ey">07</span>海报宣传价 vs 实际到手价</h2>
+    <h2><span class="ey">06</span>海报宣传价 vs 实际到手价</h2>
     <div class="sd">各平台「低至 X 元/秒」均按非全能参考档位计算，与统一口径不可混用。</div>
   </div>
   <details><summary>展开海报价与实际到手价对照（4 行）<span class="chev">›</span></summary><div class="dbody"><div class="tw"><table><thead><tr>
@@ -1204,7 +1204,7 @@ cost_body = f"""
 
 <section id="retry" class="reveal">
   <div class="sechead">
-    <h2><span class="ey">06</span>失败重试成本</h2>
+    <h2><span class="ey">07</span>失败重试成本</h2>
     <div class="sd">失败是否退分，决定「实际单条成本」要乘多少。此项此前未纳入计算 —— 若某平台失败不退分，其真实成本需按失败率上浮。</div>
   </div>
   <div class="tw"><table><thead><tr>
