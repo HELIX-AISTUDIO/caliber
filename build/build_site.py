@@ -580,6 +580,7 @@ summary .warnbadge{font-size:10px;font-weight:800;color:#0B0B0B;background:#FFC9
   border:3px solid #000;cursor:pointer}
 .cqval{font-family:%%F_MONO%%;font-size:15px;font-weight:700;color:#D1FE17;
   letter-spacing:-.03em;min-width:82px}
+.combo-plus{color:#5A6069;margin:0 5px;font-weight:700}
 .cqpresets{display:inline-flex;gap:5px;margin-left:auto}
 .cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
   font-family:%%F_MONO%%;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;
@@ -893,14 +894,61 @@ function pk(t){
                .sort(function(a,b){ return a.price - b.price; });
   return c.length ? c[0] : null;
 }
-function stk(t){
-  var arr = PLANS.map(function(p){
-    var n = Math.ceil(t / p.mCap);
-    return {p:p, n:n, total:n*p.price, cap:n*p.mCap};
-  });
-  arr.sort(function(a,b){ return a.total - b.total; });
-  return arr[0];
+/* ── 组合订阅最省（跨平台混合）───────────────────────────────
+   无界背包：dp[j] = 覆盖 j 条/月的最低支出，每个档位可用多次。
+   容量向下取整（保守）—— 宁可少算一点，也保证给出的方案一定可行。
+   这样 1× 即梦超级 + 1× Neowow Pro 这类跨平台组合才会被纳入比较，
+   而这正是「单一档位买多份」永远看不到的解。 */
+function bestCombo(t){
+  var N = Math.max(1, Math.min(200, Math.ceil(t)));
+  var items = [];
+  for(var i=0;i<PLANS.length;i++){
+    var w = Math.floor(PLANS[i].mCap);
+    if(w >= 1) items.push({p:PLANS[i], w:w});
+  }
+  if(!items.length) return null;
+  var dp = [], pre = [];
+  for(var j=0;j<=N;j++){ dp[j] = Infinity; pre[j] = null; }
+  dp[0] = 0;
+  for(var j=0;j<=N;j++){
+    if(dp[j] === Infinity) continue;
+    for(var i=0;i<items.length;i++){
+      var k = Math.min(N, j + items[i].w);
+      var c = dp[j] + items[i].p.price;
+      if(c < dp[k]){ dp[k] = c; pre[k] = {from:j, item:i}; }
+    }
+  }
+  if(dp[N] === Infinity) return null;
+  var counts = [], cur = N;
+  while(cur > 0 && pre[cur]){
+    var e = pre[cur], it = items[e.item];
+    var hit = null;
+    for(var q=0;q<counts.length;q++){
+      if(counts[q].p === it.p){ hit = counts[q]; break; }
+    }
+    if(hit) hit.n++; else counts.push({p:it.p, n:1});
+    cur = e.from;
+  }
+  var cap = 0, real = 0;
+  for(var q2=0;q2<counts.length;q2++){
+    cap += counts[q2].n * counts[q2].p.mCap;
+    real += counts[q2].n * counts[q2].p.price;
+  }
+  counts.sort(function(x,y){ return y.p.mCap - x.p.mCap; });
+  return {items:counts, total:dp[N], cap:cap, real:real};
 }
+
+function comboLabel(b){
+  if(!b) return '—';
+  var parts = [];
+  for(var i=0;i<b.items.length;i++){
+    var it = b.items[i];
+    parts.push('<span class="dot" style="background:' + it.p.color + '"></span>' +
+               it.p.plat + ' ' + it.p.tier + (it.n > 1 ? ' \u00d7 ' + it.n : ''));
+  }
+  return parts.join('<span class="combo-plus">+</span>');
+}
+
 function render(){
   var el = document.getElementById('tgt'), out = document.getElementById('rec');
   if(!el || !out) return;
@@ -926,12 +974,17 @@ function render(){
     h += '<tr><td>单一订阅最省</td><td colspan="4" style="color:#FABC00">'
       +  '无单一档位可覆盖，须组合订阅</td></tr>';
   }
-  var b = stk(t);
-  h += '<tr><td>组合订阅最省</td>'
-    +  '<td><span class="dot" style="background:'+b.p.color+'"></span>'+b.p.plat+' '+b.p.tier+(b.n>1?' \u00d7 '+b.n:'')+'</td>'
-    +  '<td class="num strong">\u00a5'+b.total.toLocaleString()+'</td>'
-    +  '<td class="num">'+b.cap.toFixed(1)+' 条/月</td>'
-    +  '<td class="num">\u00a5'+b.p.perVideo.toFixed(2)+'</td></tr>';
+  var b = bestCombo(t);
+  if(b){
+    h += '<tr><td>组合订阅最省<\u002fbr><s>跨平台混合</s></td>'
+      +  '<td>' + comboLabel(b) + '</td>'
+      +  '<td class="num strong">\u00a5' + b.total.toLocaleString() + '</td>'
+      +  '<td class="num">' + b.cap.toFixed(1) + ' 条/月</td>'
+      +  '<td class="num">\u00a5' + (b.total / t).toFixed(2) + '</td></tr>';
+  } else {
+    h += '<tr><td>组合订阅最省</td><td colspan="4" style="color:#FABC00">'
+      +  '目标产量过高，超出单账号 200 条的求解上限</td></tr>';
+  }
   out.innerHTML = h;
 }
 document.addEventListener('DOMContentLoaded', function(){
@@ -1282,7 +1335,7 @@ cost_body = f"""
     </div>
     <table><thead><tr><th>方案类型</th><th>档位组合</th><th class="ctr">年支出</th>
     <th class="ctr">实际产能</th><th class="ctr" id="vth">单条成本</th></tr></thead><tbody id="rec"></tbody></table>
-    <div class="sub" style="margin-top:10px">「组合订阅」允许多份订阅叠加（多账号），用于产量超出单档位上限时；多账号运营成本未计入。</div>
+    <div class="sub" style="margin-top:10px">「组合订阅」为<b>跨平台混合求解</b>（无界背包）：允许不同平台的档位叠加、同一档位可多份，用于产量超出单档位上限时。多账号运营成本未计入，且按各档月产能向下取整（保守估计）。</div>
   </div>
 </section>
 
