@@ -250,8 +250,12 @@ F_MONO = ('"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Reg
 
 CSS = r"""
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden;scroll-behavior:smooth}
-body{background:#000;color:#C9CDD2;font:14px/1.7 %%F_SANS%%;overflow-x:hidden;
+/* ⚠️ 必须是 clip 而不是 hidden：overflow-x:hidden 会让 html/body 变成滚动容器，
+   进而使子元素的 position:sticky 失效（实测导航会跟随内容滚走）。
+   overflow:clip 同样能裁掉横向溢出，但不创建滚动容器，sticky 正常工作。
+   若不支持 clip，声明被忽略 -> 仅失去横向裁剪，sticky 仍可用，属更安全的失败方向。 */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip;scroll-behavior:smooth}
+body{background:#000;color:#C9CDD2;font:14px/1.7 %%F_SANS%%;overflow-x:clip;
   padding:0 0 72px;padding-bottom:calc(72px + env(safe-area-inset-bottom,0px));
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
   letter-spacing:-.005em;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
@@ -265,7 +269,9 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 /* 磨砂噪点：极低透明度的分形噪声，给面板与整页一层"砂面"颗粒 */
 body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.04;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
-[id]{scroll-margin-top:132px}
+/* 吸顶高度由 JS 实测写入（导航与子导航高度随视口变化，写死会错位） */
+:root{--navh:57px;--subh:50px;--gap:18px}
+[id]{scroll-margin-top:calc(var(--navh) + var(--subh) + var(--gap))}
 ::selection{background:#D1FE17;color:#0B0B0B}
 
 /* ── 顶部 lime 通栏 ── */
@@ -306,7 +312,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;opac
   flex:0 0 auto}
 
 /* ── 二级子导航（页内锚点，sticky） ── */
-.subnav{position:sticky;top:57px;z-index:35;
+.subnav{position:sticky;top:var(--navh,57px);z-index:35;
   background:linear-gradient(180deg,rgba(255,255,255,.055) 0%,rgba(0,0,0,.46) 100%);
   -webkit-backdrop-filter:blur(30px) saturate(160%);backdrop-filter:blur(30px) saturate(160%);
   border-bottom:1px solid rgba(255,255,255,.1);
@@ -578,7 +584,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
 /* ── 移动端 ── */
 @media (max-width:900px){ .g5,.g3,.g2{grid-template-columns:1fr 1fr} }
 @media (max-width:820px){
-  [id]{scroll-margin-top:112px}
+  :root{--gap:14px}
   .promo{font-size:11.5px;padding:9px 14px;gap:9px}
   .nav .inner{padding:10px 15px;gap:11px}
   .nav .spec{display:none}
@@ -614,6 +620,22 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
 # 脚本
 # ══════════════════════════════════════════════════════════════
 JS = r"""
+/* ── 吸顶偏移实测 ──
+   导航与子导航的实际高度会随视口宽度与文案换行变化，
+   写死 top / scroll-margin-top 会在某些宽度下错位，故运行时测量。 */
+(function(){
+  function sync(){
+    var nav = document.querySelector('.nav'), sub = document.querySelector('.subnav');
+    var r = document.documentElement.style;
+    if(nav) r.setProperty('--navh', nav.offsetHeight + 'px');
+    if(sub) r.setProperty('--subh', sub.offsetHeight + 'px');
+  }
+  sync();
+  window.addEventListener('resize', sync, {passive:true});
+  window.addEventListener('orientationchange', sync, {passive:true});
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(sync);
+})();
+
 /* ── 滚动入场动画 ── */
 (function(){
   var els = document.querySelectorAll('.reveal');
@@ -699,6 +721,16 @@ function render(){
 document.addEventListener('DOMContentLoaded', function(){
   var el = document.getElementById('tgt');
   if(el){ el.addEventListener('input', render); render(); }
+  /* 点击子导航时立即高亮，不等 scrollspy 节流 */
+  Array.prototype.forEach.call(document.querySelectorAll('.subnav a[href^="#"]'), function(a){
+    a.addEventListener('click', function(){
+      Array.prototype.forEach.call(document.querySelectorAll('.subnav a'), function(x){
+        x.classList.remove('active');
+      });
+      a.classList.add('active');
+      window.__lastSub = a;
+    });
+  });
 });
 """
 
