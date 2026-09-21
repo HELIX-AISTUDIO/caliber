@@ -421,11 +421,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
 
 <div class="subnav"><div class="inner">
   <a href="#overview">概览</a>
+  <a href="#calc">按产量测算</a>
   <a href="#table">档位对比</a>
   <a href="#ladder">达标阶梯</a>
   <a href="#margin">边际成本</a>
   <a href="#discount">折扣结构</a>
-  <a href="#calc">按产量测算</a>
   <a href="#official">官方公示对照</a>
   <a href="#retry">失败退分</a>
   <a href="#risk">风险</a>
@@ -626,9 +626,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
   <details><summary><span class="warnbadge">最高</span>小云雀与即梦的超级会员完全同规格，二者已无法区分<span class="chev">›</span></summary><div class="dbody">用户确认小云雀单条为 600 积分。据此，小云雀超级与即梦超级在全部关键维度上一致：同为 ¥21,840 首年 / ¥43,680 次年、同为 54,600 积分/月、同为 ¥1 = 30 积分、同为 600 积分/条 —— 折算后单条成本完全相同（¥20.00）。<br><br>两家均为字节系、同用 Seedance 全家桶。本表按同规格分别列出，但实际采购时二者可视为同一档位，差异只在非价格能力（工作流、API、客服）。<br><br>另需注意：即梦超级会员的积分由 54,000 更正为 54,600 —— 依据是 21,840 ÷ (54,600 × 12) = 1/30，与页面标注的「¥1 = 30 积分」精确吻合。</div></details><details><summary><span class="warnbadge" style="background:#FABF00">待核实</span>即梦高级会员另有 6.2K / 18.5K / 27.7K 三档积分未计入<span class="chev">›</span></summary><div class="dbody">页面对高级会员提供 6.2K / 12.3K / 18.5K / 27.7K 四档积分可选，本表仅录入 12.3K 档（¥5,199）。<br><br>低档位单价通常更差、高档位更优，因此「15–20 条/月最省」这一区间结论可能随档位价格变化。其余三档价格待补后重算。</div></details><details><summary><span class="warnbadge" style="background:#FABF00">待核实</span>年费档位均为限时活动价，恢复原价后结论会变<span class="chev">›</span></summary><div class="dbody">按官方原价重算，Neowow ULTRA 单条成本由 ¥20.21 升至 ¥75.00，全场最优解变为即梦超级会员（¥40.44/条）。<br><br>libtv 高级版截图同时出现 11,700 与 16,300 两个积分值，本表按 16,300 计算；若实际为 11,700，其单条成本将由 ¥27.51 升至 ¥38.34。</div></details><details><summary><span class="warnbadge" style="background:#FABF00">待核实</span>Higgsfield 的税务与跨境结算成本未计入<span class="chev">›</span></summary><div class="dbody">页面明示报价不含 VAT 与地方税；跨境支付按现汇卖出价结算（高于中间价约 0.5–1%）并可能叠加境外交易手续费。综合实际成本比本表高约 6–10%，即 Ultra 实际约 ¥50.51/条。<br><br>另注意：Higgsfield 积分月底清零、不结转；年付为一次性全额扣款且默认自动续订。</div></details><details><summary><span class="warnbadge">最高</span>失败重试是否扣积分 —— 隐性成本影响最大<span class="chev">›</span></summary><div class="dbody">本次按「成功出片才扣分」的理想情况计算。若某平台失败率 20% 且不退积分，其实际单条成本需上浮 25%，足以反转排名。这是唯一可能推翻全部结论的变量，务必实测。</div></details><details><summary>其余未纳入的变量<span class="chev">›</span></summary><div class="dbody">并发数与排队优先级、素材上传与存储配额、商用授权与版权归属、分镜栏编辑等是否为付费加项、积分是否跨月结转。<br><br>另据公开反馈，小云雀无官方客服渠道，积分返还与权益咨询无反馈路径 —— 不进单价，但会吃掉实际收益。</div></details>
 </section>
 
-<section id="appendix" class="reveal">
-  <div class="sechead">
-    <section id="pending" class="reveal">
+<section id="pending" class="reveal">
   <div class="sechead">
     <h2><span class="ey">09</span>待补数据</h2>
     <div class="sd">以下项目尚未获取或需确认，补齐后自动进入计算，页面无需改动。</div>
@@ -643,6 +641,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
     </div>
   </details>
 </section>
+
+<section id="appendix" class="reveal">
+  <div class="sechead">
+    
 
 <h2><span class="ey">10</span>方法论与原始数据</h2>
     <div class="sd">本节列出全部原始输入与计算链条，不含推算值，便于复核与复用。</div>
@@ -748,15 +750,28 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
 (function(){
   var links = Array.prototype.slice.call(document.querySelectorAll('.subnav a[href^="#"]'));
   if(!links.length) return;
+  /* 关键：按【文档位置】排序后再判定当前区块。
+     若不排序，逻辑会退化为「菜单里最后一项 offsetTop <= y 的胜出」——
+     一旦菜单顺序与页面顺序不一致（章节被挪动过），高亮就会乱跳。 */
   var map = links.map(function(a){ return {a:a, el:document.querySelector(a.getAttribute('href'))}; })
-                 .filter(function(x){ return x.el; });
+                 .filter(function(x){ return x.el; })
+                 .sort(function(p,q){ return p.el.offsetTop - q.el.offsetTop; });
+  var lastIdx = -1;
   function upd(){
-    var y = window.scrollY + 150, cur = map[0];
-    for(var i=0;i<map.length;i++){ if(map[i].el.offsetTop <= y) cur = map[i]; }
-    links.forEach(function(a){ a.classList.remove('active'); });
-    if(cur && (!window.__lastSub || window.__lastSub!==cur.a)){
-      cur.a.classList.add('active'); window.__lastSub = cur.a;
+    var y = window.scrollY + (parseFloat(getComputedStyle(document.documentElement)
+              .getPropertyValue('--navh')) || 57)
+            + (parseFloat(getComputedStyle(document.documentElement)
+              .getPropertyValue('--subh')) || 50) + 24;
+    var idx = 0;
+    for(var i=0;i<map.length;i++){ if(map[i].el.offsetTop <= y) idx = i; }
+    /* 滚到底部时强制选中最后一项，避免末节过短而永远选不中 */
+    if(window.innerHeight + window.scrollY >= document.body.scrollHeight - 4){
+      idx = map.length - 1;
     }
+    if(idx === lastIdx) return;
+    lastIdx = idx;
+    links.forEach(function(a){ a.classList.remove('active'); });
+    if(map[idx]) map[idx].a.classList.add('active');
   }
   var t = null;
   window.addEventListener('scroll', function(){

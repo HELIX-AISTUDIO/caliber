@@ -660,15 +660,28 @@ JS = r"""
 (function(){
   var links = Array.prototype.slice.call(document.querySelectorAll('.subnav a[href^="#"]'));
   if(!links.length) return;
+  /* 关键：按【文档位置】排序后再判定当前区块。
+     若不排序，逻辑会退化为「菜单里最后一项 offsetTop <= y 的胜出」——
+     一旦菜单顺序与页面顺序不一致（章节被挪动过），高亮就会乱跳。 */
   var map = links.map(function(a){ return {a:a, el:document.querySelector(a.getAttribute('href'))}; })
-                 .filter(function(x){ return x.el; });
+                 .filter(function(x){ return x.el; })
+                 .sort(function(p,q){ return p.el.offsetTop - q.el.offsetTop; });
+  var lastIdx = -1;
   function upd(){
-    var y = window.scrollY + 150, cur = map[0];
-    for(var i=0;i<map.length;i++){ if(map[i].el.offsetTop <= y) cur = map[i]; }
-    links.forEach(function(a){ a.classList.remove('active'); });
-    if(cur && (!window.__lastSub || window.__lastSub!==cur.a)){
-      cur.a.classList.add('active'); window.__lastSub = cur.a;
+    var y = window.scrollY + (parseFloat(getComputedStyle(document.documentElement)
+              .getPropertyValue('--navh')) || 57)
+            + (parseFloat(getComputedStyle(document.documentElement)
+              .getPropertyValue('--subh')) || 50) + 24;
+    var idx = 0;
+    for(var i=0;i<map.length;i++){ if(map[i].el.offsetTop <= y) idx = i; }
+    /* 滚到底部时强制选中最后一项，避免末节过短而永远选不中 */
+    if(window.innerHeight + window.scrollY >= document.body.scrollHeight - 4){
+      idx = map.length - 1;
     }
+    if(idx === lastIdx) return;
+    lastIdx = idx;
+    links.forEach(function(a){ a.classList.remove('active'); });
+    if(map[idx]) map[idx].a.classList.add('active');
   }
   var t = null;
   window.addEventListener('scroll', function(){
@@ -1035,11 +1048,11 @@ src_rows = "".join(
 cost_body = f"""
 <div class="subnav"><div class="inner">
   <a href="#overview">概览</a>
+  <a href="#calc">按产量测算</a>
   <a href="#table">档位对比</a>
   <a href="#ladder">达标阶梯</a>
   <a href="#margin">边际成本</a>
   <a href="#discount">折扣结构</a>
-  <a href="#calc">按产量测算</a>
   <a href="#official">官方公示对照</a>
   <a href="#retry">失败退分</a>
   <a href="#risk">风险</a>
@@ -1244,9 +1257,7 @@ cost_body = f"""
   {RISK_HTML}
 </section>
 
-<section id="appendix" class="reveal">
-  <div class="sechead">
-    <section id="pending" class="reveal">
+<section id="pending" class="reveal">
   <div class="sechead">
     <h2><span class="ey">09</span>待补数据</h2>
     <div class="sd">以下项目尚未获取或需确认，补齐后自动进入计算，页面无需改动。</div>
@@ -1262,6 +1273,10 @@ cost_body = f"""
     </div>
   </details>
 </section>
+
+<section id="appendix" class="reveal">
+  <div class="sechead">
+    
 
 <h2><span class="ey">10</span>方法论与原始数据</h2>
     <div class="sd">本节列出全部原始输入与计算链条，不含推算值，便于复核与复用。</div>
