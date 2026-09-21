@@ -318,15 +318,6 @@ th .hm{font-size:9px;letter-spacing:.04em;text-transform:none;color:#5A6069;font
 .cqp:hover{color:#fff;border-color:rgba(255,255,255,.36)}
 .cqp.on{color:#0B0B0B;background:#D1FE17;border-color:#D1FE17;font-weight:700}
 .combo-plus{color:#5A6069;margin:0 5px;font-weight:700}
-.roi{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:18px}
-.roi>div{padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.035);
-  border:1px solid rgba(255,255,255,.09)}
-.roi .rt{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#767C85}
-.roi .rv{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:22px;font-weight:700;color:#fff;margin-top:7px;
-  letter-spacing:-.03em}
-.roi .rv.good{color:#D1FE17}
-.roi .rv.bad{color:#FF6B6B}
-.roi .rd{font-size:11px;color:#767C85;margin-top:4px}
 .sub{color:#767C85;font-size:12px;line-height:1.7}
 .mono{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 
@@ -465,7 +456,7 @@ th .hm{font-size:9px;letter-spacing:.04em;text-transform:none;color:#5A6069;font
 </section>
 
 <section id="calc" class="reveal">
-  <div class="sechead"><h2><span class="ey">01</span>按产量测算总投入与回报</h2><div class="sd">先填两个数：要出多少条、每条值多少钱。表与 ROI 实时联动；1 条 = 30 秒。</div></div>
+  <div class="sechead"><h2><span class="ey">01</span>按产量反查最省方案</h2><div class="sd">先填月产量，直接看结论。1 条 = 30 秒。</div></div>
   <div class="card">
     <div class="ctrl">
       <div class="field">
@@ -476,10 +467,6 @@ th .hm{font-size:9px;letter-spacing:.04em;text-transform:none;color:#5A6069;font
         <label>换算</label>
         <span class="big" id="nv">30 条/月</span>
         <span class="sub" id="ndur">= 900 秒 ≈ 15 分钟素材</span>
-      </div>
-      <div class="field">
-        <label for="val">单条产出价值（元）</label>
-        <input type="number" id="val" min="0" step="50" value="500" aria-label="单条产出价值">
       </div>
       <div class="field">
         <label>常用档位</label>
@@ -500,14 +487,7 @@ th .hm{font-size:9px;letter-spacing:.04em;text-transform:none;color:#5A6069;font
       组合订阅为<b>跨平台混合求解</b>（无界背包）：允许不同平台档位叠加、同一档位可多份，最多 4 份。
       多账号运营成本未计入，且按各档月产能向下取整（保守估计）。全场单档上限 91 条/月。
     </div>
-    <div class="roi">
-      <div><div class="rt">年支出</div><div class="rv" id="roi-spend">—</div><div class="rd">按组合最省方案</div></div>
-      <div><div class="rt">年产条数</div><div class="rv" id="roi-clips">—</div><div class="rd">月产量 × 12</div></div>
-      <div><div class="rt">年产出价值</div><div class="rv" id="roi-rev">—</div><div class="rd">年产条数 × 单条价值</div></div>
-      <div><div class="rt">净收益</div><div class="rv" id="roi-net">—</div><div class="rd">年产出 − 年支出</div></div>
-      <div><div class="rt">投入产出比</div><div class="rv" id="roi-x">—</div><div class="rd">年产出 ÷ 年支出</div></div>
-      <div><div class="rt">回本条数</div><div class="rv" id="roi-be">—</div><div class="rd">年支出 ÷ 单条价值</div></div>
-    </div>
+    
   </div>
 </section>
 
@@ -703,7 +683,7 @@ document.addEventListener('DOMContentLoaded', function(){
    ══════════════════════════════════════════════════════════════ */
 var PLANS = [{"plat": "libtv", "tier": "标准版", "label": "", "color": "#9CE6F3", "price": 569.0, "mCap": 1.087}, {"plat": "libtv", "tier": "进阶版", "label": "", "color": "#9CE6F3", "price": 1199.0, "mCap": 3.3333}, {"plat": "libtv", "tier": "高级版", "label": "11.7K 档", "color": "#9CE6F3", "price": 2999.0, "mCap": 8.4783}, {"plat": "libtv", "tier": "高级版", "label": "16.3K 档", "color": "#9CE6F3", "price": 3899.0, "mCap": 11.8116}, {"plat": "libtv", "tier": "豪华版", "label": "", "color": "#9CE6F3", "price": 6699.0, "mCap": 23.7681}, {"plat": "libtv", "tier": "至尊版", "label": "50.5K 档", "color": "#9CE6F3", "price": 9599.0, "mCap": 36.5942}, {"plat": "libtv", "tier": "至尊版", "label": "66K 档", "color": "#9CE6F3", "price": 12499.0, "mCap": 47.8261}, {"plat": "Neowow", "tier": "PLUS", "label": "", "color": "#00C65A", "price": 599.0, "mCap": 1.2}, {"plat": "Neowow", "tier": "Pro", "label": "32.8K 档", "color": "#00C65A", "price": 1599.0, "mCap": 4.3733}, {"plat": "Neowow", "tier": "Pro", "label": "52.8K 档", "color": "#00C65A", "price": 2289.0, "mCap": 7.04}, {"plat": "Neowow", "tier": "Pro", "label": "10.8W 档", "color": "#00C65A", "price": 4666.0, "mCap": 14.4}, {"plat": "Neowow", "tier": "MAX", "label": "18.8W 档", "color": "#00C65A", "price": 7299.0, "mCap": 25.0667}, {"plat": "Neowow", "tier": "MAX", "label": "28.8W 档", "color": "#00C65A", "price": 11059.0, "mCap": 38.4}, {"plat": "Neowow", "tier": "ULTRA", "label": "", "color": "#00C65A", "price": 11899.0, "mCap": 49.0667}, {"plat": "即梦", "tier": "基础会员", "label": "", "color": "#3280FF", "price": 659.0, "mCap": 1.2083}, {"plat": "即梦", "tier": "标准会员", "label": "", "color": "#3280FF", "price": 1899.0, "mCap": 3.6833}, {"plat": "即梦", "tier": "高级会员", "label": "6.2K 档", "color": "#3280FF", "price": 2599.0, "mCap": 10.3333}, {"plat": "即梦", "tier": "高级会员", "label": "12.3K 档", "color": "#3280FF", "price": 5199.0, "mCap": 20.5333}, {"plat": "即梦", "tier": "高级会员", "label": "18.5K 档", "color": "#3280FF", "price": 7799.0, "mCap": 30.8333}, {"plat": "即梦", "tier": "高级会员", "label": "27.7K 档", "color": "#3280FF", "price": 11699.0, "mCap": 46.1667}, {"plat": "即梦", "tier": "超级会员", "label": "", "color": "#3280FF", "price": 21840.0, "mCap": 91.0}, {"plat": "小云雀", "tier": "基础会员", "label": "", "color": "#FABC00", "price": 453.0, "mCap": 1.3833}, {"plat": "小云雀", "tier": "标准会员", "label": "", "color": "#FABC00", "price": 1199.0, "mCap": 3.8667}, {"plat": "小云雀", "tier": "高级会员", "label": "6.3K 档", "color": "#FABC00", "price": 2649.0, "mCap": 10.5}, {"plat": "小云雀", "tier": "高级会员", "label": "8.6K 档", "color": "#FABC00", "price": 3599.0, "mCap": 14.3333}, {"plat": "小云雀", "tier": "高级会员", "label": "10.2K 档", "color": "#FABC00", "price": 4199.0, "mCap": 17.0}, {"plat": "小云雀", "tier": "高级会员", "label": "12K 档", "color": "#FABC00", "price": 4999.0, "mCap": 20.0}, {"plat": "小云雀", "tier": "高级会员", "label": "18.5K 档", "color": "#FABC00", "price": 7799.0, "mCap": 30.8333}, {"plat": "小云雀", "tier": "高级会员", "label": "27.7K 档", "color": "#FABC00", "price": 10699.0, "mCap": 46.1667}, {"plat": "小云雀", "tier": "超级会员", "label": "", "color": "#FABC00", "price": 21840.0, "mCap": 91.0}, {"plat": "Higgsfield", "tier": "Starter", "label": "", "color": "#ED1572", "price": 1214.77, "mCap": 0.9524}, {"plat": "Higgsfield", "tier": "Plus", "label": "", "color": "#ED1572", "price": 3158.39, "mCap": 4.7619}, {"plat": "Higgsfield", "tier": "Ultra", "label": "3K 档", "color": "#ED1572", "price": 8017.46, "mCap": 14.2857}, {"plat": "Higgsfield", "tier": "Ultra", "label": "6K 档", "color": "#ED1572", "price": 15710.97, "mCap": 28.5714}, {"plat": "Higgsfield", "tier": "Ultra", "label": "9K 档", "color": "#ED1572", "price": 21865.79, "mCap": 42.8571}];
 var MAX_STACK = 4;          /* 同档最多叠加份数 */
-var CQ_LOCK = false, CQ_LAST = null, VAL_LAST = null;
+var CQ_LOCK = false, CQ_LAST = null;
 
 /* 两个滑块（按产量测算 #tgt / 全档位对比 #q）控制同一个量。
    不联动它们会互相打架：上面拖到 50、下面还显示 10，表格按谁算都不对。 */
@@ -779,12 +759,9 @@ function money(v, cur){ return (cur === 'USD' ? '$' : '\u00a5') + Math.round(v).
 
 /* ── 主渲染 ── */
 function renderRec(src){
-  var v = document.getElementById('val');
-  if(!v) return;
   var N = readN(src);
-  var V = Math.max(0, parseFloat(v.value || '0'));
-  if(CQ_LAST === N && VAL_LAST === V) return;   /* 节流：拖动时 input 高频触发 */
-  CQ_LAST = N; VAL_LAST = V;
+  if(CQ_LAST === N) return;   /* 节流：拖动时 input 高频触发，N 未变则跳过 */
+  CQ_LAST = N;
 
   var secs = N * 30, mins = secs / 60;
   var nv = document.getElementById('nv');
@@ -828,26 +805,6 @@ function renderRec(src){
   var rec = document.getElementById('rec');
   if(rec) rec.innerHTML = h;
 
-  /* ROI 区块 —— 以「组合订阅最省」为计算基准 */
-  var plan = combo || (single ? {total:single.total, cap:single.cap} : null);
-  var yClips = N * 12;
-  var spend = plan ? plan.total : 0;
-  var revenue = yClips * V;
-  var net = revenue - spend;
-  var roi = spend > 0 ? revenue / spend : 0;
-  var breakeven = V > 0 ? Math.ceil(spend / V) : null;
-  function set(id, txt, cls){
-    var e = document.getElementById(id);
-    if(!e) return;
-    e.textContent = txt;
-    e.className = 'rv' + (cls ? ' ' + cls : '');
-  }
-  set('roi-spend', money(spend));
-  set('roi-clips', yClips.toLocaleString() + ' 条');
-  set('roi-rev', money(revenue));
-  set('roi-net', (net >= 0 ? '+' : '\u2212') + money(Math.abs(net)), net >= 0 ? 'good' : 'bad');
-  set('roi-x', roi > 0 ? roi.toFixed(2) + '\u00d7' : '\u2014', roi >= 1 ? 'good' : (roi > 0 ? 'bad' : ''));
-  set('roi-be', breakeven === null ? '\u2014' : breakeven.toLocaleString() + ' 条');
 }
 
 /* ── 全档位对比：按该产量的年支出重排（不新增列，成本并入排名格副行）── */
@@ -930,11 +887,6 @@ document.addEventListener('DOMContentLoaded', function(){
   bindPresets('#presets .cqp');
   bindPresets('#qpresets .cqp');
 
-  var v = document.getElementById('val');
-  if(v){
-    v.addEventListener('input', function(){ VAL_LAST = null; renderRec(); });
-    v.addEventListener('change', function(){ VAL_LAST = null; renderRec(); });
-  }
   CQ_LAST = null;
   renderRec(); rerank();
 });

@@ -568,15 +568,6 @@ th .hm{font-size:9px;letter-spacing:.04em;text-transform:none;color:#5A6069;font
 .cqp:hover{color:#fff;border-color:rgba(255,255,255,.36)}
 .cqp.on{color:#0B0B0B;background:#D1FE17;border-color:#D1FE17;font-weight:700}
 .combo-plus{color:#5A6069;margin:0 5px;font-weight:700}
-.roi{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:18px}
-.roi>div{padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.035);
-  border:1px solid rgba(255,255,255,.09)}
-.roi .rt{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#767C85}
-.roi .rv{font-family:__MONO__;font-size:22px;font-weight:700;color:#fff;margin-top:7px;
-  letter-spacing:-.03em}
-.roi .rv.good{color:#D1FE17}
-.roi .rv.bad{color:#FF6B6B}
-.roi .rd{font-size:11px;color:#767C85;margin-top:4px}
 .sub{color:#767C85;font-size:12px;line-height:1.7}
 .mono{font-family:__MONO__}
 
@@ -723,7 +714,7 @@ COST_JS = r"""
    ══════════════════════════════════════════════════════════════ */
 var PLANS = __PLANS__;
 var MAX_STACK = 4;          /* 同档最多叠加份数 */
-var CQ_LOCK = false, CQ_LAST = null, VAL_LAST = null;
+var CQ_LOCK = false, CQ_LAST = null;
 
 /* 两个滑块（按产量测算 #tgt / 全档位对比 #q）控制同一个量。
    不联动它们会互相打架：上面拖到 50、下面还显示 10，表格按谁算都不对。 */
@@ -799,12 +790,9 @@ function money(v, cur){ return (cur === 'USD' ? '$' : '\u00a5') + Math.round(v).
 
 /* ── 主渲染 ── */
 function renderRec(src){
-  var v = document.getElementById('val');
-  if(!v) return;
   var N = readN(src);
-  var V = Math.max(0, parseFloat(v.value || '0'));
-  if(CQ_LAST === N && VAL_LAST === V) return;   /* 节流：拖动时 input 高频触发 */
-  CQ_LAST = N; VAL_LAST = V;
+  if(CQ_LAST === N) return;   /* 节流：拖动时 input 高频触发，N 未变则跳过 */
+  CQ_LAST = N;
 
   var secs = N * 30, mins = secs / 60;
   var nv = document.getElementById('nv');
@@ -848,26 +836,6 @@ function renderRec(src){
   var rec = document.getElementById('rec');
   if(rec) rec.innerHTML = h;
 
-  /* ROI 区块 —— 以「组合订阅最省」为计算基准 */
-  var plan = combo || (single ? {total:single.total, cap:single.cap} : null);
-  var yClips = N * 12;
-  var spend = plan ? plan.total : 0;
-  var revenue = yClips * V;
-  var net = revenue - spend;
-  var roi = spend > 0 ? revenue / spend : 0;
-  var breakeven = V > 0 ? Math.ceil(spend / V) : null;
-  function set(id, txt, cls){
-    var e = document.getElementById(id);
-    if(!e) return;
-    e.textContent = txt;
-    e.className = 'rv' + (cls ? ' ' + cls : '');
-  }
-  set('roi-spend', money(spend));
-  set('roi-clips', yClips.toLocaleString() + ' 条');
-  set('roi-rev', money(revenue));
-  set('roi-net', (net >= 0 ? '+' : '\u2212') + money(Math.abs(net)), net >= 0 ? 'good' : 'bad');
-  set('roi-x', roi > 0 ? roi.toFixed(2) + '\u00d7' : '\u2014', roi >= 1 ? 'good' : (roi > 0 ? 'bad' : ''));
-  set('roi-be', breakeven === null ? '\u2014' : breakeven.toLocaleString() + ' 条');
 }
 
 /* ── 全档位对比：按该产量的年支出重排（不新增列，成本并入排名格副行）── */
@@ -950,11 +918,6 @@ document.addEventListener('DOMContentLoaded', function(){
   bindPresets('#presets .cqp');
   bindPresets('#qpresets .cqp');
 
-  var v = document.getElementById('val');
-  if(v){
-    v.addEventListener('input', function(){ VAL_LAST = null; renderRec(); });
-    v.addEventListener('change', function(){ VAL_LAST = null; renderRec(); });
-  }
   CQ_LAST = null;
   renderRec(); rerank();
 });
@@ -1309,7 +1272,7 @@ cost_body = f"""
 </section>
 
 <section id="calc" class="reveal">
-  {sec_head("01", "按产量测算总投入与回报", "先填两个数：要出多少条、每条值多少钱。表与 ROI 实时联动；1 条 = " + str(SEC_PER_CLIP) + " 秒。")}
+  {sec_head("01", "按产量反查最省方案", "先填月产量，直接看结论。1 条 = " + str(SEC_PER_CLIP) + " 秒。")}
   <div class="card">
     <div class="ctrl">
       <div class="field">
@@ -1320,10 +1283,6 @@ cost_body = f"""
         <label>换算</label>
         <span class="big" id="nv">30 条/月</span>
         <span class="sub" id="ndur">= 900 秒 ≈ 15 分钟素材</span>
-      </div>
-      <div class="field">
-        <label for="val">单条产出价值（元）</label>
-        <input type="number" id="val" min="0" step="50" value="500" aria-label="单条产出价值">
       </div>
       <div class="field">
         <label>常用档位</label>
@@ -1344,14 +1303,7 @@ cost_body = f"""
       组合订阅为<b>跨平台混合求解</b>（无界背包）：允许不同平台档位叠加、同一档位可多份，最多 {4} 份。
       多账号运营成本未计入，且按各档月产能向下取整（保守估计）。全场单档上限 {MAX_CAP:.0f} 条/月。
     </div>
-    <div class="roi">
-      <div><div class="rt">年支出</div><div class="rv" id="roi-spend">—</div><div class="rd">按组合最省方案</div></div>
-      <div><div class="rt">年产条数</div><div class="rv" id="roi-clips">—</div><div class="rd">月产量 × 12</div></div>
-      <div><div class="rt">年产出价值</div><div class="rv" id="roi-rev">—</div><div class="rd">年产条数 × 单条价值</div></div>
-      <div><div class="rt">净收益</div><div class="rv" id="roi-net">—</div><div class="rd">年产出 − 年支出</div></div>
-      <div><div class="rt">投入产出比</div><div class="rv" id="roi-x">—</div><div class="rd">年产出 ÷ 年支出</div></div>
-      <div><div class="rt">回本条数</div><div class="rv" id="roi-be">—</div><div class="rd">年支出 ÷ 单条价值</div></div>
-    </div>
+    
   </div>
 </section>
 
