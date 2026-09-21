@@ -1154,7 +1154,7 @@ cost_body = f"""
 
 <section id="risk" class="reveal">
   <div class="sechead">
-    
+    <h2><span class="ey">08</span>风险与待核实项</h2>
     <div class="sd">这 {len(COST.get("risks", []))} 项里任何一项变动都可能改变上表结论。</div>
   </div>
   {RISK_HTML}
