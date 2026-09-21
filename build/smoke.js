@@ -479,6 +479,29 @@ async function run(browser) {
       open: document.querySelector('.side').classList.contains('open'),
       scrim: document.getElementById('scrim').classList.contains('open'),
     }));
+    // ① KPI 条改成横向滑动一行，把下方反查与表格提前进首屏
+    //   （用户反馈：滚了两屏还不知道下面有数据表）
+    const kbf = await p.evaluate(() => {
+      const kb = document.querySelector('.kbar.on');
+      return { flex: getComputedStyle(kb).display === 'flex',
+               scrollable: kb.scrollWidth > kb.clientWidth + 4,
+               h: Math.round(kb.getBoundingClientRect().height),
+               recTop: Math.round(document.querySelector('.tw-rec').getBoundingClientRect().top + window.scrollY),
+               vh: innerHeight };
+    });
+    check('KPI 条改为横滑一行（高度受控）', kbf.flex && kbf.scrollable && kbf.h < 200, `高 ${kbf.h}px`);
+    check('反查卡进入首屏附近（≤1.2 屏）', kbf.recTop < kbf.vh * 1.2, `${kbf.recTop}px / 视口 ${kbf.vh}`);
+
+    // ② 反查表改卡片式，不再横滑
+    const recf = await p.evaluate(() => {
+      const r = document.querySelector('.tw-rec');
+      const td = r.querySelector('tbody td[data-l]');
+      return { fits: r.scrollWidth <= r.clientWidth + 4,
+               block: getComputedStyle(r.querySelector('tbody td')).display === 'block',
+               label: td ? td.getAttribute('data-l') : '' };
+    });
+    check('反查表卡片式、不横滑', recf.fits && recf.block, `标签「${recf.label}」`);
+
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，
     // 没有 ✕ 的话用户找不到任何方式退出（用户实测被卡住）

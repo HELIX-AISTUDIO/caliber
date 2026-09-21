@@ -837,7 +837,29 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
     box-shadow:none!important;background:#fff!important}.nav{position:static!important}.promo{background:#D1FE17!important;color:#000!important}.brand .bw b,.menu a,h1,h2,h3,td,th,li,.kpi .v,.lead,.meta{color:#000!important}.legal{background:#F2FFB8!important}.legal-t,.legal-b,.legal-f{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
 }
-@media (max-width:820px){.promo{font-size:11.5px;padding:9px 14px;gap:9px}.nav .inner{padding:10px 15px;gap:11px}.nav .spec{display:none}.hero{padding:36px 15px 4px}.wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}.kpi .v{font-size:26px}.entry{padding:20px}.card,.kpi,.note,.legal,table,details,.entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g5,.g2{grid-template-columns:1fr 1fr}input[type=range]{width:100%}/* ── 主表改卡片形态（竖屏）──────────────────────────────────
+@media (max-width:820px){.promo{font-size:11.5px;padding:9px 14px;gap:9px}.nav .inner{padding:10px 15px;gap:11px}.nav .spec{display:none}.hero{padding:36px 15px 4px}.wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}.kpi .v{font-size:26px}.entry{padding:20px}.card,.kpi,.note,.legal,table,details,.entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g5,.g2{grid-template-columns:1fr 1fr}
+  /* ── KPI：竖排五张卡会吃掉 1.5 屏，用户滚到反查与表格之前就以为「页面到头了」。
+     改成横向滑动的一行，高度固定，下方内容自然进入首屏。 */
+  .grid.g5{display:flex;overflow-x:auto;overscroll-behavior-x:auto;gap:10px;
+    scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;
+    margin:0 -15px;padding:2px 15px 6px;scrollbar-width:none}
+  .grid.g5::-webkit-scrollbar{display:none}
+  .grid.g5>.kpi{flex:0 0 64%;min-width:0;scroll-snap-align:start}
+  .grid.g5>.kpi .v{font-size:24px}
+  /* ── 反查表：5 列在手机上必然横滑，用户看不全「档位组合」。
+     改成卡片式竖排 —— 每行一张卡，单元格按 data-l 自带上标。 */
+  .tw-rec{padding:4px 0 0}
+  .tw-rec table,.tw-rec tbody,.tw-rec tr,.tw-rec td{display:block;width:auto;min-width:0}
+  .tw-rec thead{display:none}
+  .tw-rec tr{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.09)}
+  .tw-rec tr:last-child{border-bottom:0;padding-bottom:2px}
+  .tw-rec td{border:0;padding:3px 0;text-align:left!important;white-space:normal;
+    display:flex;flex-wrap:wrap;align-items:baseline;gap:8px}
+  .tw-rec td::before{content:attr(data-l);flex:0 0 74px;font-size:10.5px;color:#6E747C;
+    letter-spacing:.06em}
+  .tw-rec td:first-child{display:block;font-size:14px;color:#E4E7EA;padding-bottom:8px}
+  .tw-rec td:first-child::before{display:none}
+  .tw-rec td:first-child .sub{display:inline;margin-left:7px}input[type=range]{width:100%}/* ── 主表改卡片形态（竖屏）──────────────────────────────────
      44 行 x 7 列在 390px 宽下要横向拖很远才能读完一行，这是数据密度决定的，
      压缩列宽解决不了。改为每档一张竖排卡片：首行「名次 平台 档位」，
      下面四行「标签 — 数值」，上下滑即可。 */
@@ -1005,7 +1027,14 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   .ndrop a.active{color:#D1FE17;background:rgba(209,254,23,.09)}
 }
 @media (max-width:612px){
-  .kbar.on{grid-template-columns:repeat(2,1fr)}
+  /* ── KPI 条：成本页与全清单页的顶部结论卡。
+     竖排两列会吃掉 1.5 屏，用户滚到反查与表格之前就以为「页面到头了」，
+     反馈「点进去不知道下面还有表格」。改成横向滑动的一行，高度固定。 */
+  .kbar.on{display:flex;overflow-x:auto;overscroll-behavior-x:auto;gap:10px;
+    scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;
+    margin:0 -15px;padding:2px 15px 6px;scrollbar-width:none}
+  .kbar.on::-webkit-scrollbar{display:none}
+  .kbar.on>.kb{flex:0 0 62%;min-width:0;scroll-snap-align:start}
   .kb b{font-size:19px}
   .side{gap:14px}
 }
@@ -1420,16 +1449,16 @@ function renderRec(src){
     h += '<tr><td>单一账号最省<br><span class="sub">1 个平台 · 1 个账号</span></td>'
       +  '<td><span class="dot" style="background:' + single.p.color + '"></span>' + single.p.plat + ' ' +
          single.p.tier + (single.n > 1 ? ' \u00d7 ' + single.n : '') + '</td>'
-      +  '<td class="num strong">' + money(single.total) + '</td>'
-      +  '<td class="num">' + single.cap.toFixed(1) + ' 条/月</td>'
-      +  '<td class="num">' + money(single.total / N) + '</td></tr>';
+      +  '<td class="num strong" data-l="该周期支出">' + money(single.total) + '</td>'
+      +  '<td class="num" data-l="实际产能">' + single.cap.toFixed(1) + ' 条/月</td>'
+      +  '<td class="num" data-l="单条成本">' + money(single.total / N) + '</td></tr>';
   } else {
     h += '<tr><td>单一账号最省</td><td colspan="4" class="sub">'
       + '月产 ' + N + ' 条超出任何单档产能 —— 1 个账号做不到，必须走组合订阅</td></tr>';
   }
   if(combo){
     h += '<tr><td>组合订阅最省<br><span class="sub">可跨平台 + 同平台多账号</span></td>'
-      +  '<td>' + comboLabel(combo) + '</td>'
+      +  '<td data-l="档位组合">' + comboLabel(combo) + '</td>'
       +  '<td class="num strong">' + money(combo.total) + '</td>'
       +  '<td class="num">' + combo.cap.toFixed(1) + ' 条/月<br><span class="sub">合计产能</span></td>'
       +  '<td class="num">' + money(combo.total / N) + '</td></tr>';
@@ -2130,9 +2159,9 @@ if _init_s:
         f'<td><span class="dot" style="background:{_init_s["row"]["color"]}"></span>'
         f'{_init_s["row"]["plat"]} {_init_s["row"]["tier"]}'
         f'{" × " + str(_init_s["n"]) if _init_s["n"] > 1 else ""}</td>'
-        f'<td class="num strong">¥{_init_s["total"]:,.0f}</td>'
-        f'<td class="num">{_init_s["cap"]:.1f} 条/月</td>'
-        f'<td class="num">¥{_init_s["total"]/30:,.0f}</td></tr>')
+        f'<td class="num strong" data-l="该周期支出">¥{_init_s["total"]:,.0f}</td>'
+        f'<td class="num" data-l="实际产能">{_init_s["cap"]:.1f} 条/月</td>'
+        f'<td class="num" data-l="单条成本">¥{_init_s["total"]/30:,.0f}</td></tr>')
 if _init_c:
     _lbl = '<span class="combo-plus">+</span>'.join(
         f'<span class="dot" style="background:{u["r"]["color"]}"></span>'
@@ -2142,10 +2171,11 @@ if _init_c:
     _np = len({u["r"]["plat"] for u in _init_c["items"]})
     _init_combo_html += (
         f'<tr><td>组合订阅最省<br><span class="sub">可跨平台 + 同平台多账号</span></td>'
-        f'<td>{_lbl}<span class="combo-note">共 {_acct} 个账号 · {_np} 个平台</span></td>'
-        f'<td class="num strong">¥{_init_c["total"]:,.0f}</td>'
-        f'<td class="num">{_init_c["cap"]:.1f} 条/月<br><span class="sub">合计产能</span></td>'
-        f'<td class="num">¥{_init_c["total"]/30:,.0f}</td></tr>')
+        f'<td data-l="档位组合">{_lbl}<span class="combo-note">共 {_acct} 个账号 · {_np} 个平台</span></td>'
+        f'<td class="num strong" data-l="该周期支出">¥{_init_c["total"]:,.0f}</td>'
+        f'<td class="num" data-l="实际产能">{_init_c["cap"]:.1f} 条/月 '
+        f'<span class="sub">合计产能</span></td>'
+        f'<td class="num" data-l="单条成本">¥{_init_c["total"]/30:,.0f}</td></tr>')
 
 
 
@@ -2637,7 +2667,7 @@ cost_body = f"""
 <div class="vpanel on" data-view="all" id="table">
   <div class="reco">
     <div class="recot">按左栏月产量反查 · 最省方案<span>1 条 = {SEC_PER_CLIP} 秒；改月产量或周期，这里即时重算</span></div>
-    <div class="tw"><table><thead><tr>
+    <div class="tw tw-rec"><table><thead><tr>
       <th>方案类型</th><th>档位组合</th><th class="ctr">该周期支出</th>
       <th class="ctr">实际产能</th><th class="ctr">单条成本</th></tr></thead>
       <tbody id="rec">{_init_combo_html}</tbody></table></div>
