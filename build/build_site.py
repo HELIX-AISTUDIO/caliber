@@ -567,29 +567,7 @@ summary .warnbadge{font-size:10px;font-weight:800;color:#0B0B0B;background:#FFC9
 
 /* ── 控件 ── */
 .ctrl{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:16px}
-.toolbar{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:12px;
-  padding:11px 15px;border-radius:12px;background:rgba(255,255,255,.035);
-  border:1px solid rgba(255,255,255,.09)}
-.cqrange{-webkit-appearance:none;appearance:none;width:210px;height:4px;border-radius:999px;
-  outline:none;background:rgba(255,255,255,.12);cursor:pointer}
-.cqrange::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;
-  background:#D1FE17;border:3px solid #000;cursor:pointer;
-  transition:transform .2s cubic-bezier(.22,1,.36,1)}
-.cqrange::-webkit-slider-thumb:hover{transform:scale(1.12)}
-.cqrange::-moz-range-thumb{width:17px;height:17px;border-radius:50%;background:#D1FE17;
-  border:3px solid #000;cursor:pointer}
-.cqval{font-family:%%F_MONO%%;font-size:15px;font-weight:700;color:#D1FE17;
-  letter-spacing:-.03em;min-width:82px}
-.combo-plus{color:#5A6069;margin:0 5px;font-weight:700}
-.cqpresets{display:inline-flex;gap:5px;margin-left:auto}
-.cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
-  font-family:%%F_MONO%%;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;
-  cursor:pointer;transition:color .2s,border-color .2s,background .2s;letter-spacing:-.01em}
-.cqp:hover{color:#fff;border-color:rgba(255,255,255,.36)}
-.cqp.on{color:#0B0B0B;background:#D1FE17;border-color:#D1FE17;font-weight:700}
-.cqhint{color:#767C85}
-.cq-best{color:#0B0B0B;background:#D1FE17;font-weight:800;padding:1px 7px;border-radius:5px}
-.cq-no{color:#5A6069}
+
 input[type=range]{-webkit-appearance:none;appearance:none;width:320px;height:4px;border-radius:999px;
   outline:none;background:rgba(255,255,255,.12)}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;border-radius:50%;
@@ -799,94 +777,6 @@ function sortBy(k, el){
   rs.sort(function(a,b){ return (parseFloat(a.dataset[k]) - parseFloat(b.dataset[k])) * dir; });
   rs.forEach(function(r){ tb.appendChild(r); });
 }
-/* ── 主表自定义产量列 ── */
-var CQ_LOCK = false;   /* 联动时防止两个滑块互相触发造成死循环 */
-
-function cqPaintPresets(N){
-  var ps = document.querySelectorAll('#cqpresets .cqp');
-  Array.prototype.forEach.call(ps, function(b){
-    b.classList.toggle('on', parseInt(b.dataset.n, 10) === N);
-  });
-}
-
-function syncCq(fromCalc){
-  var inp = document.getElementById('cq'); if(!inp) return;
-  var N = Math.max(1, parseInt(inp.value || '10', 10));
-  var N = Math.min(200, N);
-  /* 节流：拖动时 input 会高频触发，而 N 只在跨整数时变化。
-     不跳过会导致每一帧都重排 35 行 DOM，拖起来发滞。 */
-  if(window.__lastCqN === N) return;
-  window.__lastCqN = N;
-  var val = document.getElementById('cqval');
-  if(val) val.textContent = N + ' 条/月';
-  cqPaintPresets(N);
-  /* 与「按产量反查最省方案」的滑块双向联动：同页两个控件控制同一件事，不联动会互相打架 */
-  var tgt = document.getElementById('tgt');
-  if(tgt && !fromCalc && !CQ_LOCK){
-    CQ_LOCK = true; tgt.value = Math.min(parseInt(tgt.max, 10) || 200, N);
-    tgt.dispatchEvent(new Event('input', {bubbles:true}));
-    CQ_LOCK = false;
-  }
-  var th = document.getElementById('cqth'), hint = document.getElementById('cqhint');
-  var secs = N * 30, mins = secs / 60;
-  if(th) th.textContent = '月产 ' + N + ' 条的年支出';
-  if(hint) hint.textContent = '= ' + secs.toLocaleString() + ' 秒 ≈ ' +
-    (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '（1 条 = 30 秒）';
-  var MAX_STACK = 4, cells = document.querySelectorAll('.cqcell'), best = Infinity;
-  function needOf(c, p){
-    if(!(c > 0)) return null;
-    var n = Math.ceil(N / c - 1e-9);
-    if(n > MAX_STACK) return null;
-    return {n:n, total:n * p};
-  }
-  Array.prototype.forEach.call(cells, function(td){
-    var v = needOf(parseFloat(td.dataset.c), parseFloat(td.dataset.p));
-    if(v && v.total < best) best = v.total;
-  });
-  Array.prototype.forEach.call(cells, function(td){
-    var v = needOf(parseFloat(td.dataset.c), parseFloat(td.dataset.p));
-    if(!v){
-      td.dataset.total = '';
-      td.innerHTML = '<span class="cq-no">产能过低</span>';
-      return;
-    }
-    td.dataset.total = v.total;
-    var t = '\u00a5' + v.total.toLocaleString() + (v.n > 1 ? ' \u00b7 ' + v.n + '\u00d7' : '');
-    td.innerHTML = (v.total === best) ? '<span class="cq-best">' + t + ' 最省</span>' : t;
-  });
-  /* 排名跟随月产量：按「该产量的年支出」升序重排，产能过低者沉底并重编号 */
-  var tb = document.querySelector('#main tbody');
-  if(tb){
-    var rs = Array.prototype.slice.call(tb.querySelectorAll('tr'));
-    rs.forEach(function(r){
-      var td = r.querySelector('.cqcell');
-      var t = td ? td.dataset.total : '';
-      r.__total = (t === '' || t == null) ? null : parseFloat(t);
-    });
-    rs.sort(function(x, y){
-      if(x.__total == null && y.__total == null) return 0;
-      if(x.__total == null) return 1;
-      if(y.__total == null) return -1;
-      return x.__total - y.__total;
-    });
-    rs.forEach(function(r, i){
-      tb.appendChild(r);
-      var rk = r.querySelector('.rk');
-      if(!rk) return;
-      var bb = rk.querySelector('b'), ss = rk.querySelector('s');
-      if(bb) bb.textContent = (r.__total == null ? '\u2014' : (i + 1));
-      if(ss) ss.textContent = (r.__total == null || !best) ? '产能过低'
-                            : (r.__total / best).toFixed(2) + '\u00d7';
-    });
-    rs.forEach(function(r){ r.classList.remove('top'); });
-    if(rs.length && rs[0].__total != null) rs[0].classList.add('top');
-  }
-  /* 排序指示箭头跟随当前排序依据 */
-  var vth = document.getElementById('vth');
-  if(vth) vth.textContent = '单条成本';
-  if(th) th.textContent = '月产 ' + N + ' 条的年支出 \u2193';
-}
-
 /* ── 产量测算 ── */
 var PLANS = __DATA__;
 function pk(t){
@@ -955,11 +845,6 @@ function render(){
   var t = parseFloat(el.value);
   var secs = t * 30, mins = secs / 60;
   document.getElementById('tgtv').textContent = t + ' 条/月';
-  var cqEl = document.getElementById('cq');
-  if(cqEl && !CQ_LOCK && parseInt(cqEl.value, 10) !== t){
-    cqEl.value = Math.min(parseInt(cqEl.max, 10) || 200, t);
-    syncCq(true);
-  }
   var dv = document.getElementById('tgtsec');
   if(dv) dv.textContent = '= ' + secs.toLocaleString() + ' 秒 ≈ ' +
     (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '素材';
@@ -990,18 +875,6 @@ function render(){
 document.addEventListener('DOMContentLoaded', function(){
   var el = document.getElementById('tgt');
   if(el){ el.addEventListener('input', render); render(); }
-  var cq = document.getElementById('cq');
-  if(cq){
-    cq.addEventListener('input', function(){ syncCq(false); });
-    var ps = document.querySelectorAll('#cqpresets .cqp');
-    Array.prototype.forEach.call(ps, function(b){
-      b.addEventListener('click', function(){
-        cq.value = b.dataset.n;
-        syncCq(false);
-      });
-    });
-    syncCq(false);
-  }
   /* 点击子导航时立即高亮，不等 scrollspy 节流 */
   Array.prototype.forEach.call(document.querySelectorAll('.subnav a[href^="#"]'), function(a){
     a.addEventListener('click', function(){
@@ -1187,8 +1060,7 @@ for p in sorted(plans, key=lambda x: x["perVideoCNY"]):
         f'<td class="num">{p["monthly"]:,}</td>'
         f'<td class="num cbar"><span class="strong">¥{f2(p["perVideoCNY"])}</span>{mini_bar(p["perVideoCNY"])}</td>'
         f'<td class="num cell2"><b>{p["perSecCNY"]:.3f}</b><s>元/秒</s></td>'
-        f'<td class="num cell2"><b>{p["mCap"]:.2f}</b><s>条/月</s></td>'
-        f'<td class="num cqcell" data-p="{p["priceCNY"]:.2f}" data-c="{p["mCap"]:.4f}">{cq_cell(p)}</td></tr>')
+        f'<td class="num cell2"><b>{p["mCap"]:.2f}</b><s>条/月</s></td></tr>')
 
 lad_rows = ""
 for i, r in enumerate(ladder):
@@ -1334,7 +1206,7 @@ cost_body = f"""
       <span class="sub" id="tgtsec">= 900 秒 ≈ 15 分钟素材</span>
     </div>
     <table><thead><tr><th>方案类型</th><th>档位组合</th><th class="ctr">年支出</th>
-    <th class="ctr">实际产能</th><th class="ctr" id="vth">单条成本</th></tr></thead><tbody id="rec"></tbody></table>
+    <th class="ctr">实际产能</th><th class="ctr">单条成本 ↓</th></tr></thead><tbody id="rec"></tbody></table>
     <div class="sub" style="margin-top:10px">「组合订阅」为<b>跨平台混合求解</b>（无界背包）：允许不同平台的档位叠加、同一档位可多份，用于产量超出单档位上限时。多账号运营成本未计入，且按各档月产能向下取整（保守估计）。</div>
   </div>
 </section>
@@ -1344,28 +1216,12 @@ cost_body = f"""
     <h2><span class="ey">02</span>全档位对比</h2>
     <div class="sd">条形越长＝越省（以全场最优价为 100%）。点表头可排序，左右滑动查看完整表格。</div>
   </div>
-  <div class="toolbar">
-    <span class="sub">自定义月产量</span>
-    <input type="range" id="cq" class="cqrange" min="1" max="200" step="1"
-           value="{CQ_DEFAULT}" aria-label="自定义月产量">
-    <span class="cqval" id="cqval">{CQ_DEFAULT} 条/月</span>
-    <span class="sub cqhint" id="cqhint">{cq_default_text()}</span>
-    <span class="sub cqhint" style="flex-basis:100%">{cq_max_note()}</span>
-    <span class="cqpresets" id="cqpresets">
-      <button type="button" class="cqp" data-n="5">5</button>
-      <button type="button" class="cqp" data-n="10">10</button>
-      <button type="button" class="cqp" data-n="30">30</button>
-      <button type="button" class="cqp" data-n="50">50</button>
-      <button type="button" class="cqp" data-n="100">100</button>
-    </span>
-  </div>
-  <div class="tw scroll-y tw-main"><table id="main"><thead><tr>
+<table id="main"><thead><tr>
     <th onclick="sortBy('v',this)">#</th><th>平台</th><th>档位</th>
     <th onclick="sortBy('p',this)" class="ctr">年费</th><th class="ctr">月积分</th>
     <th onclick="sortBy('v',this)" class="ctr">单条成本 ↓</th><th class="ctr">元/秒</th>
     <th onclick="sortBy('c',this)" class="ctr">月产能 ↓</th>
-    <th class="ctr" id="cqth">月产 {CQ_DEFAULT} 条的年支出</th>
-  </tr></thead><tbody>
+      </tr></thead><tbody>
 {main_rows}
   </tbody></table></div>
 </section>
