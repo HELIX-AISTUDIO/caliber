@@ -61,12 +61,12 @@ w("cost-seedance25.json", {
                    "实际结算按各银行现汇卖出价通常再高 0.5–1%。"},
 
     # 单条消耗积分（生成页实测）
-    "creditsPerVideo": {"Neowow": 7500, "libtv": 1380, "即梦": 600, "小云雀": 800, "Higgsfield": 210},
+    "creditsPerVideo": {"Neowow": 7500, "libtv": 1380, "即梦": 600, "小云雀": 600, "Higgsfield": 210},
     "creditsSource": {
         "Neowow": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考 · 分镜栏编辑",
         "libtv": "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s",
         "即梦": "即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s",
-        "小云雀": "Seedance 2.5 · 16:9 · 720P · 30s（口径 800；截图显示 600，见风险 3）",
+        "小云雀": "Seedance 2.5 · 16:9 · 720P · 30s → 600 积分（用户已确认）",
         "Higgsfield": "Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard"
     },
 
@@ -88,15 +88,19 @@ w("cost-seedance25.json", {
 
     # 档位清单（原价 = 划线原价 / 次年续费全额 / Higgsfield 月付×12）
     "plans": [
-        {"platform": "libtv", "tier": "标准版", "price": 569, "currency": "CNY",
+        {"platform": "libtv", "tier": "标准版", "price": 569, "renewal": 759, "currency": "CNY",
          "monthlyCredits": 1500, "original": 729, "originalNote": "划线原价"},
-        {"platform": "libtv", "tier": "进阶版", "price": 1199, "currency": "CNY",
+        {"platform": "libtv", "tier": "进阶版", "price": 1199, "renewal": 1799, "currency": "CNY",
          "monthlyCredits": 4600, "original": 2199, "originalNote": "划线原价"},
         {"platform": "libtv", "tier": "高级版", "price": 3899, "currency": "CNY",
-         "monthlyCredits": 16300, "original": 7399, "originalNote": "划线原价"},
-        {"platform": "libtv", "tier": "豪华版", "price": 6699, "currency": "CNY",
+         "monthlyCredits": 16300, "renewal": 5099, "original": 7399, "originalNote": "划线原价",
+         "creditsOptions": [
+             {"monthlyCredits": 11700, "label": "11.7K 档"},
+             {"monthlyCredits": 16300, "label": "16.3K 档"}
+         ]},
+        {"platform": "libtv", "tier": "豪华版", "price": 6699, "renewal": 7399, "currency": "CNY",
          "monthlyCredits": 32800, "original": 14999, "originalNote": "划线原价"},
-        {"platform": "libtv", "tier": "至尊版", "price": 9599, "currency": "CNY",
+        {"platform": "libtv", "tier": "至尊版", "price": 9599, "renewal": 9599, "currency": "CNY",
          "monthlyCredits": 50500, "original": 22999, "originalNote": "划线原价"},
         {"platform": "Neowow", "tier": "PLUS", "price": 599, "currency": "CNY",
          "monthlyCredits": 9000, "original": 1080, "originalNote": "划线原价"},
@@ -111,9 +115,10 @@ w("cost-seedance25.json", {
         {"platform": "即梦", "tier": "标准会员", "price": 1899, "currency": "CNY",
          "monthlyCredits": 2210, "original": None, "originalNote": "页面未公示"},
         {"platform": "即梦", "tier": "高级会员", "price": 5199, "currency": "CNY",
-         "monthlyCredits": 12320, "original": 10398, "originalNote": "次年续费全额"},
+         "monthlyCredits": 12320, "original": 10398, "originalNote": "次年续费全额",
+         "creditsOptionsNote": "页面提供 6.2K / 12.3K / 18.5K / 27.7K 四档积分可选，本表仅录入 12.3K 档（¥5,199）；其余三档价格未获取，故未计入对比。"},
         {"platform": "即梦", "tier": "超级会员", "price": 21840, "currency": "CNY",
-         "monthlyCredits": 54000, "original": 43680, "originalNote": "次年续费全额"},
+         "monthlyCredits": 54600, "original": 43680, "originalNote": "次年续费全额"},
         {"platform": "小云雀", "tier": "基础会员", "price": 453, "currency": "CNY",
          "monthlyCredits": 830, "original": 759, "originalNote": "划线原价"},
         {"platform": "小云雀", "tier": "标准会员", "price": 1199, "currency": "CNY",
@@ -146,12 +151,18 @@ w("cost-seedance25.json", {
 
     # 风险与待核实项（页面用折叠块呈现）
     "risks": [
-        {"level": "high", "title": "小云雀单条积分 800 与截图显示的 600 冲突",
-         "body": ["文字口径给出 800 积分/条，但生成页截图显示 600（划线 780）。",
-                  "交叉验证支持 800：按 800 算，超级会员单条 ¥26.67 = ¥0.889/秒，"
-                  "与其海报「限时 5 折、低至 0.4 元/秒」吻合；按 600 算折后仅 ¥0.33/秒，与海报明显不符。",
-                  "若 600 为真，小云雀超级将降至 ¥20.00/条、月产能升至 91 条，"
-                  "直接与即梦超级并列全场最优，并可能夺取 49–90 条/月区间的最省解。"]},
+        {"level": "high", "title": "小云雀与即梦的超级会员完全同规格，二者已无法区分",
+         "body": ["用户确认小云雀单条为 600 积分。据此，小云雀超级与即梦超级在全部关键维度上一致："
+                  "同为 ¥21,840 首年 / ¥43,680 次年、同为 54,600 积分/月、同为 ¥1 = 30 积分、"
+                  "同为 600 积分/条 —— 折算后单条成本完全相同（¥20.00）。",
+                  "两家均为字节系、同用 Seedance 全家桶。本表按同规格分别列出，"
+                  "但实际采购时二者可视为同一档位，差异只在非价格能力（工作流、API、客服）。",
+                  "另需注意：即梦超级会员的积分由 54,000 更正为 54,600 —— "
+                  "依据是 21,840 ÷ (54,600 × 12) = 1/30，与页面标注的「¥1 = 30 积分」精确吻合。"]},
+        {"level": "warn", "title": "即梦高级会员另有 6.2K / 18.5K / 27.7K 三档积分未计入",
+         "body": ["页面对高级会员提供 6.2K / 12.3K / 18.5K / 27.7K 四档积分可选，本表仅录入 12.3K 档（¥5,199）。",
+                  "低档位单价通常更差、高档位更优，因此「15–20 条/月最省」这一区间结论可能随档位价格变化。"
+                  "其余三档价格待补后重算。"]},
         {"level": "warn", "title": "年费档位均为限时活动价，恢复原价后结论会变",
          "body": ["按官方原价重算，Neowow ULTRA 单条成本由 ¥20.21 升至 ¥75.00，全场最优解变为即梦超级会员（¥40.44/条）。",
                   "libtv 高级版截图同时出现 11,700 与 16,300 两个积分值，本表按 16,300 计算；"

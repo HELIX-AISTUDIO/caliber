@@ -64,10 +64,24 @@ CPV = COST["creditsPerVideo"]
 COLOR = {k: v["color"] for k, v in PLATFORMS.items()}
 CU = {"CNY": "¥", "USD": "$"}
 
-# RAW 行：(平台, 档位, 年费, 币种, 月积分, 每条消耗积分, 原价, 原价说明)
-RAW = [(p["platform"], p["tier"], p["price"], p["currency"],
-        p["monthlyCredits"], CPV[p["platform"]], p["original"], p["originalNote"])
-       for p in COST["plans"]]
+# RAW 行：(平台, 档位, 年费, 币种, 月积分, 每条消耗积分, 原价, 原价说明, 积分档标签)
+# 同一档位提供多个积分选项（creditsOptions）时，每个选项展开为一行（价格相同）
+def _rows():
+    out = []
+    for p in COST["plans"]:
+        opts = p.get("creditsOptions")
+        if opts:
+            for o in opts:
+                out.append((p["platform"], p["tier"], p["price"], p["currency"],
+                            o["monthlyCredits"], CPV[p["platform"]], p["original"],
+                            p["originalNote"], o.get("label", "")))
+        else:
+            out.append((p["platform"], p["tier"], p["price"], p["currency"],
+                        p["monthlyCredits"], CPV[p["platform"]], p["original"],
+                        p["originalNote"], ""))
+    return out
+
+RAW = _rows()
 OFFICIAL = {(pl, ti): r for pl, d in COST["officialRate"].items() for ti, r in d.items()}
 AD_CLAIM = {pl: (d["tier"], d["perSec"]) for pl, d in COST["adClaim"].items()}
 
@@ -75,14 +89,14 @@ AD_CLAIM = {pl: (d["tier"], d["perSec"]) for pl, d in COST["adClaim"].items()}
 # 计算
 # ══════════════════════════════════════════════════════════════
 plans = []
-for plat, tier, price, cur, monthly, per, orig, orignote in RAW:
+for plat, tier, price, cur, monthly, per, orig, orignote, variant in RAW:
     k = RATE if cur == "USD" else 1.0
     yc = monthly * 12
     unit = price / yc
     m_cap = monthly / per
     official = OFFICIAL.get((plat, tier))
     plans.append({
-        "plat": plat, "tier": tier, "cur": cur, "k": k,
+        "plat": plat, "tier": tier, "variant": variant, "cur": cur, "k": k,
         "price": price, "priceCNY": price * k,
         "monthly": monthly, "per": per, "yearCredits": yc,
         "unit": unit, "unitCNY": unit * k, "unitPerYuan": 1.0 / unit,
@@ -108,7 +122,22 @@ for p in plans:
     else:
         p["origUnitCNY"] = p["origPerVideoCNY"] = p["disc"] = None
 
-G = lambda a, b: next(p for p in plans if p["plat"] == a and p["tier"] == b)
+def tname(p):
+    """档位显示名：多积分档时附标签"""
+    return p["tier"] + (f' · {p["variant"]}' if p.get("variant") else "")
+
+# 单档位索引：同档多积分选项时取产能最大者
+# （用于边际成本阶梯，避免同价两档产生 Δ年费=0 的噪音）
+_by_tier = {}
+for _p in plans:
+    _k = (_p["plat"], _p["tier"])
+    if _k not in _by_tier or _p["mCap"] > _by_tier[_k]["mCap"]:
+        _by_tier[_k] = _p
+G = lambda a, b: _by_tier[(a, b)]
+# 单档位视图：同价多积分选项只保留产能最大者。
+# 用于边际成本阶梯与达标阶梯 —— 同价时更高积分配置严格支配低配，
+# 否则会出现「高级版 → 高级版，Δ年费 ¥0」这类无意义对比。
+SINGLES = list(_by_tier.values())
 best_row = min(plans, key=lambda x: x["perVideoCNY"])
 runner = sorted(plans, key=lambda x: x["perVideoCNY"])[1]
 NW, JM, XQ, HG, HG2, LT = (G("Neowow", "ULTRA"), G("即梦", "超级会员"), G("小云雀", "超级会员"),
@@ -126,19 +155,57 @@ for plat in ["libtv", "Neowow", "即梦", "小云雀", "Higgsfield"]:
 
 marginal = []
 for plat in ["libtv", "Neowow", "即梦", "小云雀", "Higgsfield"]:
-    grp = sorted([p for p in plans if p["plat"] == plat], key=lambda x: x["priceCNY"])
+    grp = sorted([p for p in SINGLES if p["plat"] == plat], key=lambda x: x["priceCNY"])
     for a, b in zip(grp, grp[1:]):
         dp, dc = b["priceCNY"] - a["priceCNY"], b["yCap"] - a["yCap"]
         marginal.append({"plat": plat, "frm": a["tier"], "to": b["tier"], "dPrice": dp, "dCap": dc,
                          "mCost": dp / dc, "avgCost": b["perVideoCNY"], "color": COLOR[plat]})
 
-priced = sorted(plans, key=lambda x: x["priceCNY"])
+priced = sorted(SINGLES, key=lambda x: x["priceCNY"])
 ladder, dominated, lower = [], [], 0.0
 for p in priced:
     if p["mCap"] > lower + 1e-9:
         item = {"lo": lower, "hi": p["mCap"], "plan": p}
         (dominated if (p["mCap"] - lower) < 0.1 else ladder).append(item)
     lower = max(lower, p["mCap"])
+
+def f2(v):
+    return f"{v:,.2f}"
+
+
+# ── KPI 与建议取数（全部由数据派生，避免硬编码档位名）──
+_mid_pool = [r for r in ladder if 13 <= r["hi"] <= 28]
+mid = (min(_mid_pool, key=lambda r: r["plan"]["perVideoCNY"]) if _mid_pool else ladder[0])
+top = ladder[-1]
+
+
+def _risk_html():
+    """风险项从 data 渲染（避免与 JSON 重复维护）"""
+    out = ""
+    for r in COST.get("risks", []):
+        lv = r.get("level", "")
+        badge = ('<span class="warnbadge">最高</span>' if lv == "high"
+                 else ('<span class="warnbadge" style="background:#FABF00">待核实</span>' if lv == "warn" else ""))
+        out += (f'<details><summary>{badge}{r["title"]}<span class="chev">›</span></summary>'
+                f'<div class="dbody">{"<br><br>".join(r.get("body", []))}</div></details>')
+    return out
+
+
+def _plan_bullets():
+    """执行建议的产量区间列表从达标阶梯自动生成"""
+    out = ""
+    for i, r in enumerate(ladder):
+        p = r["plan"]
+        lo = "0" if i == 0 else f'{r["lo"]:.2f}'
+        out += (f'<li><b>月产 {lo}–{r["hi"]:.2f} 条：</b>'
+                f'{p["plat"]} {tname(p)} — ¥{p["priceCNY"]:,.0f}/年'
+                f'（实际 {p["mCap"]:.2f} 条/月 · ¥{f2(p["perVideoCNY"])}/条 · '
+                f'单价为最优解的 {p["rel"]:.2f} 倍）</li>')
+    return out
+
+
+RISK_HTML = _risk_html()
+PLAN_BULLETS = _plan_bullets()
 
 claims = [{"plat": pl, "tier": t, "ad": ad, "real": G(pl, t)["perSecCNY"],
            "ratio": G(pl, t)["perSecCNY"] / ad, "color": COLOR[pl]}
@@ -157,9 +224,6 @@ clip = lambda s, n=52: (s[:n] + "…") if len(s) > n else s
 
 _sig = json.dumps([RAW, RATE, SPEC, BRAND], ensure_ascii=False, sort_keys=True)
 FP = "HX-CLB-" + RATE_DATE.replace("-", "") + "-" + hashlib.sha256(_sig.encode()).hexdigest()[:8].upper()
-
-def f2(v):
-    return f"{v:,.2f}"
 
 # ══════════════════════════════════════════════════════════════
 # 样式（Higgsfield 设计 token）
@@ -329,6 +393,9 @@ tbody tr.top td:first-child{box-shadow:inset 3px 0 0 #D1FE17}
 .cell2 s{text-decoration:none;font-size:10.5px;color:#6E747D}
 .cell2 b{font-weight:600;color:#E4E7EA}
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.vlabel{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;font-size:10px;
+  font-weight:700;color:#D1FE17;background:rgba(209,254,23,.1);border:1px solid rgba(209,254,23,.24);
+  letter-spacing:.02em;white-space:nowrap}
 .tagu{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:999px;font-size:9.5px;
   font-weight:700;letter-spacing:.05em;color:#FF4D8D;border:1px solid rgba(255,77,141,.45)}
 /* 行内效率条 */
@@ -705,13 +772,13 @@ home_body = f"""
   <div class="grid g5">
     <div class="kpi hi"><div class="t">单条成本最优</div>
       <div class="v">¥{f2(best)}</div>
-      <div class="d">Neowow ULTRA<br>即梦超级 ¥{f2(runner['perVideoCNY'])} 并列，差 {abs(best-runner['perVideoCNY'])/best*100:.2f}%</div></div>
-    <div class="kpi good"><div class="t">单价 + 总支出双优</div>
-      <div class="v">¥5,199</div>
-      <div class="d">即梦高级会员<br>{G('即梦','高级会员')['mCap']:.2f} 条/月 · ¥{f2(G('即梦','高级会员')['perVideoCNY'])}/条</div></div>
-    <div class="kpi good"><div class="t">39–49 条/月最省</div>
-      <div class="v">¥11,899</div>
-      <div class="d">Neowow ULTRA<br>年费为即梦超级的 {11899/21840*100:.0f}%</div></div>
+      <div class="d">{best_row['plat']} {best_row['tier']}<br>与次优 ¥{f2(runner['perVideoCNY'])} 差 {abs(best-runner['perVideoCNY'])/best*100:.2f}%</div></div>
+    <div class="kpi good"><div class="t">中产能最省</div>
+      <div class="v">¥{mid['plan']['priceCNY']:,.0f}</div>
+      <div class="d">{mid['plan']['plat']} {tname(mid['plan'])}<br>{mid['plan']['mCap']:.2f} 条/月 · ¥{f2(mid['plan']['perVideoCNY'])}/条</div></div>
+    <div class="kpi good"><div class="t">大产能最省</div>
+      <div class="v">¥{top['plan']['priceCNY']:,.0f}</div>
+      <div class="d">{top['plan']['plat']} {tname(top['plan'])}<br>{top['plan']['mCap']:.2f} 条/月 · ¥{f2(top['plan']['perVideoCNY'])}/条</div></div>
     <div class="kpi pink"><div class="t">海外平台溢价</div>
       <div class="v">{HG['perVideoCNY']/best:.2f}×</div>
       <div class="d">Higgsfield Ultra ¥{f2(HG['perVideoCNY'])}/条<br>无成本优势</div></div>
@@ -743,7 +810,7 @@ for p in sorted(plans, key=lambda x: x["perVideoCNY"]):
         f'<td class="ctr rk"><b>{p["rank"]}</b><s>{p["rel"]:.2f}×</s></td>'
         f'<td><span class="dot" style="background:{p["color"]}"></span>{p["plat"]}'
         f'{"<span class=tagu>USD</span>" if p["cur"] == "USD" else ""}</td>'
-        f'<td>{p["tier"]}</td>'
+        f'<td>{p["tier"]}{"<span class=vlabel>" + p["variant"] + "</span>" if p.get("variant") else ""}</td>'
         f'<td class="num cell2"><b>{price_disp}</b><s>{sub}</s></td>'
         f'<td class="num">{p["monthly"]:,}</td>'
         f'<td class="num cbar"><span class="strong">¥{f2(p["perVideoCNY"])}</span>{mini_bar(p["perVideoCNY"])}</td>'
@@ -756,7 +823,7 @@ for i, r in enumerate(ladder):
     lo = "0" if i == 0 else f"{r['lo']:.2f}"
     lad_rows += (
         f'<tr><td class="num mono">{lo} – {r["hi"]:.2f}</td>'
-        f'<td><span class="dot" style="background:{p["color"]}"></span>{p["plat"]} {p["tier"]}</td>'
+        f'<td><span class="dot" style="background:{p["color"]}"></span>{p["plat"]} {tname(p)}</td>'
         f'<td class="num strong">¥{p["priceCNY"]:,.0f}</td>'
         f'<td class="num">{p["mCap"]:.2f}</td>'
         f'<td class="num">¥{f2(p["perVideoCNY"])}</td>'
@@ -798,7 +865,12 @@ xq_placed = "、".join(f'{r["plan"]["tier"]}（{r["lo"]:.2f}–{r["hi"]:.2f}）'
                      if r["plan"]["plat"] == "小云雀") or "无"
 
 ap_rows = ""
-for plat, tier, price, cur, monthly, per, orig, _n in RAW:
+# 附录按原始档位逐条列出（不展开积分选项，改为在月积分格内标注）
+for _pl in COST["plans"]:
+    plat, tier, price, cur = _pl["platform"], _pl["tier"], _pl["price"], _pl["currency"]
+    monthly, per, orig = _pl["monthlyCredits"], CPV[_pl["platform"]], _pl["original"]
+    _opts = _pl.get("creditsOptions")
+    _mtxt = (" / ".join(format(o["monthlyCredits"], ",") for o in _opts) + f'<div class="cny">双档可选</div>') if _opts else format(monthly, ",")
     p = G(plat, tier)
     off = (f"¥10 = {p['officialPerYuan']:.1f}" if p["officialPerYuan"] and cur == "CNY"
            else (f"1 元 = {p['officialPerYuan']:.0f}" if p["officialPerYuan"] else "—"))
@@ -806,7 +878,7 @@ for plat, tier, price, cur, monthly, per, orig, _n in RAW:
         f'<tr><td><span class="dot" style="background:{p["color"]}"></span>{plat}</td><td>{tier}</td>'
         f'<td class="ctr">{cur}</td><td class="num">{CU[cur]}{price:,}</td>'
         f'<td class="num">{("¥%s" % format(p["priceCNY"], ",.0f")) if cur == "USD" else "—"}</td>'
-        f'<td class="num">{monthly:,}</td><td class="num">{per:,}</td>'
+        f'<td class="num">{_mtxt}</td><td class="num">{per:,}</td>'
         f'<td class="num">{off}</td>'
         f'<td class="num">{(CU[cur] + format(orig, ",")) if orig else "—"}</td></tr>')
 
@@ -818,7 +890,7 @@ SOURCES = [
     ("Neowow 订阅页", "PLUS/Pro/MAX/ULTRA 四档年费 + 划线原价 + 1元=X积分"),
     ("即梦订阅页", "基础/标准/高级/超级 四档年费 + 首年5折与次年全额"),
     ("小云雀 订阅页", "基础 ¥453 / 标准 ¥1,199 / 高级 ¥4,999 / 超级 ¥21,840（含划线原价）"),
-    ("小云雀 生成页", "Seedance 2.5 / 16:9 / 720P / 30s → 界面显示 600（用户口径 800，见风险 3）"),
+    ("小云雀 生成页", "Seedance 2.5 / 16:9 / 720P / 30s → 600 积分（用户已确认）"),
     ("Higgsfield 订阅页", "Starter $15 / Plus $39 / Ultra $99（月付折年付口径）"),
     ("Higgsfield 生成页", "Model: Seedance 2.5 / 30s / 16:9 / 720p / Bitrate Standard → 210 积分"),
 ]
@@ -859,13 +931,14 @@ cost_body = f"""
       <div class="v">¥{f2(best)}</div>
       <div class="d">{best_row['plat']} {best_row['tier']} · {best_row['mCap']:.2f} 条/月<br>
       即梦超级 ¥{f2(runner['perVideoCNY'])} 并列，差 {abs(best-runner['perVideoCNY'])/best*100:.2f}%</div></div>
-    <div class="kpi good"><div class="t">单价 + 总支出双优</div>
-      <div class="v">¥5,199</div>
-      <div class="d">即梦高级会员 · {G('即梦','高级会员')['mCap']:.2f} 条/月<br>
-      全表唯一双优档，产量落此区间无需再比</div></div>
-    <div class="kpi good"><div class="t">39–49 条/月最省</div>
-      <div class="v">¥11,899</div>
-      <div class="d">Neowow ULTRA · {NW['mCap']:.2f} 条/月<br>年费仅为即梦超级的 {11899/21840*100:.0f}%</div></div>
+    <div class="kpi good"><div class="t">中产能最省</div>
+      <div class="v">¥{mid['plan']['priceCNY']:,.0f}</div>
+      <div class="d">{mid['plan']['plat']} {tname(mid['plan'])} · {mid['plan']['mCap']:.2f} 条/月<br>
+      ¥{f2(mid['plan']['perVideoCNY'])}/条</div></div>
+    <div class="kpi good"><div class="t">大产能最省</div>
+      <div class="v">¥{top['plan']['priceCNY']:,.0f}</div>
+      <div class="d">{top['plan']['plat']} {tname(top['plan'])} · {top['plan']['mCap']:.2f} 条/月<br>
+      ¥{f2(top['plan']['perVideoCNY'])}/条</div></div>
     <div class="kpi pink"><div class="t">海外平台溢价</div>
       <div class="v">{HG['perVideoCNY']/best:.2f}×</div>
       <div class="d">Higgsfield Ultra ¥{f2(HG['perVideoCNY'])}/条<br>含税后约 ¥{HG['perVideoCNY']*1.08:.2f}，无成本优势</div></div>
@@ -936,7 +1009,7 @@ cost_body = f"""
 <section id="discount" class="reveal">
   <div class="sechead">
     <h2><span class="ey">04</span>折扣结构：优势是真是假</h2>
-    <div class="sd">用官方公示原价重算。原价下单价收敛成水平线 → 说明优势全部来自折扣力度，活动一结束就消失。</div>
+    <div class="sd">用官方公示原价重算。原价下单价收敛成水平线 → 说明优势全部来自折扣力度，活动一结束就消失。「原价」列为页面划线价或次年续费全额，二者口径不同，仅用于判断「优势是否依赖活动」。</div>
   </div>
   <div class="tw"><table><thead><tr>
     <th>平台</th><th class="ctr">折扣区间</th><th class="ctr">原价下单条（CNY）</th>
@@ -990,46 +1063,9 @@ cost_body = f"""
 <section id="risk" class="reveal">
   <div class="sechead">
     <h2><span class="ey">07</span>风险与待核实项</h2>
-    <div class="sd">这五项里任何一项变动都可能改变上表结论。</div>
+    <div class="sd">这 {len(COST.get("risks", []))} 项里任何一项变动都可能改变上表结论。</div>
   </div>
-  <details>
-    <summary><span class="warnbadge">最高</span>小云雀单条积分 800 与截图显示的 600 冲突<span class="chev">›</span></summary>
-    <div class="dbody">
-      文字口径给出 <b>800 积分/条</b>，但生成页截图显示 <b>600（划线 780）</b>。<br><br>
-      <b>交叉验证支持 800：</b>按 800 算，超级会员单条 = ¥{f2(XQ['perVideoCNY'])} = ¥{XQ['perSecCNY']:.3f}/秒，与其海报「Seedance 2.5 限时 5 折、低至 0.4 元/秒」吻合（×0.5 ≈ {XQ['perSecCNY']*0.5:.2f}）；按 600 算折后仅 ¥{600*XQ['unitCNY']/30*0.5:.2f}/秒，与海报明显不符。故判定 800 有效。<br><br>
-      <b>影响量化：</b>若 600 才是真实值，小云雀超级将从 ¥{f2(XQ['perVideoCNY'])} 降至 <b>¥{600*XQ['unitCNY']:.2f}</b>，月产能从 {XQ['mCap']:.2f} 升至 {54600/600:.1f} 条，<b>直接与即梦超级并列全场最优，并可能夺取 49–90 条/月区间的最省解</b>。
-    </div>
-  </details>
-  <details>
-    <summary>年费档位均为限时活动价，恢复原价后结论会变<span class="chev">›</span></summary>
-    <div class="dbody">
-      按官方原价重算，Neowow ULTRA 单条成本由 ¥{f2(NW['perVideoCNY'])} 升至 <b>¥75.00</b>，全场最优解变为即梦超级会员（¥{f2(JM['origPerVideoCNY'])}/条）。详见「折扣结构」页签。
-      <br><br>
-      libtv 高级版截图同时出现 11,700 与 16,300 两个积分值，本表按 16,300 计算；若实际为 11,700，其单条成本将由 ¥{f2(G('libtv','高级版')['perVideoCNY'])} 升至 ¥{3899/(11700*12)*1380:.2f}。
-    </div>
-  </details>
-  <details>
-    <summary>Higgsfield 的税务与跨境结算成本未计入<span class="chev">›</span></summary>
-    <div class="dbody">
-      页面明示报价<b>不含 VAT 与地方税</b>；跨境支付按现汇卖出价结算（高于中间价约 0.5–1%）并可能叠加境外交易手续费。综合实际成本比本表高约 6–10%，即 Ultra 实际约 <b>¥{HG['perVideoCNY']*1.08:.2f}/条</b>。
-      <br><br>
-      另注意：Higgsfield 积分<b>月底清零、不结转</b>；年付为一次性全额扣款且默认自动续订，需提前手动取消。
-    </div>
-  </details>
-  <details>
-    <summary>失败重试是否扣积分 —— 隐性成本影响最大<span class="chev">›</span></summary>
-    <div class="dbody">
-      本次按「成功出片才扣分」的理想情况计算。若某平台失败率 20% 且不退积分，其实际单条成本需上浮 <b>{(1/0.8-1)*100:.0f}%</b>，足以反转排名。这是唯一可能推翻全部结论的变量，务必实测。
-    </div>
-  </details>
-  <details>
-    <summary>其余未纳入的变量<span class="chev">›</span></summary>
-    <div class="dbody">
-      并发数与排队优先级（直接影响交付周期）、素材上传与存储配额、商用授权与版权归属、分镜栏编辑等是否为付费加项、积分是否跨月结转（Higgsfield 已知不结转）。
-      <br><br>
-      另据公开反馈，<b>小云雀无官方客服渠道</b>，积分返还与权益咨询无反馈路径 —— 不进单价，但会吃掉实际收益。
-    </div>
-  </details>
+  {RISK_HTML}
 </section>
 
 <section id="appendix" class="reveal">
@@ -1040,7 +1076,7 @@ cost_body = f"""
   <details>
     <summary>计算口径与归一化链条<span class="chev">›</span></summary>
     <div class="dbody">
-      <b>核心问题：</b>五个平台的「积分」是各自发行的内部计价币，币值互不相同 —— 同样一条 30 秒视频，即梦扣 <b>600</b> 分、小云雀扣 <b>800</b> 分、libtv 扣 <b>1,380</b> 分、Higgsfield 扣 <b>210</b> 分、Neowow 扣 <b>7,500</b> 分。直接比较积分消耗没有意义。<br><br>
+      <b>核心问题：</b>五个平台的「积分」是各自发行的内部计价币，币值互不相同 —— 同样一条 30 秒视频，即梦与小云雀各扣 <b>600</b> 分、libtv 扣 <b>1,380</b> 分、Higgsfield 扣 <b>210</b> 分、Neowow 扣 <b>7,500</b> 分。直接比较积分消耗没有意义。<br><br>
       <b>归一化链条：</b><br>
       ① <code>本币/积分 = 年费 ÷ (月积分 × 12)</code><br>
       ② <code>单条成本 = 本币/积分 × 每条消耗积分</code> ← 唯一可跨平台比较的价格<br>
@@ -1059,7 +1095,7 @@ cost_body = f"""
         <tr><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td style="white-space:normal">Seedance 2.5 · 720p · 16:9 · 30s · 全能参考 · 分镜栏编辑</td><td class="num strong">7,500</td></tr>
         <tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td style="white-space:normal">Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s</td><td class="num strong">1,380</td></tr>
         <tr><td><span class="dot" style="background:#3280FF"></span>即梦</td><td style="white-space:normal">即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s</td><td class="num strong">600</td></tr>
-        <tr><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td style="white-space:normal">Seedance 2.5 · 16:9 · 720P · 30s（口径 800；截图显示 600）</td><td class="num strong">800</td></tr>
+        <tr><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td style="white-space:normal">Seedance 2.5 · 16:9 · 720P · 30s</td><td class="num strong">600</td></tr>
         <tr><td><span class="dot" style="background:#ED1572"></span>Higgsfield</td><td style="white-space:normal">Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard</td><td class="num strong">210</td></tr>
       </tbody></table>
     </div>
@@ -1088,20 +1124,12 @@ cost_body = f"""
   </div>
   <div class="note good">
     <ul style="margin-top:0">
-      <li><b>月产 ≤ 1.04 条：</b>小云雀基础会员 ¥453/年 —— 全场最低入门支出（产能仅够跑通流程）。</li>
-      <li><b>月产 1.04–3.33 条：</b>libtv 标准版 ¥569 → libtv 进阶版 ¥1,199。</li>
-      <li><b>月产 3.33–4.76 条：</b>即梦标准会员 ¥1,899 → <b>Higgsfield Plus ¥3,158</b>（其唯一占位区间，因国内档位在此断档）。</li>
-      <li><b>月产 4.76–11.81 条：</b>libtv 高级版 ¥3,899/年 —— 产量跨度最大的一段。</li>
-      <li><b>月产 11.81–15.00 条：</b>Neowow Pro ¥4,588（≤14.4）→ 小云雀高级会员 ¥4,999（14.4–15.0）。</li>
-      <li><b>月产 15.00–20.53 条：</b>即梦高级会员 ¥5,199/年。全表唯一的「单价 + 总支出双优」档位，落此区间无需再比。</li>
-      <li><b>月产 20.53–36.59 条：</b>libtv 豪华版 ¥6,699（≤23.77）→ libtv 至尊版 ¥9,599（23.77–36.59）。</li>
-      <li><b>月产 36.59–49.07 条：</b>Neowow MAX ¥9,850（≤38.40）→ Neowow ULTRA ¥11,899（38.40–49.07）。</li>
-      <li><b>月产 49.07–90 条：</b>即梦超级会员 ¥21,840/年。不要用 Neowow 双开 ULTRA（¥23,798 换 98 条/月），单条成本相同但总价更高。</li>
-      <li><b>月产 &gt; 90 条：</b>2× Neowow ULTRA ¥23,798 换 98.1 条/月；150 条时最优为 {stack150['p']['plat']} {stack150['p']['tier']} × {stack150['n']} 共 ¥{stack150['total']:,.0f}/年。</li>
-      <li><b>海外需求：</b>Higgsfield 仅建议作关键镜头精修通道（Ultra 月上限 {HG['mCap']:.1f} 条）；Ultra 折 ¥{f2(HG['perVideoCNY'])}/条是全场最优的 {HG['perVideoCNY']/best:.2f} 倍。若只需 3.7–4.8 条/月，其 Plus 档反而值得考虑。</li>
-      <li><b>不要买：</b>即梦基础会员（¥{f2(G('即梦','基础会员')['perVideoCNY'])}/条）、即梦标准会员（¥{f2(G('即梦','标准会员')['perVideoCNY'])}/条）、libtv 标准版（¥{f2(G('libtv','标准版')['perVideoCNY'])}/条）、Higgsfield Starter（¥{f2(worst)}/条）—— 单价均在最优解 2.1 倍以上且月产能不足 1.3 条。</li>
-      <li><b>小云雀 vs 即梦：</b>同为字节系、同价（超级档均 ¥21,840/年），但小云雀单条耗 800 积分 vs 即梦 600 积分。按 800 口径，小云雀超级在任一产量区间都不如即梦超级，无价格理由选购。</li>
-    </ul>
+      {PLAN_BULLETS}
+      <li><b>被支配档位（单独采购无意义）：</b>{so_far} —— 同价多积分选项时只计入高配档：libtv 高级版的 11.7K 档与 16.3K 档同为 ¥3,899，低配档被严格支配，不进阶梯与边际对比（主表中仍保留供查阅）。</li>
+      <li><b>海外需求：</b>Higgsfield 仅建议作关键镜头精修通道（Ultra 月上限 {HG['mCap']:.1f} 条）；Ultra 折 ¥{f2(HG['perVideoCNY'])}/条是全场最优的 {HG['perVideoCNY']/best:.2f} 倍，含税后约 ¥{HG['perVideoCNY']*1.08:.2f}/条。若只需 3.7–4.8 条/月，其 Plus 档反而值得考虑。</li>
+      <li><b>不要买：</b>即梦基础会员（¥{f2(G('即梦','基础会员')['perVideoCNY'])}/条）、即梦标准会员（¥{f2(G('即梦','标准会员')['perVideoCNY'])}/条）、libtv 标准版（¥{f2(G('libtv','标准版')['perVideoCNY'])}/条）、Higgsfield Starter（¥{f2(worst)}/条）—— 单价均在最优解 2.0 倍以上且月产能不足 1.5 条。</li>
+      <li><b>小云雀 vs 即梦：</b>二者超级会员<b>完全同规格</b> —— 同为 ¥21,840 首年 / ¥43,680 次年、同为 54,600 积分/月、同为 ¥1 = 30 积分、同为 600 积分/条，折算单条成本完全相同（<b>¥{f2(XQ['perVideoCNY'])}</b>）。选谁只看非价格能力：工作流完整度、CLI/API 支持、客服响应。公开反馈称小云雀<b>无官方客服渠道</b>。</li>
+</ul>
   </div>
 </section>
 
