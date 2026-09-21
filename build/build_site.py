@@ -656,6 +656,48 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
   font-size:12px;line-height:1.8;color:#B9BEC4;white-space:normal}
 .tmx.on{display:block}
 .tmx b{color:#D1FE17;font-weight:600}
+/* ── 新人引导弹窗 ── */
+.ibody{overflow:hidden}
+#intro{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;
+  padding:22px;background:rgba(4,5,6,.76)}
+#intro.on{display:flex}
+.icard{width:100%;max-width:466px;background:#101215;border-radius:20px;
+  border:1px solid rgba(255,255,255,.13);box-shadow:0 24px 70px rgba(0,0,0,.7);
+  padding:26px 26px 20px;position:relative;max-height:86vh;overflow-y:auto}
+.ix{position:absolute;right:16px;top:16px;width:32px;height:32px;border-radius:9px;
+  border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.05);
+  color:#C9CDD2;font-size:13px;line-height:1;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center}
+.ix:hover{background:rgba(255,255,255,.11)}
+.ieyebrow{font-family:__MONO__;font-size:10.5px;letter-spacing:.14em;color:#6E747C}
+.is{display:none}
+.is.on{display:block}
+.is h3{font-size:19px;line-height:1.5;color:#fff;font-weight:600;margin:12px 0 0;
+  letter-spacing:-.01em}
+.is p{font-size:13px;line-height:1.85;color:#A8AEB5;margin:13px 0 0}
+.is ul{margin:14px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:11px}
+.is li{font-size:13px;line-height:1.8;color:#A8AEB5;padding-left:19px;position:relative}
+.is li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;
+  border-radius:2px;background:#D1FE17}
+.is li b{color:#E4E7EA;font-weight:600}
+.ifoot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:24px;
+  padding-top:17px;border-top:1px solid rgba(255,255,255,.09)}
+.idots{display:flex;gap:6px}
+.idot{width:6px;height:6px;border-radius:4px;background:rgba(255,255,255,.2);
+  transition:background .2s,width .2s}
+.idot.on{background:#D1FE17;width:16px}
+.ibtns{display:flex;gap:9px;margin-left:auto}
+.ibtn{-webkit-appearance:none;appearance:none;cursor:pointer;font-family:inherit;
+  font-size:13px;padding:9px 17px;border-radius:10px;line-height:1;
+  border:1px solid rgba(255,255,255,.14);background:transparent;color:#C9CDD2}
+.ibtn:hover{background:rgba(255,255,255,.07)}
+.ibtn.pri{background:#D1FE17;color:#0B0B0D;border-color:#D1FE17;font-weight:600}
+.ibtn.pri:hover{background:#c7f000}
+@media (max-width:520px){
+  #intro{padding:14px;align-items:flex-end}
+  .icard{max-width:none;border-radius:20px 20px 16px 16px;padding:22px 18px 16px}
+  .is h3{font-size:17px}
+}
 .glist{display:flex;flex-direction:column;gap:0;border-top:1px solid rgba(255,255,255,.08)}
 .gterm{padding:20px 2px;border-bottom:1px solid rgba(255,255,255,.08);scroll-margin-top:76px}
 .gterm:target{background:rgba(209,254,23,.05)}
@@ -1039,6 +1081,59 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   });
 });
+
+/* ══════════ 全站通用：新人引导弹窗 ══════════
+   只在首次访问出现；第 1 步就有 ✕，不强迫看完；页脚有入口可随时重看。 */
+(function(){
+  var el = document.getElementById('intro');
+  if(!el) return;
+  var KEY = 'caliber.intro.v1';
+  var slides = el.querySelectorAll('.is');
+  var dots = el.querySelectorAll('.idot');
+  var prev = el.querySelector('.iprev');
+  var next = el.querySelector('.inext');
+  var x = el.querySelector('.ix');
+  var i = 0;
+
+  function show(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    Array.prototype.forEach.call(slides, function(s2, k){ s2.classList.toggle('on', k === i); });
+    Array.prototype.forEach.call(dots, function(d, k){ d.classList.toggle('on', k <= i); });
+    prev.style.visibility = i ? 'visible' : 'hidden';
+    next.textContent = (i === slides.length - 1) ? '开始看' : '下一步';
+  }
+  function close(){
+    el.classList.remove('on');
+    document.body.classList.remove('ibody');
+    try{ localStorage.setItem(KEY, '1'); }catch(e){}
+  }
+  function open(){
+    el.classList.add('on');
+    /* ⚠ 只在弹窗打开期间锁滚动，关闭立刻解除 —— 本项目有过「忘了解锁、页面滑不动」的事故 */
+    document.body.classList.add('ibody');
+    show(0);
+  }
+
+  prev.addEventListener('click', function(){ show(i - 1); });
+  next.addEventListener('click', function(){
+    if(i === slides.length - 1){ close(); } else { show(i + 1); }
+  });
+  x.addEventListener('click', close);
+  el.addEventListener('click', function(e){ if(e.target === el) close(); });
+  document.addEventListener('keydown', function(e){
+    if(!el.classList.contains('on')) return;
+    if(e.key === 'Escape') close();
+    if(e.key === 'ArrowRight') next.click();
+    if(e.key === 'ArrowLeft' && i) prev.click();
+  });
+
+  var again = document.getElementById('introAgain');
+  if(again) again.addEventListener('click', function(e){ e.preventDefault(); open(); });
+
+  var seen = false;
+  try{ seen = !!localStorage.getItem(KEY); }catch(e){ seen = true; }  /* 存不了就别弹，别每次都打扰 */
+  if(!seen) setTimeout(open, 700);   /* 让首屏先渲染完再弹，避免闪一下 */
+})();
 
 /* ══════════ 全站通用：术语提示 ══════════
    词典只注入一次，提示内容由 JS 填进 data-s（避免每个术语在 HTML 里重复一遍长文案）。 */
@@ -1794,7 +1889,10 @@ def legal():
 
 
 def foot(text):
-    return f'<div class="foot">{text}</div>'
+    # 误关之后要有路回来 —— 引导弹窗只在首次自动出现
+    return (f'<div class="foot">{text}'
+            f'\u3000|\u3000<a href="#" id="introAgain" style="color:#8A9098;'
+            f'border-bottom:1px dashed rgba(255,255,255,.3)">\u65b0\u624b\u5f15\u5bfc</a></div>')
 
 
 def kpi(t, v, d, cls="", vcls="rv"):
@@ -2048,6 +2146,52 @@ GLOS_JSON = json.dumps({x["k"]: {"t": x["t"], "s": x["s"], "l": x["l"]}
                         for x in GLOSSARY["terms"]}, ensure_ascii=False)
 
 
+INTRO = """
+<div id="intro" role="dialog" aria-modal="true" aria-label="新手引导">
+  <div class="icard">
+    <button type="button" class="ix" aria-label="跳过引导">\u2715</button>
+
+    <div class="is on">
+      <div class="ieyebrow">01 / 这是什么</div>
+      <h3>把各平台的积分，<br>换算成同一种钱</h3>
+      <p>各平台用自己的积分计价，币值互不相同 —— 同一条 30 秒视频，即梦扣 600 分、
+      Neowow 扣 7,500 分。直接比积分没有意义。</p>
+      <p>本站在把它们压平到同一口径之后，再折算成人民币。
+      <b style="color:#D1FE17">不采信宣传数字，只给可复核的结果。</b></p>
+    </div>
+
+    <div class="is">
+      <div class="ieyebrow">02 / 怎么看</div>
+      <h3>三步拿到你要的答案</h3>
+      <ul>
+        <li><b>先看结论</b> —— 数据页顶部有结论条，不必自己算</li>
+        <li><b>看你的场景</b> —— 拖动「月产量」，表格与排名即时重算</li>
+        <li><b>看不懂某个词</b> —— 带虚线的词点一下就有解释，也可去「术语表」</li>
+      </ul>
+    </div>
+
+    <div class="is">
+      <div class="ieyebrow">03 / 看之前请知道</div>
+      <h3>三个前提</h3>
+      <ul>
+        <li>价格是采集当日的<b>限时活动价</b>，活动退坡后排名会变</li>
+        <li>排名按<b>单账号单平台</b>口径；需要多账号时归入「组合订阅」另算</li>
+        <li>数据来源、算法与风险说明<b>全部公开</b>，页面底部可查</li>
+      </ul>
+    </div>
+
+    <div class="ifoot">
+      <div class="idots"><i class="idot on"></i><i class="idot"></i><i class="idot"></i></div>
+      <div class="ibtns">
+        <button type="button" class="ibtn iprev" style="visibility:hidden">上一步</button>
+        <button type="button" class="ibtn pri inext">下一步</button>
+      </div>
+    </div>
+  </div>
+</div>
+"""
+
+
 def page(title, desc, nav_html, body, cost_js=False):
     js = JS.replace("__COST__", COST_JS) if cost_js else JS.replace("__COST__", "")
     js = js.replace("__GLOS__", GLOS_JSON)
@@ -2104,6 +2248,7 @@ def page(title, desc, nav_html, body, cost_js=False):
 {body}
 <div class="wrap">{legal()}</div>
 
+{INTRO}
 <script>{js}</script>
 </body></html>"""
 
@@ -2812,7 +2957,7 @@ def selfcheck():
     for _m in re.findall(r'class="([^"]*)"', _all):
         _used_cls.update(_m.split())
     # 运行时由 JS 或浏览器加上的类，静态 HTML 里必然找不到
-    _RUNTIME_CLS = {"js", "in", "on", "top", "active", "pp", "pline", "combo-note", "tmx", "tip", "lg-mono"}
+    _RUNTIME_CLS = {"js", "in", "on", "top", "active", "pp", "pline", "combo-note", "tmx", "tip", "lg-mono", "ibody"}
     for cls in sorted(set(re.findall(r"(?<![\w./-])\.([A-Za-z][\w-]*)", css_block))):
         if cls not in _used_cls and cls not in _RUNTIME_CLS:
             errs.append(f"样式表里的 .{cls} 未在任何页面上使用")

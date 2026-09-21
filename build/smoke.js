@@ -28,6 +28,16 @@ const SHOTS = process.argv.includes('--shots');
 const OUT = path.join(ROOT, 'harvest');
 const ROWS_EXP = '47', QROWS_EXP = '39', PLATS_EXP = '7', LIBTV_Q_EXP = '7';
 
+/* ⚠ newPage 必须定义在模块级 —— desktop()/mobile() 是顶层函数，
+   IIFE 里的 const 它们看不见（第一次改就踩了这个）。 */
+let browser = null;
+const SEEN = () => { try { localStorage.setItem('caliber.intro.v1', '1'); } catch (e) {} };
+async function newPage(opts = {}) {
+  const ctx = await browser.newContext(opts);
+  await ctx.addInitScript(SEEN);   /* 引导弹窗会拦截点击，逐 context 预置「已看过」 */
+  return ctx.newPage();
+}
+
 const fails = [];
 const log = (...a) => console.log(...a);
 
@@ -40,7 +50,7 @@ async function run(browser) {
   /* ══════════ 桌面 ══════════ */
   log('\n── 桌面 1440×900 ──');
   {
-    const p = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const p = await newPage({ viewport: { width: 1440, height: 900 } });
     const errs = [];
     p.on('pageerror', e => errs.push('pageerror: ' + e.message));
     p.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
@@ -145,7 +155,7 @@ async function run(browser) {
   log('\n── 三周期全清单 cycles.html ──');
   {
     const cu = URL.replace('cost.html', 'cycles.html');
-    const p = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+    const p = await newPage({ viewport: { width: 1440, height: 950 } });
     const errs = [];
     p.on('pageerror', e => errs.push('pageerror: ' + e.message));
     p.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
@@ -236,10 +246,48 @@ async function run(browser) {
     await p.close();
   }
 
+  /* ══════════ 新人引导弹窗（独立 context：干净的 localStorage）══════════ */
+  log('\n── 新人引导弹窗 ──');
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 950 } });
+    const q = await ctx.newPage();
+    const e5 = []; q.on('pageerror', e => e5.push(e.message));
+    await q.goto(URL, { waitUntil: 'load' });
+    await q.waitForTimeout(1300);
+    const a1 = await q.evaluate(() => {
+      const el = document.getElementById('intro');
+      return { on: el.classList.contains('on'), lock: document.body.classList.contains('ibody'),
+               steps: el.querySelectorAll('.is').length,
+               prev: getComputedStyle(el.querySelector('.iprev')).visibility,
+               next: el.querySelector('.inext').textContent };
+    });
+    check('首次访问弹出引导且锁滚动', a1.on === true && a1.lock === true);
+    check('引导为 3 步、首步无「上一步」', a1.steps === 3 && a1.prev === 'hidden', `${a1.steps} 步`);
+    await q.click('.inext'); await q.waitForTimeout(280);
+    await q.click('.inext'); await q.waitForTimeout(280);
+    const a2 = await q.evaluate(() => document.querySelector('.inext').textContent);
+    check('末步按钮变为「开始看」', a2 === '开始看', a2);
+    await q.click('.inext'); await q.waitForTimeout(400);
+    const a3 = await q.evaluate(() => ({
+      on: document.getElementById('intro').classList.contains('on'),
+      lock: document.body.classList.contains('ibody'),
+      flag: localStorage.getItem('caliber.intro.v1'),
+    }));
+    check('关闭后解锁并写入标记', a3.on === false && a3.lock === false && a3.flag === '1');
+    await q.reload(); await q.waitForTimeout(1200);
+    check('再次访问不再打扰',
+      (await q.evaluate(() => document.getElementById('intro').classList.contains('on'))) === false);
+    await q.click('#introAgain'); await q.waitForTimeout(350);
+    check('页脚「新手引导」可重看',
+      (await q.evaluate(() => document.getElementById('intro').classList.contains('on'))) === true);
+    check('引导弹窗无 JS 报错', e5.length === 0, e5.slice(0, 2).join(' | '));
+    await ctx.close();
+  }
+
   /* ══════════ 术语引导层 ══════════ */
   log('\n── 术语引导（成本页 / 术语表页）──');
   {
-    const p2 = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+    const p2 = await newPage({ viewport: { width: 1440, height: 950 } });
     const e3 = []; p2.on('pageerror', e => e3.push(e.message));
     await p2.goto(URL, { waitUntil: 'load' });
     await p2.waitForTimeout(600);
@@ -253,7 +301,7 @@ async function run(browser) {
     check('术语已标记且悬停出解释', g.n >= 5 && g.hover === true, `${g.n} 处`);
     check('NAV 含术语表入口', g.nav === true);
 
-    const p3 = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+    const p3 = await newPage({ viewport: { width: 1440, height: 950 } });
     const e4 = []; p3.on('pageerror', e => e4.push(e.message));
     await p3.goto(URL.replace('cost.html', 'glossary.html'), { waitUntil: 'load' });
     await p3.waitForTimeout(500);
@@ -272,7 +320,7 @@ async function run(browser) {
   /* ══════════ 汉堡菜单：四页必须都能用 ══════════ */
   log('\n── 汉堡菜单（四页）──');
   for (const pg of ['index.html', 'cost.html', 'cycles.html', 'leaderboard-vlm.html']) {
-    const q = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    const q = await newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     const e2 = []; q.on('pageerror', e => e2.push(e.message));
     await q.goto(URL.replace('cost.html', pg), { waitUntil: 'load' });
     await q.waitForTimeout(420);
@@ -295,7 +343,7 @@ async function run(browser) {
   /* ══════════ 首页散点图 ══════════ */
   log('\n── 首页 index.html（帕累托散点）──');
   {
-    const p = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+    const p = await newPage({ viewport: { width: 1440, height: 950 } });
     const errs = [];
     p.on('pageerror', e => errs.push('pageerror: ' + e.message));
     await p.goto(URL.replace('cost.html', 'index.html'), { waitUntil: 'load' });
@@ -326,7 +374,7 @@ async function run(browser) {
   /* ══════════ 手机 ══════════ */
   log('\n── 手机 430×900 ──');
   {
-    const p = await browser.newPage({ viewport: { width: 430, height: 900 }, hasTouch: true, isMobile: true });
+    const p = await newPage({ viewport: { width: 430, height: 900 }, hasTouch: true, isMobile: true });
     const errs = [];
     p.on('pageerror', e => errs.push('pageerror: ' + e.message));
     p.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text()); });
@@ -469,7 +517,7 @@ async function run(browser) {
      于是测试全绿、线上照坏。教训：可见 ≠ 可用，交互必须真点一次。 */
   log('\n── 四页汉堡菜单（手机 390×844）──');
   for (const f of ['index.html', 'cost.html', 'cycles.html', 'leaderboard-vlm.html']) {
-    const p = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const p = await newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
     const errs = [];
     p.on('pageerror', e => errs.push('pageerror: ' + e.message));
     await p.goto(URL.replace('cost.html', f), { waitUntil: 'load' });
@@ -507,7 +555,8 @@ async function run(browser) {
     console.error('找不到 Edge：' + EDGE + '\n可用 CALIBER_EDGE 环境变量指定浏览器路径。');
     process.exit(2);
   }
-  const browser = await chromium.launch({ executablePath: EDGE, headless: true });
+  browser = await chromium.launch({ executablePath: EDGE, headless: true });
+
   try {
     await run(browser);
   } finally {
