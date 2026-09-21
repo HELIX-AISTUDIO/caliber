@@ -28,215 +28,251 @@
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden}
-body{background:#000;color:#DEE0E3;font:14px/1.7 "Inter","Inter Display","SN Pro","Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;overflow-x:hidden;
-  padding:0 0 80px;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px));
-  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;letter-spacing:-.006em;
-  -webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
-/* 固定光晕：translate3d 提升合成层，避免移动端滚动时重绘卡顿 */
-body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-  transform:translate3d(0,0,0);will-change:transform;
-  background:
-    radial-gradient(940px 520px at 10% -8%,rgba(209,254,23,.11),transparent 66%),
-    radial-gradient(720px 440px at 102% 6%,rgba(237,21,114,.08),transparent 66%),
-    radial-gradient(860px 520px at 46% 106%,rgba(156,230,243,.055),transparent 66%)}
-.topbar{height:4px;background:linear-gradient(90deg,#D1FE17,#9DE500 55%,#ED1572);position:relative;z-index:2}
-.hero{position:relative;z-index:1;padding:38px 0 6px;margin-bottom:24px}
-.hero .inner{max-width:1240px;margin:0 auto;padding:0 24px}
+body{background:#000;color:#C9CDD2;font:14px/1.7 "Inter","Inter Display","SN Pro","Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;overflow-x:hidden;
+  padding:0 0 72px;padding-bottom:calc(72px + env(safe-area-inset-bottom,0px));
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  letter-spacing:-.005em;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 
-/* ── 浮窗主框（复刻 higgsfield 玻璃面板） ── */
-.hfcard{position:relative;overflow:hidden;border:1.5px solid #D1FE17;border-radius:24px;
-  padding:34px 32px 32px;background:rgba(11,11,11,.62);
-  -webkit-backdrop-filter:blur(40px) saturate(1.25);backdrop-filter:blur(40px) saturate(1.25);
-  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.08),0 0 76px rgba(209,254,23,.20),0 22px 60px rgba(0,0,0,.7);
-  background-image:
-    linear-gradient(rgba(209,254,23,.062) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(209,254,23,.062) 1px,transparent 1px);
-  background-size:46px 46px}
-.hfcard::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(120% 90% at 50% 120%,rgba(209,254,23,.10),transparent 62%)}
-h1{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:31px;font-weight:700;color:#fff;letter-spacing:-.035em;
-  line-height:1.2;position:relative;z-index:1}
-.hero .sub{color:#9EA2AD;font-size:13px;margin-top:11px;letter-spacing:0;position:relative;z-index:1}
-.hl{display:inline-block;margin-top:16px;margin-right:9px;padding:9px 17px;border-radius:999px;
-  background:#D1FE17;color:#0B0B0B;font-size:12.5px;font-weight:700;letter-spacing:-.01em;
-  box-shadow:0 0 22px rgba(209,254,23,.4);position:relative;z-index:1}
-.spec{display:inline-block;margin-top:16px;padding:9px 17px;border-radius:999px;font-size:12.5px;
-  font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;letter-spacing:-.01em;color:#D1FE17;
-  background:rgba(11,11,11,.55);border:1px solid rgba(209,254,23,.34);
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);position:relative;z-index:1}
-.disc{margin-top:20px;display:flex;gap:11px;align-items:flex-start;padding:13px 17px;border-radius:14px;
-  background:rgba(250,188,0,.09);border:1px solid rgba(250,188,0,.34);
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  font-size:12.5px;color:#E4D3A8;line-height:1.65;position:relative;z-index:1;letter-spacing:0}
-.disc b{color:#FABC00;font-weight:600}
-.disc-i{flex:0 0 19px;height:19px;border-radius:50%;background:#FABC00;color:#0B0B0B;
-  font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:2px;
-  font-family:"Inter","Inter Display","SN Pro","Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif}
+/* ══ 顶部 lime 通栏（Higgsfield 标志性反转面） ══ */
+.promo{background:#D1FE17;color:#0B0B0B;font-size:12.5px;font-weight:600;letter-spacing:-.01em;
+  display:flex;align-items:center;justify-content:center;gap:13px;flex-wrap:wrap;
+  padding:10px 22px;text-align:center;line-height:1.5}
+.promo b{font-weight:800}
+.promo .tag2{border:1.5px solid #0B0B0B;border-radius:999px;padding:2px 11px;font-size:11px;font-weight:700;white-space:nowrap}
+
+/* ══ 顶栏 ══ */
+.nav{border-bottom:1px solid rgba(255,255,255,.08);position:relative;z-index:2}
+.nav .inner{max-width:1240px;margin:0 auto;padding:15px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;font-size:14px;letter-spacing:-.022em}
+.brand i{width:22px;height:22px;border-radius:7px;background:#D1FE17;display:inline-block;flex:0 0 22px}
+.nav .spec{margin-left:auto;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;font-weight:500;color:#D1FE17;
+  border:1px solid rgba(209,254,23,.35);border-radius:999px;padding:6px 13px;letter-spacing:-.01em}
+/* ── 顶部菜单（参照 higgsfield 顶栏：小字项 + lime 胶囊标签 + 右侧药丸） ── */
+.menu{display:flex;align-items:center;gap:1px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;flex:1 1 auto;min-width:0}
+.menu::-webkit-scrollbar{display:none}
+.menu a{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none;
+  color:#9AA0A8;font-size:13px;font-weight:600;letter-spacing:-.012em;
+  padding:7px 12px;border-radius:999px;flex:0 0 auto}
+.menu a:hover{color:#fff;background:rgba(255,255,255,.065)}
+.menu a.active{color:#D1FE17}
+.menu a.active:hover{color:#D1FE17}
+.menu a.soon{color:#565C64;cursor:default}
+.menu a.soon:hover{background:transparent;color:#565C64}
+.menu .nb{background:#D1FE17;color:#0B0B0B;font-size:9.5px;font-weight:800;padding:1.5px 7px;
+  border-radius:999px;letter-spacing:.02em}
+
+/* ══ Hero ══ */
+.hero{max-width:1240px;margin:0 auto;padding:66px 24px 8px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:#D1FE17;margin-bottom:16px;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+h1{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:clamp(29px,5vw,52px);font-weight:800;color:#fff;
+  letter-spacing:-.038em;line-height:1.06}
+h1 em{font-style:normal;color:#D1FE17}
+.hero .lead{color:#8A9099;font-size:14.5px;max-width:730px;margin-top:22px;line-height:1.78;letter-spacing:0}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}
+.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
+  letter-spacing:-.012em;text-decoration:none;white-space:nowrap}
+.btn-fill{background:#D1FE17;color:#0B0B0B}
+.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}
+.disc{display:flex;gap:11px;align-items:flex-start;max-width:830px;margin-top:30px;
+  padding:14px 17px;border:1px solid rgba(255,201,60,.26);border-radius:13px;
+  background:rgba(255,201,60,.035);font-size:12px;color:#A9AFB8;line-height:1.72;letter-spacing:0}
+.disc b{color:#FFC93C;font-weight:600}
+.disc-i{flex:0 0 17px;height:17px;border-radius:50%;background:#FFC93C;color:#0B0B0B;font-size:11px;
+  font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:2px}
 
 .wrap{max-width:1240px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
-h2{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:17px;font-weight:700;margin:46px 0 15px;padding-left:14px;
-  border-left:4px solid #D1FE17;color:#fff;letter-spacing:-.018em}
-h3{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;font-weight:700;margin:25px 0 11px;color:#C8CAD0;letter-spacing:-.01em}
+h2{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:21px;font-weight:750;color:#fff;letter-spacing:-.025em;
+  line-height:1.3;margin:68px 0 18px}
+.wrap h2:first-of-type{margin-top:14px}
+h2 .ey{display:inline-block;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:600;color:#D1FE17;
+  letter-spacing:0;margin-right:13px}
+h3{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14.5px;font-weight:700;color:#fff;letter-spacing:-.015em;margin:30px 0 12px}
 
-/* ── 玻璃浮窗卡片 ── */
-.card,.kpi,.note{background:rgba(11,11,11,.62);border:1px solid rgba(255,255,255,.14);
-  border-radius:24px;-webkit-backdrop-filter:blur(24px) saturate(1.2);backdrop-filter:blur(24px) saturate(1.2);
-  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.05),0 12px 34px rgba(0,0,0,.58)}
-.card{padding:19px 21px}
-.grid{display:grid;gap:15px}
-.g3{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
-.g5{grid-template-columns:repeat(auto-fit,minmax(206px,1fr))}
-.kpi{padding:17px 19px;position:relative;overflow:hidden}
-.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#2E3031}
-.kpi.good::before{background:#D1FE17}
-.kpi.info::before{background:#3280FF}
-.kpi.warn::before{background:#FABC00}
-.kpi.bad::before{background:#FB2C36}
-.kpi.pink::before{background:#ED1572}
-.kpi.hi{border-color:rgba(209,254,23,.62);box-shadow:inset 0 0 0 .61px rgba(209,254,23,.18),0 0 44px rgba(209,254,23,.16),0 12px 34px rgba(0,0,0,.6)}
-.kpi.hi .v{color:#D1FE17}
-.kpi .t{font-size:11px;color:#9EA2AD;letter-spacing:.07em;font-weight:600;text-transform:uppercase}
-.kpi .v{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:23px;font-weight:600;margin:9px 0 5px;color:#fff;letter-spacing:-.025em}
-.kpi .d{font-size:12px;color:#9EA2AD;line-height:1.6;letter-spacing:0}
+/* ══ 卡片：实心面 + 发丝描边（无毛玻璃） ══ */
+.card,.kpi,.note,.legal{background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:18px}
+.card{padding:22px 24px}
+.grid{display:grid;gap:14px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(285px,1fr))}
+.g5{grid-template-columns:repeat(auto-fit,minmax(205px,1fr))}
+.kpi{padding:20px 22px}
+.kpi .t{font-size:10.5px;color:#767C85;font-weight:700;letter-spacing:.095em;text-transform:uppercase}
+.kpi .v{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:26px;font-weight:700;color:#fff;margin:11px 0 7px;letter-spacing:-.032em;line-height:1.15}
+.kpi.good .v,.kpi.hi .v{color:#D1FE17}
+.kpi.hi{border-color:rgba(209,254,23,.45)}
+.kpi .d{font-size:12px;color:#8A9099;line-height:1.68;letter-spacing:0}
+.kpi .d b{color:#C9CDD2}
 
-/* ── 表格 ── */
+/* ══ 表格 ══ */
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
-  background:rgba(11,11,11,.62);border:1px solid rgba(255,255,255,.14);border-radius:24px;overflow:hidden;
-  -webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
-  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.05),0 12px 34px rgba(0,0,0,.58)}
-th{background:rgba(255,255,255,.045);color:#9EA2AD;font-weight:600;font-size:11px;text-align:left;
-  padding:12px 13px;white-space:nowrap;letter-spacing:.055em;text-transform:uppercase;
-  border-bottom:1px solid rgba(255,255,255,.14);cursor:pointer;user-select:none}
+  background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden}
+th{background:transparent;color:#767C85;font-weight:700;font-size:10.5px;text-align:left;
+  padding:15px 14px;white-space:nowrap;letter-spacing:.095em;text-transform:uppercase;
+  border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer;user-select:none}
 th:hover{color:#D1FE17}
 th.ctr,td.ctr{text-align:center}
-td{padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.055);white-space:nowrap;color:#DEE0E3;letter-spacing:0}
+td{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap;
+  color:#C9CDD2;letter-spacing:0}
 tbody tr:last-child td{border-bottom:none}
-tbody tr:hover{background:rgba(209,254,23,.05)}
-tbody tr.top{background:rgba(209,254,23,.07)}
-tbody tr.top td:first-child{box-shadow:inset 4px 0 0 #D1FE17}
-.num{text-align:right;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;letter-spacing:-.02em}
-.cny{font-size:10.5px;color:#717684;font-weight:400;letter-spacing:0}
+tbody tr:hover{background:rgba(255,255,255,.032)}
+tbody tr.top{background:rgba(209,254,23,.055)}
+tbody tr.top td:first-child{box-shadow:inset 3px 0 0 #D1FE17}
+.num{text-align:right;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-weight:500;letter-spacing:-.022em}
+.cny{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;color:#5A6069;font-weight:400;letter-spacing:0}
 .strong{color:#D1FE17;font-weight:600}
-.ybest{color:#0B0B0B;font-weight:700;background:#D1FE17}
-.rk{color:#5E636E;font-weight:600}
-.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:middle;
-  box-shadow:0 0 8px currentColor}
-.tagu{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:10px;
-  font-weight:700;letter-spacing:.04em;background:rgba(237,21,114,.2);color:#FF6BAE;border:1px solid rgba(237,21,114,.55)}
+.ybest{color:#0B0B0B;font-weight:800;background:#D1FE17}
+.rk{color:#5A6069;font-weight:600}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.tagu{display:inline-block;margin-left:7px;padding:1px 7px;border-radius:999px;font-size:9.5px;
+  font-weight:700;letter-spacing:.05em;color:#FF4D8D;border:1px solid rgba(255,77,141,.45)}
 
-/* ── 条形图 ── */
-.bar-row{display:grid;grid-template-columns:212px 1fr 78px;align-items:center;gap:12px;margin-bottom:8px}
-.bar-label{font-size:12.5px;color:#DEE0E3;letter-spacing:0}
-.bar-track{height:16px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
-.bar-fill{height:100%;border-radius:6px;transition:width .55s cubic-bezier(.22,1,.36,1)}
-.b-good{background:linear-gradient(90deg,#829B19,#D1FE17);box-shadow:0 0 14px rgba(209,254,23,.35)}
-.b-mid{background:linear-gradient(90deg,#B07A00,#FABC00)}
-.b-bad{background:linear-gradient(90deg,#7A1234,#ED1572)}
-.bar-val{text-align:right;font-size:12.5px;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;color:#DEE0E3;letter-spacing:-.02em}
+/* ══ 条形图：单色分级（lime → 灰阶），不做彩虹 ══ */
+.bar-row{display:grid;grid-template-columns:206px 1fr 76px;align-items:center;gap:14px;margin-bottom:9px}
+.bar-label{font-size:12.5px;color:#C9CDD2;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{height:14px;background:rgba(255,255,255,.05);border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;border-radius:999px}
+.b-good{background:#D1FE17}
+.b-mid{background:linear-gradient(90deg,#3A3F47,#6E7681)}
+.b-bad{background:linear-gradient(90deg,#23272D,#3A3F47)}
+.bar-val{text-align:right;font-size:12.5px;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;
+  color:#C9CDD2;letter-spacing:-.022em}
 
-/* ── 标签 ── */
-.tag{display:inline-block;padding:3px 11px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.03em}
-.v-good{background:#D1FE17;color:#0B0B0B;box-shadow:0 0 14px rgba(209,254,23,.35)}
-.v-warn{background:rgba(250,188,0,.15);color:#FABC00;border:1px solid rgba(250,188,0,.45)}
-.v-bad{background:rgba(251,44,54,.14);color:#FF6568;border:1px solid rgba(251,44,54,.42)}
+/* ══ 标签：只有「强烈推荐」给 lime ══ */
+.tag{display:inline-block;padding:3px 11px;border-radius:999px;font-size:10.5px;
+  font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.v-good{background:#D1FE17;color:#0B0B0B}
+.v-warn{background:transparent;color:#C9CDD2;border:1px solid rgba(255,255,255,.18)}
+.v-bad{background:transparent;color:#FF6B6B;border:1px solid rgba(255,107,107,.32)}
 
-/* ── 说明块 ── */
-.note{padding:15px 19px;font-size:13px;color:#DEE0E3;border-left:4px solid #D1FE17;letter-spacing:0}
-.note.warn{border-left-color:#FABC00;background:rgba(24,19,7,.72)}
-.note.good{border-left-color:#D1FE17;background:rgba(15,20,8,.72)}
-.note.pink{border-left-color:#ED1572;background:rgba(22,8,17,.72)}
+/* ══ 说明块：统一实心面，仅左侧细线区分语义 ══ */
+.note{padding:20px 24px;font-size:13px;color:#C9CDD2;line-height:1.78;letter-spacing:0}
+.note.warn{border-left:2px solid rgba(255,201,60,.55)}
+.note.good{border-left:2px solid rgba(209,254,23,.5)}
+.note.pink{border-left:2px solid rgba(255,77,141,.45)}
 .note b{color:#fff;font-weight:600}
 .note+.note{margin-top:12px}
-ul{margin:9px 0 0 19px}
-li{margin:7px 0;color:#DEE0E3;font-size:13px;letter-spacing:0}
+ul{margin:10px 0 0 19px}
+li{margin:8px 0;color:#C9CDD2;font-size:13px;letter-spacing:0;line-height:1.75}
 li::marker{color:#D1FE17}
-code{background:rgba(209,254,23,.11);border:1px solid rgba(209,254,23,.22);padding:2px 7px;border-radius:7px;
-  font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:#D1FE17;font-weight:500;letter-spacing:-.02em}
-.ctrl{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:16px}
-input[type=range]{-webkit-appearance:none;appearance:none;width:320px;height:6px;border-radius:4px;outline:none;
-  background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;
-  background:#D1FE17;cursor:pointer;border:4px solid #000;box-shadow:0 0 16px rgba(209,254,23,.75)}
-.big{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:20px;font-weight:600;color:#D1FE17;letter-spacing:-.025em}
-.mono{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:-.02em}
-.foot{margin-top:50px;color:#5E636E;font-size:12px;text-align:center;
-  border-top:1px solid rgba(255,255,255,.1);padding-top:20px;letter-spacing:0}
-/* ── 版权与溯源块 ── */
-.legal{margin-top:20px;padding:16px 20px;border-radius:20px;background:rgba(11,11,11,.62);
-  border:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
-  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.05);font-size:11.5px;color:#717684;
-  line-height:1.75;letter-spacing:0}
-.legal-t{color:#C8CAD0;font-weight:600;font-size:12.5px;margin-bottom:6px}
-.legal-f{margin-top:8px;color:#5E636E}
-.legal-f .fp{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#D1FE17;font-weight:500;letter-spacing:-.02em;
-  background:rgba(209,254,23,.09);border:1px solid rgba(209,254,23,.22);padding:1px 7px;border-radius:6px}
-/* ── 打印 / 存 PDF：强制浅色，版权页保留 ── */
-@media print{
-  body{background:#fff!important;color:#000!important;padding:0}
-  body::before{display:none!important}
-  .topbar{background:#000!important}
-  .hfcard,.card,.kpi,.note,table,.legal{background:#fff!important;border-color:#9AA0A6!important;
-    box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-  .hfcard{background-image:none!important;border-color:#111!important}
-  h1,h2,h3,.kpi .v,.strong,.legal-t,.bar-val,td,th,li{color:#000!important}
-  .hl{background:#000!important;color:#fff!important;box-shadow:none!important}
-  .disc{background:#fff!important;border-color:#B8860B!important;color:#333!important}
-  .disc b,.disc-i{color:#8A6D00!important}
-  .tw{overflow:visible!important}
-  .tw table{min-width:0!important}
-  th{background:#F1F3F4!important;color:#000!important}
-  a{color:#000!important}
-}
+code{background:rgba(209,254,23,.09);border:1px solid rgba(209,254,23,.2);padding:2px 7px;
+  border-radius:6px;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:#D1FE17;font-weight:500;letter-spacing:-.02em}
+.ctrl{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:320px;height:4px;border-radius:999px;
+  outline:none;background:rgba(255,255,255,.12)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;border-radius:50%;
+  background:#D1FE17;cursor:pointer;border:3px solid #000}
+.big{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:21px;font-weight:700;color:#D1FE17;letter-spacing:-.03em}
+.mono{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:-.022em}
+.sub{color:#767C85;font-size:12px;letter-spacing:0;line-height:1.7}
+.foot{margin-top:36px;color:#5A6069;font-size:11.5px;text-align:center;
+  border-top:1px solid rgba(255,255,255,.08);padding-top:20px;letter-spacing:0;line-height:1.75}
 .mb22{margin-bottom:22px}
-.sub{color:#9EA2AD;font-size:12.5px;letter-spacing:0}
-.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:24px}
+
+/* ══ 版权块：页脚整块 lime 反转面（Higgsfield 签名） ══ */
+.legal{margin-top:26px;padding:28px 30px;background:#D1FE17;border-color:#D1FE17;border-radius:20px;
+  color:#0B0B0B;font-size:12px;line-height:1.8;letter-spacing:0}
+.legal-t{font-size:16px;font-weight:800;letter-spacing:-.025em;margin-bottom:9px;color:#0B0B0B}
+.legal-b{color:#1F2A00;max-width:1000px}
+.legal-f{margin-top:14px;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;color:#1F2A00}
+.legal-f .fp{background:#0B0B0B;color:#D1FE17;padding:2.5px 9px;border-radius:6px;font-weight:600;letter-spacing:-.02em}
+
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:18px}
 .tw table{min-width:720px}
 .tw::-webkit-scrollbar{height:9px}
-.tw::-webkit-scrollbar-thumb{background:#2E3031;border-radius:5px}
+.tw::-webkit-scrollbar-thumb{background:#2A2E34;border-radius:5px}
 .tw::-webkit-scrollbar-track{background:transparent}
-/* 微信 X5 / 旧 WebView 不支持 backdrop-filter：退化为不透明面，保证文字对比度 */
-@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){
-  .card,.kpi,.note,table{background:#0F1113}
-  .hfcard{background:#070A05}
-  .spec{background:#0B0B0B}
+
+/* ══ 打印 / 存 PDF：强制浅色，版权块与指纹保留 ══ */
+@media print{
+  body{background:#fff!important;color:#000!important;padding:0}
+  .promo{background:#D1FE17!important;color:#000!important}
+  .nav{border-bottom-color:#CCC!important}
+  .brand{color:#000!important}
+  .nav .spec{color:#333!important;border-color:#999!important}
+  .card,.kpi,.note,table,.legal{background:#fff!important;border-color:#BBB!important}
+  .legal{background:#F2FFB8!important}
+  h1,h2,h3,h2 .ey,.kpi .v,.strong,.kpi .t,.lead,td,th,li,.bar-val,.legal-b{color:#000!important}
+  .eyebrow{color:#4A5A00!important}
+  .btn-fill{background:#D1FE17!important;color:#000!important}
+  .btn-ghost{color:#000!important;border-color:#999!important}
+  .disc{background:#fff!important;border-color:#B8860B!important;color:#333!important}
+  .disc b,.disc-i{color:#6B5200!important}
+  .disc-i{background:#FFE08A!important}
+  .tw{overflow:visible!important}
+  .tw table{min-width:0!important}
+  th{background:#F2F3F5!important;border-bottom-color:#BBB!important}
+  tbody tr.top{background:#F7FFD9!important}
+  .b-good{background:#8FCB00!important}
+  .b-mid{background:#9AA0A6!important}
+  .b-bad{background:#D0D3D7!important}
 }
+
 @media (max-width:820px){
-  .topbar{height:3px}
-  .hero{padding:24px 0 4px;margin-bottom:20px}
-  .hero .inner,.wrap{padding:0 14px}
-  .hfcard{padding:24px 19px 22px;border-radius:20px;background-size:34px 34px}
-  h1{font-size:20px;letter-spacing:-.03em}
-  h2{font-size:15px;margin:32px 0 12px}
+  .promo{font-size:11.5px;padding:9px 14px;gap:9px}
+  .nav .inner{padding:12px 15px}
+  .nav .spec{margin-left:0;font-size:10.5px}
+  .hero{padding:38px 15px 4px}
+  h1{letter-spacing:-.032em}
+  .hero .lead{font-size:13.5px;margin-top:17px}
+  .btns{margin-top:22px}
+  .btn{padding:11px 18px;font-size:12.5px}
+  .disc{margin-top:22px}
+  .wrap{padding:0 15px}
+  h2{font-size:17.5px;margin:46px 0 14px}
   .g5,.g3{grid-template-columns:1fr 1fr}
-  .kpi .v{font-size:19px}
-  .bar-row{grid-template-columns:1fr 62px;gap:8px}
+  .kpi .v{font-size:22px}
+  .bar-row{grid-template-columns:1fr 60px;gap:9px}
   .bar-label{grid-column:1;font-size:12px}
   .bar-track{grid-column:1}
   .bar-val{grid-column:2;grid-row:1/3;align-self:center}
   .ctrl{gap:10px}
   input[type=range]{width:100%}
-  .spec{font-size:11px}
-  .card,.kpi,.note,table{border-radius:18px}
+  .card,.kpi,.note,.legal,table{border-radius:15px}
+  .legal{padding:22px 19px}
+  .legal-t{font-size:14.5px}
+  td,th{padding:11px 11px}
 }
 @media (max-width:520px){ .g5,.g3{grid-template-columns:1fr} }
 </style></head><body>
 
-<div class="topbar"></div>
-<div class="hero"><div class="inner"><div class="hfcard">
-<h1>画布平台 · Seedance 2.5 出片成本与性价比对比</h1>
-<div class="sub">5 个平台 / 20 个档位 · 币种 CNY + USD · 汇率 1 USD = 6.7487 CNY（2026-09-21）</div>
-<div><span class="hl">全部折算为同一口径可比</span><span class="spec">Seedance 2.5 · 720p · 16:9 · 30s · 全能参考</span></div>
-<div class="disc"><span class="disc-i">!</span><span>
-<b>价格说明：</b>本页所有会员年费与单条生成价格，均取决于各平台<b>当前的活动力度与限时优惠</b>，随活动周期、渠道与档位政策浮动，<b>仅代表本页数据采集时点（2026-09-21）的情况，不代表最终价格</b>。请以下单时平台页面实际显示为准。
+<div class="promo">
+  <span><b>价格说明：</b>本页价格为 2026-09-21 采集快照，取决于各平台当期活动与限时优惠力度，不代表最终价格</span>
+  <span class="tag2">数据时点 2026-09-21</span>
+</div>
+
+<div class="nav"><div class="inner">
+  <a class="brand" href="#top"><i></i>画布平台成本对比</a>
+  <nav class="menu">
+    <a href="#m-1">计算口径</a>
+    <a href="#m-3">档位对比</a>
+    <a href="#m-6">达标阶梯</a>
+    <a href="#m-7">折扣透视</a>
+    <a href="#m-12">原始数据</a>
+    <a class="soon">视觉理解模型排行榜<i class="nb">即将上线</i></a>
+  </nav>
+  <span class="spec">Seedance 2.5 · 720p · 16:9 · 30s · 全能参考</span>
+</div></div>
+
+<div class="hero" id="top">
+  <div class="eyebrow">Seedance 2.5 &middot; Cost Benchmark</div>
+  <h1>同一条 30 秒视频，<br>最贵档比最省档贵 <em>5.26 倍</em></h1>
+  <p class="lead">5 个平台、20 个档位，全部压平积分币值、折算成同口径的单条现金成本。含边际成本阶梯、按产量反查的达标最省方案，以及用官方原价做的折扣结构压力测试。</p>
+  <div class="btns">
+    <a class="btn btn-fill" href="#m-3">查看 20 档位对比</a>
+    <a class="btn btn-ghost" href="#m-6">按产量反查最省方案</a>
+  </div>
+  <div class="disc"><span class="disc-i">!</span><span>
+<b>价格说明：</b>本页所有会员年费与单条生成价格，均取决于各平台<b>当前的活动力度与限时优惠</b>，随活动周期、渠道与档位政策浮动，<b>仅代表 2026-09-21 采集时点的情况，不代表最终价格</b>。请以下单时平台页面实际显示为准。
 </span></div>
-</div></div></div>
+</div>
 
 <div class="wrap">
 
-<h2>一、计算口径</h2>
+<h2 id="m-1"><span class="ey">01</span>计算口径</h2>
 <div class="note">
 <b>核心问题：</b>五个平台的「积分」是各自发行的内部计价币，币值互不相同 —— 同样一条 30 秒视频，即梦扣 <b>600</b> 分、小云雀扣 <b>800</b> 分、libtv 扣 <b>1,380</b> 分、Higgsfield 扣 <b>210</b> 分、Neowow 扣 <b>7,500</b> 分。<b>直接比较积分消耗没有意义</b>，必须先压平币值再折算成现金。<br><br>
 <b>归一化链条：</b><br>
@@ -250,7 +286,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 <b>⚠ 价格时效性声明：</b>本页所有会员年费与单条生成价格，均取决于各平台<b>当前的活动力度与限时优惠</b>，会随活动周期、渠道与档位政策浮动，<b>仅代表 2026-09-21 采集时点的情况，不代表最终价格</b>。本页的价值在于「方法」而非「数字」—— 归一化公式与阶梯算法在任何价格下都成立，把最新价格代入即可自行重算。请以下单时平台页面实际显示为准。
 </div>
 
-<h2>二、关键结论</h2>
+<h2 id="m-2"><span class="ey">02</span>关键结论</h2>
 <div class="grid g5">
   <div class="kpi hi"><div class="t">全场单条成本最优</div>
     <div class="v">¥20.21</div>
@@ -277,7 +313,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     低档位普遍是「高价试用」陷阱</div></div>
 </div>
 
-<h2>三、全档位主表（按单条成本升序，统一折算 CNY）</h2>
+<h2 id="m-3"><span class="ey">03</span>全档位主表（按单条成本升序，统一折算 CNY）</h2>
 <div class="note" style="margin-bottom:14px">
 Higgsfield 三档为 USD 报价，年费栏显示本币并在下方标注折合 CNY；「单条成本」与「相对最优」两列已统一折算，故可直接排序。Higgsfield 报价<b>不含 VAT 及地方税</b>，实际到手成本需再上浮。
 </div>
@@ -285,20 +321,20 @@ Higgsfield 三档为 USD 报价，年费栏显示本币并在下方标注折合 
 <th onclick="sortBy('v',this)">#</th><th>平台</th><th>档位</th>
 <th onclick="sortBy('p',this)" class="ctr">年费</th><th class="ctr">月积分</th>
 <th class="ctr">元/积分</th>
-<th onclick="sortBy('v',this)" class="ctr">单条成本 ▾</th><th class="ctr">元/秒</th>
-<th onclick="sortBy('c',this)" class="ctr">月产能 ▾</th><th class="ctr">年产能</th><th class="ctr">相对最优</th>
+<th onclick="sortBy('v',this)" class="ctr">单条成本 ↓</th><th class="ctr">元/秒</th>
+<th onclick="sortBy('c',this)" class="ctr">月产能 ↓</th><th class="ctr">年产能</th><th class="ctr">相对最优</th>
 </tr></thead><tbody>
 <tr class="top" data-v="20.2089" data-c="49.067" data-p="11899.00"><td class="ctr rk">①</td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>ULTRA</td><td class="num">¥11,899</td><td class="num">368,000</td><td class="num">0.00269</td><td class="num strong">¥20.21</td><td class="num">0.674</td><td class="num">49.07</td><td class="num">589</td><td class="num ybest">1.000×</td></tr><tr class="" data-v="20.2222" data-c="90.000" data-p="21840.00"><td class="ctr rk">②</td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>超级会员</td><td class="num">¥21,840</td><td class="num">54,000</td><td class="num">0.03370</td><td class="num strong">¥20.22</td><td class="num">0.674</td><td class="num">90.00</td><td class="num">1080</td><td class="num ">1.001×</td></tr><tr class="" data-v="21.0998" data-c="20.533" data-p="5199.00"><td class="ctr rk">③</td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>高级会员</td><td class="num">¥5,199</td><td class="num">12,320</td><td class="num">0.03517</td><td class="num strong">¥21.10</td><td class="num">0.703</td><td class="num">20.53</td><td class="num">246</td><td class="num ">1.044×</td></tr><tr class="" data-v="21.3759" data-c="38.400" data-p="9850.00"><td class="ctr rk">4</td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>MAX</td><td class="num">¥9,850</td><td class="num">288,000</td><td class="num">0.00285</td><td class="num strong">¥21.38</td><td class="num">0.713</td><td class="num">38.40</td><td class="num">461</td><td class="num ">1.058×</td></tr><tr class="" data-v="21.8591" data-c="36.594" data-p="9599.00"><td class="ctr rk">5</td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>至尊版</td><td class="num">¥9,599</td><td class="num">50,500</td><td class="num">0.01584</td><td class="num strong">¥21.86</td><td class="num">0.729</td><td class="num">36.59</td><td class="num">439</td><td class="num ">1.082×</td></tr><tr class="" data-v="23.4873" data-c="23.768" data-p="6699.00"><td class="ctr rk">6</td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>豪华版</td><td class="num">¥6,699</td><td class="num">32,800</td><td class="num">0.01702</td><td class="num strong">¥23.49</td><td class="num">0.783</td><td class="num">23.77</td><td class="num">285</td><td class="num ">1.162×</td></tr><tr class="" data-v="26.5509" data-c="14.400" data-p="4588.00"><td class="ctr rk">7</td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>Pro</td><td class="num">¥4,588</td><td class="num">108,000</td><td class="num">0.00354</td><td class="num strong">¥26.55</td><td class="num">0.885</td><td class="num">14.40</td><td class="num">173</td><td class="num ">1.314×</td></tr><tr class="" data-v="26.6667" data-c="68.250" data-p="21840.00"><td class="ctr rk">8</td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>超级会员</td><td class="num">¥21,840</td><td class="num">54,600</td><td class="num">0.03333</td><td class="num strong">¥26.67</td><td class="num">0.889</td><td class="num">68.25</td><td class="num">819</td><td class="num ">1.320×</td></tr><tr class="" data-v="27.5083" data-c="11.812" data-p="3899.00"><td class="ctr rk">9</td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>高级版</td><td class="num">¥3,899</td><td class="num">16,300</td><td class="num">0.01993</td><td class="num strong">¥27.51</td><td class="num">0.917</td><td class="num">11.81</td><td class="num">142</td><td class="num ">1.361×</td></tr><tr class="" data-v="27.7722" data-c="15.000" data-p="4999.00"><td class="ctr rk">10</td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>高级会员</td><td class="num">¥4,999</td><td class="num">12,000</td><td class="num">0.03472</td><td class="num strong">¥27.77</td><td class="num">0.926</td><td class="num">15.00</td><td class="num">180</td><td class="num ">1.374×</td></tr><tr class="" data-v="29.9750" data-c="3.333" data-p="1199.00"><td class="ctr rk">11</td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>进阶版</td><td class="num">¥1,199</td><td class="num">4,600</td><td class="num">0.02172</td><td class="num strong">¥29.97</td><td class="num">0.999</td><td class="num">3.33</td><td class="num">40</td><td class="num ">1.483×</td></tr><tr class="" data-v="34.4540" data-c="2.900" data-p="1199.00"><td class="ctr rk">12</td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>标准会员</td><td class="num">¥1,199</td><td class="num">2,320</td><td class="num">0.04307</td><td class="num strong">¥34.45</td><td class="num">1.148</td><td class="num">2.90</td><td class="num">35</td><td class="num ">1.705×</td></tr><tr class="" data-v="36.3855" data-c="1.038" data-p="453.00"><td class="ctr rk">13</td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>基础会员</td><td class="num">¥453</td><td class="num">830</td><td class="num">0.04548</td><td class="num strong">¥36.39</td><td class="num">1.213</td><td class="num">1.04</td><td class="num">12</td><td class="num ">1.800×</td></tr><tr class="" data-v="41.5972" data-c="1.200" data-p="599.00"><td class="ctr rk">14</td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>PLUS</td><td class="num">¥599</td><td class="num">9,000</td><td class="num">0.00555</td><td class="num strong">¥41.60</td><td class="num">1.387</td><td class="num">1.20</td><td class="num">14</td><td class="num ">2.058×</td></tr><tr class="" data-v="42.9638" data-c="3.683" data-p="1899.00"><td class="ctr rk">15</td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>标准会员</td><td class="num">¥1,899</td><td class="num">2,210</td><td class="num">0.07161</td><td class="num strong">¥42.96</td><td class="num">1.432</td><td class="num">3.68</td><td class="num">44</td><td class="num ">2.126×</td></tr><tr class="" data-v="43.6233" data-c="1.087" data-p="569.00"><td class="ctr rk">16</td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>标准版</td><td class="num">¥569</td><td class="num">1,500</td><td class="num">0.03161</td><td class="num strong">¥43.62</td><td class="num">1.454</td><td class="num">1.09</td><td class="num">13</td><td class="num ">2.159×</td></tr><tr class="" data-v="45.4483" data-c="1.208" data-p="659.00"><td class="ctr rk">17</td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>基础会员</td><td class="num">¥659</td><td class="num">725</td><td class="num">0.07575</td><td class="num strong">¥45.45</td><td class="num">1.515</td><td class="num">1.21</td><td class="num">14</td><td class="num ">2.249×</td></tr><tr class="" data-v="46.7685" data-c="14.286" data-p="8017.46"><td class="ctr rk">18</td><td><span class="dot" style="background:#ED1572"></span>Higgsfield<span class=tagu>USD</span></td><td>Ultra</td><td class="num">$1,188<div class="cny">≈¥8,017</div></td><td class="num">3,000</td><td class="num">0.22271</td><td class="num strong">¥46.77</td><td class="num">1.559</td><td class="num">14.29</td><td class="num">171</td><td class="num ">2.314×</td></tr><tr class="" data-v="55.2719" data-c="4.762" data-p="3158.39"><td class="ctr rk">19</td><td><span class="dot" style="background:#ED1572"></span>Higgsfield<span class=tagu>USD</span></td><td>Plus</td><td class="num">$468<div class="cny">≈¥3,158</div></td><td class="num">1,000</td><td class="num">0.26320</td><td class="num strong">¥55.27</td><td class="num">1.842</td><td class="num">4.76</td><td class="num">57</td><td class="num ">2.735×</td></tr><tr class="" data-v="106.2920" data-c="0.952" data-p="1214.77"><td class="ctr rk">20</td><td><span class="dot" style="background:#ED1572"></span>Higgsfield<span class=tagu>USD</span></td><td>Starter</td><td class="num">$180<div class="cny">≈¥1,215</div></td><td class="num">200</td><td class="num">0.50615</td><td class="num strong">¥106.29</td><td class="num">3.543</td><td class="num">0.95</td><td class="num">11</td><td class="num ">5.260×</td></tr>
 </tbody></table></div>
 <div class="sub" style="margin-top:10px">左右滑动查看完整表格 · 点击表头可排序 ·「相对最优」= 本档单条成本 ÷ 全场最低单条成本（1.000× 为最优）</div>
 
-<h2>四、单条成本排行</h2>
-<div class="card"><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#00C65A"></span>Neowow ULTRA</div><div class="bar-track"><div class="bar-fill b-good" style="width:19.0%"></div></div><div class="bar-val">¥20.21</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#3280FF"></span>即梦 超级会员</div><div class="bar-track"><div class="bar-fill b-good" style="width:19.0%"></div></div><div class="bar-val">¥20.22</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#3280FF"></span>即梦 高级会员</div><div class="bar-track"><div class="bar-fill b-good" style="width:19.9%"></div></div><div class="bar-val">¥21.10</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#00C65A"></span>Neowow MAX</div><div class="bar-track"><div class="bar-fill b-good" style="width:20.1%"></div></div><div class="bar-val">¥21.38</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 至尊版</div><div class="bar-track"><div class="bar-fill b-mid" style="width:20.6%"></div></div><div class="bar-val">¥21.86</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 豪华版</div><div class="bar-track"><div class="bar-fill b-mid" style="width:22.1%"></div></div><div class="bar-val">¥23.49</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#00C65A"></span>Neowow Pro</div><div class="bar-track"><div class="bar-fill b-mid" style="width:25.0%"></div></div><div class="bar-val">¥26.55</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#FABC00"></span>小云雀 超级会员</div><div class="bar-track"><div class="bar-fill b-mid" style="width:25.1%"></div></div><div class="bar-val">¥26.67</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 高级版</div><div class="bar-track"><div class="bar-fill b-mid" style="width:25.9%"></div></div><div class="bar-val">¥27.51</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#FABC00"></span>小云雀 高级会员</div><div class="bar-track"><div class="bar-fill b-mid" style="width:26.1%"></div></div><div class="bar-val">¥27.77</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 进阶版</div><div class="bar-track"><div class="bar-fill b-mid" style="width:28.2%"></div></div><div class="bar-val">¥29.97</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#FABC00"></span>小云雀 标准会员</div><div class="bar-track"><div class="bar-fill b-bad" style="width:32.4%"></div></div><div class="bar-val">¥34.45</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#FABC00"></span>小云雀 基础会员</div><div class="bar-track"><div class="bar-fill b-bad" style="width:34.2%"></div></div><div class="bar-val">¥36.39</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#00C65A"></span>Neowow PLUS</div><div class="bar-track"><div class="bar-fill b-bad" style="width:39.1%"></div></div><div class="bar-val">¥41.60</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#3280FF"></span>即梦 标准会员</div><div class="bar-track"><div class="bar-fill b-bad" style="width:40.4%"></div></div><div class="bar-val">¥42.96</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 标准版</div><div class="bar-track"><div class="bar-fill b-bad" style="width:41.0%"></div></div><div class="bar-val">¥43.62</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#3280FF"></span>即梦 基础会员</div><div class="bar-track"><div class="bar-fill b-bad" style="width:42.8%"></div></div><div class="bar-val">¥45.45</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#ED1572"></span>Higgsfield Ultra</div><div class="bar-track"><div class="bar-fill b-bad" style="width:44.0%"></div></div><div class="bar-val">¥46.77</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#ED1572"></span>Higgsfield Plus</div><div class="bar-track"><div class="bar-fill b-bad" style="width:52.0%"></div></div><div class="bar-val">¥55.27</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#ED1572"></span>Higgsfield Starter</div><div class="bar-track"><div class="bar-fill b-bad" style="width:100.0%"></div></div><div class="bar-val">¥106.29</div></div></div>
+<h2 id="m-4"><span class="ey">04</span>单条成本排行（条形越长 = 越省）</h2>
+<div class="card"><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#00C65A"></span>Neowow ULTRA</div><div class="bar-track"><div class="bar-fill b-good" style="width:100.0%"></div></div><div class="bar-val">¥20.21</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#3280FF"></span>即梦 超级会员</div><div class="bar-track"><div class="bar-fill b-good" style="width:99.9%"></div></div><div class="bar-val">¥20.22</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#3280FF"></span>即梦 高级会员</div><div class="bar-track"><div class="bar-fill b-good" style="width:95.8%"></div></div><div class="bar-val">¥21.10</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#00C65A"></span>Neowow MAX</div><div class="bar-track"><div class="bar-fill b-good" style="width:94.5%"></div></div><div class="bar-val">¥21.38</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 至尊版</div><div class="bar-track"><div class="bar-fill b-mid" style="width:92.5%"></div></div><div class="bar-val">¥21.86</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 豪华版</div><div class="bar-track"><div class="bar-fill b-mid" style="width:86.0%"></div></div><div class="bar-val">¥23.49</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#00C65A"></span>Neowow Pro</div><div class="bar-track"><div class="bar-fill b-mid" style="width:76.1%"></div></div><div class="bar-val">¥26.55</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#FABC00"></span>小云雀 超级会员</div><div class="bar-track"><div class="bar-fill b-mid" style="width:75.8%"></div></div><div class="bar-val">¥26.67</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 高级版</div><div class="bar-track"><div class="bar-fill b-mid" style="width:73.5%"></div></div><div class="bar-val">¥27.51</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#FABC00"></span>小云雀 高级会员</div><div class="bar-track"><div class="bar-fill b-mid" style="width:72.8%"></div></div><div class="bar-val">¥27.77</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 进阶版</div><div class="bar-track"><div class="bar-fill b-mid" style="width:67.4%"></div></div><div class="bar-val">¥29.97</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#FABC00"></span>小云雀 标准会员</div><div class="bar-track"><div class="bar-fill b-bad" style="width:58.7%"></div></div><div class="bar-val">¥34.45</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#FABC00"></span>小云雀 基础会员</div><div class="bar-track"><div class="bar-fill b-bad" style="width:55.5%"></div></div><div class="bar-val">¥36.39</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#00C65A"></span>Neowow PLUS</div><div class="bar-track"><div class="bar-fill b-bad" style="width:48.6%"></div></div><div class="bar-val">¥41.60</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#3280FF"></span>即梦 标准会员</div><div class="bar-track"><div class="bar-fill b-bad" style="width:47.0%"></div></div><div class="bar-val">¥42.96</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 标准版</div><div class="bar-track"><div class="bar-fill b-bad" style="width:46.3%"></div></div><div class="bar-val">¥43.62</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#3280FF"></span>即梦 基础会员</div><div class="bar-track"><div class="bar-fill b-bad" style="width:44.5%"></div></div><div class="bar-val">¥45.45</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#ED1572"></span>Higgsfield Ultra</div><div class="bar-track"><div class="bar-fill b-bad" style="width:43.2%"></div></div><div class="bar-val">¥46.77</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#ED1572"></span>Higgsfield Plus</div><div class="bar-track"><div class="bar-fill b-bad" style="width:36.6%"></div></div><div class="bar-val">¥55.27</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#ED1572"></span>Higgsfield Starter</div><div class="bar-track"><div class="bar-fill b-bad" style="width:19.0%"></div></div><div class="bar-val">¥106.29</div></div></div>
 <div class="note good" style="margin-top:14px">
 <b>看点：</b>Neowow ULTRA 与即梦超级会员的「元/秒」均为 <b>¥0.674</b>，完全相同 —— 两家顶级档位的定价密度已收敛到同一水平，此时比拼的不再是单价而是年费门槛与产能上限。Higgsfield 最优档为 <b>¥1.559/秒</b>，约为前者的 2.3 倍。
 </div>
 
-<h2>五、边际成本阶梯：升档到底值不值</h2>
+<h2 id="m-5"><span class="ey">05</span>边际成本阶梯：升档到底值不值</h2>
 <div class="note" style="margin-bottom:14px">
 <b>边际成本</b>指从下一档升到上一档，每多获得一条视频产能实际多花多少钱。<b>判定标尺为全场最优单价 ¥20.21/条</b>：边际成本 ≤ ¥20.5 说明这一步买到的产能已达到甚至优于全场最优水平；¥20.5–26 为一般；&gt; ¥26 说明你在为不需要的产能付费。
 </div>
@@ -314,7 +350,7 @@ Higgsfield 三档为 USD 报价，年费栏显示本币并在下方标注折合 
 ④ <b>小云雀与 Higgsfield 的阶梯最陡：</b>两家从最低档往上的边际成本远高于国内第一梯队，说明它们的低档位不是「便宜入口」而是「高价试用装」，要降到有竞争力的单价必须直接上顶档。
 </div>
 
-<h2>六、达标总支出阶梯（核心结论表）</h2>
+<h2 id="m-6"><span class="ey">06</span>达标总支出阶梯（核心结论表）</h2>
 <div class="note warn" style="margin-bottom:14px">
 <b>「单条成本最省」≠「花钱最省」。</b>若你的产量用不满某个高档位，为多余的产能付费反而不如买一个单价更高但刚好够用的小档位。下表按「单一订阅」约束（不重复开卡、不混平台）列出每个产量区间的最省方案。
 </div>
@@ -342,7 +378,7 @@ Higgsfield 三档为 USD 报价，年费栏显示本币并在下方标注折合 
   <div class="sub" style="margin-top:10px">「组合订阅」允许多份订阅叠加（多账号），用于产量超出单档位上限时。多账号的运营成本未计入。</div>
 </div>
 
-<h2>七、折扣结构透视：高档位的优势是真是假</h2>
+<h2 id="m-7"><span class="ey">07</span>折扣结构透视：高档位的优势是真是假</h2>
 <div class="note warn" style="margin-bottom:14px">
 本次得出的单价优势，可能来自两种完全不同的来源：<b>(A) 真实规模效应</b> —— 买得多，平台真的给更低的单价；<b>(B) 折扣力度差异</b> —— 原价是线性的，便宜纯粹因为本次活动折扣更深。<br>
 区分方法：把每个档位换回<b>官方公示原价</b>（Higgsfield 取其月付价×12）再算一次单条成本。若原价下的单价收敛成一条水平线，说明优势全部来自折扣（B），活动一结束就会消失。
@@ -360,7 +396,7 @@ Higgsfield 三档为 USD 报价，年费栏显示本币并在下方标注折合 
 <b>⑤ 决策含义：</b>若打算长期（跨活动周期）使用，应<b>按原价排序决策</b>。按原价，国内排序为：即梦超级 ¥40.44 &lt; 即梦高级 ¥42.20 &lt; libtv 高级 ¥52.20 &lt; 小云雀超级 ¥53.33 &lt; Neowow 全档 ¥75.00。<b>Neowow 在最坏情形下垫底。</b>
 </div>
 
-<h2>八、海外 vs 国内：Higgsfield 的定位</h2>
+<h2 id="m-8"><span class="ey">08</span>海外 vs 国内：Higgsfield 的定位</h2>
 <div class="grid g3">
   <div class="kpi pink"><div class="t">Higgsfield Ultra</div>
     <div class="v">$1,188</div>
@@ -384,7 +420,7 @@ Higgsfield 三档为 USD 报价，年费栏显示本币并在下方标注折合 
 <b>务必注意：</b>Higgsfield 积分<b>月底清零、不结转</b>；年付为一次性全额扣款且自动续订（Terms 9.3(a)），需提前手动取消。
 </div>
 
-<h2>九、海报宣传价 vs 实际到手价</h2>
+<h2 id="m-9"><span class="ey">09</span>海报宣传价 vs 实际到手价</h2>
 <div class="note warn" style="margin-bottom:14px">
 各平台海报上的「低至 X 元/秒」<b>全部按非全能参考的最低价档位计算</b>，与本次统一口径不可混用。下表为同一顶级档位下，海报宣称值与按 7500 / 800 / 1380 / 600 积分实算的到手值对比。
 </div>
@@ -395,7 +431,7 @@ Higgsfield 三档为 USD 报价，年费栏显示本币并在下方标注折合 
 <b>解读：</b>倍差 = 全能参考模式相对基础模式的成本溢价。Neowow 2.59× 溢价最高；<b>即梦与小云雀均报「¥0.40/秒」，倍差同为 1.69×，但小云雀实算 0.889 元/秒、即梦 0.674 元/秒 —— 同样一句「低至 0.40 元/秒」，小云雀的实际成本高出 +31.9%</b>。若你的工作流强依赖「全能参考」（本次统一口径即如此），海报价格对你全部失效。
 </div>
 
-<h2>十、必须核实的五项风险</h2>
+<h2 id="m-10"><span class="ey">10</span>必须核实的五项风险</h2>
 <div class="note warn">
 <b>1. 年费档位均为限时活动价，恢复原价后结论会变（详见第七节）。</b>
 按原价重算，Neowow ULTRA 单条成本由 ¥20.21 升至 <b>¥75.00</b>，全场最优解变为即梦超级会员（¥40.44/条）。
@@ -415,7 +451,7 @@ Higgsfield 三档为 USD 报价，年费栏显示本币并在下方标注折合 
 本次按「成功出片才扣分」的理想情况计算。若某平台失败率 20% 且不退积分，其实际单条成本需上浮 <b>25%</b>，足以反转排名。另需注意 <b>Higgsfield 积分月底清零、不结转</b>，产量波动月份的实际成本会进一步高于本表估算。
 </div>
 
-<h2>十一、执行建议</h2>
+<h2 id="m-11"><span class="ey">11</span>执行建议</h2>
 <div class="note good" style="margin-bottom:14px">
 <b>决策顺序：先定月产量 → 查第六节阶梯表 → 落到唯一档位 → 再用第七节的原价排序做压力测试。</b>
 不要从「哪家单价低」入手：单价最优解（Neowow ULTRA，49.07 条/月）对绝大多数人都是产能过剩，而且它的优势已被证明<b>完全依赖折扣</b>。
@@ -440,7 +476,7 @@ Higgsfield 三档为 USD 报价，年费栏显示本币并在下方标注折合 
 <li><b>小云雀 vs 即梦的取舍：</b>同为字节系、同价（超级档均 ¥21,840/年），但小云雀单条耗 800 积分 vs 即梦 600 积分。按你给出的 800 口径，<b>小云雀超级在任一产量区间都不如即梦超级，无价格理由选购</b>；选它只能是短剧流水线、CLI/API 工作流等非价格能力。另据公开反馈，小云雀<b>无官方客服渠道，积分返还与权益咨询无反馈路径</b>。</li>
 </ul>
 
-<h2>十二、附录：原始数据全清单</h2>
+<h2 id="m-12"><span class="ey">12</span>附录：原始数据全清单</h2>
 <div class="note mb22">
 本节完整列出本次计算所依据的<b>全部原始输入</b>，不含任何推算值。20 个档位、5 条积分消耗、4 条海报宣传价、10 张来源截图逐一登记。
 </div>
