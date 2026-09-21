@@ -1216,7 +1216,7 @@ cost_body = f"""
     <h2><span class="ey">02</span>全档位对比</h2>
     <div class="sd">条形越长＝越省（以全场最优价为 100%）。点表头可排序，左右滑动查看完整表格。</div>
   </div>
-<table id="main"><thead><tr>
+<div class="tw scroll-y tw-main"><table id="main"><thead><tr>
     <th onclick="sortBy('v',this)">#</th><th>平台</th><th>档位</th>
     <th onclick="sortBy('p',this)" class="ctr">年费</th><th class="ctr">月积分</th>
     <th onclick="sortBy('v',this)" class="ctr">单条成本 ↓</th><th class="ctr">元/秒</th>
