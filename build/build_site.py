@@ -1071,7 +1071,7 @@ home_body = f"""
       <span class="arrow">→</span>
       <div class="et">LIVE · {UPDATED}</div>
       <h3>平台成本对比</h3>
-      <p>5 个平台、{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本。</p>
+      <p>{len(PLATFORMS)} 个平台、{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本。</p>
       <div class="nums">
         <div><s>¥{f2(BEST)}</s><em>最低单条</em></div>
         <div><s>{WORST/BEST:.2f}×</s><em>最贵/最省</em></div>
@@ -1235,7 +1235,7 @@ cost_body = f"""
 <div class="hero">
   <div class="eyebrow">{COST["eyebrow"]}</div>
   <h1>同一条 {SEC_PER_CLIP} 秒视频<br>最贵档比最省档贵 <em>{WORST/BEST:.2f} 倍</em></h1>
-  <p class="lead">5 个平台的积分币值互不相同，直接比消耗没有意义。这里先把它们压平到同一口径，再折算成单条现金成本。</p>
+  <p class="lead">{len(PLATFORMS)} 个平台的积分币值互不相同，直接比消耗没有意义。这里先把它们压平到同一口径，再折算成单条现金成本。</p>
   <div class="meta">
     <span><i></i>数据时点 <b>{UPDATED}</b></span>
     <span><i></i>平台 <b>{len(PLATFORMS)}</b></span>
@@ -1378,11 +1378,11 @@ cost_body = f"""
 </div>
 
 <div id="retry">
-  {sec_head("", "失败重试成本", "五家平台失败均<b>不消耗积分</b> —— 本表全部单价按「成功出片才扣分」计算，与实际计费一致，无需再折算失败率。")}
+  {sec_head("", "失败重试成本", "各平台失败均<b>不消耗积分</b> —— 本表全部单价按「成功出片才扣分」计算，与实际计费一致，无需再折算失败率。")}
   {table([("平台", None), ("失败是否扣分", None), ("依据", None)], retry_rows, "tw")}
   <div class="note good" style="margin-top:14px">
     <b>为什么这一项重要：</b>若某平台失败不退分且失败率 20%，其实际单条成本需上浮 25%，足以反转全部排名。
-    既然五家均不扣分，<b>上表排名不受失败率影响</b>，可直接按单价决策。<br><br>{COST["retryNote"]}
+    既然各平台均不扣分，<b>上表排名不受失败率影响</b>，可直接按单价决策。<br><br>{COST["retryNote"]}
   </div>
   <details style="margin-top:14px">
     <summary>跨零点提交的积分归属差异<span class="chev">›</span></summary>
@@ -1395,7 +1395,7 @@ cost_body = f"""
   <details>
     <summary>计算口径与归一化链条<span class="chev">›</span></summary>
     <div class="dbody">
-      <b>核心问题：</b>五个平台的「积分」是各自发行的内部计价币，币值互不相同 ——
+      <b>核心问题：</b>{len(PLATFORMS)} 个平台的「积分」是各自发行的内部计价币，币值互不相同 ——
       同样一条 {SEC_PER_CLIP} 秒视频，即梦与小云雀各扣 <b>600</b> 分、libtv 扣 <b>1,380</b> 分、
       Higgsfield 扣 <b>210</b> 分、Neowow 扣 <b>7,500</b> 分。直接比较积分消耗没有意义。<br><br>
       <b>归一化链条：</b><br>
