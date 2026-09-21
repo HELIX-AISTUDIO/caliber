@@ -43,6 +43,7 @@ PLATFORMS = {
     "小云雀":      {"name": "小云雀",      "color": "#FABC00", "currency": "CNY", "region": "cn"},
     "Higgsfield": {"name": "Higgsfield", "color": "#ED1572", "currency": "USD", "region": "global",
                    "excludeTax": True},
+    "Tapnow":     {"name": "Tapnow",     "color": "#A78BFA", "currency": "USD", "region": "global"},
 }
 
 # ═══════════ 汇率 ═══════════
@@ -55,7 +56,8 @@ FX = {"pair": "USD_CNY", "rate": 6.7487, "asOf": UPDATED,
 SPEC = {"text": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考", "secondsPerClip": 30,
         "note": "全部平台的单条积分消耗均在此口径下测得，是本次对比成立的唯一前提。"}
 
-CREDITS_PER_VIDEO = {"libtv": 1380, "Neowow": 7500, "即梦": 600, "小云雀": 600, "Higgsfield": 210}
+CREDITS_PER_VIDEO = {"libtv": 1380, "Neowow": 7500, "即梦": 600, "小云雀": 600,
+                     "Higgsfield": 210, "Tapnow": 1200}
 
 CREDITS_SOURCE = {
     "libtv":      "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s",
@@ -63,6 +65,7 @@ CREDITS_SOURCE = {
     "即梦":        "即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s",
     "小云雀":      "Seedance 2.5 · 16:9 · 720P · 30s（用户确认 600 积分）",
     "Higgsfield": "Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard",
+    "Tapnow":     "Seedance 2.5 · 相同参数（用户口径）→ 1,200 积分",
 }
 
 # ═══════════ 档位清单 ═══════════
@@ -119,6 +122,22 @@ PLANS = [
     {"platform": "Higgsfield", "tier": "Ultra", "original": 1548,
      "credits": [{"credits": 3000, "price": 1188}, {"credits": 6000, "price": 2328},
                  {"credits": 9000, "price": 3240}]},
+
+    # ── Tapnow（USD；连续包年 50% OFF 口径）──
+    # 滑动档位，故每个选项的原价各不相同 —— 原价随选项下沉，见下方 model 说明
+    {"platform": "Tapnow", "tier": "BASIC", "credits": [
+        {"credits": 1500, "price": 90, "original": 180}]},
+    {"platform": "Tapnow", "tier": "PRO", "credits": [
+        {"credits": 3500,  "price": 315,  "original": 420},
+        {"credits": 6000,  "price": 540,  "original": 720},
+        {"credits": 9500,  "price": 855,  "original": 1140},
+        {"credits": 11500, "price": 1035, "original": 1380},
+        {"credits": 20000, "price": 1800, "original": 2400}]},
+    {"platform": "Tapnow", "tier": "ULTIMATE", "credits": [
+        {"credits": 36000, "price": 2592, "original": 4320}]},
+    {"platform": "Tapnow", "tier": "MAX", "credits": [
+        {"credits": 72000,  "price": 5184, "original": 8640},
+        {"credits": 100000, "price": 7200, "original": 12000}]},
 ]
 
 # ═══════════ 平台公示兑换率（仅作口径反向校验）═══════════
@@ -147,6 +166,12 @@ SCOPE = {
     "currentShort": "年费档位",
     "impact": "短周期选项缺少包年折扣，单位成本通常高于年费；"
               "故本表的「最省」结论【仅在年费口径内成立】，不可直接外推到月付场景。",
+    "promoRule": "各平台页面除「年付折扣」外还常挂「限时活动福利」（如某模型限时折扣、"
+                 "无限用 N 天、赠送积分）。本表统一处理为："
+                 "【已体现在挂牌年价里的折扣（如年付 5 折）计入】；"
+                 "【与统一口径无关的其它模型折扣、时限权益、数额未公示的赠送 一律不计入】。"
+                 "理由：前者是价格，后者不是 —— 时限权益的价值取决于你在那几天用多少，"
+                 "无法折算成单条成本；数额未公示者无法量化。",
     "items": [
         {"label": "年费 / 连续包年", "status": "已覆盖", "done": True,
          "note": "本表全部档位均属此口径"},
@@ -181,7 +206,10 @@ RISKS = [
      "body": ["用户确认：各平台年费均为限时活动价。按官方划线原价重算，"
               "Neowow 各档单条成本大幅上升，全场最优解将转移 —— 详见「折扣结构」一节。",
               "libtv 高级版与至尊版、即梦高级四档、小云雀高级六档、"
-              "Neowow Pro 三档与 MAX 两档均为联动定价，活动结束后可能同步调整。"]},
+              "Neowow Pro 三档与 MAX 两档均为联动定价，活动结束后可能同步调整。",
+              "其中 Tapnow 的年价本身就是「连续包年 50% OFF」的活动价"
+              "（如 PRO 3.5K 档 $35 → $26.25/月），且它是全场折扣力度最大的一家 —— "
+              "活动退坡对其单条成本的影响也最大。本表按折后年价计算，原价见「折扣结构」。"]},
 ]
 
 # ═══════════ 数据来源 ═══════════
@@ -196,6 +224,10 @@ SOURCES = [
     {"page": "小云雀 订阅页",      "data": "四档年费；高级会员 6.3K–27.7K 六档联动"},
     {"page": "Higgsfield 订阅页", "data": "Starter $15 / Plus $39（划线 $49）/ Ultra $99（划线 $129）；Ultra 为 3,000–9,000 分三档滑块"},
     {"page": "Higgsfield 生成页", "data": "Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard → 210 积分"},
+    {"page": "Tapnow 订阅页", "data": "USD 计价；连续包年 50% OFF。BASIC $90/年 1,500 分；"
+                                       "PRO 五档滑动 $315/540/855/1035/1800（3.5K–20K 分）；"
+                                       "ULTIMATE $2592/年 36,000 分；MAX 两档 $5184/7200（72K / 100K 分）"},
+    {"page": "Tapnow 生成页", "data": "Seedance 2.5 · 相同参数 → 1,200 积分（用户口径）"},
 ]
 
 # ═══════════ 排行榜骨架（字段已锁定，回填 entries 即出榜）═══════════
@@ -254,7 +286,9 @@ def main():
         print("  data/%-24s %7d B" % (name, os.path.getsize(p)))
 
     # 结构自检：任何档位缺选项、选项缺键、价格为 None 都在此拦截
-    assert len(PLATFORMS) == 5
+    # 不再写死平台数：以档位表里实际出现的平台为准
+    assert len(PLATFORMS) == len({p['platform'] for p in PLANS}), \
+        'PLATFORMS 与 PLANS 中的平台不一致'
     n_opt = 0
     for p in PLANS:
         assert p["credits"], "%s %s 无积分选项" % (p["platform"], p["tier"])

@@ -92,7 +92,9 @@ def build_rows():
                 "mCap": mcap, "yCap": mcap * 12,
                 "label": c.get("label") or (auto_label(monthly) if multi else ""),
                 "multi": multi,
-                "renewal": p.get("renewal"), "original": p.get("original"),
+                "renewal": p.get("renewal"),
+                # 原价优先取选项级；档位级作为回退（老数据未逐项拆分时仍可用）
+                "original": c.get("original", p.get("original")),
                 "color": COLOR[plat],
             })
     return out

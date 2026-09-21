@@ -29,5 +29,11 @@
     "currency": "USD",
     "region": "global",
     "excludeTax": true
+  },
+  "Tapnow": {
+    "name": "Tapnow",
+    "color": "#A78BFA",
+    "currency": "USD",
+    "region": "global"
   }
 }
