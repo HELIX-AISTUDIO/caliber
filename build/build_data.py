@@ -100,8 +100,12 @@ w("cost-seedance25.json", {
          ]},
         {"platform": "libtv", "tier": "豪华版", "price": 6699, "renewal": 7399, "currency": "CNY",
          "monthlyCredits": 32800, "original": 14999, "originalNote": "划线原价"},
-        {"platform": "libtv", "tier": "至尊版", "price": 9599, "renewal": 9599, "currency": "CNY",
-         "monthlyCredits": 50500, "original": 22999, "originalNote": "划线原价"},
+        {"platform": "libtv", "tier": "至尊版", "price": 9599, "currency": "CNY",
+         "renewal": 9599, "monthlyCredits": 50500, "original": 22999, "originalNote": "划线原价",
+         "creditsOptions": [
+             {"monthlyCredits": 50500, "price": 9599, "label": "50.5K 档"},
+             {"monthlyCredits": 66000, "price": 12499, "label": "66K 档"}
+         ]},
         {"platform": "Neowow", "tier": "PLUS", "price": 599, "currency": "CNY",
          "monthlyCredits": 9000, "original": 1080, "originalNote": "划线原价"},
         {"platform": "Neowow", "tier": "Pro", "price": 4666, "currency": "CNY",

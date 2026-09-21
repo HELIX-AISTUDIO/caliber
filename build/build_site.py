@@ -68,7 +68,6 @@ CU = {"CNY": "¥", "USD": "$"}
 # 同一档位提供多个积分选项（creditsOptions）时，每个选项展开为一行（价格相同）
 SKIPPED = []   # 价格未获取的积分档，排除出计算并登记
 
-
 def _rows():
     """把 plans 展开为待计算行。
     注意：同一档位的不同积分选项**各自有价格**（平台为联动定价），
@@ -92,7 +91,6 @@ def _rows():
                         p["monthlyCredits"], CPV[p["platform"]], p["original"],
                         p["originalNote"], ""))
     return out
-
 
 RAW = _rows()
 OFFICIAL = {(pl, ti): r for pl, d in COST["officialRate"].items() for ti, r in d.items()}
@@ -185,13 +183,11 @@ for p in priced:
 def f2(v):
     return f"{v:,.2f}"
 
-
 # ── 主表「月产 N 条的年支出」列：构建时按默认 10 条预渲染 ──
 # 不依赖 JS，脚本失效时该列依然正确显示，JS 只负责改数字后重算
 CQ_DEFAULT = 10
 _cq_pool = [p["priceCNY"] for p in plans if p["mCap"] >= CQ_DEFAULT]
 CQ_BEST = min(_cq_pool) if _cq_pool else None
-
 
 def cq_cell(p):
     if p["mCap"] < CQ_DEFAULT:
@@ -199,31 +195,16 @@ def cq_cell(p):
     t = f'¥{p["priceCNY"]:,.0f}'
     return f'<span class="cq-best">{t} 最省</span>' if p["priceCNY"] == CQ_BEST else t
 
-
 def cq_default_text():
     secs = CQ_DEFAULT * 30
     mins = secs / 60
     dur = f'{mins/60:.1f} 小时' if mins >= 60 else f'{mins:.0f} 分钟'
     return f'= {secs:,} 秒 ≈ {dur}素材（1 条 = 30 秒）'
 
-
 # ── KPI 与建议取数（全部由数据派生，避免硬编码档位名）──
 _mid_pool = [r for r in ladder if 13 <= r["hi"] <= 28]
 mid = (min(_mid_pool, key=lambda r: r["plan"]["perVideoCNY"]) if _mid_pool else ladder[0])
 top = ladder[-1]
-
-
-def _risk_html():
-    """风险项从 data 渲染（避免与 JSON 重复维护）"""
-    out = ""
-    for r in COST.get("risks", []):
-        lv = r.get("level", "")
-        badge = ('<span class="warnbadge">最高</span>' if lv == "high"
-                 else ('<span class="warnbadge" style="background:#FABF00">待核实</span>' if lv == "warn" else ""))
-        out += (f'<details><summary>{badge}{r["title"]}<span class="chev">›</span></summary>'
-                f'<div class="dbody">{"<br><br>".join(r.get("body", []))}</div>')
-    return out
-
 
 def _plan_bullets():
     """执行建议的产量区间列表从达标阶梯自动生成"""
@@ -237,8 +218,6 @@ def _plan_bullets():
                 f'单价为最优解的 {p["rel"]:.2f} 倍）</li>')
     return out
 
-
-RISK_HTML = _risk_html()
 PLAN_BULLETS = _plan_bullets()
 
 claims = [{"plat": pl, "tier": t, "ad": ad, "real": G(pl, t)["perSecCNY"],
@@ -871,10 +850,8 @@ js_plans = json.dumps([{"plat": p["plat"], "tier": p["tier"], "price": round(p["
                         "mCap": round(p["mCap"], 4), "perVideo": round(p["perVideoCNY"], 3),
                         "color": p["color"]} for p in plans], ensure_ascii=False)
 
-
 def sub_css(s):
     return (s.replace("%%F_SANS%%", F_SANS).replace("%%F_DISP%%", F_DISP).replace("%%F_MONO%%", F_MONO))
-
 
 def page(title, desc, nav_html, body, extra_js=""):
     js = JS.replace("%%COST_JS%%", COST_JS).replace("__DATA__", js_plans) if "%data%" in extra_js else JS.replace("%%COST_JS%%", "")
@@ -930,7 +907,6 @@ def page(title, desc, nav_html, body, extra_js=""):
 <script>{js}</script>
 </body></html>"""
 
-
 def nav(active):
     """导航从 data/site.json 的 nav 数组生成；未完成板块带状态徽标但仍可进入"""
     items = ""
@@ -944,7 +920,6 @@ def nav(active):
   <nav class="menu">{items}</nav>
   <span class="spec">{SPEC}</span>
 </div></div>"""
-
 
 # ══════════════════════════════════════════════════════════════
 # 首页
@@ -1027,7 +1002,6 @@ def mini_bar(per_video):
     w = best / per_video * 100
     cls = "" if per_video <= best * 1.06 else (" m2" if per_video <= 30 else " m3")
     return f'<div class="mini{cls}"><i style="width:{w:.1f}%"></i></div>'
-
 
 main_rows = ""
 for p in sorted(plans, key=lambda x: x["perVideoCNY"]):
@@ -1137,8 +1111,6 @@ cost_body = f"""
   <a href="#discount">折扣结构</a>
   <a href="#official">官方公示对照</a>
   <a href="#retry">失败退分</a>
-  <a href="#risk">风险</a>
-  <a href="#pending">待补数据</a>
   <a href="#appendix">原始数据</a>
 </div></div>
 
@@ -1294,8 +1266,6 @@ cost_body = f"""
   </details>
 </section>
 
-
-
 <section id="official" class="reveal">
   <div class="sechead">
     <h2><span class="ey">06</span>海报宣传价 vs 实际到手价</h2>
@@ -1313,55 +1283,24 @@ cost_body = f"""
 <section id="retry" class="reveal">
   <div class="sechead">
     <h2><span class="ey">07</span>失败重试成本</h2>
-    <div class="sd">失败是否退分，决定「实际单条成本」要乘多少。此项此前未纳入计算 —— 若某平台失败不退分，其真实成本需按失败率上浮。</div>
+    <div class="sd">五家平台失败均<b>不消耗积分</b> —— 本表全部单价均按「成功出片才扣分」计算，与实际计费一致，无需再折算失败率。</div>
   </div>
   <div class="tw"><table><thead><tr>
-    <th>平台</th><th class="ctr">失败是否退分</th><th class="ctr">成本影响</th><th class="ctr">置信度</th><th>依据</th>
+    <th>平台</th><th class="ctr">失败是否扣分</th><th>依据</th>
   </tr></thead><tbody>
-  {"".join(f'<tr><td><span class="dot" style="background:{COLOR.get(x["plat"], "#767C85")}"></span>{x["plat"]}</td>'
-           f'<td class="ctr"><span class="tag {"v-good" if x["penalty"]=="0%" else ("v-bad" if "×" in x["penalty"] else "v-warn")}">{x["retry"]}</span></td>'
-           f'<td class="ctr num">{x["penalty"]}</td>'
-           f'<td class="ctr" style="white-space:normal">{x["confidence"]}</td>'
-           f'<td style="white-space:normal">{x["source"]}</td></tr>' for x in COST.get("retryPolicy", []))}
+    {"".join(f'<tr><td><span class="dot" style="background:{COLOR.get(x["plat"], "#767C85")}"></span>{x["plat"]}</td>'
+             f'<td class="ctr"><span class="tag v-good">{x["retry"]}</span></td>'
+             f'<td style="white-space:normal">{x["confidence"]}</td></tr>' for x in COST.get("retryPolicy", []))}
   </tbody></table></div>
+  <div class="note good" style="margin-top:14px">
+    <b>为什么这一项重要：</b>若某平台失败不退分且失败率 20%，其实际单条成本需上浮 25%，足以反转全部排名。
+    既然五家均不扣分，<b>上表排名不受失败率影响</b>，可以直接按单价决策。
+    <br><br>
+    <b>{COST.get("retryNote", "")}</b>
+  </div>
   <details style="margin-top:14px">
-    <summary>逐家说明与实测建议<span class="chev">›</span></summary>
-    <div class="dbody">
-      {"".join(f'<h3>{x["plat"]}</h3><p><b>{x["retry"]}</b>　成本影响 {x["penalty"]}　置信度 {x["confidence"]}</p><p>{x["detail"]}</p>' for x in COST.get("retryPolicy", []))}
-      <h3>跨零点扣分陷阱</h3>
-      <p>{COST.get("crossMidnightNote", "")}</p>
-      <h3>这对本表结论意味着什么</h3>
-      <p>上表全部单价均按「成功出片才扣分」计算。<b>若某平台失败不退分且失败率 20%，其实际单条成本需上浮 25%</b>，
-      足以改变排名。目前唯一有官方明确保证的是 <b>Higgsfield（失败自动退还）</b> ——
-      这是它在单价劣势之外的一项隐性优势，尤其适合需要反复抽卡的高失败率工作流。</p>
-      <p class="sub">置信度说明：Higgsfield 为官方文档原文；即梦与小云雀为第三方整理与投诉案例交叉印证，<b>不是官方用户协议</b>，
-      下单前建议实测一次并保留任务 ID。libtv 与 Neowow 未检索到公开规则。</p>
-    </div>
-  </details>
-</section>
-
-<section id="risk" class="reveal">
-  <div class="sechead">
-    <h2><span class="ey">08</span>风险与待核实项</h2>
-    <div class="sd">这 {len(COST.get("risks", []))} 项里任何一项变动都可能改变上表结论。</div>
-  </div>
-  {RISK_HTML}
-</section>
-
-<section id="pending" class="reveal">
-  <div class="sechead">
-    <h2><span class="ey">09</span>待补数据</h2>
-    <div class="sd">以下项目尚未获取或需确认，补齐后自动进入计算，页面无需改动。</div>
-  </div>
-  <details open>
-    <summary><span class="warnbadge" style="background:#FABF00">待补</span>{len(COST.get("pending", []))} 项待补 / 待确认<span class="chev">›</span></summary>
-    <div class="dbody">
-      <table><thead><tr><th>项目</th><th>为什么需要</th></tr></thead><tbody>
-      {"".join(f'<tr><td style="white-space:normal"><b>{x["item"]}</b></td>'
-               f'<td style="white-space:normal">{x["why"]}</td></tr>' for x in COST.get("pending", []))}
-      </tbody></table>
-      {"<h3>已排除出计算的积分档</h3><table><thead><tr><th>平台</th><th>档位</th><th class=\"ctr\">月积分</th><th>说明</th></tr></thead><tbody>" + "".join(f'<tr><td>{x["plat"]}</td><td>{x["tier"]}</td><td class=\"num\">{x["credits"]:,}</td><td>价格未获取，未纳入计算</td></tr>' for x in SKIPPED) + "</tbody></table>" if SKIPPED else ""}
-    </div>
+    <summary>跨零点提交的积分归属差异<span class="chev">›</span></summary>
+    <div class="dbody">{COST.get("crossMidnightNote", "")}</div>
   </details>
 </section>
 
@@ -1369,7 +1308,7 @@ cost_body = f"""
   <div class="sechead">
     
 
-<h2><span class="ey">10</span>方法论与原始数据</h2>
+<h2><span class="ey">08</span>方法论与原始数据</h2>
     <div class="sd">本节列出全部原始输入与计算链条，不含推算值，便于复核与复用。</div>
   </div>
   <details>
@@ -1418,13 +1357,13 @@ cost_body = f"""
 
 <section class="reveal">
   <div class="sechead">
-    <h2><span class="ey">11</span>执行建议</h2>
+    <h2><span class="ey">09</span>执行建议</h2>
     <div class="sd">决策顺序：先定月产量 → 查达标阶梯 → 落到唯一档位 → 用原价排序做压力测试。</div>
   </div>
   <div class="note good">
     <ul style="margin-top:0">
       {PLAN_BULLETS}
-      <li><b>被支配档位（单独采购无意义）：</b>{so_far} —— 可覆盖区间不足 0.1 条/月。另有 {len(SKIPPED)} 个积分档因价格未获取而**未纳入计算**，见下方「待补数据」。</li>
+      <li><b>被支配档位（单独采购无意义）：</b>{so_far} —— 可覆盖区间不足 0.1 条/月。</li>
       <li><b>海外需求：</b>Higgsfield 仅建议作关键镜头精修通道（Ultra 月上限 {HG['mCap']:.1f} 条）；Ultra 折 ¥{f2(HG['perVideoCNY'])}/条是全场最优的 {HG['perVideoCNY']/best:.2f} 倍，含税后约 ¥{HG['perVideoCNY']*1.08:.2f}/条。若只需 3.7–4.8 条/月，其 Plus 档反而值得考虑。</li>
       <li><b>不要买：</b>即梦基础会员（¥{f2(G('即梦','基础会员')['perVideoCNY'])}/条）、即梦标准会员（¥{f2(G('即梦','标准会员')['perVideoCNY'])}/条）、libtv 标准版（¥{f2(G('libtv','标准版')['perVideoCNY'])}/条）、Higgsfield Starter（¥{f2(worst)}/条）—— 单价均在最优解 2.0 倍以上且月产能不足 1.5 条。</li>
       <li><b>小云雀 vs 即梦：</b>二者超级会员<b>完全同规格</b> —— 同为 ¥21,840 首年 / ¥43,680 次年、同为 54,600 积分/月、同为 ¥1 = 30 积分、同为 600 积分/条，折算单条成本完全相同（<b>¥{f2(XQ['perVideoCNY'])}</b>）。选谁只看非价格能力：工作流完整度、CLI/API 支持、客服响应。公开反馈称小云雀<b>无官方客服渠道</b>。</li>
