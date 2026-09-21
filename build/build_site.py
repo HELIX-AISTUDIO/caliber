@@ -469,7 +469,6 @@ tbody tr.top td:first-child{box-shadow:inset 3px 0 0 #D1FE17}
   border:1px solid rgba(255,255,255,.14);white-space:nowrap}
 .tagu{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:999px;font-size:9.5px;
   font-weight:700;color:#FF4D8D;border:1px solid rgba(255,77,141,.45)}
-.cq-no{color:#5A6069}
 .mini{height:5px;border-radius:999px;background:rgba(255,255,255,.07);margin-top:6px;overflow:hidden}
 .mini i{display:block;height:100%;border-radius:999px;background:rgba(255,255,255,.20);
   transition:width .9s cubic-bezier(.22,1,.36,1)}
@@ -890,8 +889,6 @@ function rerank(src){
   });
   rs.forEach(function(r){ r.classList.remove('top'); });
   if(rs.length && rs[0].__t != null) rs[0].classList.add('top');
-  var vth = document.getElementById('vth');
-  if(vth) vth.textContent = '单条成本';
 }
 
 /* ── 表头排序（点击覆盖滑块排序，滑块再动即覆盖回来）── */
@@ -995,10 +992,6 @@ def table(headers, rows, cls="tw scroll-y", tid=""):
     idattr = f' id="{tid}"' if tid else ""
     return f'<div class="{cls}"><table{idattr}><thead><tr>{th}</tr></thead>' \
            f'<tbody>{rows}</tbody></table></div>'
-
-
-def dash(v, dec=2, suffix=""):
-    return f'{v:.{dec}f}{suffix}'
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -1569,6 +1562,24 @@ def selfcheck():
     if n_th != n_td:
         errs.append(f"cost.html: 主表表头 {n_th} 列与数据行 {n_td} 列不一致")
 
+    # ── 死引用检查：防止后续改动留下指向已删元素的 JS / CSS ──
+    js_all = re.search(r"<script>(.*?)</script>", cost, re.S).group(1)
+    ids_html = set(re.findall(r'id="([\w-]+)"', cost))
+    for eid in sorted(set(re.findall(r"getElementById\('([\w-]+)'\)", js_all))):
+        if eid not in ids_html:
+            errs.append(f"cost.html: JS 引用了不存在的元素 id -> #{eid}")
+    _src = io.open(os.path.abspath(__file__), encoding="utf-8").read()
+    css_block = _src[_src.index('CSS = r"""'):_src.index('JS = r"""')]
+    for cls in sorted(set(re.findall(r"\.([A-Za-z][\w-]*)", css_block))):
+        if cls not in cost:
+            errs.append(f"cost.html: CSS 类 .{cls} 在页面上无对应元素")
+    for m in re.finditer(r"^def (\w+)\(", _src, re.M):
+        fn = m.group(1)
+        if fn == "main":
+            continue
+        if len(re.findall(r"\b" + fn + r"\s*\(", _src)) <= 1:
+            errs.append(f"build_site.py: 死函数 {fn}()")
+
     js = re.search(r"<script>(.*?)</script>", cost, re.S).group(1)
     tmp = os.path.join(os.path.dirname(ROOT), "harvest", "_selfcheck.js")
     os.makedirs(os.path.dirname(tmp), exist_ok=True)
@@ -1606,4 +1617,5 @@ if errs:
     for e in errs:
         print("   -", e)
     raise SystemExit(1)
-print("自检通过：div 配对 / 文档完整 / 零外部请求 / 锚点有效 / 表头列数一致 / JS 语法 OK")
+print("自检通过（11 项）：div 配对 / 文档完整 / style+script 标签 / 无残留占位符 / 零外部请求 / "
+      "锚点有效 / 表头列数一致 / JS 语法 / JS 引用的元素存在 / CSS 类页面存在 / 无死函数")

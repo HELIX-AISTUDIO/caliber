@@ -219,7 +219,6 @@ tbody tr.top td:first-child{box-shadow:inset 3px 0 0 #D1FE17}
   border:1px solid rgba(255,255,255,.14);white-space:nowrap}
 .tagu{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:999px;font-size:9.5px;
   font-weight:700;color:#FF4D8D;border:1px solid rgba(255,77,141,.45)}
-.cq-no{color:#5A6069}
 .mini{height:5px;border-radius:999px;background:rgba(255,255,255,.07);margin-top:6px;overflow:hidden}
 .mini i{display:block;height:100%;border-radius:999px;background:rgba(255,255,255,.20);
   transition:width .9s cubic-bezier(.22,1,.36,1)}
@@ -881,8 +880,6 @@ function rerank(src){
   });
   rs.forEach(function(r){ r.classList.remove('top'); });
   if(rs.length && rs[0].__t != null) rs[0].classList.add('top');
-  var vth = document.getElementById('vth');
-  if(vth) vth.textContent = '单条成本';
 }
 
 /* ── 表头排序（点击覆盖滑块排序，滑块再动即覆盖回来）── */
