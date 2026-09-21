@@ -4,10 +4,10 @@
 <meta name="format-detection" content="telephone=no,email=no,address=no">
 <meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark">
-<meta name="description" content="CALIBER — AI 平台与模型 · 用同一把尺子横量。AI 平台成本对比与模型能力排行榜，统一口径折算，只给可复核的结果。">
-<meta property="og:title" content="CALIBER · 首页">
-<meta property="og:description" content="CALIBER — AI 平台与模型 · 用同一把尺子横量。AI 平台成本对比与模型能力排行榜，统一口径折算，只给可复核的结果。">
-<title>CALIBER · 首页</title>
+<meta name="description" content="同一套口径下横向评测各模型的视觉理解能力，输出可复核的排名与置信区间。">
+<meta property="og:title" content="CALIBER · 视觉理解模型排行榜">
+<meta property="og:description" content="同一套口径下横向评测各模型的视觉理解能力，输出可复核的排名与置信区间。">
+<title>CALIBER · 视觉理解模型排行榜</title>
 <!-- ============================================================
      HX-CLB-20260921-A215F0AB
      © 2026 HELIX AI 工作室. 保留所有权利 / All Rights Reserved.
@@ -344,79 +344,52 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
 
 <div class="nav"><div class="inner">
   <a class="brand" href="index.html"><i></i><span class="bw"><b>CALIBER</b><s>HELIX AI 工作室</s></span></a>
-  <nav class="menu"><a href="index.html" class="active">首页</a><a href="cost.html">平台成本对比</a><a href="leaderboard-vlm.html">视觉理解模型排行榜<i class="nb">即将上线</i></a></nav>
+  <nav class="menu"><a href="index.html">首页</a><a href="cost.html">平台成本对比</a><a href="leaderboard-vlm.html" class="active">视觉理解模型排行榜<i class="nb">即将上线</i></a></nav>
   <span class="spec">Seedance 2.5 · 720p · 16:9 · 30s · 全能参考</span>
 </div></div>
 
 
 <div class="hero">
-  <div class="eyebrow">CALIBER · Unified Benchmark</div>
-  <h1>把 AI 平台<br>放在<em>同一把尺子</em>上</h1>
-  <p class="lead">各平台用自己的积分币计价，币值互不相同。CALIBER 先把它们压平到同一口径，再折算成可比较的现金成本与能力得分 — 不采信宣传数字，只给可复核的结果。</p>
-  <div class="btns">
-    <a class="btn btn-fill" href="cost.html">进入平台成本对比</a>
-    <a class="btn btn-ghost" href="cost.html#ladder">按产量反查最省方案</a>
-  </div>
+  <div class="eyebrow">Vision-Language Benchmark</div>
+  <h1>视觉理解模型<br><em>统一口径排行榜</em></h1>
+  <p class="lead">同一套口径下横向评测各模型的视觉理解能力，输出可复核的排名与置信区间。</p>
+  <div class="meta"><span><i></i>状态 <b>评测中</b></span><span><i></i>维度 <b>4</b></span><span><i></i>模型 <b>—</b></span><span><i></i>数据时点 <b>待回填</b></span></div>
 </div>
 
 <div class="wrap">
-
-<section class="reveal">
+<section class="reveal" style="margin-top:42px">
   <div class="sechead">
-    <h2><span class="ey">板块</span>两条对比线</h2>
-    <div class="sd">统一口径的方法论复用在同一套框架下：成本线已上线，能力线在建。</div>
+    <h2><span class="ey">01</span>榜单</h2>
+    <div class="sd">每维度 0–100 分，按权重加权为总分；每项至少 5 次独立运行取中位数，报 95% 置信区间。</div>
   </div>
-  <div class="grid g2">
-    <a class="entry" href="cost.html">
-      <span class="arrow">→</span>
-      <div class="et">LivE · 2026-09-21</div>
-      <h3>平台成本对比</h3>
-      <p>5 个画布平台、20 个会员档位，按「Seedance 2.5 · 720p · 16:9 · 30s · 全能参考」统一口径折算单条现金成本。</p>
-      <div class="nums">
-        <div><s>¥20.21</s><em>最低单条</em></div>
-        <div><s>5.26×</s><em>最贵/最省</em></div>
-        <div><s>20</s><em>档位</em></div>
-      </div>
-    </a>
-    <a class="entry" href="leaderboard-vlm.html">
-      <span class="arrow">→</span>
-      <div class="et">Vision-Language Benchmark · 评测中</div>
-      <h3>视觉理解模型排行榜 <i class="nb">即将上线</i></h3>
-      <p>同一套口径下横向评测各模型的视觉理解能力，输出可复核的排名与置信区间。</p>
-      <div class="nums">
-        <div><s>4</s><em>评测维度</em></div>
-        <div><s>—</s><em>模型数</em></div>
-        <div><s>—</s><em>数据时点</em></div>
-      </div>
-    </a>
-  </div>
+  <div class="card" style="text-align:center;padding:52px 26px"><div class="eyebrow" style="margin-bottom:13px">评测进行中</div><div style="color:#8A9099;font-size:13px;line-height:1.75;max-width:540px;margin:0 auto">评测集与打分脚本已就位，数据回填后本节将自动渲染为排行榜。字段结构已锁定，后续只需向 entries 追加记录，无需改动页面。</div></div>
 </section>
 
 <section class="reveal">
   <div class="sechead">
-    <h2><span class="ey">结论</span>成本线速览</h2>
-    <div class="sd">完整数据与算法见<a href="cost.html" style="color:#D1FE17;text-decoration:none">平台成本对比 →</a></div>
+    <h2><span class="ey">02</span>评测维度与权重</h2>
+    <div class="sd">权重定死后再开始跑分，避免「先看结果再调权重」。</div>
   </div>
-  <div class="grid g5">
-    <div class="kpi hi"><div class="t">单条成本最优</div>
-      <div class="v">¥20.21</div>
-      <div class="d">Neowow ULTRA<br>即梦超级 ¥20.22 并列，差 0.07%</div></div>
-    <div class="kpi good"><div class="t">单价 + 总支出双优</div>
-      <div class="v">¥5,199</div>
-      <div class="d">即梦高级会员<br>20.53 条/月 · ¥21.10/条</div></div>
-    <div class="kpi good"><div class="t">39–49 条/月最省</div>
-      <div class="v">¥11,899</div>
-      <div class="d">Neowow ULTRA<br>年费为即梦超级的 54%</div></div>
-    <div class="kpi pink"><div class="t">海外平台溢价</div>
-      <div class="v">2.31×</div>
-      <div class="d">Higgsfield Ultra ¥46.77/条<br>无成本优势</div></div>
-    <div class="kpi bad"><div class="t">最差档位</div>
-      <div class="v">5.26×</div>
-      <div class="d">Higgsfield Starter ¥106.29/条<br>低档位多是高价试用</div></div>
-  </div>
+  <div class="tw"><table><thead><tr><th class="ctr">key</th><th>维度</th>
+  <th class="ctr">权重</th><th>说明</th></tr></thead><tbody><tr><td><span class="mono" style="color:#D1FE17">chart</span></td><td>图表识别</td><td class="num">30%</td><td style="white-space:normal">柱/折/饼/散点图的数值读取与趋势判断，含刻度反推</td></tr><tr><td><span class="mono" style="color:#D1FE17">ocr</span></td><td>OCR 文字提取</td><td class="num">25%</td><td style="white-space:normal">截图、扫描件、手写体、低对比度与小字号文字的准确率</td></tr><tr><td><span class="mono" style="color:#D1FE17">spatial</span></td><td>空间推理</td><td class="num">25%</td><td style="white-space:normal">相对位置、遮挡关系、计数与方位判断</td></tr><tr><td><span class="mono" style="color:#D1FE17">longdoc</span></td><td>长图细节</td><td class="num">20%</td><td style="white-space:normal">超长截图与多栏排版中的信息定位与跨区关联</td></tr></tbody></table></div>
 </section>
 
-<div class="foot">CALIBER · 统一口径基准　|　HELIX AI 工作室 出品　|　数据采集 2026-09-21　·　全部数值按统一口径重算，非平台宣传数字</div>
+<section class="reveal">
+  <div class="sechead">
+    <h2><span class="ey">03</span>数据字段说明</h2>
+    <div class="sd">字段已锁定。回填时只需向 <code>data/leaderboard-vlm.json</code> 的 <code>entries</code> 追加记录，页面自动出榜，无需改动任何模板。</div>
+  </div>
+  <details open>
+    <summary>entries[] 单条记录结构<span class="chev">›</span></summary>
+    <div class="dbody">
+      <table><thead><tr><th class="ctr">字段</th><th>说明</th></tr></thead><tbody>
+      <tr><td><span class="mono" style="color:#D1FE17">rank</span></td><td style="white-space:normal">integer — 由 score 降序自动生成，不必手填</td></tr><tr><td><span class="mono" style="color:#D1FE17">model</span></td><td style="white-space:normal">string — 模型名，如 'GPT-6'</td></tr><tr><td><span class="mono" style="color:#D1FE17">variant</span></td><td style="white-space:normal">string|null — 变体标记，如 'High' / 'Thinking'</td></tr><tr><td><span class="mono" style="color:#D1FE17">provider</span></td><td style="white-space:normal">string — 供应方，如 'OpenAI'</td></tr><tr><td><span class="mono" style="color:#D1FE17">license</span></td><td style="white-space:normal">string — 'proprietary' | 'open'</td></tr><tr><td><span class="mono" style="color:#D1FE17">score</span></td><td style="white-space:normal">number — 加权总分 0–100</td></tr><tr><td><span class="mono" style="color:#D1FE17">ci</span></td><td style="white-space:normal">number — 95% 置信区间半宽</td></tr><tr><td><span class="mono" style="color:#D1FE17">dims</span></td><td style="white-space:normal">object — {chart, ocr, spatial, longdoc} 各维度得分</td></tr><tr><td><span class="mono" style="color:#D1FE17">runs</span></td><td style="white-space:normal">integer — 独立运行次数</td></tr><tr><td><span class="mono" style="color:#D1FE17">evaluatedAt</span></td><td style="white-space:normal">string — YYYY-MM-DD</td></tr><tr><td><span class="mono" style="color:#D1FE17">note</span></td><td style="white-space:normal">string|null — 备注</td></tr><tr><td><span class="mono" style="color:#D1FE17">source</span></td><td style="white-space:normal">string|null — 数据来源说明</td></tr>
+      </tbody></table>
+    </div>
+  </details>
+</section>
+
+<div class="foot">CALIBER · 统一口径基准　|　HELIX AI 工作室 出品　|　视觉理解模型排行榜评测中</div>
 
 
 <div class="legal">

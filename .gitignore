@@ -1,19 +1,27 @@
-# 构建与工作区产物（不属于发布内容）
-*.py
+# Python 缓存（源码要提交，只忽略字节码）
 __pycache__/
 *.pyc
-harvest/
-outputs/
-.wbapp_*
-.workbuddy/
-.visualizer/
+*.pyo
+
+# 构建产物（deploy/ 是要上传的公网包，属产物不入库）
+deploy/
+dist/
+.astro/
+node_modules/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+*.swp
 *.tmp
 *.log
 Thumbs.db
 .DS_Store
 desktop.ini
 
-# 编辑器
-.vscode/
-.idea/
-*.swp
+# 工作区临时
+harvest/
+outputs/
+.wbapp_*
+.workbuddy/
+.visualizer/

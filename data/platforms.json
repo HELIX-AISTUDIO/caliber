@@ -1,0 +1,38 @@
+{
+  "libtv": {
+    "name": "libtv",
+    "cn": "libtv",
+    "color": "#9CE6F3",
+    "currency": "CNY",
+    "region": "cn"
+  },
+  "Neowow": {
+    "name": "Neowow",
+    "cn": "Neowow",
+    "color": "#00C65A",
+    "currency": "CNY",
+    "region": "cn"
+  },
+  "即梦": {
+    "name": "即梦",
+    "cn": "即梦",
+    "color": "#3280FF",
+    "currency": "CNY",
+    "region": "cn"
+  },
+  "小云雀": {
+    "name": "小云雀",
+    "cn": "小云雀",
+    "color": "#FABC00",
+    "currency": "CNY",
+    "region": "cn"
+  },
+  "Higgsfield": {
+    "name": "Higgsfield",
+    "cn": "Higgsfield",
+    "color": "#ED1572",
+    "currency": "USD",
+    "region": "global",
+    "excludeTax": true
+  }
+}

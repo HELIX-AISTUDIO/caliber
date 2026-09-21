@@ -1,0 +1,27 @@
+{
+  "brand": "CALIBER",
+  "brandCn": "统一口径基准",
+  "studio": "HELIX AI 工作室",
+  "tagline": "AI 平台与模型 · 用同一把尺子横量",
+  "positions": "把 AI 平台放在同一把尺子上",
+  "intro": "各平台用自己的积分币计价，币值互不相同。CALIBER 先把它们压平到同一口径，再折算成可比较的现金成本与能力得分 — 不采信宣传数字，只给可复核的结果。",
+  "owner": "HELIX AI 工作室",
+  "year": "2026",
+  "nav": [
+    {
+      "key": "home",
+      "label": "首页",
+      "href": "index.html"
+    },
+    {
+      "key": "cost",
+      "label": "平台成本对比",
+      "href": "cost.html"
+    },
+    {
+      "key": "leaderboard-vlm",
+      "label": "视觉理解模型排行榜",
+      "href": "leaderboard-vlm.html"
+    }
+  ]
+}

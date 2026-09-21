@@ -119,25 +119,76 @@
 
 ## 技术说明
 
-- **单文件零依赖**：整页为自包含 HTML，无 CDN、无外部字体、无统计脚本，全部资源内联。
-- **微信兼容**：已适配微信 X5 内核（`backdrop-filter` 缺失时的 `@supports` 兜底、iOS 底部安全区、固定光晕合成层提升）。
-- **移动端**：820px / 520px 两级断点，表格带横向滚动容器。
-- **打印友好**：`@media print` 浅色适配，存 PDF 时版权块与指纹一并保留。
+- **数据与页面分离**：所有内容来自 `data/*.json`，页面由 `build/build_site.py` 渲染。改数据不必碰模板。
+- **单页零外部请求**：全站无 CDN、无外部字体、无统计脚本，CSS/JS 全内联。弱网与微信内都可秒开。
+- **微信兼容**：适配 X5 内核（`backdrop-filter` 缺失时的 `@supports` 兜底、iOS 底部安全区、固定光晕合成层提升）。
+- **移动端**：900 / 820 / 520px 三级断点，表格带横向滚动容器。
+- **过渡动画**：`scroll-behavior:smooth` + 锚点 `scroll-margin-top` + IntersectionObserver 入场 + 子导航 scrollspy，全部有 `prefers-reduced-motion` 兜底。
+- **打印友好**：`@media print` 浅色适配，存 PDF 时版权块与溯源指纹保留。
 
 ## 目录结构
 
 ```
-index.html      报告主页面（自包含，可直接双击打开）
-LICENSE         版权许可条款
-SECURITY.md     保护措施与技术边界说明
-robots.txt      反爬与反 AI 抓取指令
-_headers        Cloudflare Pages / Netlify 响应头（GitHub Pages 忽略）
-.nojekyll       禁止 GitHub Pages 的 Jekyll 处理，避免文件被过滤
+index.html                 首页（构建产物）
+cost.html                  平台成本对比（构建产物）
+leaderboard-vlm.html       视觉理解模型排行榜（构建产物）
+data/
+  site.json                站点元数据：品牌、出品方、导航
+  platforms.json           平台元数据：名称、颜色、币种、地区
+  cost-seedance25.json     成本数据集：口径、汇率、单条积分、20 档位、风险项、来源
+  leaderboard-vlm.json     排行榜数据集：维度权重、字段结构、entries
+build/
+  build_site.py            站点生成器（读 data/ → 输出三页 HTML）
+  build_data.py            数据层初始化（可从零重建 data/*.json）
+LICENSE                    版权许可条款
+SECURITY.md                保护措施与技术边界说明
+DESIGN.md                  设计系统（色板 / 字体 / 组件 / 多页面约定）
+robots.txt                 反爬与反 AI 抓取指令
+_headers                   Cloudflare Pages 安全响应头
+.nojekyll                  GitHub Pages 用，禁 Jekyll 过滤
 ```
 
-## 本地查看
+`deploy/` 为公网发布包（7 个文件，不含 `data/` 与 `build/`），由生成器自动产出。
 
-直接在浏览器打开 `index.html` 即可，无需构建、无需起服务。
+## 内容模型
+
+四个概念，全站统一：
+
+| 概念 | 含义 | 存放位置 |
+|---|---|---|
+| **平台 platform** | libtv / Neowow / 即梦 / 小云雀 / Higgsfield | `data/platforms.json` |
+| **模型 model** | 被评测的模型 | `data/leaderboard-*.json` 的 `models` |
+| **评测项 dimension** | 评分维度与权重 | `data/leaderboard-*.json` 的 `methodology.dimensions` |
+| **数据点 entry** | 一条可比较的记录 | 各数据集的 `plans` / `entries` |
+
+## 如何新增一个榜单页
+
+三步，不需要碰模板：
+
+1. 在 `data/` 新建 `<榜单>.json`，照 `leaderboard-vlm.json` 的字段结构填
+   （`methodology.dimensions` 定权重、`entries` 放数据、`fieldSchema` 写字段说明）
+2. 在 `build/build_site.py` 里加一个 `render_<榜单>()` —— 可直接复用排行榜页的渲染函数
+3. 在 `data/site.json` 的 `nav` 数组加一项，导航自动出现
+
+然后运行 `python build/build_site.py` 重新生成。**加数据即出榜，模板无需改动**（已实测验证）。
+
+## 本地查看与构建
+
+```bash
+# 直接看（产物已在仓库内，无需构建）
+双击 index.html
+
+# 重新生成
+python build/build_site.py
+
+# 从零重建数据层（谨慎，会覆盖 data/*.json）
+python build/build_data.py
+```
+
+## 部署
+
+改完跑一次生成器，把 `deploy/` 里的 7 个文件重新拖到 Cloudflare Pages，链接不变。
+详见上方「线上地址」与「部署要求」。
 
 ---
 
