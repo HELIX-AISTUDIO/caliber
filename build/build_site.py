@@ -7,7 +7,8 @@ CALIBER · 站点渲染器
      旧版靠正则/字符串替换改模板，反复出现「锚点失配」「命中错误位置且静默成功」
      「吃掉结构标签导致布局塌陷」等事故 —— 重写就是为了根除这一类问题。
   2. 派生量一律现算，不落盘：单条成本 / 月产能 / 达标阶梯 / 边际成本 /
-     折扣结构 / 跨平台组合最省（无界背包）/ ROI。
+     跨平台组合最省（无界背包）。
+     刻意【不算】折扣结构 —— 划线原价按 PRICE_RULE 不属价格，不做分析。
   3. 构建结束自动跑自检（div 配对、列数、锚点、JS 语法），失败即非零退出。
 
 运行：python build/build_site.py
@@ -54,6 +55,10 @@ CPV = COST["creditsPerVideo"]
 OFFICIAL_RATE = COST["officialRate"]
 AD_CLAIM = COST["adClaim"]
 SCOPE = COST["scope"]
+# 数据范围文案一律由 SCOPE["items"] 推导 —— 曾因页面上两处各自硬编码、
+# 数据层改成三周期后页面仍写「月度／季度会员后续补充」，两处文案互相矛盾。
+SCOPE_COVERED = "、".join(x["label"] for x in SCOPE["items"] if x["done"])
+SCOPE_PENDING = "、".join(x["label"] for x in SCOPE["items"] if not x["done"])
 COLOR = {k: v["color"] for k, v in PLATFORMS.items()}
 CU = {"CNY": "¥", "USD": "$"}
 
@@ -92,9 +97,14 @@ def build_rows():
                 "mCap": mcap, "yCap": mcap * 12,
                 "label": c.get("label") or (auto_label(monthly) if multi else ""),
                 "multi": multi,
-                "renewal": p.get("renewal"),
-                # 原价优先取选项级；档位级作为回退（老数据未逐项拆分时仍可用）
-                "original": c.get("original", p.get("original")),
+                # 次年续费价在选项级（libtv 续费价随积分档变，不随档位变）
+                "renewal": c.get("renewal"),
+                # 三周期原始实付总额（年付即 price）；mCr = 月付口径月积分，缺省同年付
+                "payY": price, "payQ": c.get("q"), "payM": c.get("m"),
+                # 三周期各自的「月积分」——平台可能按周期给不同积分。
+                # 缺省同年付；mCr/qCr 在数据文件里按档位单独给。
+                "mCr": c.get("mCr", monthly),
+                "qCr": c.get("qCr", monthly),
                 "color": COLOR[plat],
             })
     return out
@@ -107,15 +117,40 @@ for i, r in enumerate(sorted(ROWS, key=lambda x: x["perVideo"]), 1):
     r["rank"] = i
     r["rel"] = r["perVideo"] / BEST
 
-# 折扣结构（按划线原价重算）
+# ── 三周期派生量 ───────────────────────────────────────────────
+#  本币/积分 = 该周期实付总额 ÷ (该周期月积分 × 周期月数)
+#  单条成本 = 本币/积分 × 单条消耗积分 × 汇率
+#  月产能   = 该周期月积分 ÷ 单条消耗积分
+# 注意月付用 mCr —— 即梦标准会员月付给 4,000 积分，年/季付只给 2,210。
+PERIODS = [("y", "年付", 12, "payY"), ("q", "季付", 3, "payQ"), ("m", "月付", 1, "payM")]
 for r in ROWS:
-    o = r["original"]
-    if o:
-        oc = o * r["k"]
-        r["origPerVideo"] = oc / (r["monthly"] * 12) * r["per"]
-        r["disc"] = r["priceCNY"] / oc
-    else:
-        r["origPerVideo"] = r["disc"] = None
+    r["byP"] = {}
+    for key, _lbl, months, field in PERIODS:
+        pay = r[field]
+        if pay is None:
+            continue
+        # ⚠ 三周期各自的月积分：年付用 credits，季付用 qCr，月付用 mCr（缺省同年付）。
+        # 原实现把年付与季付绑在同一个值上 —— 若平台按周期给不同积分就会算错。
+        cr = {"y": r["monthly"], "q": r["qCr"], "m": r["mCr"]}[key]
+        unit = pay / (cr * months)
+        r["byP"][key] = {"pay": pay, "payCNY": pay * r["k"], "cr": cr,
+                         "perVideo": unit * r["per"] * r["k"], "cap": cr / r["per"]}
+    # 该档三周期中的最优周期（单条成本最低）
+    r["bestP"] = min(r["byP"], key=lambda kk: r["byP"][kk]["perVideo"]) if r["byP"] else None
+    # 周期倒挂：更长的承诺期反而单价更高 —— 逐对检查（季/月、年/月、年/季）
+    # 注意：这不总是平台的错。即梦标准会员月付给 4,000 积分、年付只给 2,210，
+    # 所以年付单条成本反而比月付贵 44% —— 是「积分随周期缩水」造成的真实倒挂。
+    r["traps"] = []
+    for _lk, _sk, _llbl, _slbl in (("q", "m", "季付", "月付"),
+                                   ("y", "m", "年付", "月付"),
+                                   ("y", "q", "年付", "季付")):
+        if _lk in r["byP"] and _sk in r["byP"]:
+            _lv, _sv = r["byP"][_lk]["perVideo"], r["byP"][_sk]["perVideo"]
+            if _lv > _sv + 1e-9:
+                                r["traps"].append({"lkey": _lk, "skey": _sk,
+                                   "long": _llbl, "short": _slbl, "pct": _lv / _sv - 1,
+                                   "longPay": r["byP"][_lk]["pay"], "shortPay": r["byP"][_sk]["pay"]})
+    r["qTrap"] = next((t["pct"] for t in r["traps"] if t["long"] == "季付"), None)
 
 # 同（平台,档位）只保留产能最大者 —— 用于阶梯与边际，避免同档多选项中低配产生 Δ=0
 BY_TIER = {}
@@ -129,21 +164,16 @@ SINGLES = list(BY_TIER.values())
 CQ_DEFAULT = 30          # 表格滑块默认值；构建时按此预渲染，无 JS 也正确
 
 
-def delivered(r, n_col=None):
-    """该产量下每条实际成本 = 该档年支出（含多份叠加）÷ 月产量；不可行返回 None"""
-    n_col = CQ_DEFAULT if n_col is None else n_col
-    cap = r["mCap"]
-    if cap <= 0:
-        return None
-    cnt = int(math.ceil(n_col / cap - 1e-9))
-    if cnt > 4:
-        return None
-    return cnt * r["priceCNY"] / n_col
-
-
 def tname(r):
     return r["tier"] + (f' · {r["label"]}' if r["multi"] else "")
 
+
+def f2(v):
+    return f"{v:,.2f}"
+
+
+def money(v, cur="CNY"):
+    return f"{CU[cur]}{v:,.0f}"
 
 def build_ladder():
     """达标总支出阶梯：按年费升序扫描，只收能扩大覆盖上限的档位"""
@@ -163,21 +193,6 @@ def build_marginal():
             dprice, dcap = b["priceCNY"] - a["priceCNY"], b["yCap"] - a["yCap"]
             out.append({"plat": plat, "a": a, "b": b, "dPrice": dprice, "dCap": dcap,
                         "mCost": dprice / dcap, "avg": b["perVideo"], "color": COLOR[plat]})
-    return out
-
-
-def build_discount():
-    out = []
-    for plat in PLATFORMS:
-        grp = [r for r in ROWS if r["plat"] == plat and r["disc"] is not None]
-        if not grp:
-            continue
-        ds = [r["disc"] for r in grp]
-        ops = [r["origPerVideo"] for r in grp]
-        out.append({"plat": plat, "minD": min(ds), "maxD": max(ds),
-                    "minO": min(ops), "maxO": max(ops),
-                    "spreadO": (max(ops) / min(ops) - 1) * 100,
-                    "spreadD": (max(ds) / min(ds) - 1) * 100, "color": COLOR[plat]})
     return out
 
 
@@ -233,9 +248,27 @@ def best_single(n, max_stack=4):
 
 LADDER = build_ladder()
 MARGINAL = build_marginal()
-DISCOUNT = build_discount()
 MARG_WORST = max(MARGINAL, key=lambda x: x["mCost"])
 MAX_CAP = max(r["mCap"] for r in ROWS)
+# 全场产能两端 —— 供「结论速览」下方那句产能定位使用
+# 注意并列：即梦与小云雀的超级会员同为 91.00 条/月，极值句必须两个都列
+CAP_LO = min(r["mCap"] for r in ROWS)
+CAP_HI = max(r["mCap"] for r in ROWS)
+
+
+def cap_who(v):
+    """列出月产能恰为 v 的档位名（同档多积分档去重），用「／」连接"""
+    seen, out = set(), []
+    for r in ROWS:
+        if abs(r["mCap"] - v) < 1e-9:
+            k = (r["plat"], r["tier"])
+            if k not in seen:
+                seen.add(k)
+                out.append(f'{r["plat"]} {tname(r)}')
+    return "／".join(out)
+
+
+CAP_LO_WHO, CAP_HI_WHO = cap_who(CAP_LO), cap_who(CAP_HI)
 
 # 平台汇总：供页面开头的「覆盖平台清单」使用
 PLAT_SUM = []
@@ -254,6 +287,189 @@ for _p in PLATFORMS:
     })
 PLAT_SUM.sort(key=lambda x: x["lo"])
 
+PLAT_LG = {"libtv": "lg-libtv", "Neowow": "lg-neowow", "即梦": "lg-jimeng",
+           "小云雀": "lg-xiaoyunque", "Higgsfield": "lg-higgsfield", "Tapnow": "lg-tapnow"}
+
+
+def plogo(plat, cls="clogo"):
+    return f'<i class="{cls} {PLAT_LG[plat]}" aria-hidden="true"></i>'
+# 指标：(key, 标签, 取值, 单位, 越大越好?, 格式化)
+CHART_METRICS = [
+    ("cost", "单条成本", lambda r, k: r["byP"][k]["perVideo"], "元/条", False,
+     lambda v: f"¥{v:,.2f}"),
+    ("cap", "每月可生成", lambda r, k: r["byP"][k]["cap"], "条/月", True,
+     lambda v: f"{v:,.2f}"),
+    ("sec", "元/秒", lambda r, k: r["byP"][k]["perVideo"] / SEC_PER_CLIP, "元/秒", False,
+     lambda v: f"{v:.3f}"),
+    ("pay", "该周期实付", lambda r, k: r["byP"][k]["payCNY"], "元", False,
+     lambda v: f"¥{v:,.0f}"),
+]
+METRIC_LBL = {m[0]: m[1] for m in CHART_METRICS}
+METRIC_UNIT = {m[0]: m[3] for m in CHART_METRICS}
+
+def chart_rows(metric, period):
+    """按某指标 + 某周期生成排名条。长度＝「离最优值的接近程度」而非数值比例。
+
+    ⚠ 刻度必须与前端 renderChart() 完全一致（相对最优倍数的平方根压缩），
+      否则首屏（服务端渲染）与切换指标后（JS 重绘）的条长会不同。
+    """
+    fn = next(m[2] for m in CHART_METRICS if m[0] == metric)
+    fmt = next(m[5] for m in CHART_METRICS if m[0] == metric)
+    lower_better = not next(m[4] for m in CHART_METRICS if m[0] == metric)
+    cand = [(fn(r, period), r) for r in ROWS if period in r["byP"]]
+    if not cand:
+        return ""
+    vals = [v for v, _ in cand]
+    best = min(vals) if lower_better else max(vals)
+    max_rel = max((v / best) if lower_better else (best / v) for v in vals)
+    rel_span = (max_rel - 1.0) or 1.0
+    cand.sort(key=lambda x: x[0], reverse=not lower_better)
+    out = ""
+    for i, (v, r) in enumerate(cand, 1):
+        rel = (v / best) if lower_better else (best / v)
+        if not best:
+            rel = 1.0
+        t = math.sqrt((rel - 1.0) / rel_span) if rel_span else 0.0
+        # 色阶下限 0.10：原公式最差档 alpha≈0，条形直接消失（用户反馈「颜色暗淡看不清变化」）
+        a = 0.10 + 0.42 * (1 - t)
+        w = (1 - t) * 100
+        lbl = f'<s>{r["label"]}</s>' if r.get("label") else ""
+        out += (
+            f'<div class="crow" data-plat="{r["plat"]}" '
+            f'data-k="{r["plat"]}|{r["tier"]}|{r.get("label","")}">'
+            f'<span class="crk{" top3" if i <= 3 else ""}">{i}</span>'
+            f'{plogo(r["plat"])}'
+            f'<span class="cname">{r["plat"]} {r["tier"]}{lbl}</span>'
+            f'<span class="cbar"><i style="width:{w:.1f}%;background:rgba(209,254,23,{a:.3f})"></i></span>'
+            f'<span class="cval">{fmt(v)}<s>{rel:.2f}×</s></span>'
+            f'</div>')
+    return out
+
+
+# ═══════════ 周期结构（月付 / 季付 / 年付）═══════════
+# 用户 2026-09-21 裁定：原「三榜并列」的分流设计作废 —— 预演发现
+# 「季付榜的最优解」在月付榜里反而更便宜，三个独立榜会给出自相矛盾的建议。
+# 改为：三周期各自最优解（并排可比）+ 平台级周期折扣区间 + 季付陷阱清单。
+PERIOD_LEAD = {}
+for _k, _lbl, _months, _f in PERIODS:
+    _c = [r for r in ROWS if _k in r["byP"]]
+    if not _c:
+        continue
+    _v = min(r["byP"][_k]["perVideo"] for r in _c)
+    _seen, _who = set(), []
+    for r in sorted(_c, key=lambda x: x["byP"][_k]["perVideo"]):
+        if abs(r["byP"][_k]["perVideo"] - _v) < 1e-6:
+            kk = (r["plat"], r["tier"])
+            if kk not in _seen:
+                _seen.add(kk)
+                _who.append(f'{r["plat"]} {tname(r)}')
+    PERIOD_LEAD[_k] = {"lbl": _lbl, "cost": _v, "who": "／".join(_who), "cnt": len(_c)}
+
+PERIOD_PLAT = []
+for _p in PLATFORMS:
+    _rs = [r for r in ROWS if r["plat"] == _p]
+    if not _rs:
+        continue
+    _ym = [r["byP"]["y"]["perVideo"] / r["byP"]["m"]["perVideo"]
+           for r in _rs if "y" in r["byP"] and "m" in r["byP"]]
+    _qm = [r["byP"]["q"]["perVideo"] / r["byP"]["m"]["perVideo"]
+           for r in _rs if "q" in r["byP"] and "m" in r["byP"]]
+    PERIOD_PLAT.append({
+        "plat": _p, "color": COLOR[_p], "hasQ": bool(_qm),
+        "yLo": min(_ym), "yHi": max(_ym),
+        "qLo": min(_qm) if _qm else None, "qHi": max(_qm) if _qm else None,
+        # 判定按【档位】计，不按倒挂组合计 —— 同一档位可能同时季付和年付倒挂，
+        # 按组合计会出现「2 档倒挂」这种夸大表述（实际只有 1 个档位）
+        "trapN": sum(1 for r in _rs if r["traps"])})
+
+# 周期倒挂全清单：任何「承诺更久、单价反而更高」的组合（季/月、年/月、年/季）
+TRAPS = []
+for _r in ROWS:
+    for _t in _r["traps"]:
+        TRAPS.append(dict(_t, row=_r))
+TRAPS.sort(key=lambda x: x["pct"], reverse=True)
+TRAP_TIERS = len({(t["row"]["plat"], t["row"]["tier"]) for t in TRAPS})
+TRAP_PLATS = "／".join(sorted({t["row"]["plat"] for t in TRAPS}))
+TRAP_WORST = TRAPS[0] if TRAPS else None
+# 只统计「季付比月付贵」的档位数，用于与旧口径对照
+PTRAP = [r for r in ROWS if r["qTrap"] is not None]
+
+# ── 每周期各自的排名与相对倍数（三张表各排各的，不能共用年付的名次）──
+BEST_P = {}
+for _k, _lbl, _m, _f in PERIODS:
+    _c = [r for r in ROWS if _k in r["byP"]]
+    if not _c:
+        continue
+    _b = min(r["byP"][_k]["perVideo"] for r in _c)
+    BEST_P[_k] = _b
+    for _i, r in enumerate(sorted(_c, key=lambda x: x["byP"][_k]["perVideo"]), 1):
+        r["byP"][_k]["rank"] = _i
+        r["byP"][_k]["rel"] = r["byP"][_k]["perVideo"] / _b
+    # 产能排名单独算 —— 热力底色要用它，且产能序与成本序不同
+    for _i, r in enumerate(sorted(_c, key=lambda x: -x["byP"][_k]["cap"]), 1):
+        r["byP"][_k]["crank"] = _i
+PTN = {k: len([r for r in ROWS if k in r["byP"]]) for k, _l, _m, _f in PERIODS}
+
+
+def _sub_deliver(r, key, n=None):
+    """「单条成本」列副行 —— 单账号口径。
+
+    口径＝1 个平台 + 1 个账号。产能不够就直说「这一个账号最多能做多少条」，
+    而不是含糊的「产能过低」——用户要的是「为什么不行」。
+    需要多账号时走组合订阅，不混进单档排名。
+    """
+    n = CQ_DEFAULT if n is None else n
+    p = r["byP"].get(key)
+    if not p or p["cap"] <= 0:
+        return "该周期不可用"
+    if p["cap"] < n:
+        return "单账号最多 %.1f 条 · 不够 %d" % (p["cap"], n)
+    return "该产量 ¥%s/条 · 1 个账号" % f2(p["payCNY"] / n)
+
+
+# 主表：7 列，无「月产能」「年支出」列（用户裁定去掉）
+# 三个周期各生成一张独立表 —— 每张表全部服务端预渲染，切换只切可见性，
+# 不做单元格级 JS 重写（那类改写一旦漏掉某列就会静默错位）。
+PT_HEAD = {"y": ("年付 · 实付", "CNY"), "q": ("季付 · 实付", "每季"), "m": ("月付 · 实付", "每月")}
+
+
+def main_rows_for(key):
+    rows, best = "", BEST_P[key]
+    cand = sorted((r for r in ROWS if key in r["byP"]),
+                  key=lambda x: x["byP"][key]["perVideo"])
+    # 列内热力底色（借自 arena.ai 的做法）：不增一个字，让一列数字可以「扫读」。
+    # 成本列越省越亮（lime）。⚠ 归一化用【名次】而不是【数值】：
+    # 单价 19→106 元是长尾，线性映射会把前 20 名全压成同一个值，肉眼无从分辨。
+    N = max(1, PTN[key] - 1)
+    for r in cand:
+        p = r["byP"][key]
+        ca = 0.118 * (1 - (p["rank"] - 1) / N) ** 0.85
+        price_disp = f'{CU[r["cur"]]}{p["pay"]:,}'
+        sub = f'≈¥{p["payCNY"]:,.0f}' if r["cur"] == "USD" else PT_HEAD[key][1]
+        vl = f'<span class="vlabel">{r["label"]}</span>' if r["multi"] else ""
+        usd = '<span class="tagu">USD</span>' if r["cur"] == "USD" else ""
+        w = best / p["perVideo"] * 100
+        mc = "" if p["perVideo"] <= best * 1.06 else (" m2" if p["perVideo"] <= best * 2.2 else " m3")
+        top = "top" if p["rank"] == 1 else ""
+        rows += (
+            f'<tr class="{top}" data-plat="{r["plat"]}" data-v="{p["perVideo"]:.4f}" '
+            f'data-p="{p["payCNY"]:.2f}" data-c="{p["cap"]:.4f}">'
+            f'<td class="ctr rk"><b>{p["rank"]}</b><s>{p["rel"]:.2f}×</s></td>'
+            f'<td><span class="plc">{plogo(r["plat"], "plgo")}</span>{r["plat"]}{usd}</td>'
+            f'<td>{r["tier"]}{vl}</td>'
+            f'<td class="num cell2" data-l="{PT_HEAD[key][0]}"><b>{price_disp}</b><s>{sub}</s></td>'
+            f'<td class="num cell2" data-l="每月可生成">'
+            f'<b>{p["cap"]:.2f} 条</b>'
+            f'<s>{p["cr"]:,} 积分 · {p["cap"]*SEC_PER_CLIP:,.0f} 秒</s></td>'
+            f'<td class="num cell2" data-l="单条成本" data-rated="{p["perVideo"]:.2f}" '
+            f'style="background:rgba(209,254,23,{ca:.3f})">'
+            f'<span class="{"strong" if p["rank"]==1 else "nm"}">¥{f2(p["perVideo"])}</span>'
+            f'<s>{_sub_deliver(r, key)}</s>'
+            f'<div class="mini{mc}"><i style="--w:{w:.1f}%;width:{w:.1f}%"></i></div></td>'
+            f'<td class="num cell2" data-l="元/秒"><b>{p["perVideo"]/SEC_PER_CLIP:.3f}</b><s>元/秒</s></td></tr>')
+    return rows
+
+
 # 指纹：随数据集变化
 import hashlib
 _sig = json.dumps([COST["plans"], RATE, SPEC, BRAND], ensure_ascii=False, sort_keys=True)
@@ -268,14 +484,6 @@ FP_EDITION = "HX-CLB-ED-" + UPDATED.replace("-", "") + "-" + \
 FP = FP_WORK   # 兼容旧引用
 
 
-def f2(v):
-    return f"{v:,.2f}"
-
-
-def money(v, cur="CNY"):
-    return f"{CU[cur]}{v:,.0f}"
-
-
 # ═══════════════════════════════════════════════════════════════════
 # 3. 样式与脚本
 # ═══════════════════════════════════════════════════════════════════
@@ -286,83 +494,37 @@ F_DISP = ('"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system
 F_MONO = ('"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,'
           'Menlo,Consolas,monospace')
 
-CSS = r"""
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%;overflow-x:clip;scroll-behavior:smooth}
-:root{--navh:57px;--subh:50px;--gap:18px}
-/* ⚠️ 必须是 clip 而非 hidden：overflow-x:hidden 会让 html/body 变成滚动容器，
+CSS = r"""*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{-webkit-text-size-adjust:100%;overflow-x:clip;scroll-behavior:smooth}:root{--navh:57px;--subh:50px;--gap:18px}/* ⚠️ 必须是 clip 而非 hidden：overflow-x:hidden 会让 html/body 变成滚动容器，
    使子元素的 position:sticky 失效（实测导航会跟随内容滚走）。 */
 body{background:#000;color:#C9CDD2;font:14px/1.7 __SANS__;overflow-x:clip;
   padding-bottom:calc(72px + env(safe-area-inset-bottom,0px));
   -webkit-font-smoothing:antialiased;letter-spacing:-.005em;
-  -webkit-tap-highlight-color:transparent}
-[id]{scroll-margin-top:calc(var(--navh) + var(--subh) + var(--gap))}
-::selection{background:#D1FE17;color:#0B0B0B}
-/* ── 环境底光：纯黑底上叠模糊等于没效果，玻璃必须先有可折射的底光 ── */
+  -webkit-tap-highlight-color:transparent}[id]{scroll-margin-top:calc(var(--navh) + var(--subh) + var(--gap))}::selection{background:#D1FE17;color:#0B0B0B}/* ── 环境底光：纯黑底上叠模糊等于没效果，玻璃必须先有可折射的底光 ── */
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   transform:translate3d(0,0,0);
   background:
     radial-gradient(1150px 640px at 6% -12%,rgba(209,254,23,.145),transparent 62%),
     radial-gradient(860px 540px at 105% 3%,rgba(237,21,114,.105),transparent 64%),
-    radial-gradient(920px 580px at 44% 108%,rgba(156,230,243,.075),transparent 64%)}
-body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.04;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
-
-.promo{background:#D1FE17;color:#0B0B0B;font-size:12.5px;font-weight:600;letter-spacing:-.01em;
+    radial-gradient(920px 580px at 44% 108%,rgba(156,230,243,.075),transparent 64%)}body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}.promo{background:#D1FE17;color:#0B0B0B;font-size:12.5px;font-weight:600;letter-spacing:-.01em;
   display:flex;align-items:center;justify-content:center;gap:13px;flex-wrap:wrap;
-  padding:10px 22px;text-align:center;line-height:1.5;position:relative;z-index:3}
-.promo b{font-weight:800}
-.promo .tag2{border:1.5px solid #0B0B0B;border-radius:999px;padding:2px 11px;font-size:11px;font-weight:700}
-
-.nav{position:sticky;top:0;z-index:40;
+  padding:10px 22px;text-align:center;line-height:1.5;position:relative;z-index:3}.promo b{font-weight:800}.promo .tag2{border:1.5px solid #0B0B0B;border-radius:999px;padding:2px 11px;font-size:11px;font-weight:700}.nav{position:sticky;top:0;z-index:40;
   background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(0,0,0,.42));
   -webkit-backdrop-filter:blur(34px) saturate(165%);backdrop-filter:blur(34px) saturate(165%);
   border-bottom:1px solid rgba(255,255,255,.11);
-  box-shadow:inset 0 -1px 0 rgba(255,255,255,.04),0 10px 30px rgba(0,0,0,.45)}
-.nav .inner{max-width:1280px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:16px}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex:0 0 auto}
-.brand i{width:24px;height:24px;border-radius:8px;background:#D1FE17;flex:0 0 24px;
-  transition:transform .35s cubic-bezier(.22,1,.36,1)}
-.brand:hover i{transform:rotate(45deg)}
-.brand .bw{display:flex;flex-direction:column;line-height:1.15}
-.brand .bw b{font-family:__DISP__;font-size:16px;font-weight:800;color:#fff;letter-spacing:.06em}
-.brand .bw s{text-decoration:none;font-size:9.5px;font-weight:600;color:#6E747D;letter-spacing:.05em}
-.menu{display:flex;align-items:center;gap:2px;overflow-x:auto;scrollbar-width:none;
-  flex:1 1 auto;min-width:0}
-.menu::-webkit-scrollbar{display:none}
-.menu a{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none;
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.04),0 10px 30px rgba(0,0,0,.45)}.nav .inner{max-width:1280px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:16px}.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex:0 0 auto}.brand i{width:24px;height:24px;border-radius:8px;background:#D1FE17;flex:0 0 24px;
+  transition:transform .35s cubic-bezier(.22,1,.36,1)}.brand:hover i{transform:rotate(45deg)}.brand .bw{display:flex;flex-direction:column;line-height:1.15}.brand .bw b{font-family:__DISP__;font-size:16px;font-weight:800;color:#fff;letter-spacing:.06em}.brand .bw s{text-decoration:none;font-size:9.5px;font-weight:600;color:#6E747D;letter-spacing:.05em}.menu{display:flex;align-items:center;gap:2px;overflow-x:auto;scrollbar-width:none;
+  flex:1 1 auto;min-width:0}.menu::-webkit-scrollbar{display:none}.menu a{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none;
   color:#9AA0A8;font-size:13px;font-weight:600;padding:7px 12px;border-radius:999px;flex:0 0 auto;
-  transition:color .22s,background .22s}
-.menu a:hover{color:#fff;background:rgba(255,255,255,.065)}
-.menu a.active{color:#D1FE17}
-.menu .nb{background:#D1FE17;color:#0B0B0B;font-size:9.5px;font-weight:800;padding:1.5px 7px;
-  border-radius:999px}
-.nav .spec{margin-left:auto;font-family:__MONO__;font-size:11.5px;font-weight:500;color:#D1FE17;
-  border:1px solid rgba(209,254,23,.35);border-radius:999px;padding:6px 13px;flex:0 0 auto}
-
-.subnav{position:sticky;top:var(--navh,57px);z-index:35;
-  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(0,0,0,.46));
-  -webkit-backdrop-filter:blur(30px) saturate(160%);backdrop-filter:blur(30px) saturate(160%);
-  border-bottom:1px solid rgba(255,255,255,.1);box-shadow:0 8px 26px rgba(0,0,0,.4)}
-.subnav .inner{max-width:1280px;margin:0 auto;padding:9px 24px;display:flex;gap:6px;
-  overflow-x:auto;scrollbar-width:none}
-.subnav .inner::-webkit-scrollbar{display:none}
-.subnav a{white-space:nowrap;flex:0 0 auto;text-decoration:none;color:#8A9099;font-size:12.5px;
-  font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid transparent;
-  transition:color .22s,border-color .22s,background .22s}
-.subnav a:hover{color:#fff;background:rgba(255,255,255,.05)}
-.subnav a.active{color:#D1FE17;border-color:rgba(209,254,23,.4);background:rgba(209,254,23,.07)}
-
-.wrap{max-width:1280px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
-/* ── Hero 光场：lime 从「涂料」变「光源」── */
-.hero{max-width:1280px;margin:0 auto;padding:58px 24px 6px;position:relative;z-index:1}
-.hero::before{content:"";position:absolute;left:50%;top:-14%;z-index:-1;pointer-events:none;
+  transition:color .22s,background .22s}.menu a:hover{color:#fff;background:rgba(255,255,255,.065)}.menu a.active{color:#D1FE17}.menu .nb{background:#D1FE17;color:#0B0B0B;font-size:9.5px;font-weight:800;padding:1.5px 7px;
+  border-radius:999px}.nav .spec{margin-left:auto;font-family:__MONO__;font-size:11.5px;font-weight:500;color:#D1FE17;
+  border:1px solid rgba(209,254,23,.35);border-radius:999px;padding:6px 13px;flex:0 0 auto}.wrap{max-width:1280px;margin:0 auto;padding:0 24px;position:relative;z-index:1}/* ── Hero 光场：lime 从「涂料」变「光源」── */
+.hero{max-width:1280px;margin:0 auto;padding:58px 24px 6px;position:relative;z-index:1}.hero::before{content:"";position:absolute;left:50%;top:-14%;z-index:-1;pointer-events:none;
   width:min(1180px,140vw);height:150%;transform:translateX(-50%);
   background:
     radial-gradient(42% 34% at 50% 30%,rgba(209,254,23,.26),rgba(209,254,23,.09) 48%,transparent 74%),
     radial-gradient(76% 62% at 50% 2%,rgba(209,254,23,.085),transparent 72%);
-  -webkit-filter:blur(4px);filter:blur(4px)}
-.hero::after{content:"";position:absolute;left:-12%;right:-12%;bottom:-4%;height:46%;
+  -webkit-filter:blur(4px);filter:blur(4px)}.hero::after{content:"";position:absolute;left:-12%;right:-12%;bottom:-4%;height:46%;
   z-index:-1;pointer-events:none;opacity:.42;
   background-image:
     linear-gradient(rgba(209,254,23,.13) 1px,transparent 1px),
@@ -370,317 +532,355 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;opac
   background-size:58px 58px,58px 58px;
   transform:perspective(400px) rotateX(63deg);transform-origin:50% 100%;
   -webkit-mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%);
-  mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%)}
-.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
-  color:#D1FE17;margin-bottom:15px;font-family:__MONO__}
-h1{font-family:__DISP__;font-size:clamp(31px,5.3vw,60px);font-weight:800;color:#fff;
-  letter-spacing:-.038em;line-height:1.07}
-h1 em{font-style:normal;color:#D1FE17}
-.hero .lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75}
-.meta{display:flex;gap:20px;flex-wrap:wrap;margin-top:22px;font-size:12.5px;color:#767C85}
-.meta span{display:inline-flex;align-items:center;gap:7px}
-.meta i{width:5px;height:5px;border-radius:50%;background:#D1FE17;flex:0 0 5px}
-.meta b{color:#C9CDD2;font-weight:600;font-family:__MONO__}
-.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
-.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
+  mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%)}.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:#D1FE17;margin-bottom:15px;font-family:__MONO__}h1{font-family:__DISP__;font-size:clamp(31px,5.3vw,60px);font-weight:800;color:#fff;
+  letter-spacing:-.038em;line-height:1.07}h1 em{font-style:normal;color:#D1FE17}.hero .lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75}.meta{display:flex;gap:20px;flex-wrap:wrap;margin-top:22px;font-size:12.5px;color:#767C85}.meta span{display:inline-flex;align-items:center;gap:7px}.meta i{width:5px;height:5px;border-radius:50%;background:#D1FE17;flex:0 0 5px}.meta b{color:#C9CDD2;font-weight:600;font-family:__MONO__}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
   text-decoration:none;white-space:nowrap;
-  transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s}
-.btn-white{background:#fff;color:#0B0B0B}
-.btn-white:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,255,255,.2)}
-.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}
-.btn-ghost:hover{border-color:rgba(255,255,255,.45);transform:translateY(-2px)}
-.disc{display:flex;gap:11px;align-items:flex-start;max-width:840px;margin-top:26px;
-  padding:13px 16px;border:1px solid rgba(255,201,60,.26);border-radius:13px;
-  background:rgba(255,201,60,.035);font-size:12px;color:#A9AFB8;line-height:1.7}
-.disc b{color:#FFC93C;font-weight:600}
-.disc-i{flex:0 0 17px;height:17px;border-radius:50%;background:#FFC93C;color:#0B0B0B;font-size:11px;
-  font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:2px}
-
-h2{font-family:__DISP__;font-size:20px;font-weight:750;color:#fff;letter-spacing:-.025em;line-height:1.3}
-h2 .ey{display:inline-block;font-family:__MONO__;font-size:12px;font-weight:600;color:#D1FE17;
-  margin-right:12px}
-.sechead{margin-bottom:18px}
-.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}
-section{margin-top:60px}
-h3{font-family:__DISP__;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}
-
-/* ── 玻璃面板（规格取自 higgsfield .bg-glass-card：白→黑渐透底 + 大半径模糊）── */
-.glass,.card,.kpi,.note,.entry,.legal,details{
+  transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s}.btn-white{background:#fff;color:#0B0B0B}.btn-white:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,255,255,.2)}.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}.btn-ghost:hover{border-color:rgba(255,255,255,.45);transform:translateY(-2px)}h2{font-family:__DISP__;font-size:20px;font-weight:750;color:#fff;letter-spacing:-.025em;line-height:1.3}h2 .ey{display:inline-block;font-family:__MONO__;font-size:12px;font-weight:600;color:#D1FE17;
+  margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:__DISP__;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.card,.kpi,.note,.entry,.legal,details{
   background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 46%,rgba(0,0,0,.30));
   -webkit-backdrop-filter:blur(28px) saturate(150%);backdrop-filter:blur(28px) saturate(150%);
   border:1px solid rgba(255,255,255,.12);border-radius:18px;
   box-shadow:inset 0 0 0 .61px rgba(255,255,255,.07),inset 0 1px 0 rgba(255,255,255,.05),
              0 1px 2px rgba(0,0,0,.45),0 10px 24px rgba(0,0,0,.4),0 30px 60px rgba(0,0,0,.48)}
-@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){
-  .glass,.card,.kpi,.note,.entry,.legal,details,.nav,.subnav{
+@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){.card,.kpi,.note,.entry,.legal,details,.nav{
     background:linear-gradient(158deg,#161B18,#0D110F)}
-}
-.card{padding:20px 22px}
-.grid{display:grid;gap:14px}
-.g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
-.g5{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
-.kpi{padding:18px 20px}
-.kpi .t{font-size:9.5px;color:#767C85;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
-.kpi .v{font-family:__MONO__;font-size:clamp(30px,3.2vw,46px);font-weight:700;color:#fff;
-  margin:12px 0 6px;letter-spacing:-.032em;line-height:1.15}
-.kpi.good .v,.kpi.hi .v{color:#D1FE17}
-.kpi.hi{border-color:rgba(209,254,23,.45)}
-.kpi .d{font-size:12px;color:#8A9099;line-height:1.65}
-.kpi .d b{color:#C9CDD2}
-
-.entry{display:block;text-decoration:none;padding:26px;position:relative;
-  transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .3s}
-.entry:hover{transform:translateY(-4px);border-color:rgba(209,254,23,.42);
-  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.09),0 26px 60px rgba(0,0,0,.62),0 0 42px rgba(209,254,23,.09)}
-.entry .et{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#767C85;
-  font-family:__MONO__;margin-bottom:12px}
-.entry h3{margin:0 0 9px;font-size:18px;font-weight:750;color:#fff}
-.entry p{color:#8A9099;font-size:13px;line-height:1.65;margin-bottom:16px}
-.entry .nums{display:flex;gap:22px;flex-wrap:wrap;padding-top:16px;
-  border-top:1px solid rgba(255,255,255,.07)}
-.entry .nums div{display:flex;flex-direction:column;gap:3px}
-.entry .nums s{text-decoration:none;font-family:__MONO__;font-size:18px;font-weight:700;
-  color:#D1FE17;letter-spacing:-.03em}
-.entry .nums em{font-style:normal;font-size:10.5px;color:#767C85;letter-spacing:.06em;text-transform:uppercase}
-.entry .arrow{position:absolute;top:24px;right:24px;color:#D1FE17;font-size:17px;
-  transition:transform .3s cubic-bezier(.22,1,.36,1)}
-.entry:hover .arrow{transform:translateX(4px)}
-
-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
+}.card{padding:20px 22px}.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}.g5{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}.kpi{padding:18px 20px}.kpi .t{font-size:9.5px;color:#767C85;font-weight:700;letter-spacing:.13em;text-transform:uppercase}.kpi .v{font-family:__MONO__;font-size:clamp(30px,3.2vw,46px);font-weight:700;color:#fff;
+  margin:12px 0 6px;letter-spacing:-.032em;line-height:1.15}.kpi.good .v,.kpi.hi .v{color:#D1FE17}.kpi.hi{border-color:rgba(209,254,23,.45)}.kpi .d{font-size:12px;color:#8A9099;line-height:1.65}.kpi .d b{color:#C9CDD2}.entry{display:block;text-decoration:none;padding:26px;position:relative;
+  transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .3s}.entry:hover{transform:translateY(-4px);border-color:rgba(209,254,23,.42);
+  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.09),0 26px 60px rgba(0,0,0,.62),0 0 42px rgba(209,254,23,.09)}.entry .et{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#767C85;
+  font-family:__MONO__;margin-bottom:12px}.entry h3{margin:0 0 9px;font-size:18px;font-weight:750;color:#fff}.entry p{color:#8A9099;font-size:13px;line-height:1.65;margin-bottom:16px}.entry .nums{display:flex;gap:22px;flex-wrap:wrap;padding-top:16px;
+  border-top:1px solid rgba(255,255,255,.07)}.entry .nums div{display:flex;flex-direction:column;gap:3px}.entry .nums s{text-decoration:none;font-family:__MONO__;font-size:18px;font-weight:700;
+  color:#D1FE17;letter-spacing:-.03em}.entry .nums em{font-style:normal;font-size:10.5px;color:#767C85;letter-spacing:.06em;text-transform:uppercase}.entry .arrow{position:absolute;top:24px;right:24px;color:#D1FE17;font-size:17px;
+  transition:transform .3s cubic-bezier(.22,1,.36,1)}.entry:hover .arrow{transform:translateX(4px)}table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
   background:linear-gradient(158deg,rgba(22,27,24,.86),rgba(10,13,11,.92));
   border:1px solid rgba(255,255,255,.12);border-radius:18px;overflow:hidden;
   box-shadow:inset 0 0 0 .61px rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.5),
-             0 8px 20px rgba(0,0,0,.42),0 26px 56px rgba(0,0,0,.46)}
-th{background:transparent;color:#767C85;font-weight:700;font-size:10.5px;text-align:left;
+             0 8px 20px rgba(0,0,0,.42),0 26px 56px rgba(0,0,0,.46)}th{background:transparent;color:#767C85;font-weight:700;font-size:10.5px;text-align:left;
   padding:10px 14px;white-space:nowrap;letter-spacing:.095em;text-transform:uppercase;
-  border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer;user-select:none;transition:color .2s}
-th:hover{color:#D1FE17}
-th.ctr,td.ctr{text-align:center}
-td{padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap;
-  vertical-align:middle}
-tbody tr{transition:background .18s}
-tbody tr:last-child td{border-bottom:none}
-tbody tr:hover{background:rgba(255,255,255,.032)}
-tbody tr.top{background:rgba(209,254,23,.055)}
-tbody tr.top td:first-child{box-shadow:inset 3px 0 0 #D1FE17}
-.num{text-align:right;font-variant-numeric:tabular-nums;font-family:__MONO__;font-weight:500;
-  letter-spacing:-.022em}
-.strong{color:#D1FE17;font-weight:600}
-.nm{color:#E4E7EA;font-weight:600}
-.ybest{color:#0B0B0B;font-weight:800;background:#D1FE17}
-.rk b{display:block;font-family:__MONO__;font-size:15px;color:#fff;font-weight:700}
-.rk s{text-decoration:none;font-size:10px;color:#5A6069;font-family:__MONO__}
-.cell2{line-height:1.25}
-.cell2>*{display:block}
-.cell2 s{text-decoration:none;font-size:10.5px;color:#6E747D;display:block}
-.cell2 b{font-weight:600;color:#E4E7EA}
-.dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;vertical-align:middle}
-.vlabel{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;font-size:10px;
+  border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer;user-select:none;transition:color .2s}th:hover{color:#D1FE17}th.ctr,td.ctr{text-align:center}td{padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap;
+  vertical-align:middle}tbody tr{transition:background .18s}tbody tr:last-child td{border-bottom:none}tbody tr:hover{background:rgba(255,255,255,.032)}tbody tr.top{background:rgba(209,254,23,.055)}tbody tr.top td:first-child{box-shadow:inset 3px 0 0 #D1FE17}.num{text-align:right;font-variant-numeric:tabular-nums;font-family:__MONO__;font-weight:500;
+  letter-spacing:-.022em}.strong{color:#D1FE17;font-weight:600}.neg{color:#FF6B6B;font-weight:600}.nm{color:#E4E7EA;font-weight:600}.rk b{display:block;font-family:__MONO__;font-size:15px;color:#fff;font-weight:700}.rk s{text-decoration:none;font-size:10px;color:#5A6069;font-family:__MONO__}.cell2{line-height:1.25}.cell2>*{display:block}.cell2 s{text-decoration:none;font-size:10.5px;color:#6E747D;display:block}.cell2 b{font-weight:600;color:#E4E7EA}.dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;vertical-align:middle}.vlabel{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;font-size:10px;
   font-weight:600;color:#9AA0A8;background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.14);white-space:nowrap}
-.tagu{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:999px;font-size:9.5px;
-  font-weight:700;color:#FF4D8D;border:1px solid rgba(255,77,141,.45)}
-.mini{height:5px;border-radius:999px;background:rgba(255,255,255,.07);margin-top:6px;overflow:hidden}
-.mini i{display:block;height:100%;border-radius:999px;background:rgba(255,255,255,.20);
-  transition:width .9s cubic-bezier(.22,1,.36,1)}
-.js .reveal .mini i{width:0!important}
-.js .reveal.in .mini i{width:var(--w)!important}
-.mini.m2 i{background:rgba(255,255,255,.13)}
-.mini.m3 i{background:rgba(255,255,255,.09)}
-/* lime 只标最重要的一件事 —— 强调色一旦满地都是，就等于没有强调 */
-tr.top .mini i{background:#D1FE17}
-
-.tag{display:inline-block;padding:3px 11px;border-radius:999px;font-size:10.5px;font-weight:700}
-.v-good{background:#D1FE17;color:#0B0B0B}
-.v-warn{background:transparent;color:#C9CDD2;border:1px solid rgba(255,255,255,.18)}
-.v-bad{background:transparent;color:#FF6B6B;border:1px solid rgba(255,107,107,.32)}
-
-.note{padding:18px 22px;font-size:13px;line-height:1.78}
-.note.warn{border-left:2px solid rgba(255,201,60,.55)}
-.note.good{border-left:2px solid rgba(209,254,23,.5)}
-ul{margin:8px 0 0 19px}
-li{margin:7px 0;font-size:13px;line-height:1.72}
-li::marker{color:#D1FE17}
-code{background:rgba(209,254,23,.09);border:1px solid rgba(209,254,23,.2);padding:2px 7px;
-  border-radius:6px;font-family:__MONO__;font-size:12.5px;color:#D1FE17;font-weight:500}
-details{margin-bottom:12px;overflow:hidden;border-radius:16px;transition:border-color .25s}
-details:hover{border-color:rgba(209,254,23,.28)}
-summary{cursor:pointer;padding:16px 22px;font-size:13.5px;font-weight:650;color:#E4E7EA;
-  list-style:none;display:flex;align-items:center;gap:11px}
-summary::-webkit-details-marker{display:none}
-summary:hover{color:#fff}
-summary .chev{margin-left:auto;color:#767C85;font-size:12px;
-  transition:transform .3s cubic-bezier(.22,1,.36,1)}
-details[open] summary .chev{transform:rotate(90deg);color:#D1FE17}
-summary .warnbadge{font-size:10px;font-weight:800;color:#0B0B0B;background:#FFC93C;
-  padding:1.5px 7px;border-radius:999px}
-.dbody{padding:0 22px 22px;font-size:13px;line-height:1.78}
-.dbody>*+*{margin-top:12px}
-.dbody h3{margin:18px 0 10px}
-
-.tw{overflow-x:auto;border-radius:18px}
-.tw table{min-width:760px}
-.tw.scroll-y{max-height:440px;overflow-y:auto;overscroll-behavior:contain}
-.tw.tw-main{max-height:min(72vh,640px)}
-.tw.scroll-y::-webkit-scrollbar{width:10px;height:10px}
-.tw.scroll-y::-webkit-scrollbar-track{background:rgba(255,255,255,.03);border-radius:6px}
-.tw.scroll-y::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:6px;
-  border:2px solid transparent;background-clip:content-box}
-.tw.scroll-y::-webkit-scrollbar-thumb:hover{background:rgba(209,254,23,.45);
-  background-clip:content-box;border:2px solid transparent}
-.tw.scroll-y{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
-.tw.scroll-y thead th{position:sticky;top:0;z-index:2;
-  background:linear-gradient(180deg,rgba(22,27,24,.98),rgba(16,20,18,.96))}
-
-.ctrl{display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap;margin-bottom:18px}
-.field{display:flex;flex-direction:column;gap:7px}
-.field label{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  color:#767C85}
-input[type=range]{-webkit-appearance:none;appearance:none;width:min(320px,62vw);height:4px;
-  border-radius:999px;outline:none;background:rgba(255,255,255,.12);cursor:pointer}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;
-  border-radius:50%;background:#D1FE17;border:3px solid #000;cursor:pointer}
-input[type=number]{width:110px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.14);white-space:nowrap}.tagu{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:999px;font-size:9.5px;
+  font-weight:700;color:#FF4D8D;border:1px solid rgba(255,77,141,.45)}.mini{height:5px;border-radius:999px;background:rgba(255,255,255,.07);margin-top:6px;overflow:hidden}.mini i{display:block;height:100%;border-radius:999px;background:rgba(255,255,255,.20);
+  transition:width .9s cubic-bezier(.22,1,.36,1)}.js .reveal .mini i{width:0!important}.js .reveal.in .mini i{width:var(--w)!important}.mini.m2 i{background:rgba(255,255,255,.13)}.mini.m3 i{background:rgba(255,255,255,.09)}/* lime 只标最重要的一件事 —— 强调色一旦满地都是，就等于没有强调 */
+tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;border-radius:999px;font-size:10.5px;font-weight:700}.v-good{background:#D1FE17;color:#0B0B0B}.v-warn{background:transparent;color:#C9CDD2;border:1px solid rgba(255,255,255,.18)}.v-bad{background:transparent;color:#FF6B6B;border:1px solid rgba(255,107,107,.32)}.note{padding:18px 22px;font-size:13px;line-height:1.78}.note.warn{border-left:2px solid rgba(255,201,60,.55)}.note.good{border-left:2px solid rgba(209,254,23,.5)}ul{margin:8px 0 0 19px}li{margin:7px 0;font-size:13px;line-height:1.72}li::marker{color:#D1FE17}code{background:rgba(209,254,23,.09);border:1px solid rgba(209,254,23,.2);padding:2px 7px;
+  border-radius:6px;font-family:__MONO__;font-size:12.5px;color:#D1FE17;font-weight:500}details{margin-bottom:12px;overflow:hidden;border-radius:16px;transition:border-color .25s}details:hover{border-color:rgba(209,254,23,.28)}summary{cursor:pointer;padding:16px 22px;font-size:13.5px;font-weight:650;color:#E4E7EA;
+  list-style:none;display:flex;align-items:center;gap:11px}summary::-webkit-details-marker{display:none}summary:hover{color:#fff}summary .chev{margin-left:auto;color:#767C85;font-size:12px;
+  transition:transform .3s cubic-bezier(.22,1,.36,1)}details[open] summary .chev{transform:rotate(90deg);color:#D1FE17}.dbody{padding:0 22px 22px;font-size:13px;line-height:1.78}.dbody>*+*{margin-top:12px}.dbody h3{margin:18px 0 10px}.tw{overflow-x:auto;border-radius:18px}.tw table{min-width:760px}/* 内层滚动容器【不能】用 overscroll-behavior:contain：
+   手指/滚轮停在容器上时，Chrome 会把手势吃掉而不传给页面，
+   表现为「滑到这里就划不动了」（手机上尤其致命）。 */
+.tw.scroll-y{max-height:440px;overflow-y:auto}.tw.tw-main{max-height:min(72vh,640px)}.tw.scroll-y::-webkit-scrollbar{width:10px;height:10px}.tw.scroll-y::-webkit-scrollbar-track{background:rgba(255,255,255,.03);border-radius:6px}.tw.scroll-y::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:6px;
+  border:2px solid transparent;background-clip:content-box}.tw.scroll-y::-webkit-scrollbar-thumb:hover{background:rgba(209,254,23,.45);
+  background-clip:content-box;border:2px solid transparent}.tw.scroll-y{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}.tw.scroll-y thead th{position:sticky;top:0;z-index:2;
+  background:linear-gradient(180deg,rgba(22,27,24,.98),rgba(16,20,18,.96))}input[type=range]{-webkit-appearance:none;appearance:none;width:min(320px,62vw);height:4px;
+  border-radius:999px;outline:none;background:rgba(255,255,255,.12);cursor:pointer}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;
+  border-radius:50%;background:#D1FE17;border:3px solid #000;cursor:pointer}input[type=number]{width:110px;background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.14);border-radius:9px;color:#fff;font-family:__MONO__;
-  font-size:14px;font-weight:600;padding:7px 10px;outline:none;letter-spacing:-.02em}
-input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}
-.big{font-family:__MONO__;font-size:21px;font-weight:700;color:#D1FE17;letter-spacing:-.03em}
-.presets{display:inline-flex;gap:5px}
-/* ── 表格上方的月产量工具条 ── */
-.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;
-  padding:11px 15px;border-radius:13px;background:rgba(255,255,255,.035);
-  border:1px solid rgba(255,255,255,.09)}
-.cqr{-webkit-appearance:none;appearance:none;width:190px;height:4px;border-radius:999px;
-  outline:none;background:rgba(255,255,255,.12);cursor:pointer}
-.cqr::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  font-size:14px;font-weight:600;padding:7px 10px;outline:none;letter-spacing:-.02em}input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.presets{display:inline-flex;gap:5px}.cqr{-webkit-appearance:none;appearance:none;width:190px;height:4px;border-radius:999px;
+  outline:none;background:rgba(255,255,255,.12);cursor:pointer}.cqr::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
   background:#D1FE17;border:3px solid #000;cursor:pointer;
-  transition:transform .2s cubic-bezier(.22,1,.36,1)}
-.cqr::-webkit-slider-thumb:hover{transform:scale(1.12)}
-.cqr::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#D1FE17;
-  border:3px solid #000;cursor:pointer}
-.qv{font-family:__MONO__;font-size:15px;font-weight:700;color:#D1FE17;letter-spacing:-.03em;
-  min-width:78px}
-.tb-hint{flex-basis:100%;margin:0}
-th .hm{font-size:9px;letter-spacing:.04em;text-transform:none;color:#5A6069;font-weight:600}
-/* ── 覆盖平台清单 ── */
-.guide{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  margin-top:30px}
-.gstep{display:flex;gap:13px;align-items:flex-start;padding:15px 17px;border-radius:15px;
-  background:rgba(209,254,23,.05);border:1px solid rgba(209,254,23,.18)}
-.gstep .gn{flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:#D1FE17;color:#0B0B0B;
-  font-family:__MONO__;font-size:13px;font-weight:800;display:flex;align-items:center;
-  justify-content:center}
-.gstep b{display:block;color:#fff;font-size:13.5px;font-weight:700;margin-bottom:3px}
-.gstep span{display:block;color:#8A9099;font-size:11.5px;line-height:1.6}
-.pcard{padding:15px 17px}
-.pcard .pn{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;color:#fff}
-.pcard .pn .dot{margin:0}
-.pcard .pmeta{font-size:11px;color:#767C85;margin-top:6px;letter-spacing:.02em}
-.pcard .prange{font-family:__MONO__;font-size:16px;font-weight:700;color:#E4E7EA;
-  margin-top:10px;letter-spacing:-.03em}
-.pcard .prange s{text-decoration:none;font-size:10px;color:#5A6069;font-weight:500;
-  margin-left:5px;letter-spacing:0}
-.pcard .pbest{font-size:11px;color:#8A9099;margin-top:5px;line-height:1.5}
-.pcard.best .prange{color:#D1FE17}
-.pcard .pochip{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;
-  font-size:9.5px;font-weight:600;color:#9AA0A8;background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.14)}
-.cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
+  transition:transform .2s cubic-bezier(.22,1,.36,1)}.cqr::-webkit-slider-thumb:hover{transform:scale(1.12)}.cqr::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#D1FE17;
+  border:3px solid #000;cursor:pointer}.qv{font-family:__MONO__;font-size:15px;font-weight:700;color:#D1FE17;letter-spacing:-.03em;
+  min-width:78px}.cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
   font-family:__MONO__;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;
-  cursor:pointer;transition:color .2s,border-color .2s,background .2s}
-.cqp:hover{color:#fff;border-color:rgba(255,255,255,.36)}
-.cqp.on{color:#0B0B0B;background:#D1FE17;border-color:#D1FE17;font-weight:700}
-.combo-plus{color:#5A6069;margin:0 5px;font-weight:700}
-.sub{color:#767C85;font-size:12px;line-height:1.7}
-.mono{font-family:__MONO__}
-
-.foot{margin-top:44px;color:#5A6069;font-size:11.5px;text-align:center;
-  border-top:1px solid rgba(255,255,255,.08);padding-top:20px}
-.legal{margin-top:22px;padding:26px 28px;background:#D1FE17 !important;border-color:#D1FE17;
+  cursor:pointer;transition:color .2s,border-color .2s,background .2s}.cqp:hover{color:#fff;border-color:rgba(255,255,255,.36)}.cqp.on{color:#0B0B0B;background:#D1FE17;border-color:#D1FE17;font-weight:700}/* ══ 应用式布局：左栏选项 + 右主区（参照 arena.ai 的结构）══
+   目的是「一进来就是控件与数据」，不再用长文档铺陈。 */
+.app{display:flex;gap:26px;align-items:flex-start;
+  max-width:1420px;margin:0 auto;padding:26px 26px 0}.side{flex:0 0 236px;position:sticky;top:calc(var(--navh) + 14px);
+  display:flex;flex-direction:column;gap:20px;padding-right:2px;
+  max-height:calc(100vh - var(--navh) - 30px);overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.16) transparent}.side::-webkit-scrollbar{width:6px}.side::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:6px}.sgroup{display:flex;flex-direction:column;gap:9px}.sgt{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:#6E747C}.sgchip{margin-left:auto;font-family:__MONO__;font-size:10px;letter-spacing:0;
+  text-transform:none;color:#8A9098;padding:2px 7px;border-radius:999px;
+  background:rgba(255,255,255,.05);white-space:nowrap}.segv{display:flex;flex-direction:column;gap:3px}.segv button{-webkit-appearance:none;appearance:none;border:1px solid transparent;
+  background:transparent;color:#9AA0A8;font-family:inherit;font-size:13px;font-weight:600;
+  text-align:left;padding:9px 12px;border-radius:10px;cursor:pointer;line-height:1.25;
+  transition:background .16s,color .16s,border-color .16s}.segv button s{display:block;font-size:10.5px;font-weight:400;text-decoration:none;
+  color:#6E747C;margin-top:2px}.segv button:hover{background:rgba(255,255,255,.045);color:#D7DBDF}.segv button.on{background:rgba(209,254,23,.10);border-color:rgba(209,254,23,.34);color:#D1FE17}.segv button.on s{color:#9AA85E}.segv.segk{flex-direction:row;gap:3px}.segv.segk button{flex:1;text-align:center;padding:9px 5px;font-size:12px}.side .cqr{width:100%}.srow{display:flex;align-items:baseline;gap:9px;margin-top:7px}.pf{display:flex;flex-wrap:wrap;gap:5px}.pfb{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:9px;
+  border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03);
+  color:#8A9098;font-family:inherit;font-size:11.5px;font-weight:600;cursor:pointer;
+  transition:color .16s,border-color .16s,background .16s}.pfb i{width:6px;height:6px;border-radius:50%;opacity:.4;flex:0 0 auto}.pfb.on{color:#E4E7EA;border-color:rgba(255,255,255,.24);background:rgba(255,255,255,.06)}.pfb.on i{opacity:1}.mainv{flex:1;min-width:0;display:flex;flex-direction:column;gap:18px}
+/* ⚠ flex 子项默认 min-width:auto —— 里面的表格有 min-width:760px，
+   会把整个主区撑到 760px，导致窄屏横向溢出（#all 视图侥幸没事，
+   因为它的 .tw-main 恰好带了 min-width:0）。这条兜住所有视图。 */
+.mainv>*{min-width:0}
+.tw{min-width:0}.vhead h1{font-family:__DISP__;font-size:clamp(20px,2.4vw,29px);font-weight:700;
+  letter-spacing:-.03em;line-height:1.22;color:#fff;margin:0}.vhead h1 em{font-style:normal;color:#D1FE17}.vmeta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:11px;font-size:11.5px;
+  line-height:1.75;color:#7A8088}
+.vsub{font-size:12.5px;line-height:1.75;color:#8A9098;margin-top:9px;max-width:720px}.vmeta b{color:#C9CDD2;font-weight:600}/* KPI 条三套（年/季/月），同一时刻只显示当前周期那套 */
+.kbar{display:none;gap:10px;grid-template-columns:repeat(auto-fit,minmax(148px,1fr))}
+.kbar.on{display:grid}.kb{padding:12px 14px;border-radius:13px;background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.085)}.kb.hi{border-color:rgba(209,254,23,.3);background:rgba(209,254,23,.055)}.kb s{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:#6E747C;text-decoration:none}.kb b{display:block;font-family:__MONO__;font-size:22px;font-weight:700;
+  letter-spacing:-.035em;color:#EDEFF2;margin-top:5px}.kb.hi b{color:#D1FE17}.kb em{display:block;font-style:normal;font-size:10.5px;color:#8A9098;margin-top:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kb b .u{font-family:__SANS__;font-size:11px;font-weight:600;font-style:normal;
+  color:#8A9098;margin-left:2px;letter-spacing:0}.vnote{font-size:11px;line-height:1.75;color:#6E747C;padding:11px 14px;border-radius:12px;
+  background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.06)}.vnote b{color:#9AA0A8}/* ── 动态排名条（三周期全清单页）──
+   条长＝「离该指标最优值的接近程度」，不是原始数值大小 —— 越长越好，无需读数字。
+   颜色同向：越接近最优越亮（lime 热力）。 */
+/* 44 档一次性铺开会把页面拉到十几屏 —— 改为区域内滚动。
+   ⚠ 只在桌面端启用：手机上套一层滚动容器会吃掉手势（已踩过）。 */
+.chart{display:flex;flex-direction:column;gap:5px;
+  max-height:min(66vh,640px);overflow-y:auto;overscroll-behavior:auto;
+  padding-right:6px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
+.chart::-webkit-scrollbar{width:8px}
+.chart::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:8px}
+.chart::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:8px}
+.crow{display:grid;grid-template-columns:30px 30px minmax(110px,1fr) minmax(90px,1.5fr) 100px;
+  align-items:center;gap:10px;padding:7px 12px;border-radius:11px;
+  background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.055)}
+.crow:hover{background:rgba(255,255,255,.05)}
+/* 产能不足：降饱和 + 降透明度，一眼可分辨；鼠标悬停恢复以便查看细节 */
+.pt tbody tr.out,.crow.out{opacity:.38;filter:grayscale(.75)}
+.pt tbody tr.out:hover,.crow.out:hover{opacity:.72;filter:grayscale(.35)}
+/* ── 帕累托散点：横轴＝该周期实付（对数）、纵轴＝每月可生成 ──
+   用途是回答「花多少钱买到多少产能」——这是本站在「单价」之外唯一有意义的权衡轴。
+   对角线上的点＝不被任何其他档位支配（更便宜且更能做）的档位，即帕累托前沿。 */
+/* ⚠ hero 的内容（meta 行）在 1440 视口下会撑到 1514px，导致整页横向溢出 ——
+   这是首页原有缺陷，加散点后被冒烟测试抓出来。overflow-x:clip 不产生滚动容器，
+   只裁掉溢出，不影响 sticky；配合 meta 允许换行双保险。 */
+.hero{overflow-x:clip}
+.hero .meta{flex-wrap:wrap}
+.hero .pareto,.wrap>.pareto{margin-top:34px}
+.pareto{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:18px;
+  background:rgba(255,255,255,.024);border:1px solid rgba(255,255,255,.075)}
+.phd b{display:block;font-size:14px;color:#E4E7EA}
+.phd span{display:block;font-size:11.5px;color:#7A8088;line-height:1.7;margin-top:5px}
+.phd i{font-style:normal;color:#D1FE17}
+.pplot{position:relative;height:340px;border-radius:12px;
+  background:
+    repeating-linear-gradient(to right,rgba(255,255,255,.05) 0 1px,transparent 1px 10%),
+    repeating-linear-gradient(to bottom,rgba(255,255,255,.05) 0 1px,transparent 1px 25%),
+    rgba(0,0,0,.25)}
+/* .pline 已移除（连线机制取消）—— 散点只靠点本身表达 */
+.pp{position:absolute;transform:translate(-50%,50%);cursor:default;z-index:2}
+.pp:hover{z-index:9}
+.pp i{width:19px;height:19px;border-radius:5px;opacity:.85;display:block;
+  background-size:cover;background-position:center;background-color:#111;
+  border:1px solid rgba(0,0,0,.55);box-shadow:0 0 0 1.5px rgba(255,255,255,.10)}
+/* 用户裁定：点不做高亮 —— 点本来就不可点，给 lime 环会让用户以为能点。
+   信息全部交给连线表达。 */
+/* 排名行悬停 → 散点对应点放大；散点悬停 → 排名行高亮。双向联动。 */
+.pp.hl i{outline:2px solid #D1FE17;outline-offset:2px;opacity:1}
+.crow.hl{background:rgba(209,254,23,.07);border-color:rgba(209,254,23,.3)}
+.pp.rk1 i{border-width:2px;border-color:rgba(209,254,23,.55)}
+.pp:hover i{opacity:1}
+.pp.rk1 i{border-color:rgba(209,254,23,.6)}
+/* 连线要足够醒目：它是这张图唯一的信息载体 */
+.pline path{stroke-width:2}
+.pp b{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);white-space:nowrap;
+  display:none;padding:5px 9px;border-radius:8px;font-size:11px;font-weight:600;
+  background:rgba(10,11,13,.97);border:1px solid rgba(255,255,255,.16);color:#EDEFF2;
+  box-shadow:0 8px 22px rgba(0,0,0,.6);z-index:9}
+.pp b s{display:block;text-decoration:none;font-weight:400;color:#8A9098;margin-top:2px}
+.pp:hover b{display:block}
+.pfoot{display:flex;justify-content:space-between;font-family:__MONO__;font-size:10.5px;color:#6E747C}
+.crk{font-family:__MONO__;font-size:12px;font-weight:700;color:#6E747C;text-align:right}
+.crk.top3{color:#D1FE17}
+.lg-libtv{background-image:url("data:image/png;base64,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")}
+.lg-neowow{background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAABgFBMVEX////+/v/+/v79/f79/f39/fz8/P38/Pz7+/z7+/v7+/r6+vv6+vr5+fr5+fn5+Pn4+Pn4+Pj39/f09PTz8/Py8vLx8fHw8PHw8PDv7+/u7u7q6urm5ubi4uLh4eHf39/b29va2trZ2dnY2NjX19fW1tbU1NTS0tLQ0NDNzc3KysrJycnIyMjHx8fFxcW/v7+9vb26urq2traysrKtra2pqamlpaWhoaGfn6Cenp2cnJyampqXl5eVlZWTk5OSkpKPj4+NjY2Li4uKioqJiYmHh4eFhYWCg4OAgIB9fX18fHx4eHh1dXV0dHRycnJxcXFubm5ra2tmZmZhYWFfX19bW1tWVlZSUlJOTk5ISUhFRUVDQ0NCQkI+Pj47Ozs5OTk1NTU0NDQvLy8sLCwpKSkoKCgkJCQgICAfHx8eHh8dHR0cHBwaGhoZGRkYGBkXFxcSEhIPDw8ODg4NDQ0LCwsKCgoJCQkHBwcGBgYFBQUEBAQEAwMDAwMCAgIBAQEAAAA7iml9AAADw0lEQVR42u2X+1cTRxTHr+u047TbrUGlKY/yUFAoIm8DgoAiRVAEY8SgiDaAKA8fVNxsZ+b+694hOcV9kvTwi+dkftlk9+Qz33u/d+7eAJ7SghqoBqqBTgck1f8DSR26pU5HUX4zkRQNIjXPD/BIk5ImJoXb1/vWk0iRIC1xomsZpcGUo9LrC29697SuDiRx9s7uPboQZic7mpeuh8/mMXsXZVUghYU+/DCmSNjbiQaAR3TPm1rTX4Y+oK4G5OH0E1SZDYVPG8ESrfvPJvvaByTdXovPUhRI6+FtxNxdfATgCKuzGwDYa3T1/IpXrAKk8ePwoXLdiWlggjEGYKfqV1BKfe8lxmYpGjTyma5LYHPiMC5seIweiRnoWdzBGOciky1H3+8u9loljkGxy1lSslsP0LgQQ4pSpHC8u5HScrw4QPdfS73gOACZf4ueFz5AEBGZN+mYLH8DYkJQwoEU8hQsR55FCOspDgH7L6pjlFNCC97ycO7Byt6JiiTeghRLWkbbpaaZoj9XEOLkwEnkCOh8UdxfbZvwVwIEa/FjsyWSONxqOvg0e6013SZ95wWCp2PxBEEcmpabTXQ9SaFp/aUjLIjzYI4ckYI7tGssSOK68ZgJ+xvbxFmwfVx6xnkq0DAhENl9Exk30o9jYXUQrAYjSCbYr7CfdhfQnn1wkfGySb2vt26BCDjXc6h0PEij2wqCs/pNpBZil0xKv6MnnT4SZ3/uBd9OAdB+A3AbBvFQbv1KPUTQwR9Az8Vpv5fOsouYoEjhVgq4A7dVEXd+ozSRPzCqpKfmAkUBbY8DJPCb9upHTqCbpOhvfqX5THsXg34sujgSAJEdQ//o2IJUesDk2mqhvjYL82tQGAdxoYC43WAFfBN1MOXzDXyCVktVBIOrCzZLd1vXOH1peZLrgFCVpmAkAZSxnLJwsJjJkVUuqlBX+RnSG1pFg8j8K+WdyS2qXsFKHci2w6cGfn8eW9kl81klS1gdW4FXnA+0m64QxHnjK5UA+twC5yoCMRu6vPiCVDhoOazCxQvxp1/iU3Aqi8wWkABC5d2AupM5limIm/E5MrHtdMBPdmzCfxAO9QZ2/sKlqw9l0qEl0vth2s12bBGk0QTgmC5rnbeuvnnrnfTKJrn5obSRbnHbOV62OIrn+ujlXwBmooZeCM1GiO9yk31/OOBf55r752iqcTfyL7VSuoIhotT6DjZf5JbmpsbHMpmx2zML2XzhU8nYqmZIKaMmF2VmEE0PqxrYzQ88Gl+OlvmgdO1vVg1UA9VA3wfoKy1N1tY01xhTAAAAAElFTkSuQmCC")}
+.lg-jimeng{background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAABgFBMVEXx/v/6/rvU/v7F/P24/f6r/v+g/v6Z/f3S9vj794Gr9/ub9/vd03342gqh3N6M/f+N9/x5+f139v199f1u9vxo9v1g9v5U9v1I9/5u9Ptq7fdO8/1K6vM89v028v448f4o9/8r8v0s8f4w8P0o8P0k7/0m6/4j7P4k6fsi7P0h6vwk5f0h5vwk4/0k4fwi4Psl3fgi3vsk2/sk2Pwh2fkj1vgh1/kq0fQjz/Yi0vgmzPkmyPohyPQkw+8kwPbjnCOYn3d2mpx3hFors+0spuQqmb0xg68ksO0jofEjl/gkmdAhivkfjeEfffkifbhsWDk8Tk0gYaQqQEUaYJoYTGAYQW4WPksrLisjHx0SMFgNHiocFxULExYHExwNCw0GCg0FBgkEBQcEBAQEBAICBgcDBAQCBAMFAwMDAwMCAwMBAwQCAgQCAgICAgABAgMBAgIAAgIBAgEDAQIBAQMBAQEBAQAAAQIAAQEAAQADAAUDAAABAAIBAAAAAAMAAAEAAADtKFzNAAADaUlEQVR42u3X3VfaaBAH4BRiUDx8CH6uVRShgBAoKq1ogY0bKJRFqAZwEVDDYgGjVHhZIqbMv943292bnuM5ScMlc8nFc36ZGSZAwISKmEJTaApNoZ9qIE0GGoEkTQJ6Hte/DEXt0GB8mcj3BEkzhOAikchDQ/uj9XsJU+JChfQS1IC8yZSod++1QvdQNmHpqXGPtEEDqGPIlIcbQeMePfYTprm5uRNodrVBzW/5OYIgXv0OwA80QZB/Reh0BMHUgUcaoBaUCUJP6mcJ8xkOJfwyJGBIR1JGo1GvZy4xzDdbwnCIEBJaLaQKupjVU1a71Wo1kGamLP1qoi6GSMPi8tKizW63UPPMSeGiet3g65flQoEHpAqasS6tr66vYGxtwUJR82a5ZuUBjHk1PSLnbSub284dx8bqiqwtWCwGipohjXpzX3miNpyRONC2z+Nxu5ybGJOjrdlw0wwzBbh9Vr5HBdK2vOHyBQJer8fndm07N39gC/YCdEUVC8lQS+s7vkAoFKT9Ae8bnMzt2nE4Vl+X4Iuo4vjfmC1yIDq8txcOBYM0Tft3vV7XVqoKt6Ly8bfRmQG32uMN7kWi794dyFooTG+95/BuSir2qA0MDuT00OFI9BBXNII1/9tUVbrBeSTFUBdV5Nn7AvRe5PADLmztB5MlGPE9pGazcastv606d+nQAXbisVjsaJ/lnqB6PX7hdUe8tETU4orDHQjKgWKxj/FjlqvCM8f1eqKoHBKgarbg2Xv84YPoYRwXe14DqZJM/n2Hht8UQ0i4ZWZsyw73Lm714YejY7ZYk+CqyB6XoCMqh5AADGldW3fiQJHo/lGSw8w19ykeT911+jBWCiH0zOjm7csb7t0A7X+fLF0BXHGn6XT6jyJ0hsrvUZdnCCP+uu64XW9i5xX8SaX4KZ3JpNNsRepLiiH5xJJyoK23Sa4OUOVSbDydyWYymdPWYAySUgihy1kdtfD63840Sin26PhjGkPZbOZ81FFzah+hfFIo48aMmvxNtVLiPrP4wbLZXBa3SBRV3Owfb9Z2s43++31U404z2Zx6CAS+3f1/OsOvna94asU/c7mcaujnGjZHUDmVoTvQBMHgn6ZU+5z7Cx40QrjuRte1p5EkaobQw6P0eC9OAJL6DwhNAJr+O5pCU2gKvVDfAf9WRwpR8cqOAAAAAElFTkSuQmCC")}
+.lg-xiaoyunque{background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAABQVBMVEX////+/v79/f38/Pz7+/v6+vr5+fn4+Pj39/f19fXz8/Pw8PDv7+/u7u7p6enn5+fm5ubk5OTj4+Pi4uLh4eHg4ODf39/e3t7d3d3X19fU1NTT09PQ0NDMzMzKysq8vLy5ubm2traurq6tra2rq6uqqqqnp6empqakpKSgoKCfn5+dnZ2ZmZmXl5eWlpaVlZWTk5OQkJCOjo6IiIiDg4N+fn59fX18fHx7e3t6enp5eXl4eHh1dXVzc3Nvb29ubm5sbGxqampoaGhnZ2dhYWFgYGBcXFxZWVlYWFhXV1dWVlZPT09OTk5NTU1KSkpJSUlGRkZFRUVDQ0NAQEA8PDw7Ozs3Nzc0NDQyMjIjIyMYGBgTExMODg4MDAwLCwsKCgoJCQkICAgHBwcGBgYFBQUEBAQDAwMCAgMCAgIBAQEAAAAnvg7lAAAB/ElEQVR42u3X+1MTMRAH8E0uByrWF6Ioaq3gW8D3E0EB5aEo4BvhqrQXk+///we4d70Zp6U3Q3L3i8zttJ20M/uZ3TRJU0JJQRVUQRV0sCDbL5whE5syKrKaX3ajZk9Ev6KmE8QN/HhWP3OyN4aHj32C3j9k0X54hPrGPMz+K7J2u06kAtkdIggOv+/n5ELaNmhA7K1G0iraDpOtMU9hlqo4ZOYoutHfyYGs3Tkl0mQRZJzICvpitAOksUYdh2j07qvX98fSIT9rP2EdoBgPhEoTw5dR8kH7TS2RJI38doI0rvN0cF/hGqtp5rcad+cBXSGenIAeo6Xx/dpb28Yyv/WAxjlN0IkdwxvlA1GjaXCRpCek6CaPNDbUIS4NT0h5Q89tzON1CuVYnPTmDb3IICVGmlgqAN1KW1unQaoDj7xbE3Q8SiZ7g9fmpsEl74r48RStGB9pdBVY4S/fFxIyfMcLcmtzG/h61G9BphAJEcykW2R3cchzi3SgJPns1OzcvfOdTesP9RwjBaDug60Q1H3QVtD/CJ0uCzqnS4EC0YBBCZCiWf7NKw4JObSV05kbNMAFaRSGZEgTuU4udFUNqu7gc+R2y1hX6PLexi4sA9bxVmuwcGd68l9MTU7PfNbIr8ft5q997tk67g1tq39HHvHHlgTZarIr6MBDfwGWlxz1MHo2pgAAAABJRU5ErkJggg==")}
+.lg-higgsfield{background-image:url("data:image/png;base64,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")}
+.lg-tapnow{background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAABgFBMVEX///////7///3+///+//3//v/+/vv9/fz8+vv68/v8/PD89ur788L474z45fL95rz52fD92rP463n+4Z7+3Zr+2Jr40ez6ytb90av8yaj+1JL+zpH8yZb8y5D6wdf6wrj7wan7vaz9xZz9wqD8wKbq8KzU8KPb637E633q6Wjc6GnS6XDL6Xfl1f3g45zszPzcyvfmw/7hvv3bv/7SwP6x8Kmt7YyZ76Ch7pS864Kz7Iqx0PGrwv6N8KqA8Kxz8a5d87WDz+hZ1OT5t8/6tbr6t7T6trT6urD6ua/5stD7sL36srnqtt7Puv7HuP6/t/65tP6ytv6usv74qsv5rMH6rMD4ptT9psX6otL7mdb1q8/1pcr0nNTxodDxl8/ao92lsf2Ztf2cr/2Tq/qIsP13sf2Ep/p1pvxRtv1WpfkqtPwoqf0Isv0IqfsFov0BpP1+kvxrgv1ShftFdPskmP0kjPwnevsqbPsCnfoKjfsSevsLcfsPa/wFafsBafwBZvzwRzpAAAAE/0lEQVR42u3X6VfiZhQH4GQS9ohQhDgzFju2QqctiqN0wwUHlzLV0RFEJSAo2wDiCm4U/dfn3jchBElA7bd2fh/0HM/xOffed0lCUV/zHw39ghZ/0/S/YhiGYli9Xg+/qedTLyhKb+HGByAOjjOTPzyrHMrMDXwjZ4CzMBT9HIYSmbckIqV/ukRTeuK8bQekcfNTJXBgNkoGpYGBccvjJJ1O/EnT6Hh/ehCv91E14fIyrE6HS01xExNeFcg7Ma7v3w1jtFh5nnfZrEaLBxzvzw8D0ATXdxeYuUH7KEC8283z417vLyrxej2ePmNiLYN2+ygmHEbJ/qN6PB6uJ6Tn7Hb7MDpLS2GMm/9DNR6Pp8e8aRac4Zcvv3uzurz0IRYJhyMRN/+narA3VvNscg50vv/hzV8rAMU+xKKJxNrEryoJBAKavdGUxe5wOsfGEFr+m0CCEI+vBX7vDkAeg+agOceQc2QEIWxtGyhBSIH0m0pAMmoW5HA4X70eaVVEoP39JEBzXUFJE4KCXqlB8cB8V+bmEGLUKYRef9uGYgTCkhYW5hc6g5JRaw8NKqGlFpQkUOg9JLQQCrWlgNawzY6HFYUFqaLQ+3K5/PlzfnExJAWkoI7RgnBEErSCFYWjIpQpiwEq17IW5jU2JM1ARR1QLBZOCKn9/T10qhhCHcwGiTWvMWuE2hWtruCGjEYQSpcrlWr1+Pi4Wq2QooAKBheDmufjIbQdEyKJ1H6yVKlVj6+vr49PTtqS3+ezGtVvJEbvGBrqnJGQiKSS6Urt5hoDNSmlSZ/PpFM/IcrlF6HdRGI3W6vf3MhQtQIQzml6anJy0qouqUCw9CUlREpCaH2aSCZW64jIEJnRbmovXa7dEAiUExnaWJ+ZngLJZmJUD60KlK0gdCMyJydHsAXyuc2PAL1DyMqqQ/Lpl1pLJUv1OkLXWE316Aih3ObGx/V1Ak3aDKqHTQGRioTddK1+20DnSEo5f7DZgkhv6kPquI8QyiLUbNTrFaKU89nM1lZfCG+2BxWV0LlrXF6clUqlYiGbPTzM9IfMcGePyBBcIjukMwKdg1REKdMJGTWeIk7nSPvyF3ags0azede8uro4OyXQoQLCLWnQeIwMOxUXm9TZ/V3znysoqdgN2ay0xiU5PDzWnpHUWQs6VYFMlE69N3hAyhDp7LZ5L0IXIpTthDSvW3xkyxsyKnYmQ6ddkJXVfGiLz36cUWwnpYBg2menXa2ZtF+FsSR8iYBV20lXlBAMqaCEenUmlSRB250VdUIzCFnpHm/ngyCJEM7oEqF7LUh9zaSSLHa7BAk7BXFjKyvKKiCbsdfLnwFeIUdXl8V9BENCSTFsGXoHnfX+ErLgO6S4s0lJt41GQ1r+vLK1np3he7ooEUhIFWt1oG4vu3Y2dOYz9HlBNg7K0G6yWAHqEk+/DH2SIK3dKJdEWXh+FB/ZeGfvbRVLtfNzqOe0kC/kWhXNTMNjrWdnYnMoxaJYUXJvL50pkIOfz+VyB3CvfcIRwaOW7f9RxNp4PhyORhMAgQTWZuYAFAg4WJAfC+of1kCkSCIeJw5kyhcMzh7MQjY2Zmb8/kc5sMFZK3yLhCNxMWtrsNS0wYQYlPNoh7xTmFxAuddIXHA64SOORsvvx7ZY6tFhGJPV5XK7XS6X1UiRBcIPQvqFwcA++TubMUIMFNVeZ53uGR/qrX961j9/zf8sXwArjmcCY9TZQgAAAABJRU5ErkJggg==")}
+/* 三个尺寸的 logo 壳：背景图由 .lg-* 提供 */
+.clogo,.pfbi,.plgo{display:inline-block;flex:0 0 auto;background-color:#111;
+  background-size:cover;background-position:center;background-repeat:no-repeat}
+.clogo{width:26px;height:26px;border-radius:8px;border:1px solid rgba(255,255,255,.1)}
+.pfbi{width:15px;height:15px;border-radius:4px}
+.plgo{width:15px;height:15px;border-radius:4px;vertical-align:-2px;margin-right:7px}
+.plc{display:inline-flex}
+.cname{font-size:13px;font-weight:600;color:#E4E7EA;min-width:0;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.cname s{text-decoration:none;font-size:10.5px;font-weight:400;color:#7A8088;margin-left:6px}
+.cbar{height:9px;border-radius:5px;background:rgba(255,255,255,.085);overflow:hidden}
+.cbar i{display:block;height:100%;border-radius:5px;transition:width .35s cubic-bezier(.22,1,.36,1)}
+.cval{font-family:__MONO__;font-size:13.5px;font-weight:700;color:#EDEFF2;text-align:right;
+  white-space:nowrap}
+.cval s{display:block;text-decoration:none;font-size:10px;font-weight:500;color:#7A8088}
+.combo-note{display:block;margin-top:4px;font-size:10.5px;color:#8A9098}
+.reco{display:flex;flex-direction:column;gap:10px;padding:14px 15px;border-radius:16px;
+  background:rgba(209,254,23,.045);border:1px solid rgba(209,254,23,.2)}
+.recot{font-size:13px;font-weight:700;color:#D1FE17}
+.recot span{display:block;font-size:11px;font-weight:400;color:#8A9098;margin-top:4px}
+/* 顶部 tab 条：手机端常驻可见（PC 端用侧栏，故隐藏）—— 学 arena.ai */
+.tabs{display:none}
+/* ⚠ 不要给 .vmeta span 加 display:inline-flex —— flex 容器会裁掉纯文本节点
+   首尾的空白，导致「数据时点」与「2026-09-21」直接贴在一起（用户报的重叠感）。
+   图标对齐用 vertical-align 处理即可。 */
+.vmeta svg{vertical-align:-2px;margin-right:5px;color:#5A6069;flex:0 0 auto}
+.vpanel{display:none;flex-direction:column;gap:14px}.vpanel.on{display:flex}.vptitle{font-size:14px;font-weight:700;color:#E4E7EA}.vptitle span{display:block;font-size:11.5px;font-weight:400;color:#7A8088;margin-top:4px}/* 周期三选一：整块预渲染，只切可见性 */
+.pt{display:none}.pt.on{display:block}/* ── 结论芯片行（替代三张大卡，降低文字密度）── */
+.chips{display:flex;gap:10px;flex-wrap:wrap}.chip{display:inline-flex;align-items:baseline;gap:9px;padding:10px 15px;border-radius:12px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+  font-family:__MONO__;font-size:15px;font-weight:700;color:#EDEFF2;letter-spacing:-.02em}.chip b{font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.09em;color:#D1FE17}.chip s{font-family:__SANS__;font-size:11.5px;font-weight:400;text-decoration:none;color:#8A9098}/* 计算器里的极简折叠块：不占视觉重量，只承载口径说明 */
+details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}details.tiny summary{padding:6px 0;font-size:11.5px;font-weight:600;color:#6E747C}details.tiny summary:hover{color:#C9CDD2}details.tiny .dbody{padding:8px 0 0;font-size:12px;color:#8A9098}.combo-plus{color:#5A6069;margin:0 5px;font-weight:700}.sub{color:#767C85;font-size:12px;line-height:1.7}.mono{font-family:__MONO__}.foot{margin-top:44px;color:#5A6069;font-size:11.5px;text-align:center;
+  border-top:1px solid rgba(255,255,255,.08);padding-top:20px}.legal{margin-top:22px;padding:26px 28px;background:#D1FE17 !important;border-color:#D1FE17;
   border-radius:20px;color:#0B0B0B;font-size:12px;line-height:1.8;backdrop-filter:none;
-  -webkit-backdrop-filter:none}
-.legal-t{font-size:16px;font-weight:800;letter-spacing:-.025em;margin-bottom:9px}
-.legal-b{color:#1F2A00;max-width:1000px}
-.legal-f{margin-top:14px;font-family:__MONO__;font-size:11px;color:#1F2A00}
-.legal-f .fp{background:#0B0B0B;color:#D1FE17;padding:2.5px 9px;border-radius:6px;font-weight:600}
+  -webkit-backdrop-filter:none}.legal-t{font-size:16px;font-weight:800;letter-spacing:-.025em;margin-bottom:9px}.legal-b{color:#1F2A00;max-width:1000px}.legal-f{margin-top:14px;font-family:__MONO__;font-size:11px;color:#1F2A00}.legal-f .fp{background:#0B0B0B;color:#D1FE17;padding:2.5px 9px;border-radius:6px;font-weight:600}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-.reveal{opacity:0;transform:translateY(16px);
-  transition:opacity .62s cubic-bezier(.22,1,.36,1),transform .62s cubic-bezier(.22,1,.36,1)}
-.reveal.in{opacity:1;transform:none}
-.hero>*{animation:fadeUp .7s cubic-bezier(.22,1,.36,1) both}
-.hero>*:nth-child(2){animation-delay:.06s}
-.hero>*:nth-child(3){animation-delay:.12s}
-.hero>*:nth-child(4){animation-delay:.18s}
-@media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  .reveal,.hero>*{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}.reveal{opacity:0;transform:translateY(16px);
+  transition:opacity .62s cubic-bezier(.22,1,.36,1),transform .62s cubic-bezier(.22,1,.36,1)}.reveal.in{opacity:1;transform:none}.hero>*{animation:fadeUp .7s cubic-bezier(.22,1,.36,1) both}.hero>*:nth-child(2){animation-delay:.06s}.hero>*:nth-child(3){animation-delay:.12s}.hero>*:nth-child(4){animation-delay:.18s}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal,.hero>*{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}
 }
-@media print{
-  body{background:#fff!important;color:#000!important;padding:0}
-  body::before,body::after,.hero::before,.hero::after{display:none!important}
-  .glass,.card,.kpi,.note,.entry,.legal,details,.nav,.subnav,table{
+@media print{body{background:#fff!important;color:#000!important;padding:0}body::before,body::after,.hero::before,.hero::after{display:none!important}.card,.kpi,.note,.entry,.legal,details,.nav,table{
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
-    box-shadow:none!important;background:#fff!important}
-  .nav,.subnav{position:static!important}
-  .promo{background:#D1FE17!important;color:#000!important}
-  .brand .bw b,.menu a,h1,h2,h3,td,th,li,.kpi .v,.lead,.meta{color:#000!important}
-  .legal{background:#F2FFB8!important}
-  .legal-t,.legal-b,.legal-f{color:#000!important}
-  .tw{overflow:visible!important}
-  .tw table{min-width:0!important}
-  details:not([open]) .dbody{display:block!important}
+    box-shadow:none!important;background:#fff!important}.nav{position:static!important}.promo{background:#D1FE17!important;color:#000!important}.brand .bw b,.menu a,h1,h2,h3,td,th,li,.kpi .v,.lead,.meta{color:#000!important}.legal{background:#F2FFB8!important}.legal-t,.legal-b,.legal-f{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
 }
-@media (max-width:820px){
-  .promo{font-size:11.5px;padding:9px 14px;gap:9px}
-  .nav .inner{padding:10px 15px;gap:11px}
-  .nav .spec{display:none}
-  .subnav .inner{padding:8px 15px}
-  .hero{padding:36px 15px 4px}
-  .wrap{padding:0 15px}
-  section{margin-top:44px}
-  h2{font-size:17.5px}
-  .kpi .v{font-size:26px}
-  .entry{padding:20px}
-  .card,.kpi,.note,.legal,table,details,.entry{border-radius:15px}
-  .legal{padding:21px 18px}
-  td,th{padding:7px 11px}
-  summary{padding:14px 17px;font-size:13px}
-  .dbody{padding:0 17px 18px}
-  .g5,.g2{grid-template-columns:1fr 1fr}
-  .ctrl{gap:14px}
-  input[type=range]{width:100%}
-  /* ── 主表改卡片形态（竖屏）──────────────────────────────────
+@media (max-width:820px){.promo{font-size:11.5px;padding:9px 14px;gap:9px}.nav .inner{padding:10px 15px;gap:11px}.nav .spec{display:none}.hero{padding:36px 15px 4px}.wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}.kpi .v{font-size:26px}.entry{padding:20px}.card,.kpi,.note,.legal,table,details,.entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g5,.g2{grid-template-columns:1fr 1fr}input[type=range]{width:100%}/* ── 主表改卡片形态（竖屏）──────────────────────────────────
      44 行 x 7 列在 390px 宽下要横向拖很远才能读完一行，这是数据密度决定的，
      压缩列宽解决不了。改为每档一张竖排卡片：首行「名次 平台 档位」，
      下面四行「标签 — 数值」，上下滑即可。 */
-  .tw.tw-main{max-height:none}
-  #main{min-width:0;background:transparent;border:0;box-shadow:none;border-radius:0;
-    overflow:visible}
-  #main thead{display:none}
-  #main tbody tr{display:flex;flex-wrap:wrap;align-items:center;
-    margin-bottom:10px;padding:12px 14px;border-radius:14px;
-    border:1px solid rgba(255,255,255,.12);
-    background:linear-gradient(158deg,rgba(255,255,255,.055),rgba(0,0,0,.3))}
-  #main tbody tr.top{border-color:rgba(209,254,23,.42);box-shadow:inset 3px 0 0 #D1FE17}
-  #main tbody tr.top td:first-child{box-shadow:none}
-  #main tbody td{border:0;padding:0;white-space:normal}
-  #main tbody td:nth-child(-n+3){flex:0 0 auto;text-align:left;padding-right:8px}
-  #main tbody td:nth-child(1) b{font-size:14px}
-  #main tbody td:nth-child(1) s{font-size:10px;margin-left:3px}
-  #main tbody td:nth-child(2){font-weight:600;color:#fff;font-size:13.5px}
-  #main tbody td:nth-child(3){color:#9AA0A8;font-size:12.5px}
-  #main tbody td:nth-child(n+4){flex:1 0 100%;display:block;position:relative;
-    padding:7px 0 7px 80px;border-top:1px dashed rgba(255,255,255,.075)}
-  #main tbody td:nth-child(n+4)::before{content:attr(data-l);position:absolute;
-    left:0;top:7px;color:#767C85;font-size:10.5px;font-weight:700;
-    letter-spacing:.06em;white-space:nowrap}
-  #main tbody td:nth-child(n+4) s{font-size:10.5px}
-  #main tbody td:nth-child(6) .mini{max-width:170px;margin-left:auto;margin-top:5px}
-  #main tbody td:nth-child(6) s{display:block;text-align:right}
+  /* 特异性必须 ≥ .tw.scroll-y(0,2,0)，否则 overflow-y:auto 赢，
+   卡片形态下容器仍被当作滚动容器 → 手势被它吃掉、整页滑不动。 */
+  .tw.scroll-y.tw-main{max-height:none;overflow:visible}.tw-main table{min-width:0!important}.tw-main{min-width:0;background:transparent;border:0;box-shadow:none;border-radius:0;
+    overflow:visible}.tw-main thead{display:none}
+  /* ── 手机端卡片：压成「两行 + 一条刻度」，对齐 arena.ai 的手机行高（约 110px）──
+     上一版每张卡 7 行、约 270px，44 张就是 11,900px（16 屏），滑到崩溃。
+     现在：第 1 行＝名次 / 平台 / 档位 / 单条成本，第 2 行＝实付 · 产能 · 元每秒。 */
+  .tw-main tbody tr{display:grid;grid-template-columns:auto auto 1fr auto;
+    align-items:baseline;gap:3px 8px;
+    margin-bottom:8px;padding:11px 13px;border-radius:13px;
+    border:1px solid rgba(255,255,255,.1);
+    background:linear-gradient(158deg,rgba(255,255,255,.05),rgba(0,0,0,.28))}
+  .tw-main tbody tr.top{border-color:rgba(209,254,23,.42);box-shadow:inset 3px 0 0 #D1FE17}
+  .tw-main tbody td{border:0;padding:0;white-space:normal;background:none!important;
+    position:static;display:block}
+  .tw-main tbody td::before{display:none}
+  /* 第 1 行 */
+  .tw-main tbody td:nth-child(1){grid-area:1/1;font-size:12px;text-align:left}
+  .tw-main tbody td:nth-child(1) b{font-size:12.5px}
+  .tw-main tbody td:nth-child(1) s{font-size:9.5px;margin-left:3px}
+  .tw-main tbody td:nth-child(2){grid-area:1/2;font-weight:600;color:#fff;font-size:13px;
+    white-space:nowrap}
+  .tw-main tbody td:nth-child(3){grid-area:1/3;color:#9AA0A8;font-size:12px;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tw-main tbody td:nth-child(6){grid-area:1/4;text-align:right;white-space:nowrap}
+  .tw-main tbody td:nth-child(6) .nm,.tw-main tbody td:nth-child(6) .strong{font-size:14px}
+  .tw-main tbody td:nth-child(6) s{display:block;font-size:9.5px;color:#6E747C;margin-top:1px;
+    white-space:nowrap}
+  .tw-main tbody td:nth-child(6) .mini{display:none}
+  /* 第 2 行：三项小字并排，各自带极简前缀 */
+  .tw-main tbody td:nth-child(4){grid-area:2/1/2/3;color:#7A8088;font-size:10.5px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tw-main tbody td:nth-child(5){grid-area:2/3;color:#7A8088;font-size:10.5px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .tw-main tbody td:nth-child(7){grid-area:2/4;color:#7A8088;font-size:10.5px;text-align:right;
+    white-space:nowrap}
+  .tw-main tbody td:nth-child(4)::before{content:"实付 ";color:#5A6069;display:inline}
+  .tw-main tbody td:nth-child(5)::before{content:"产能 ";color:#5A6069;display:inline}
+  .tw-main tbody td:nth-child(7)::before{content:"元/秒 ";color:#5A6069;display:inline}
+  .tw-main tbody td:nth-child(4) b,.tw-main tbody td:nth-child(5) b,
+  .tw-main tbody td:nth-child(7) b{display:inline;font-size:11.5px;font-weight:600;color:#B9BEC4}
+  .tw-main tbody td:nth-child(4) s,.tw-main tbody td:nth-child(5) s,
+  .tw-main tbody td:nth-child(7) s{display:none}
 
 }
-@media (max-width:520px){ .g5,.g2{grid-template-columns:1fr} }
+@media (max-width:520px){.g5,.g2{grid-template-columns:1fr} }/* ── 窄屏：左栏改为【底部抽屉】+ 底部摘要条 ──
+   上一版把侧栏做成「吸顶横向滚动条」，实测失败：吸顶块挡住内容，
+   月产量与平台筛选被挤出视野、用户根本找不到。
+   移动端的正确形态是「底部条 + 弹层」：不占首屏、信息一个不少、可发现。 */
+.mobar,.scrim,.nburger,.ndrop{display:none}
+@media (max-width:1020px){
+  /* ⚠ 必须显式 stretch：桌面端 .app 是 flex-start，窄屏转纵向后
+     align-items:flex-start 会让交叉轴（横向）按内容宽度定尺寸，
+     主区被里面的 760px 表格撑到 760px → 整页横向溢出。 */
+  .app{flex-direction:column;align-items:stretch;gap:15px;padding:16px 15px 0}
+  .side{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:60;width:auto;
+    max-height:80vh;overflow-y:auto;flex-direction:column;flex-wrap:nowrap;gap:17px;
+    padding:18px 18px calc(20px + env(safe-area-inset-bottom,0px));
+    border-radius:20px 20px 0 0;background:#0A0B0D;
+    border:1px solid rgba(255,255,255,.12);border-bottom:0;
+    box-shadow:0 -18px 44px rgba(0,0,0,.62);
+    transform:translateY(103%);visibility:hidden;
+    transition:transform .3s cubic-bezier(.22,1,.36,1),visibility .3s}
+  .side.open{transform:none;visibility:visible}
+  .sgroup{flex:1 0 auto}
+  .segv{flex-direction:row;gap:3px}
+  .segv button{flex:1;text-align:center;padding:9px 5px;font-size:12px}
+  .segv button s{display:block;font-size:10px}
+  .side .cqr{width:100%}
+  .mobar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;
+    align-items:center;gap:12px;
+    padding:11px 15px calc(11px + env(safe-area-inset-bottom,0px));
+    background:rgba(10,11,13,.93);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+    border-top:1px solid rgba(255,255,255,.1)}
+  .mosum{flex:1;min-width:0;font-size:11.5px;color:#9AA0A8;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* 用户反馈「调整」不显眼、不知道里面藏着控件 —— 改成实心亮色 + 图标 + 动效 */
+  .mobar{padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));
+    background:rgba(16,17,20,.97);border-top:1px solid rgba(209,254,23,.22);
+    box-shadow:0 -10px 26px rgba(0,0,0,.5)}
+  .mobar button{-webkit-appearance:none;appearance:none;flex:0 0 auto;cursor:pointer;
+    display:flex;align-items:center;gap:7px;
+    border:0;background:#D1FE17;color:#0B0B0B;
+    font-family:inherit;font-size:13.5px;font-weight:800;letter-spacing:-.01em;
+    padding:11px 18px;border-radius:12px;
+    box-shadow:0 0 0 0 rgba(209,254,23,.55);animation:mopulse 2.4s ease-out 1.2s 2}
+  @keyframes mopulse{
+    0%{box-shadow:0 0 0 0 rgba(209,254,23,.5)}
+    70%{box-shadow:0 0 0 10px rgba(209,254,23,0)}
+    100%{box-shadow:0 0 0 0 rgba(209,254,23,0)}}
+  .mobar button svg{flex:0 0 auto}
+  .mosum{color:#C9CDD2}
+  .mosum em{font-style:normal;color:#8A9098}
+  .scrim{display:block;position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.55);
+    opacity:0;visibility:hidden;transition:opacity .28s,visibility .28s}
+  .scrim.open{opacity:1;visibility:visible}
+  /* 顶部横滚 tab：导航常驻可见，比藏进抽屉好找（对齐 arena.ai 的手机结构） */
+  .tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;
+    margin:-4px 0 0;padding-bottom:2px}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{-webkit-appearance:none;appearance:none;flex:0 0 auto;cursor:pointer;
+    border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.035);
+    color:#9AA0A8;font-family:inherit;font-size:13px;font-weight:600;
+    padding:9px 15px;border-radius:11px;white-space:nowrap;text-align:left}
+  .tabs button s{display:block;font-size:10px;font-weight:400;text-decoration:none;
+    color:#6E747C;margin-top:2px}
+  .tabs button.on{background:#D1FE17;border-color:#D1FE17;color:#0B0B0B}
+  .tabs button.on s{color:rgba(11,11,11,.62)}
+  #sgView{display:none}
+  /* 排名条窄屏：名称一行，条子通栏第二行 */
+  .crow{grid-template-columns:24px 24px 1fr auto;gap:4px 9px;padding:9px 11px}
+  .crk{grid-area:1/1}
+  .clogo{grid-area:1/2;width:23px;height:23px;border-radius:7px}
+  .cname{grid-area:1/3}
+  .cval{grid-area:1/4;font-size:12.5px}
+  .cbar{grid-area:2/1/2/5;height:7px}
+  /* 手机端保持「随页面滚动」—— 嵌套滚动容器会吃掉手势 */
+  .chart{max-height:none;overflow:visible;padding-right:0}
+  .pplot{height:260px}
+  .pp i{width:15px;height:15px;border-radius:4px}
+  .pf{max-width:none}
+  /* promo 在手机端压到一行：长句与日期 chip 都隐去（日期在下方 vmeta 里已有） */
+  .pmore,.promo .tag2{display:none}
+  .promo{padding:9px 15px;font-size:11px;gap:0}
+  /* 窄屏导航：横向菜单改汉堡 —— 硬裁/横滚都不是好体验 */
+  .nav .menu{display:none}
+  .nburger{display:flex;flex-direction:column;justify-content:center;gap:4px;
+    width:38px;height:38px;padding:0 9px;margin-left:auto;cursor:pointer;
+    border:1px solid rgba(255,255,255,.14);border-radius:11px;
+    background:rgba(255,255,255,.045)}
+  .nburger i{display:block;height:1.5px;border-radius:2px;background:#D7DBDF}
+  .ndrop{position:absolute;left:12px;right:12px;top:calc(100% + 6px);z-index:45;
+    padding:8px;border-radius:15px;background:rgba(10,11,13,.97);
+    border:1px solid rgba(255,255,255,.13);box-shadow:0 18px 42px rgba(0,0,0,.6);
+    -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+  .nav.open .ndrop{display:block}
+  .ndrop nav{display:flex;flex-direction:column}
+  .ndrop a{display:flex;align-items:center;gap:8px;padding:13px;border-radius:10px;
+    text-decoration:none;color:#C9CDD2;font-size:14px;font-weight:600}
+  .ndrop a+a{box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+  .ndrop a.active{color:#D1FE17;background:rgba(209,254,23,.09)}
+}
+@media (max-width:612px){
+  .kbar.on{grid-template-columns:repeat(2,1fr)}
+  .kb b{font-size:19px}
+  .side{gap:14px}
+}
 """
 
 JS = r"""
@@ -765,28 +965,125 @@ COST_JS = r"""
    外加「全档位对比」按该产量的年支出重排（排名格副行直接显示该产量下的年支出）
    ══════════════════════════════════════════════════════════════ */
 var PLANS = __PLANS__;
+var PT_N = __PTN__;         /* 每个周期各有几档可比 */
 var MAX_STACK = 4;          /* 同档最多叠加份数 */
 var CQ_LOCK = false, CQ_LAST = null;
+var PK = 'y';               /* 当前周期：y 年付 / q 季付 / m 月付 */
+var CV = 'all';             /* 当前视图：all 全档位对比 / buy 我该买哪个 / period 周期对照 */
 
-/* 两个滑块（按产量测算 #tgt / 全档位对比 #q）控制同一个量。
-   不联动它们会互相打架：上面拖到 50、下面还显示 10，表格按谁算都不对。 */
-function linkN(N, src){
-  CQ_LOCK = true;
-  var a = document.getElementById('tgt'), b = document.getElementById('q');
-  if(a && a !== src) a.value = N;
-  if(b && b !== src) b.value = N;
-  CQ_LOCK = false;
+/* ── 移动端底部摘要条：让用户不打开抽屉也知道当前看的是哪一套 ── */
+var VIEW_LBL = {all: '全档位对比', period: '先别急着下单'};
+var PER_LBL = {y: '年付', q: '季付', m: '月付'};
+function updateMoSum(){
+  var el = document.getElementById('moSum');
+  if(!el) return;
+  /* 三周期全清单页的摘要口径不同 */
+  if(document.getElementById('chart')){
+    var cn = document.querySelectorAll('#cycPlat .pfb.on').length;
+    var ctot = document.querySelectorAll('#cycPlat .pfb').length;
+    el.textContent = CM[CT.m].lb + ' \u00b7 ' + PERLB[CT.k] + ' \u00b7 '
+      + (CT.o === 'best' ? '最优在前' : '最差在前') + ' \u00b7 ' + cn + '/' + ctot + ' 平台';
+    return;
+  }
+  var on = document.querySelectorAll('#platFilter .pfb.on').length;
+  var tot = document.querySelectorAll('#platFilter .pfb').length;
+  el.textContent = VIEW_LBL[CV] + ' · ' + PER_LBL[PK] + ' · ' + readN() + ' 条/月 · ' + on + '/' + tot + ' 平台';
 }
 
-/* 取值：以「非触发方」为准，保证两侧始终一致 */
+/* ── 周期切换 ──
+   三张表整块预渲染，切换只改可见性与当前生效的价/量，不做单元格级重写。
+   不可用（如 Higgsfield 无季付）的档位把 price 置 Infinity、mCap 置 0，
+   needOf 与 bestCombo 的既有判断会自动跳过它们，无需改算法。 */
+function activePt(){ return document.querySelector('.pt.on'); }
+function activeTb(){ var el = activePt(); return el ? el.querySelector('tbody') : null; }
+function activeTable(){ var el = activePt(); return el ? el.querySelector('table') : null; }
+
+function applyPeriod(K){
+  PK = K;
+  for(var i = 0; i < PLANS.length; i++){
+    var p = PLANS[i], v = p.pc[K];
+    p.price = (v == null) ? Infinity : v;
+    p.mCap = (p.cp[K] == null) ? 0 : p.cp[K];
+  }
+  document.body.dataset.p = K;
+  Array.prototype.forEach.call(document.querySelectorAll('.pt'), function(el){
+    el.classList.toggle('on', el.dataset.pt === K);
+  });
+  /* ⚠ 这里曾写 `.seg button`，但类名早已改成 .segv ——
+     选择器不匹配 → 表格切了、绿色框却一直停在年付上（用户报的 bug）。
+     周期按钮只有一处（#segA），直接用 id 最不容易再踩。 */
+  Array.prototype.forEach.call(document.querySelectorAll('#segA button'), function(b){
+    b.classList.toggle('on', b.dataset.k === K);
+  });
+  ['segchipA'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.textContent = PT_N[K] + ' 档';
+  });
+  /* KPI 条也随周期变 —— 不同周期的「最优档」并不是同一个档位 */
+  Array.prototype.forEach.call(document.querySelectorAll('.kbar'), function(el){
+    el.classList.toggle('on', el.dataset.kbar === K);
+  });
+  CQ_LAST = null;
+  applyPlatFilter();      /* 换表后重新套用平台筛选 */
+  updateMoSum();
+  renderRec(); rerank();
+}
+
+/* ── 查看方式切换：三块面板互斥显示 ──
+   合并原先的「01 我该买哪个 / 02 周期怎么选 / 03 全档位对比」——
+   它们是同一份数据的三种读法，不该各占一屏。 */
+function applyView(V){
+  CV = V;
+  updateMoSum();
+  Array.prototype.forEach.call(document.querySelectorAll('.vpanel'), function(el){
+    el.classList.toggle('on', el.dataset.view === V);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-seg="view"] button'), function(b){
+    b.classList.toggle('on', b.dataset.v === V);
+  });
+  if(V === 'all'){ applyPlatFilter(); rerank(); }
+}
+
+/* ── 平台筛选：隐藏未选中的平台行（三张周期表同步）── */
+function applyPlatFilter(){
+  var btns = document.querySelectorAll('#platFilter .pfb');
+  if(!btns.length) return;
+  var on = {}, n = 0;
+  Array.prototype.forEach.call(btns, function(b){
+    if(b.classList.contains('on')){ on[b.dataset.p] = 1; n++; }
+  });
+  var el = document.getElementById('platN');
+  if(el) el.textContent = n + '/' + btns.length;
+  updateMoSum();
+  Array.prototype.forEach.call(document.querySelectorAll('.pt'), function(wrap){
+    var first = true;
+    Array.prototype.forEach.call(wrap.querySelectorAll('tbody tr'), function(tr){
+      var show = !!on[tr.dataset.plat];
+      tr.style.display = show ? '' : 'none';
+      if(show){ tr.classList.remove('top'); if(first){ tr.classList.add('top'); first = false; } }
+    });
+  });
+}
+
+/* 单滑块：左栏 #tgt 是唯一的产量来源，两个视图共用它 */
+function linkN(N, src){
+  var a = document.getElementById('tgt');
+  if(a && a !== src) a.value = N;
+}
+
 function readN(src){
-  var other = src && src.id === 'tgt' ? document.getElementById('q')
-                                      : document.getElementById('tgt');
-  var el = (src && src.value) ? src : (other || src);
+  var el = (src && src.value) ? src : document.getElementById('tgt');
   return Math.max(1, Math.min(200, parseInt(el && el.value || '30', 10)));
 }
 
-/* 单档覆盖目标产量的最低支出：可行返回 {n,total}，不可行返回 null */
+/* 单账号口径：1 个账号 = 1 个档位，产能不够就是做不到（不允许同档多份）。
+   「同档多份」本质上就是多账号，属于组合订阅的范畴，不能混进单档排名。 */
+function soloOf(cap, price, N){
+  return (cap > 0 && cap >= N) ? {n: 1, total: price} : null;
+}
+
+/* 单档覆盖目标产量的最低支出：可行返回 {n,total}，不可行返回 null
+   —— 只用于组合订阅求解（那里才允许多账号） */
 function needOf(cap, price, N){
   if(!(cap > 0)) return null;
   var n = Math.ceil(N / cap - 1e-9);
@@ -829,13 +1126,18 @@ function bestCombo(N){
 
 function comboLabel(b){
   if(!b) return '—';
-  var parts = [];
+  var parts = [], acct = 0, plats = {};
   for(var i=0;i<b.items.length;i++){
     var it = b.items[i];
+    acct += it.n;
+    plats[it.p.plat] = 1;
     parts.push('<span class="dot" style="background:' + it.p.color + '"></span>' +
-               it.p.plat + ' ' + it.p.tier + (it.n > 1 ? ' \u00d7 ' + it.n : ''));
+               it.p.plat + ' ' + it.p.tier + (it.n > 1 ? ' \u00d7 ' + it.n + ' 个账号' : ''));
   }
-  return parts.join('<span class="combo-plus">+</span>');
+  var np = 0; for(var k in plats) np++;
+  /* 「说明白」＝必须写出：共几个账号、跨几个平台。否则读者不知道 ×2 是同平台两个号还是两个平台。 */
+  return parts.join('<span class="combo-plus">+</span>')
+       + '<span class="combo-note">共 ' + acct + ' 个账号 · ' + np + ' 个平台</span>';
 }
 
 function money(v, cur){ return (cur === 'USD' ? '$' : '\u00a5') + Math.round(v).toLocaleString(); }
@@ -852,37 +1154,36 @@ function renderRec(src){
   var nd = document.getElementById('ndur');
   if(nd) nd.textContent = '= ' + secs.toLocaleString() + ' 秒 \u2248 ' +
     (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '素材';
-  var qv = document.getElementById('qv'), qd = document.getElementById('qd');
+  var qv = document.getElementById('nv');
   if(qv) qv.textContent = N + ' 条/月';
-  if(qd) qd.textContent = '= ' + secs.toLocaleString() + ' 秒 ≈ ' +
-    (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '素材';
-  Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp, #qpresets .cqp'), function(b){
+  Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp'), function(b){
     b.classList.toggle('on', parseInt(b.dataset.n, 10) === N);
   });
 
   /* 方案表 */
   var single = null;
   for(var i=0;i<PLANS.length;i++){
-    var x = needOf(PLANS[i].mCap, PLANS[i].price, N);
-    if(x && (!single || x.total < single.total)) single = {p:PLANS[i], n:x.n, total:x.total, cap:x.n*PLANS[i].mCap};
+    var x = soloOf(PLANS[i].mCap, PLANS[i].price, N);
+    if(x && (!single || x.total < single.total)) single = {p:PLANS[i], n:1, total:x.total, cap:PLANS[i].mCap};
   }
   var combo = bestCombo(N);
   var h = '';
   if(single){
-    h += '<tr><td>单一档位最省</td>'
+    h += '<tr><td>单一账号最省<br><span class="sub">1 个平台 · 1 个账号</span></td>'
       +  '<td><span class="dot" style="background:' + single.p.color + '"></span>' + single.p.plat + ' ' +
          single.p.tier + (single.n > 1 ? ' \u00d7 ' + single.n : '') + '</td>'
       +  '<td class="num strong">' + money(single.total) + '</td>'
       +  '<td class="num">' + single.cap.toFixed(1) + ' 条/月</td>'
       +  '<td class="num">' + money(single.total / N) + '</td></tr>';
   } else {
-    h += '<tr><td>单一档位最省</td><td colspan="4" class="sub">无单一档位可在 ' + MAX_STACK + ' 份内覆盖</td></tr>';
+    h += '<tr><td>单一账号最省</td><td colspan="4" class="sub">'
+      + '月产 ' + N + ' 条超出任何单档产能 —— 1 个账号做不到，必须走组合订阅</td></tr>';
   }
   if(combo){
-    h += '<tr><td>组合订阅最省<br><span class="sub">跨平台混合</span></td>'
+    h += '<tr><td>组合订阅最省<br><span class="sub">可跨平台 + 同平台多账号</span></td>'
       +  '<td>' + comboLabel(combo) + '</td>'
       +  '<td class="num strong">' + money(combo.total) + '</td>'
-      +  '<td class="num">' + combo.cap.toFixed(1) + ' 条/月</td>'
+      +  '<td class="num">' + combo.cap.toFixed(1) + ' 条/月<br><span class="sub">合计产能</span></td>'
       +  '<td class="num">' + money(combo.total / N) + '</td></tr>';
   }
   var rec = document.getElementById('rec');
@@ -890,18 +1191,17 @@ function renderRec(src){
 
 }
 
-/* ── 全档位对比：按该产量的年支出重排（不新增列，成本并入排名格副行）── */
+/* ── 全档位对比：按该产量的支出重排（只作用于当前可见的那张周期表）── */
 function rerank(src){
-  var tb = document.querySelector('#main tbody');
+  var tb = activeTb();
   if(!tb) return;
   var N = readN(src);
-  var rs = Array.prototype.slice.call(tb.querySelectorAll('tr'));
-  var best = Infinity;
+  var all = Array.prototype.slice.call(tb.querySelectorAll('tr'));
+  var rs = all.filter(function(r){ return r.style.display !== 'none'; });   /* 被平台筛选隐藏的不参与排名 */
   rs.forEach(function(r){
-    var x = needOf(parseFloat(r.dataset.c), parseFloat(r.dataset.p), N);
+    var x = soloOf(parseFloat(r.dataset.c), parseFloat(r.dataset.p), N);
     r.__n = x ? x.n : null;
     r.__t = x ? x.total : null;
-    if(x && x.total < best) best = x.total;
   });
   rs.sort(function(x, y){
     if(x.__t == null && y.__t == null) return 0;
@@ -909,8 +1209,14 @@ function rerank(src){
     if(y.__t == null) return -1;
     return x.__t - y.__t;
   });
+  var okN = 0;
   rs.forEach(function(r, i){
     tb.appendChild(r);
+    /* 产能不足以覆盖目标产量的行：整行置灰（用户要求「月产量拉高后，
+       哪些会员积分根本不够用要能一眼看出来，而不是混在列表里」） */
+    var dead = (r.__t == null);
+    r.classList.toggle('out', dead);
+    if(dead) i--; else okN++;
     var rk = r.querySelector('.rk');
     if(rk){
       var b = rk.querySelector('b'), ss = rk.querySelector('s');
@@ -923,53 +1229,329 @@ function rerank(src){
       }
     }
     var c2 = r.querySelector('td[data-rated] s');
-    if(c2) c2.textContent = (r.__t == null)
-      ? '该产量下产能过低'
-      : '该产量 ' + money(r.__t / N) + '/条';
+    if(c2){
+      /* 单账号口径：做不到就直说「这一个账号最多能做多少条」，
+         而不是含糊的「产能过低」—— 用户要的是「为什么不行」。 */
+      if(r.__t == null){
+        c2.textContent = '单账号最多 ' + parseFloat(r.dataset.c).toFixed(1) + ' 条 · 不够 ' + N;
+      } else {
+        c2.textContent = '该产量 ' + money(r.__t / N) + '/条 · 1 个账号';
+      }
+    }
+  });
+  all.forEach(function(r){
+    if(r.style.display === 'none') tb.appendChild(r);   /* 隐藏行沉底，切回来时顺序不乱 */
   });
   rs.forEach(function(r){ r.classList.remove('top'); });
   if(rs.length && rs[0].__t != null) rs[0].classList.add('top');
+  /* 覆盖率计数：让「这个月产量下有几种选择」变成可读的数字 */
+  /* 覆盖率＝单账号口径：1 个平台 1 个账号就能覆盖月产量的档位数。
+     月产 200 条时这个数是 0 —— 这正是用户要的诚实答案。 */
+  var cv = document.getElementById('coverN');
+  if(cv) cv.textContent = okN + ' / ' + rs.length + ' 档（单账号口径）';
+
 }
 
-/* ── 表头排序（点击覆盖滑块排序，滑块再动即覆盖回来）── */
+/* ── 表头排序（点击覆盖滑块排序，滑块再动即覆盖回来）──
+   作用域限定在【该表头所属的那张表】：三张周期表各自独立排序，互不干扰。 */
 function sortBy(k, el){
-  var tb = document.querySelector('#main tbody');
+  var tbl = el && el.closest ? el.closest('table') : null;
+  var tb = tbl ? tbl.querySelector('tbody') : activeTb();
   if(!tb) return;
   var rs = Array.prototype.slice.call(tb.querySelectorAll('tr'));
   var dir = el.dataset.dir === 'asc' ? -1 : 1;
   el.dataset.dir = dir === 1 ? 'asc' : 'desc';
   rs.sort(function(a, b){ return (parseFloat(a.dataset[k]) - parseFloat(b.dataset[k])) * dir; });
   rs.forEach(function(r){ tb.appendChild(r); });
+  rs.forEach(function(r){ r.classList.remove('top'); });
+  if(rs.length) rs[0].classList.add('top');
+}
+
+/* ══════════ 三周期全清单页：动态排名条 ══════════ */
+var CDATA = __CDATA__;
+var MI = {cost: 0, cap: 1, sec: 2, pay: 3};
+var CM = {
+  cost: {lb: '单条成本', low: true,  f: function(v){ return '\u00a5' + v.toFixed(2); }},
+  cap:  {lb: '每月可生成', low: false, f: function(v){ return v.toFixed(2) + ' \u6761'; }},
+  sec:  {lb: '元/秒', low: true,  f: function(v){ return v.toFixed(3); }},
+  pay:  {lb: '该周期实付', low: true,  f: function(v){ return '\u00a5' + Math.round(v).toLocaleString(); }}
+};
+var PERLB = {y: '年付', q: '季付', m: '月付'};
+var MI2 = MI;                                       /* v 的下标 */
+var MLOW = {cost: true, cap: false, sec: true, pay: true};
+/* 两轴不能取同一个量，否则退化成对角线 —— 所以「每月可生成」配的是单条成本 */
+/* 与 Python 侧 PARETO_AXES 必须一致：预算轴 × 指标轴。
+   成本与产能强反相关，配在一起前沿会退化。 */
+var PAXES = {cost: ['pay', 'cost'], cap: ['pay', 'cap'],
+             sec: ['pay', 'sec'], pay: ['pay', 'cap']};
+var CT = {m: 'cost', k: 'y', o: 'best'};
+var CP = {};
+
+function renderChart(){
+  var box = document.getElementById('chart');
+  if(!box) return;
+  var idx = MI[CT.m], low = CM[CT.m].low, fmt = CM[CT.m].f;
+  var rows = [];
+  for(var i = 0; i < CDATA.length; i++){
+    var d = CDATA[i], v = d.v[CT.k];
+    if(v == null || CP[d.p] === false) continue;
+    rows.push({d: d, v: v[idx]});
+  }
+  if(!rows.length){ box.innerHTML = '<div class="sub">该周期下没有可比较的档位</div>'; return; }
+  var vals = rows.map(function(x){ return x.v; });
+  var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  var best = low ? lo : hi;
+  /* 归一化基准用【相对最优的倍数】而不是绝对差值。
+     原因：单条成本 19.30～21.10 的前 12 名只差 9%，绝对刻度下条形几乎一样长（看不出差别），
+     而尾部 106.29 是 5.51 倍 —— 两者无法在同一线性刻度上同时看清。
+     改用 rel 之后再做平方根压缩：头部 100%→86% 可分辨，尾部压到 0。 */
+  var maxRel = 1;
+  for(var q0 = 0; q0 < rows.length; q0++){
+    var r0 = low ? rows[q0].v / best : best / rows[q0].v;
+    if(r0 > maxRel) maxRel = r0;
+  }
+  var relSpan = (maxRel - 1) || 1;
+  rows.sort(function(a, b){ return low ? a.v - b.v : b.v - a.v; });   /* 先固定排成「最优在前」 */
+  for(var j0 = 0; j0 < rows.length; j0++) rows[j0].rk = j0 + 1;          /* 名次永远以「最优＝1」为准 */
+  if(CT.o === 'worst') rows.reverse();                                   /* 再按需翻转显示顺序 */
+  var h = '';
+  for(var j = 0; j < rows.length; j++){
+    var d = rows[j].d, v = rows[j].v;
+    var rel = low ? v / best : best / v;            /* 1＝最优 */
+    var t = Math.sqrt((rel - 1) / relSpan);         /* 0＝最优，1＝最差（平方根刻度） */
+    var w = (1 - t) * 100;
+    var a = (0.10 + 0.42 * (1 - t)).toFixed(3);   /* 下限 0.10，最差档也看得见 */
+    var rk9 = d.p + '|' + d.t + '|' + (d.l || '');
+    h += '<div class="crow" data-plat="' + d.p + '" data-k="' + rk9 + '">'
+      +  '<span class="crk' + (rows[j].rk <= 3 ? ' top3' : '') + '">' + rows[j].rk + '</span>'
+      +  '<i class="clogo ' + d.lg + '"></i>'
+      +  '<span class="cname">' + d.p + ' ' + d.t + (d.l ? '<s>' + d.l + '</s>' : '') + '</span>'
+      +  '<span class="cbar"><i style="width:' + w.toFixed(1) + '%;background:rgba(209,254,23,' + a + ')"></i></span>'
+      /* 倍率一律写成「相对最优值的比」：成本 5.51× 读作「贵 5.51 倍」，
+         产能 0.01× 读作「只有最优的 1%」—— 两个方向都能正确读。 */
+      +  '<span class="cval">' + fmt(v) + '<s>'
+      /* 右侧倍率统一写成「本行数值 ÷ 最优数值」：
+         成本 5.51× 读作「贵 5.51 倍」；产能 0.01× 读作「只有最优的 1%」——
+         两个方向都能正确读，不会出现「95×」这种反直觉的数。 */
+      +  (v / best).toFixed(2) + '\u00d7</s></span>'
+      +  '</div>';
+  }
+  box.innerHTML = h;
+}
+
+/* ── 帕累托散点：横轴＝实付（对数），纵轴＝月产能 ──
+   前沿判定：某档若存在另一档「更便宜 且 更能做」，则该档被支配，不在前沿上。
+   这条线回答的是「花多少钱买到多少产能」，与上方「单价排名」是两个不同的问题。 */
+function renderPareto(){
+  var box = document.getElementById('pplot');
+  if(!box) return;
+  var ax = PAXES[CT.m], mx = ax[0], my = ax[1];
+  var ix = MI2[mx], iy = MI2[my];
+  var pts = [];
+  for(var i = 0; i < CDATA.length; i++){
+    var d = CDATA[i], v = d.v[CT.k];
+    if(v == null || CP[d.p] === false) continue;
+    pts.push({d: d, x: v[ix], y: v[iy], vm: v[MI[CT.m]],
+              key: d.p + '|' + d.t + '|' + (d.l || '')});
+  }
+  if(pts.length < 2){ box.innerHTML = ''; return; }
+
+  /* 归一化：跨度 ≥3 倍用对数（实付可达 250×，线性会把低价段压成一条竖线） */
+  function norm(sel, lowBetter){
+    var vs = pts.map(sel), lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs);
+    var lg = (lo > 0 && hi / lo >= 3);
+    var a = lg ? Math.log(lo) : lo, b = lg ? Math.log(hi) : hi, sp = (b - a) || 1;
+    pts.forEach(function(q){
+      var t = ((lg ? Math.log(sel(q)) : sel(q)) - a) / sp;
+      q['p' + (sel === XS ? 'x' : 'y')] = 3 + t * 94;   /* 与 pareto_block() 同一公式 */
+      q['b' + (sel === XS ? 'x' : 'y')] = lowBetter ? (1 - t) : t;
+    });
+  }
+  function XS(q){ return q.x; }
+  function YS(q){ return q.y; }
+  norm(XS, MLOW[mx]);
+  norm(YS, MLOW[my]);
+
+  var x0 = Math.min.apply(null, pts.map(XS)), x1 = Math.max.apply(null, pts.map(XS));
+  var fld = document.querySelector('#paretoHd span');
+
+  /* 前沿：把两轴都换算成「优度」，不被任何点支配（两轴都更优）者入列 */
+  /* 名次必须与上方列表完全一致：同一指标、同一比较器、同一份 CDATA 顺序。
+     ⚠ 不能用「成本名次」—— 切到「每月可生成」时列表第一是即梦，散点却会标小云雀。 */
+  var rankOrder = pts.slice().sort(function(a, b){
+    return CT.m === 'cap' ? (b.vm - a.vm) : (a.vm - b.vm);
+  });
+  var rankOf = {};
+  for(var r9 = 0; r9 < rankOrder.length; r9++) rankOf[rankOrder[r9].key] = r9 + 1;
+
+  /* 连线机制已按用户要求移除 —— 只保留散点与交互 */
+  var h = '';
+  /* 按名次倒序绘制：并列同坐标的点会重叠，让 rank 1 最后画、显示在最上层 */
+  pts.sort(function(a, b){ return (rankOf[b.key] || 0) - (rankOf[a.key] || 0); });
+  for(var m = 0; m < pts.length; m++){
+    var q = pts[m], key = q.d.p + '|' + q.d.t + '|' + (q.d.l || '');
+    var qrk = rankOf[key] || 0;
+    h += '<span class="pp' + (qrk === 1 ? ' rk1' : '') + '"'
+      +  ' data-k="' + key + '" data-rk="' + qrk + '"'
+      +  ' style="left:' + q.px.toFixed(2) + '%;bottom:' + q.py.toFixed(2) + '%">'
+      +  '<i class="' + q.d.lg + '"></i>'
+      +  '<b>' + q.d.p + ' ' + q.d.t + (q.d.l ? ' · ' + q.d.l : '')
+      +  '<s>第 ' + qrk + ' 名 · ' + CM[mx].f(q.x) + ' · ' + CM[my].f(q.y) + '</s></b></span>';
+  }
+  box.innerHTML = h;
+  var a0 = document.getElementById('px0'), a1 = document.getElementById('px1');
+  if(a0) a0.textContent = '← ' + (MLOW[mx] ? '更低' : '更少') + ' ' + CM[mx].f(x0);
+  if(a1) a1.textContent = CM[mx].f(x1) + (MLOW[mx] ? ' 更高' : ' 更多') + ' →';
+  /* 标题随指标变 —— 否则用户切了指标，图变了标题还写着「花多少钱买到多少产能」 */
+  if(fld) fld.innerHTML = '横轴＝<i>该周期实付</i>（对数刻度，越左越省）｜纵轴＝'
+    + CM[my].lb + '（' + (MLOW[my] ? '越低越好' : '越高越好') + '）｜'
+    + '每个点是一个档位 —— 越靠左上越划算';
+}
+
+/* 指标元信息：标题、副标、轴方向 —— 用户要求「切指标时标题要变成解释标题」 */
+var METAM = {
+  cost: ['单条成本', '同样 30 秒 Seedance 2.5 视频，这个档位要花多少钱 —— 越低越好。'],
+  cap:  ['每月可生成', '这一个档位每月最多能出多少条 —— 越高越好。做不到你设定的月产量就整行置灰。'],
+  sec:  ['元每秒', '把单价摊到每一秒素材上 —— 越低越好，用来和其他规格横向比较。'],
+  pay:  ['该周期实付', '这个周期实际要付出去的总额（年费 / 季费 / 月费）—— 越低越好。']
+};
+
+function cycSync(){
+  ['metricSeg|m', 'cycSeg|k', 'ordSeg|o'].forEach(function(pair){
+    var kv = pair.split('|');
+    Array.prototype.forEach.call(document.querySelectorAll('#' + kv[0] + ' button'), function(b){
+      b.classList.toggle('on', b.dataset[kv[1]] === CT[kv[1]]);
+    });
+  });
+  var n = document.querySelectorAll('#cycPlat .pfb.on').length;
+  var tot = document.querySelectorAll('#cycPlat .pfb').length;
+  var e1 = document.getElementById('cycPlatN'); if(e1) e1.textContent = n + '/' + tot;
+  var e2 = document.getElementById('cycNow');
+  if(e2) e2.textContent = CM[CT.m].lb + ' \u00b7 ' + PERLB[CT.k] + ' \u00b7 ' + (CT.o === 'best' ? '最优在前' : '最差在前');
+  var e3 = document.getElementById('cycChip');
+  if(e3) e3.textContent = (CT.k === 'y' ? 44 : CT.k === 'q' ? 39 : 44) + ' \u6863';
+  var e4 = document.getElementById('cycTitle');
+  if(e4) e4.innerHTML = METAM[CT.m][0] + '<span style="color:#D1FE17"> \u00b7 </span>\u52a8\u6001\u6392\u540d';
+  var e5 = document.getElementById('cycSub');
+  if(e5) e5.textContent = METAM[CT.m][1];
+  updateMoSum();
 }
 
 document.addEventListener('DOMContentLoaded', function(){
   function onSlide(el){
     if(!el) return;
     el.addEventListener('input', function(){
-      if(CQ_LOCK) return;
       CQ_LAST = null;
       linkN(readN(el), el);
+      updateMoSum();
       renderRec(el); rerank(el);
     });
   }
   onSlide(document.getElementById('tgt'));
-  onSlide(document.getElementById('q'));
 
-  function bindPresets(sel){
-    Array.prototype.forEach.call(document.querySelectorAll(sel), function(b){
+  Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp'), function(b){
+    b.addEventListener('click', function(){
+      var N = parseInt(b.dataset.n, 10);
+      CQ_LAST = null;
+      linkN(N, null);
+      renderRec(); rerank();
+    });
+  });
+
+  /* 查看方式 */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-seg="view"] button'), function(b){
+    b.addEventListener('click', function(){ applyView(b.dataset.v); });
+  });
+  /* 承诺周期 */
+  Array.prototype.forEach.call(document.querySelectorAll('#segA button'), function(b){
+    b.addEventListener('click', function(){ applyPeriod(b.dataset.k); });
+  });
+  /* 平台筛选 */
+  Array.prototype.forEach.call(document.querySelectorAll('#platFilter .pfb'), function(b){
+    b.addEventListener('click', function(){
+      b.classList.toggle('on');
+      applyPlatFilter();
+      rerank();
+    });
+  });
+
+  /* 移动端底部抽屉 */
+  var side = document.querySelector('.side'), scrim = document.getElementById('scrim');
+  function setSheet(open){
+    if(side) side.classList.toggle('open', open);
+    if(scrim) scrim.classList.toggle('open', open);
+  }
+  var moOpen = document.getElementById('moOpen');
+  if(moOpen) moOpen.addEventListener('click', function(){
+    setSheet(!(side && side.classList.contains('open')));
+  });
+  if(scrim) scrim.addEventListener('click', function(){ setSheet(false); });
+  /* 选完「查看方式」自动收起 —— 切了视图就该看内容，不该还挡着 */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-seg="view"] button'), function(b){
+    b.addEventListener('click', function(){ setSheet(false); });
+  });
+
+  /* 窄屏汉堡菜单：点开/点外/点链接都收起 */
+  var nv = document.querySelector('.nav'), nbg = document.getElementById('nBurger');
+  if(nbg) nbg.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = nv.classList.toggle('open');
+    nbg.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', function(e){
+    if(nv && nv.classList.contains('open') && !nv.contains(e.target)){
+      nv.classList.remove('open');
+      if(nbg) nbg.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  /* ── 三周期全清单页：四个控件组 ── */
+  function cycBind(sel, attr, key){
+    Array.prototype.forEach.call(document.querySelectorAll(sel + ' button'), function(b){
       b.addEventListener('click', function(){
-        var N = parseInt(b.dataset.n, 10);
-        CQ_LAST = null;
-        linkN(N, null);
-        renderRec(); rerank();
+        CT[key] = b.dataset[attr];
+        cycSync(); renderChart(); renderPareto(); linkHover();
+        if(key !== 'm') setSheet(false);   /* 选指标后收起抽屉，直接看排名 */
       });
     });
   }
-  bindPresets('#presets .cqp');
-  bindPresets('#qpresets .cqp');
+  cycBind('#metricSeg', 'm', 'm');
+  cycBind('#cycSeg', 'k', 'k');
+  cycBind('#ordSeg', 'o', 'o');
+  Array.prototype.forEach.call(document.querySelectorAll('#cycPlat .pfb'), function(b){
+    b.addEventListener('click', function(){ CP[b.dataset.p] = b.classList.toggle('on'); cycSync(); renderChart(); renderPareto(); linkHover(); });
+  });
 
-  CQ_LAST = null;
-  renderRec(); rerank();
+  if(document.getElementById('viewSeg')){ applyView('all'); applyPeriod('y'); }
+  /* 排名行 ↔ 散点 双向联动：悬停任一侧，另一侧对应项高亮。
+     这是这张图真正的「交互」—— 之前只有 tooltip，用户感觉点了没反应。 */
+  function linkHover(){
+    var rows = document.querySelectorAll('#chart .crow');
+    Array.prototype.forEach.call(rows, function(el){
+      if(el.dataset.linked) return;
+      el.dataset.linked = '1';
+      var k = el.dataset.k;
+      el.addEventListener('mouseenter', function(){ mark(k, true); });
+      el.addEventListener('mouseleave', function(){ mark(k, false); });
+    });
+    var dots = document.querySelectorAll('#pplot .pp');
+    Array.prototype.forEach.call(dots, function(el){
+      if(el.dataset.linked) return;
+      el.dataset.linked = '1';
+      var k = el.dataset.k;
+      el.addEventListener('mouseenter', function(){ mark(k, true); });
+      el.addEventListener('mouseleave', function(){ mark(k, false); });
+    });
+  }
+  function mark(k, on){
+    if(!k) return;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-k="' + k + '"]'), function(el){
+      el.classList.toggle('hl', on);
+    });
+  }
+
+  if(document.getElementById('chart')){ renderChart(); renderPareto(); cycSync(); linkHover(); }
+  updateMoSum();
 });
 """
 
@@ -982,8 +1564,9 @@ def sub_css(s):
 # 4. 组件
 # ═══════════════════════════════════════════════════════════════════
 def promo():
-    return (f'<div class="promo"><span><b>价格说明：</b>{BRAND_CN}数据采集于 {UPDATED}，'
-            f'各平台价格取决于当期活动与限时优惠力度，不代表最终价格</span>'
+    # 移动端只显示前半句 —— 整段在 390px 下要占三行，把首屏挤掉（用户反馈「观感不舒服」）
+    return (f'<div class="promo"><span><b>价格说明：</b>{BRAND_CN}数据采集于 {UPDATED}'
+            f'<i class="pmore">，各平台价格取决于当期活动与限时优惠力度，不代表最终价格</i></span>'
             f'<span class="tag2">数据时点 {UPDATED}</span></div>')
 
 
@@ -994,11 +1577,17 @@ def nav(active):
         badge = '<i class="nb">即将上线</i>' if soon else ""
         cls = ' class="active"' if it["key"] == active else ""
         items += f'<a href="{it["href"]}"{cls}>{it["label"]}{badge}</a>'
+    # 窄屏下横向菜单必然放不下（「视觉理解模型排行榜」一个字就是 14px），
+    # 与其硬裁或让它横向滚动，不如收进汉堡菜单 —— 三项导航的标准做法。
     return (f'<div class="nav"><div class="inner">'
             f'<a class="brand" href="index.html"><i></i>'
             f'<span class="bw"><b>{BRAND}</b><s>{STUDIO}</s></span></a>'
             f'<nav class="menu">{items}</nav>'
-            f'<span class="spec">{SPEC}</span></div></div>')
+            f'<span class="spec">{SPEC}</span>'
+            f'<button type="button" class="nburger" id="nBurger" aria-label="导航菜单" '
+            f'aria-expanded="false" aria-controls="nDrop"><i></i><i></i><i></i></button>'
+            f'</div>'
+            f'<div class="ndrop" id="nDrop"><nav>{items}</nav></div></div>')
 
 
 def legal():
@@ -1034,16 +1623,249 @@ def table(headers, rows, cls="tw scroll-y", tid=""):
            f'<tbody>{rows}</tbody></table></div>'
 
 
+MAIN_TB = {k: main_rows_for(k) for k, _l, _m, _f in PERIODS}
+MAIN_N = {k: len([r for r in ROWS if k in r["byP"]]) for k, _l, _m, _f in PERIODS}
+main_rows = MAIN_TB["y"]      # 兼容旧引用（自检里用到）
+
+# 三张周期表整块预渲染，切周期只切可见性（不做单元格级 JS 重写）
+PT_TABLES = ""
+for _k, _lbl, _mo, _f in PERIODS:
+    _on = " on" if _k == "y" else ""
+    _tid = "main" if _k == "y" else "main-" + _k
+    PT_TABLES += (
+        f'<div class="pt{_on}" data-pt="{_k}">'
+        + table([("#", "v"), ("平台", None), ("档位", None), (PT_HEAD[_k][0], "p"),
+                 ("每月可生成<br><span class=hm>该周期积分 ÷ 单条消耗</span>", "v"),
+                 ("单条成本<br><span class=hm>用满产能 / 该产量</span>", "v"), ("元/秒", None)],
+                MAIN_TB[_k], "tw scroll-y tw-main", _tid)
+        + "</div>\n")
+
+
 # ═══════════════════════════════════════════════════════════════════
 # 5. 页面
 # ═══════════════════════════════════════════════════════════════════
+# ═══════════ 明细表行（6 组）═══════════
+lad_rows = ""
+for _i, _x in enumerate(LADDER):
+    _r = _x["row"]
+    _lo = "0" if _i == 0 else f'{_x["lo"]:.2f}'
+    lad_rows += (
+        f'<tr><td class="num mono">{_lo} – {_x["hi"]:.2f}</td>'
+        f'<td><span class="dot" style="background:{_r["color"]}"></span>'
+        f'{_r["plat"]} {tname(_r)}</td>'
+        f'<td class="num strong">¥{_r["priceCNY"]:,.0f}</td>'
+        f'<td class="num">{_r["mCap"]:.2f}</td>'
+        f'<td class="num">¥{f2(_r["perVideo"])}</td>'
+        f'<td class="num">{_r["perVideo"]/BEST:.2f}×</td></tr>')
+
+# 判定分档：以全场最优单条成本为标尺。阈值由构建产物反推校验：
+#   20.09/19.30=1.041 → 强烈推荐；20.72/19.30=1.074 → 一般；
+#   25.68/19.30=1.331 → 一般；26.54/19.30=1.375 → 不建议
+marg_rows = ""
+for _m in sorted(MARGINAL, key=lambda x: x["mCost"]):
+    _ratio = _m["mCost"] / BEST
+    if _ratio <= 1.05:
+        _tag, _lbl = "v-good", "强烈推荐"
+    elif _ratio <= 1.35:
+        _tag, _lbl = "v-warn", "一般"
+    else:
+        _tag, _lbl = "v-bad", "不建议"
+    marg_rows += (
+        f'<tr><td><span class="dot" style="background:{_m["color"]}"></span>{_m["plat"]}</td>'
+        f'<td>{_m["a"]["tier"]} → {_m["b"]["tier"]}</td>'
+        f'<td class="num">¥{_m["dPrice"]:,.0f}</td>'
+        f'<td class="num">+{_m["dCap"]:.0f}</td>'
+        f'<td class="num strong">¥{f2(_m["mCost"])}</td>'
+        f'<td class="num">{_m["avg"]:.2f}</td>'
+        f'<td class="ctr"><span class="tag {_tag}">{_lbl}</span></td></tr>')
+
+claim_rows = ""
+for _p, _c in AD_CLAIM.items():
+    # 取 AD_CLAIM 指定的那个顶级档位（同档多积分档时取第一个），与海报口径对应
+    _act = next(r for r in ROWS
+                if r["plat"] == _p and r["tier"] == _c["tier"])["perSec"]
+    claim_rows += (
+        f'<tr><td><span class="dot" style="background:{COLOR[_p]}"></span>{_p}</td>'
+        f'<td>{_c["tier"]}</td>'
+        f'<td class="num">¥{_c["perSec"]:.2f}</td>'
+        f'<td class="num strong">¥{_act:.3f}</td>'
+        f'<td class="num">{_act/_c["perSec"]:.2f}×</td></tr>')
+
+retry_rows = "".join(
+    f'<tr><td><span class="dot" style="background:{COLOR[_r["plat"]]}"></span>{_r["plat"]}</td>'
+    f'<td class="ctr"><span class="tag v-good">{_r["retry"]}</span></td>'
+    f'<td>{_r["basis"]}</td></tr>'
+    for _r in COST["retryPolicy"])
+
+# 三周期全清单（表）：与主表同序（按年付单条成本升序）—— 自检逐行比对依赖这一点
+ap2_rows = ""
+for _r in sorted(ROWS, key=lambda x: x["perVideo"]):
+    _c = ""
+    for _k in ("m", "q", "y"):
+        if _k in _r["byP"]:
+            _v = f'¥{f2(_r["byP"][_k]["perVideo"])}'
+            _c += ('<td class="num"><span class="strong">' + _v + "</span></td>"
+                   if _k == _r["bestP"] else f'<td class="num">{_v}</td>')
+        else:
+            _c += '<td class="num sub">—</td>'
+    _pl = {"y": "年付", "q": "季付", "m": "月付"}.get(_r["bestP"], "—")
+    ap2_rows += (
+        f'<tr><td><span class="dot" style="background:{_r["color"]}"></span>{_r["plat"]}</td>'
+        f'<td>{tname(_r)}</td>{_c}'
+        f'<td class="ctr"><span class="tag v-good">{_pl}</span></td></tr>')
+
+src_rows = "".join(
+    f'<tr><td>{_x["page"]}</td><td style="white-space:normal">{_x["data"]}</td></tr>'
+    for _x in COST["sources"])
+
+# ═══════════ 平台级周期对照 ═══════════
+pp_rows = ""
+for _x in PERIOD_PLAT:
+    if not _x["hasQ"]:
+        _tag, _jlbl, _adv, _q = "v-warn", "平台不提供", "只能年付或月付", "—"
+    elif _x["trapN"]:
+        _tag, _jlbl = "v-bad", f'{_x["trapN"]} 档倒挂'
+        _adv = "有档位承诺越久越贵，<b>买前先比对短周期</b>"
+        _q = f'{_x["qLo"]:.2f}–{_x["qHi"]:.2f}×'
+    else:
+        _tag, _jlbl, _adv = "v-good", "正常递减", "季付可用，但仍不如年付"
+        _q = f'{_x["qLo"]:.2f}–{_x["qHi"]:.2f}×'
+    pp_rows += (
+        f'<tr><td><span class="dot" style="background:{_x["color"]}"></span>{_x["plat"]}</td>'
+        f'<td class="num">{_x["yLo"]:.2f}–{_x["yHi"]:.2f}×</td>'
+        f'<td class="num">{_q}</td>'
+        f'<td class="ctr"><span class="tag {_tag}">{_jlbl}</span></td>'
+        f'<td style="white-space:normal">{_adv}</td></tr>')
+
+trap_rows = ""
+for _t in TRAPS:
+    _r = _t["row"]
+    trap_rows += (
+        f'<tr><td><span class="dot" style="background:{_r["color"]}"></span>{_r["plat"]}</td>'
+        f'<td>{tname(_r)}</td>'
+        f'<td class="ctr"><span class="tag v-bad">{_t["long"]} 比 {_t["short"]} 贵</span></td>'
+        f'<td class="num">¥{f2(_r["byP"][_t["lkey"]]["perVideo"])} '
+        f'<s>vs ¥{f2(_r["byP"][_t["skey"]]["perVideo"])}</s></td>'
+        f'<td class="num neg">+{_t["pct"]*100:.1f}%</td>'
+        f'<td class="num">¥{_t["longPay"]:,.0f} <s>vs ¥{_t["shortPay"]:,.0f}</s></td></tr>')
+
+# ═══════════ 执行建议 ═══════════
+budget_bullets = "".join(
+    f'<li><b>月产 {"0" if _i == 0 else "%.2f" % _x["lo"]}–{_x["hi"]:.2f} 条：</b>'
+    f'{_x["row"]["plat"]} {tname(_x["row"])} — ¥{_x["row"]["priceCNY"]:,.0f}/年'
+    f'（¥{f2(_x["row"]["perVideo"])}/条 · 单价为最优解的 {_x["row"]["perVideo"]/BEST:.2f} 倍）</li>'
+    for _i, _x in enumerate(LADDER))
+
+# ═══════════ 全场极值（首页与成本页共用）═══════════
+_best = min(ROWS, key=lambda r: r["perVideo"])
+_second = sorted(ROWS, key=lambda r: r["perVideo"])[1]
+_mid = next(r for r in ROWS if r["plat"] == "小云雀" and r["tier"] == "高级会员"
+            and r["monthly"] == 12000)
+_top = max(LADDER, key=lambda x: x["hi"])["row"]
+_hg = min((r for r in ROWS if r["plat"] == "Higgsfield"), key=lambda r: r["perVideo"])
+
+
+# ═══════════ KPI 条（每个周期各一套）═══════════
+# 不同周期的「最优档」往往不是同一个档位，所以 KPI 必须跟着周期换，
+# 不能拿年付的数字在季付/月付下继续显示。
+def kpis_for(key):
+    cand = [r for r in ROWS if key in r["byP"]]
+    if not cand:
+        return []
+    best = min(cand, key=lambda r: r["byP"][key]["perVideo"])
+    worst = max(cand, key=lambda r: r["byP"][key]["perVideo"])
+
+    def cheapest_for(n, stack=4):
+        ok = []
+        for r in cand:
+            cap = r["byP"][key]["cap"]
+            if cap <= 0:
+                continue
+            cnt = int(math.ceil(n / cap - 1e-9))
+            if cnt <= stack:
+                ok.append((cnt * r["byP"][key]["payCNY"], cnt, r))
+        if not ok:
+            return None
+        tot, cnt, r = min(ok, key=lambda x: x[0])
+        return {"row": r, "total": tot, "cnt": cnt}
+
+    out = [("单条成本最优", f'¥{f2(best["byP"][key]["perVideo"])}',
+            f'{best["plat"]} {tname(best)}', True)]
+    _u = {"y": "/年", "q": "/季", "m": "/月"}[key]
+    for n, lbl in ((30, "30 条/月 · 最省"), (90, "90 条/月 · 最省")):
+        c = cheapest_for(n)
+        if c:
+            out.append((lbl, f'¥{c["total"]:,.0f}<i class="u">{_u}</i>',
+                        f'{c["row"]["plat"]} {tname(c["row"])}'
+                        + (f' × {c["cnt"]}' if c["cnt"] > 1 else ''), False))
+    hg = [r for r in cand if r["plat"] == "Higgsfield"]
+    if hg:
+        hb = min(hg, key=lambda r: r["byP"][key]["perVideo"])
+        out.append(("海外平台溢价",
+                    f'{hb["byP"][key]["perVideo"] / best["byP"][key]["perVideo"]:.2f}×',
+                    f'Higgsfield {hb["tier"]}', False))
+    out.append(("最差 ÷ 最省",
+                f'{worst["byP"][key]["perVideo"] / best["byP"][key]["perVideo"]:.2f}×',
+                f'{worst["plat"]} {tname(worst)}', False))
+    return out
+
+
+KPI_SETS = {k: kpis_for(k) for k, _l, _m, _f in PERIODS}
+KPI_BARS = ""
+for _k, _lbl, _mo, _f in PERIODS:
+    _cells = "".join(
+        f'<div class="kb{" hi" if _hi else ""}"><s>{_t}</s><b>{_v}</b><em>{_sub}</em></div>'
+        for _t, _v, _sub, _hi in KPI_SETS[_k])
+    KPI_BARS += f'<div class="kbar{" on" if _k == "y" else ""}" data-kbar="{_k}">{_cells}</div>\n'
+
+# ═══════════ 反查结果的服务端初始态（N=30）═══════════
+_init_s = best_single(30)
+_init_c = best_combo(30)
+_init_combo_html = ""
+if _init_s:
+    _init_combo_html += (
+        f'<tr><td>单一账号最省<br><span class="sub">1 个平台 · 1 个账号</span></td>'
+        f'<td><span class="dot" style="background:{_init_s["row"]["color"]}"></span>'
+        f'{_init_s["row"]["plat"]} {_init_s["row"]["tier"]}'
+        f'{" × " + str(_init_s["n"]) if _init_s["n"] > 1 else ""}</td>'
+        f'<td class="num strong">¥{_init_s["total"]:,.0f}</td>'
+        f'<td class="num">{_init_s["cap"]:.1f} 条/月</td>'
+        f'<td class="num">¥{_init_s["total"]/30:,.0f}</td></tr>')
+if _init_c:
+    _lbl = '<span class="combo-plus">+</span>'.join(
+        f'<span class="dot" style="background:{u["r"]["color"]}"></span>'
+        f'{u["r"]["plat"]} {u["r"]["tier"]}'
+        f'{" × " + str(u["n"]) + " 个账号" if u["n"] > 1 else ""}' for u in _init_c["items"])
+    _acct = sum(u["n"] for u in _init_c["items"])
+    _np = len({u["r"]["plat"] for u in _init_c["items"]})
+    _init_combo_html += (
+        f'<tr><td>组合订阅最省<br><span class="sub">可跨平台 + 同平台多账号</span></td>'
+        f'<td>{_lbl}<span class="combo-note">共 {_acct} 个账号 · {_np} 个平台</span></td>'
+        f'<td class="num strong">¥{_init_c["total"]:,.0f}</td>'
+        f'<td class="num">{_init_c["cap"]:.1f} 条/月<br><span class="sub">合计产能</span></td>'
+        f'<td class="num">¥{_init_c["total"]/30:,.0f}</td></tr>')
+
+
+
 def page(title, desc, nav_html, body, cost_js=False):
     js = JS.replace("__COST__", COST_JS) if cost_js else JS.replace("__COST__", "")
     if cost_js:
         js = js.replace("__PLANS__", json.dumps(
             [{"plat": r["plat"], "tier": r["tier"], "label": r["label"], "color": r["color"],
-              "price": round(r["priceCNY"], 2), "mCap": round(r["mCap"], 4)} for r in ROWS],
-            ensure_ascii=False))
+              # pc = 各周期实付（折 CNY）；cp = 各周期月产能。缺该周期则为 null
+              "pc": {k: (round(r["byP"][k]["payCNY"], 2) if k in r["byP"] else None) for k in "yqm"},
+              "cp": {k: (round(r["byP"][k]["cap"], 4) if k in r["byP"] else None) for k in "yqm"}}
+             for r in ROWS], ensure_ascii=False))
+        js = js.replace("__PTN__", json.dumps(MAIN_N, ensure_ascii=False))
+        js = js.replace("__CDATA__", json.dumps(
+            [{"p": r["plat"], "t": r["tier"], "l": r["label"], "c": r["color"],
+              "lg": PLAT_LG[r["plat"]],
+              "rk": {k: r["byP"][k]["rank"] for k in r["byP"]},
+              "v": {k: ([round(r["byP"][k]["perVideo"], 4), round(r["byP"][k]["cap"], 4),
+                         round(r["byP"][k]["perVideo"] / SEC_PER_CLIP, 4),
+                         round(r["byP"][k]["payCNY"], 2)] if k in r["byP"] else None)
+                    for k in "yqm"}}
+             for r in ROWS], ensure_ascii=False))
     return f"""<!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -1084,309 +1906,171 @@ def page(title, desc, nav_html, body, cost_js=False):
 </body></html>"""
 
 
-# ── 首页 ──────────────────────────────────────────────────────────
-_best = min(ROWS, key=lambda r: r["perVideo"])
-_second = sorted(ROWS, key=lambda r: r["perVideo"])[1]
-_mid = next(r for r in ROWS if r["plat"] == "小云雀" and r["tier"] == "高级会员" and r["monthly"] == 12000)
-_top = max(LADDER, key=lambda x: x["hi"])["row"]
-_hg = min((r for r in ROWS if r["plat"] == "Higgsfield"), key=lambda r: r["perVideo"])
+METRIC_IDX = {"cost": 0, "cap": 1, "sec": 2, "pay": 3}
+METRIC_LOW = {"cost": True, "cap": False, "sec": True, "pay": True}   # 越低越好?
+METRIC_UNIT = {"cost": "元/条", "cap": "条/月", "sec": "元/秒", "pay": "元"}
+# 两轴＝（预算轴「该周期实付」× 当前指标）。
+# ⚠ 不能把「单条成本」和「月产能」配在一起：单条成本 = 实付 ÷ 产能，两者强反相关，
+#   前沿会退化成 1~2 个点（年付实测 2 点、月付 1 点），图等于没有。
+#   预算与产出才是独立维度，前沿才有台阶。
+#   指标本身就是「该周期实付」时，Y 换成产能 —— 否则 X≡Y 退化成一条对角线。
+PARETO_AXES = {"cost": ("pay", "cost"), "cap": ("pay", "cap"),
+               "sec": ("pay", "sec"), "pay": ("pay", "cap")}
 
-home_body = f"""
-<div class="hero">
-  <div class="eyebrow">{BRAND} · Unified Benchmark</div>
-  <h1>把 AI 平台<br>放在<em>同一把尺子</em>上</h1>
-  <p class="lead">{SITE["intro"]}</p>
-  <div class="btns">
-    <a class="btn btn-white" href="#cost">进入平台成本对比</a>
-    <a class="btn btn-ghost" href="cost.html">完整方法论与数据</a>
-  </div>
-</div>
 
-<div class="wrap">
-<section id="cost" class="reveal" style="margin-top:40px">
-  {sec_head("板块", "两条对比线", "统一口径的方法论复用在同一套框架下：成本线已上线，能力线在建。")}
-  <div class="grid g2">
-    <a class="entry" href="cost.html">
-      <span class="arrow">→</span>
-      <div class="et">LIVE · {UPDATED}</div>
-      <h3>平台成本对比</h3>
-      <p>{len(PLATFORMS)} 个平台、{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本。</p>
-      <div class="nums">
-        <div><s>¥{f2(BEST)}</s><em>最低单条</em></div>
-        <div><s>{WORST/BEST:.2f}×</s><em>最贵/最省</em></div>
-        <div><s>{len(ROWS)}</s><em>可选档位</em></div>
-      </div>
-    </a>
-    <a class="entry" href="leaderboard-vlm.html">
-      <span class="arrow">→</span>
-      <div class="et">{VLM["eyebrow"]} · 评测中</div>
-      <h3>{VLM["title"]} <i class="nb" style="font-size:9.5px;font-weight:800;color:#0B0B0B;background:#D1FE17;padding:1.5px 7px;border-radius:999px">即将上线</i></h3>
-      <p>{VLM["intro"]}</p>
-      <div class="nums">
-        <div><s>{len(VLM["methodology"]["dimensions"])}</s><em>评测维度</em></div>
-        <div><s>—</s><em>模型数</em></div>
-        <div><s>—</s><em>数据时点</em></div>
-      </div>
-    </a>
-  </div>
-</section>
+def _title(m):
+    return METRIC_LBL[m]
 
-<section class="reveal">
-  {sec_head("结论", "成本线速览", "完整数据、算法与风险说明见成本对比页。")}
-  <div class="grid g5">
-    {kpi("单条成本最优", f"¥{f2(BEST)}", f"{_best['plat']} {tname(_best)}<br>与次优 ¥{f2(_second['perVideo'])} 差 {(_second['perVideo']/BEST-1)*100:.2f}%", "hi")}
-    {kpi("中产能最省", f"¥{_mid['priceCNY']:,.0f}", f"{_mid['plat']} {tname(_mid)}<br>¥{f2(_mid['perVideo'])}/条", "good")}
-    {kpi("大产能最省", f"¥{_top['priceCNY']:,.0f}", f"{_top['plat']} {tname(_top)}<br>{_top['mCap']:.2f} 条/月", "good")}
-    {kpi("海外平台溢价", f"{_hg['perVideo']/BEST:.2f}×", f"Higgsfield {_hg['tier']} ¥{f2(_hg['perVideo'])}/条<br>无成本优势")}
-    {kpi("最差档位", f"{WORST/BEST:.2f}×", f"Higgsfield Starter ¥{f2(WORST)}/条<br>低档位多是高价试用")}
-  </div>
-</section>
-{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　数据采集 {UPDATED}　·　全部数值按统一口径重算，非平台宣传数字')}
-</div>
-"""
 
-# ── 成本页 ────────────────────────────────────────────────────────
-SUBNAV = [("overview", "结论速览"), ("calc", "我该买哪个"), ("table", "全档位对比"),
-          ("more", "更多数据")]
+def _fmt_axis(metric, v):
+    if metric == "cost":
+        return f"¥{v:,.2f}"
+    if metric == "cap":
+        return f"{v:,.2f} 条"
+    if metric == "sec":
+        return f"{v:.3f}"
+    return f"¥{v:,.0f}"
 
-subnav_html = ('<div class="subnav"><div class="inner">' +
-               "".join(f'<a href="#{k}">{v}</a>' for k, v in SUBNAV) + "</div></div>")
 
-# 主表：7 列，无「月产能」「年支出」列（用户裁定去掉）
-main_rows = ""
-for r in sorted(ROWS, key=lambda x: x["perVideo"]):
-    price_disp = f'{CU[r["cur"]]}{r["price"]:,}'
-    sub = f'≈¥{r["priceCNY"]:,.0f}' if r["cur"] == "USD" else r["cur"]
-    vl = f'<span class="vlabel">{r["label"]}</span>' if r["multi"] else ""
-    usd = '<span class="tagu">USD</span>' if r["cur"] == "USD" else ""
-    w = BEST / r["perVideo"] * 100
-    mc = "" if r["perVideo"] <= BEST * 1.06 else (" m2" if r["perVideo"] <= 30 else " m3")
-    main_rows += (
-        f'<tr class="{"top" if r["rank"]==1 else ""}" data-v="{r["perVideo"]:.4f}" '
-        f'data-p="{r["priceCNY"]:.2f}" data-c="{r["mCap"]:.4f}">'
-        f'<td class="ctr rk"><b>{r["rank"]}</b><s>{r["rel"]:.2f}×</s></td>'
-        f'<td><span class="dot" style="background:{r["color"]}"></span>{r["plat"]}{usd}</td>'
-        f'<td>{r["tier"]}{vl}</td>'
-        f'<td class="num cell2" data-l="年费"><b>{price_disp}</b><s>{sub}</s></td>'
-        f'<td class="num" data-l="月积分">{r["monthly"]:,}</td>'
-        f'<td class="num cell2" data-l="单条成本" data-rated="{r["perVideo"]:.2f}"><span class="{"strong" if r["rank"]==1 else "nm"}">¥{f2(r["perVideo"])}</span>'f'<s>{("该产量 ¥" + f2(delivered(r)) + "/条") if delivered(r) else "该产量下产能过低"}</s>'
-        f'<div class="mini{mc}"><i style="--w:{w:.1f}%;width:{w:.1f}%"></i></div></td>'
-        f'<td class="num cell2" data-l="元/秒"><b>{r["perSec"]:.3f}</b><s>元/秒</s></td></tr>')
+def pareto_block(key="y", metric="cost"):
+    """帕累托散点（服务端渲染）。
 
-lad_rows = ""
-for i, x in enumerate(LADDER):
-    r = x["row"]
-    lo = "0" if i == 0 else f'{x["lo"]:.2f}'
-    lad_rows += (f'<tr><td class="num mono">{lo} – {x["hi"]:.2f}</td>'
-                 f'<td><span class="dot" style="background:{r["color"]}"></span>{r["plat"]} {tname(r)}</td>'
-                 f'<td class="num strong">¥{r["priceCNY"]:,.0f}</td>'
-                 f'<td class="num">{r["mCap"]:.2f}</td>'
-                 f'<td class="num">¥{f2(r["perVideo"])}</td>'
-                 f'<td class="num">{r["rel"]:.2f}×</td></tr>')
+    ⚠ 归一化与前沿判定必须与前端 renderPareto() 完全一致，
+      否则首页（静态渲染）与全清单页（JS 重绘）会画出两张不同的图。
+    """
+    mx, my = PARETO_AXES[metric]
+    pts = []
+    for r in ROWS:
+        p = r["byP"].get(key)
+        if not p or p["payCNY"] <= 0 or p["cap"] <= 0:
+            continue
+        vec = [p["perVideo"], p["cap"], p["perVideo"] / SEC_PER_CLIP, p["payCNY"]]
+        pts.append({"r": r, "x": vec[METRIC_IDX[mx]], "y": vec[METRIC_IDX[my]]})
+    if len(pts) < 2:
+        return ""
 
-marg_rows = ""
-for m in sorted(MARGINAL, key=lambda x: x["mCost"]):
-    if m["mCost"] <= BEST * 1.05:
-        txt, cls = "强烈推荐", "v-good"
-    elif m["mCost"] <= 26:
-        txt, cls = "一般", "v-warn"
-    else:
-        txt, cls = "不建议", "v-bad"
-    marg_rows += (f'<tr><td><span class="dot" style="background:{m["color"]}"></span>{m["plat"]}</td>'
-                  f'<td>{m["a"]["tier"]} → {m["b"]["tier"]}</td>'
-                  f'<td class="num">¥{m["dPrice"]:,.0f}</td><td class="num">+{m["dCap"]:.0f}</td>'
-                  f'<td class="num strong">¥{f2(m["mCost"])}</td>'
-                  f'<td class="num">{f2(m["avg"])}</td>'
-                  f'<td class="ctr"><span class="tag {cls}">{txt}</span></td></tr>')
+    def norm(vals):
+        lo, hi = min(vals), max(vals)
+        # 跨度 ≥3 倍用对数：实付跨度可达 250×，线性会把低价段压成一条竖线
+        log = (lo > 0 and hi / lo >= 3)
+        if log:
+            a, b = math.log(lo), math.log(hi)
+            return [((math.log(v) - a) / ((b - a) or 1)) for v in vals], True
+        return [((v - lo) / ((hi - lo) or 1)) for v in vals], False
 
-disc_rows = ""
-for d in DISCOUNT:
-    disc_rows += (f'<tr><td><span class="dot" style="background:{d["color"]}"></span>{d["plat"]}</td>'
-                  f'<td class="num">{d["minD"]*10:.1f}–{d["maxD"]*10:.1f} 折</td>'
-                  f'<td class="num">¥{f2(d["minO"])} – ¥{f2(d["maxO"])}</td>'
-                  f'<td class="num {"ybest" if d["spreadO"]<15 else ""}">{d["spreadO"]:.1f}%</td>'
-                  f'<td class="num {"ybest" if d["spreadD"]<15 else ""}">{d["spreadD"]:.1f}%</td></tr>')
+    xs_raw = [q["x"] for q in pts]
+    ys_raw = [q["y"] for q in pts]
+    xp, xlog = norm(xs_raw)
+    yp, ylog = norm(ys_raw)
+    # 优度：X 越低越好则翻转
+    bx = [(1 - t) if METRIC_LOW[mx] else t for t in xp]
+    by = [(1 - t) if METRIC_LOW[my] else t for t in yp]
+    for i, q in enumerate(pts):
+        q["bx"], q["by"] = bx[i], by[i]
+        # 内缩 3%~97%：点宽 19px 且 translate(-50%) 居中，
+        # 直接映射 0~100 会让最左/最右/最上的点探出绘图框
+        q["px"], q["py"] = 3 + xp[i] * 94, 3 + yp[i] * 94
+        q["xlog"], q["ylog"] = xlog, ylog
 
-claim_rows = ""
-for plat, a in COST["adClaim"].items():
-    real = next(r["perSec"] for r in ROWS if r["plat"] == plat and r["tier"] == a["tier"])
-    claim_rows += (f'<tr><td><span class="dot" style="background:{COLOR[plat]}"></span>{plat}</td>'
-                   f'<td>{a["tier"]}</td><td class="num">¥{a["perSec"]:.2f}</td>'
-                   f'<td class="num strong">¥{real:.3f}</td>'
-                   f'<td class="num">{real/a["perSec"]:.2f}×</td></tr>')
+    # 连线机制已按用户要求移除，只保留散点与交互。
+    out = ""
+    # 名次必须与上方列表一致：用【当前指标】在该周期下的排名，而不是全局年付名次。
+    _mi = METRIC_IDX[metric if metric != "pay" else "pay"]
+    _vm = {id(q): [q["r"]["byP"][key]["perVideo"], q["r"]["byP"][key]["cap"],
+                   q["r"]["byP"][key]["perVideo"] / SEC_PER_CLIP,
+                   q["r"]["byP"][key]["payCNY"]][_mi] for q in pts}
+    _rankof = {}
+    for _i, _q in enumerate(sorted(pts, key=lambda z: -_vm[id(z)]
+                                   if metric == "cap" else _vm[id(z)]), 1):
+        _rankof[id(_q)] = _i
+    # ⚠ 按名次【倒序】绘制：并列同坐标的点会重叠，先画名次差的、后画名次好的，
+    #   保证 rank 1 在最上层可见。
+    for q in sorted(pts, key=lambda z: -_rankof[id(z)]):
+        r = q["r"]
+        sub = f' · {r["label"]}' if r.get("label") else ""
+        rk = _rankof[id(q)]
+        out += (f'<span class="pp{" rk1" if rk == 1 else ""}" '
+                f'data-k="{r["plat"]}|{r["tier"]}|{r.get("label","")}" data-rk="{rk}" '
+                f'style="left:{q["px"]:.2f}%;bottom:{q["py"]:.2f}%">'
+                f'<i class="{PLAT_LG[r["plat"]]}"></i>'
+                f'<b>{r["plat"]} {r["tier"]}{sub}'
+                f'<s>第 {rk} 名 · {_fmt_axis(mx, q["x"])} · {_fmt_axis(my, q["y"])}</s></b></span>')
 
-retry_rows = ""
-for x in COST["retryPolicy"]:
-    retry_rows += (f'<tr><td><span class="dot" style="background:{COLOR.get(x["plat"],"#767C85")}"></span>{x["plat"]}</td>'
-                   f'<td class="ctr"><span class="tag v-good">{x["retry"]}</span></td>'
-                   f'<td>{x["basis"]}</td></tr>')
+    x0, x1 = min(xs_raw), max(xs_raw)
+    xdir = "更便宜" if METRIC_LOW[mx] else "更少"
+    xdir2 = "更贵" if METRIC_LOW[mx] else "更多"
+    xl = (f'<span id="px0">← {xdir} {_fmt_axis(mx, x0)}</span>'
+          f'<span id="px1">{_fmt_axis(mx, x1)} {xdir2} →</span>')
+    yl = f'纵轴＝{_title(my)}（{"越低越好" if METRIC_LOW[my] else "越高越好"}）'
+    return ('<div class="pareto">'
+            f'<div class="phd" id="paretoHd"><b>同样的预算，能换到什么</b>'
+            f'<span>横轴＝<i>该周期实付</i>（对数刻度，越左越省）｜{yl}｜'
+            f'每个点是一个档位 —— 越靠左上越划算。悬停看明细，也可与下方排名列表互相联动</span></div>'
+            f'<div class="pplot" id="pplot" data-metric="{metric}">{out}</div>'
+            f'<div class="pfoot">{xl}</div></div>')
 
-ap_rows = ""
-for p in COST["plans"]:
-    for c in p["credits"]:
-        r = next(x for x in ROWS if x["plat"] == p["platform"] and x["tier"] == p["tier"]
-                 and x["monthly"] == c["credits"])
-        off = OFFICIAL_RATE.get(p["platform"], {}).get(p["tier"])
-        offs = f'{off:,.1f} 积分/元' if off else "—"
-        ap_rows += (f'<tr><td><span class="dot" style="background:{r["color"]}"></span>{r["plat"]}</td>'
-                    f'<td>{r["tier"]}</td><td class="num">{r["label"] or "—"}</td>'
-                    f'<td class="num">{r["monthly"]:,}</td>'
-                    f'<td class="num">{CU[r["cur"]]}{r["price"]:,}</td>'
-                    f'<td class="num">{"¥%s" % format(r["priceCNY"], ",.0f") if r["cur"]=="USD" else "—"}</td>'
-                    f'<td class="num">{r["perYuan"]:,.1f}</td>'
-                    f'<td class="num">{offs}</td>'
-                    f'<td class="num">{CU[r["cur"]] + format(r["original"], ",") if r["original"] else "—"}</td></tr>')
 
-src_rows = "".join(f'<tr><td>{s["page"]}</td><td style="white-space:normal">{s["data"]}</td></tr>'
-                   for s in COST["sources"])
 
-retry_src = "".join(f'<h3>{x["plat"]}</h3>' for x in COST["retryPolicy"])
-budget_bullets = "".join(
-    f'<li><b>月产 {"0" if i == 0 else format(x["lo"], ".2f")}–{x["hi"]:.2f} 条：</b>'
-    f'{x["row"]["plat"]} {tname(x["row"])} — ¥{x["row"]["priceCNY"]:,.0f}/年'
-    f'（¥{f2(x["row"]["perVideo"])}/条 · 单价为最优解的 {x["row"]["rel"]:.2f} 倍）</li>'
-    for i, x in enumerate(LADDER))
+# 侧栏平台筛选按钮（成本页与全清单页共用）
+SIDE_PLAT = "".join(
+    f'<button type="button" class="pfb on" data-p="{p["plat"]}">'
+    f'{plogo(p["plat"], "pfbi")}{p["plat"]}</button>' for p in PLAT_SUM)
+NTIER = len({r["tier"] for r in ROWS})
 
-# 计算器的服务端初始态（N=30），保证无 JS 时也不是空表
-_init_s = best_single(30)
-_init_c = best_combo(30)
-_init_combo_html = ""
-if _init_s:
-    _init_combo_html += (f'<tr><td>单一档位最省</td>'
-                         f'<td><span class="dot" style="background:{_init_s["row"]["color"]}"></span>'
-                         f'{_init_s["row"]["plat"]} {_init_s["row"]["tier"]}'
-                         f'{" × " + str(_init_s["n"]) if _init_s["n"] > 1 else ""}</td>'
-                         f'<td class="num strong">¥{_init_s["total"]:,.0f}</td>'
-                         f'<td class="num">{_init_s["cap"]:.1f} 条/月</td>'
-                         f'<td class="num">¥{_init_s["total"]/30:,.0f}</td></tr>')
-if _init_c:
-    lbl = '<span class="combo-plus">+</span>'.join(
-        f'<span class="dot" style="background:{u["r"]["color"]}"></span>{u["r"]["plat"]} {u["r"]["tier"]}'
-        f'{" × " + str(u["n"]) if u["n"] > 1 else ""}' for u in _init_c["items"])
-    _init_combo_html += (f'<tr><td>组合订阅最省<br><span class="sub">跨平台混合</span></td>'
-                         f'<td>{lbl}</td>'
-                         f'<td class="num strong">¥{_init_c["total"]:,.0f}</td>'
-                         f'<td class="num">{_init_c["cap"]:.1f} 条/月</td>'
-                         f'<td class="num">¥{_init_c["total"]/30:,.0f}</td></tr>')
-
-cost_body = f"""
-{subnav_html}
-<div class="hero">
-  <div class="eyebrow">{COST["eyebrow"]}</div>
-  <h1>同一条 {SEC_PER_CLIP} 秒视频<br>最贵档比最省档贵 <em>{WORST/BEST:.2f} 倍</em></h1>
-  <p class="lead">{len(PLATFORMS)} 个平台的积分币值互不相同，直接比消耗没有意义。这里先把它们压平到同一口径，再折算成单条现金成本。</p>
-  <div class="meta">
-    <span><i></i>数据时点 <b>{UPDATED}</b></span>
-    <span><i></i>平台 <b>{len(PLATFORMS)}</b></span>
-    <span><i></i>可选档位 <b>{len(ROWS)}</b></span>
-    <span><i></i>汇率 <b>1 USD = {RATE}</b></span>
-    <span><i></i>口径依据 <b>年费 ÷ (月积分 × 12)</b></span>
-    <span><i></i>口径范围 <b>{SCOPE["currentShort"]}</b></span>
-  </div>
-</div>
-
-<div class="wrap">
-<div class="guide">
-  <div class="gstep"><span class="gn">1</span>
-    <div><b>拖月产量</b><span>填你每月实际要出几条视频</span></div></div>
-  <div class="gstep"><span class="gn">2</span>
-    <div><b>看推荐</b><span>下方立刻给出该买哪档、年费多少、单条成本</span></div></div>
-  <div class="gstep"><span class="gn">3</span>
-    <div><b>要细节</b><span>展开「更多数据」看完整算法、折扣与风险</span></div></div>
-</div>
-
-<div class="grid g5" style="margin-top:18px">
-  {"".join(f'''<div class="card pcard{" best" if p is PLAT_SUM[0] else ""}">
-    <div class="pn"><span class="dot" style="background:{p["color"]}"></span>{p["plat"]}
-      {"<span class=\"pochip\">联动档</span>" if p["multi"] else ""}</div>
-    <div class="pmeta">{p["tiers"]} 个会员档 · {p["opts"]} 个可选积分档</div>
-    <div class="prange">¥{f2(p["lo"])}<s>– ¥{f2(p["hi"])} / 条</s></div>
-    <div class="pbest">最优：{tname(p["best"])}<br>{p["best"]["mCap"]:.2f} 条/月 · {p["best"]["perSec"]:.3f} 元/秒</div>
-  </div>''' for p in PLAT_SUM)}
-</div>
-<div class="sub" style="margin-top:10px">
-  共 <b style="color:#C9CDD2">{len(PLAT_SUM)} 个平台 · {len({r["tier"] for r in ROWS})} 个会员档 · {len(ROWS)} 个可选积分档</b>
-  （「可选积分档」＝同一会员档下不同的积分/价格组合）
-</div>
-
-<div class="sub" style="margin-top:16px;padding:12px 15px;border-radius:12px;
-  background:rgba(255,201,60,.05);border:1px solid rgba(255,201,60,.2)">
-  <b style="color:#FFC93C">数据范围：</b>目前仅覆盖<b style="color:#C9CDD2">{SCOPE["current"]}</b>，
-  月度／季度会员后续补充。<b style="color:#C9CDD2">故「最省」结论仅在年费口径内成立。</b>
-</div>
-
-<section id="overview" class="reveal" style="margin-top:44px">
-  {sec_head("", "结论速览", "先说结论：下面五张卡是全场极值与两处最优解。想知道「我该买哪个」，直接看下一节。")}
-  <div class="grid g5">
-    {kpi("单条成本最优", f"¥{f2(BEST)}", f"{_best['plat']} {tname(_best)}<br>{_best['mCap']:.2f} 条/月 · ¥{_best['perSec']:.3f}/秒", "hi")}
-    {kpi("中产能最省", f"¥{_mid['priceCNY']:,.0f}", f"{_mid['plat']} {tname(_mid)}<br>{_mid['mCap']:.2f} 条/月 · ¥{f2(_mid['perVideo'])}/条")}
-    {kpi("大产能最省", f"¥{_top['priceCNY']:,.0f}", f"{_top['plat']} {tname(_top)}<br>{_top['mCap']:.2f} 条/月 · ¥{f2(_top['perVideo'])}/条")}
-    {kpi("海外平台溢价", f"{_hg['perVideo']/BEST:.2f}×", f"Higgsfield {_hg['tier']} ¥{f2(_hg['perVideo'])}/条<br>含税后约 ¥{_hg['perVideo']*1.08:.2f}")}
-    {kpi("最差档位", f"{WORST/BEST:.2f}×", f"Higgsfield Starter ¥{f2(WORST)}/条<br>低档位多是高价试用")}
-  </div>
-</section>
-
-<section id="calc" class="reveal">
-  {sec_head("01", "我该买哪个？", "先填月产量，直接看结论。1 条 = " + str(SEC_PER_CLIP) + " 秒。")}
-  <div class="card">
-    <div class="ctrl">
-      <div class="field">
-        <label for="tgt">月产量</label>
-        <input type="range" id="tgt" min="1" max="200" step="1" value="30" aria-label="月产量">
-      </div>
-      <div class="field">
-        <label>换算</label>
-        <span class="big" id="nv">30 条/月</span>
-        <span class="sub" id="ndur">= 900 秒 ≈ 15 分钟素材</span>
-      </div>
-      <div class="field">
-        <label>常用档位</label>
-        <span class="presets" id="presets">
-          <button type="button" class="cqp" data-n="5">5</button>
-          <button type="button" class="cqp" data-n="10">10</button>
-          <button type="button" class="cqp on" data-n="30">30</button>
-          <button type="button" class="cqp" data-n="50">50</button>
-          <button type="button" class="cqp" data-n="100">100</button>
-        </span>
-      </div>
+cycles_body = f"""
+<div class="app">
+<aside class="side">
+  <div class="sgroup" id="sgMetric">
+    <div class="sgt">排名指标<span class="sgchip">条越长＝越接近最优</span></div>
+    <div class="segv" id="metricSeg" role="tablist" aria-label="排名指标">
+      <button type="button" class="on" data-m="cost" role="tab">单条成本<s>元/条 · 越低越好</s></button>
+      <button type="button" data-m="cap" role="tab">每月可生成<s>条/月 · 越高越好</s></button>
+      <button type="button" data-m="sec" role="tab">元/秒<s>越低越好</s></button>
+      <button type="button" data-m="pay" role="tab">该周期实付<s>总额 · 越低越好</s></button>
     </div>
-    <div class="tw"><table><thead><tr>
-      <th>方案类型</th><th>档位组合</th><th class="ctr">年支出</th>
-      <th class="ctr">实际产能</th><th class="ctr">单条成本</th></tr></thead>
-      <tbody id="rec">{_init_combo_html}</tbody></table></div>
-    <div class="sub" style="margin-top:10px">
-      组合订阅为<b>跨平台混合求解</b>（无界背包）：允许不同平台档位叠加、同一档位可多份，最多 {4} 份。
-      多账号运营成本未计入，且按各档月产能向下取整（保守估计）。全场单档上限 {MAX_CAP:.0f} 条/月。
+  </div>
+  <div class="sgroup" id="sgPeriod">
+    <div class="sgt">会员周期<span class="sgchip" id="cycChip">44 档</span></div>
+    <div class="segv segk" id="cycSeg" role="tablist" aria-label="会员周期">
+      <button type="button" class="on" data-k="y" role="tab">年付<s>锁 12 个月</s></button>
+      <button type="button" data-k="q" role="tab">季付<s>锁 3 个月</s></button>
+      <button type="button" data-k="m" role="tab">月付<s>随时可停</s></button>
     </div>
-    
   </div>
-</section>
-
-<section id="table" class="reveal">
-  {sec_head("02", "各平台年费与单条成本", "条形越长＝越省（以全场最优价为 100%）。「排名」格副行显示<b>当前月产量下</b>该档的年支出——拖动上方滑块，排名与副行会一起重算。「单条成本」列上行＝<b>产能用满时的单价</b>（档位固有属性，不随产量变）；下行＝<b>按你当前产量折算的实际每条</b>（买多了用不满就会变贵）。排名依据是年支出，故两者次序可能不同。")}
-  <div class="toolbar">
-    <span class="sub">月产量</span>
-    <input type="range" id="q" class="cqr" min="1" max="200" step="1" value="30"
-           aria-label="月产量">
-    <span class="qv" id="qv">30 条/月</span>
-    <span class="sub" id="qd">= 900 秒 ≈ 15 分钟素材</span>
-    <span class="presets" id="qpresets">
-      <button type="button" class="cqp" data-n="5">5</button>
-      <button type="button" class="cqp" data-n="10">10</button>
-      <button type="button" class="cqp" data-n="30">30</button>
-      <button type="button" class="cqp" data-n="50">50</button>
-      <button type="button" class="cqp" data-n="100">100</button>
-    </span>
-    <span class="sub tb-hint">拖动即按该产量的年支出重排全表；产能过低者沉底。全场单档上限 91 条/月，超出按同档多份叠加（最多 4 份）。</span>
+  <div class="sgroup" id="sgOrder">
+    <div class="sgt">排序</div>
+    <div class="segv segk" id="ordSeg" role="tablist" aria-label="排序">
+      <button type="button" class="on" data-o="best" role="tab">最优在前</button>
+      <button type="button" data-o="worst" role="tab">最差在前</button>
+    </div>
   </div>
-  {table([("#", "v"), ("平台", None), ("档位", None), ("年费", "p"), ("月积分", None),
-          ("单条成本<br><span class=hm>用满产能 / 该产量</span>", "v"), ("元/秒", None)], main_rows, "tw scroll-y tw-main", "main")}
-</section>
+  <div class="sgroup" id="sgPlat">
+    <div class="sgt">平台<span class="sgchip" id="cycPlatN">{len(PLAT_SUM)}/{len(PLAT_SUM)}</span></div>
+    <div class="pf" id="cycPlat">{SIDE_PLAT}</div>
+  </div>
+</aside>
 
-<section id="more" class="reveal">
+<main class="mainv">
+  <div class="vhead">
+    <h1 id="cycTitle">单条成本<span style="color:#D1FE17"> · </span>动态排名</h1>
+    <div class="vsub" id="cycSub">同样 30 秒 Seedance 2.5 视频，这个档位要花多少钱 —— 越低越好。</div>
+    <div class="vmeta">
+      <span>数据时点 <b>{UPDATED}</b></span>
+      <span><b>{len(PLAT_SUM)}</b> 平台 · <b>{NTIER}</b> 会员档 · <b>{len(ROWS)}</b> 积分档</span>
+      <span>口径 <b>{SCOPE["currentShort"]}</b></span>
+      <span>当前 <b id="cycNow">单条成本 · 年付 · 最优在前</b></span>
+    </div>
+  </div>
+
+  {pareto_block("y")}
+  <div class="chart" id="chart">{chart_rows("cost", "y")}</div>
+
+
+
+  <div class="wrap" style="padding:0">
   <div class="sechead">
-    <h2><span class="ey">04</span>更多对比数据</h2>
-    <div class="sd">以下为支撑上面结论的完整数据：达标阶梯、边际成本、折扣结构、官方公示对照、失败退分、方法论与原始清单。按需展开。</div>
+    <h2><span class="ey">05</span>原始数据与方法论</h2>
+    <div class="sd">排名图背后的全部输入与计算链条：达标阶梯、边际成本、官方公示对照、失败退分、三周期全清单、方法论与原始清单。</div>
   </div>
   <details>
     <summary>展开全部对比数据（6 组表格 + 方法论）<span class="chev">›</span></summary>
@@ -1402,12 +2086,6 @@ cost_body = f"""
   {sec_head("", "边际成本：升档值不值", f"从下一档升到上一档，每多买一条产能实际多花多少钱。标尺为全场最优 ¥{f2(BEST)}/条。")}
   {table([("平台", None), ("升档路径", None), ("Δ年费", None), ("Δ年产", None),
           ("边际单条", None), ("达档均值", None), ("判定", None)], marg_rows)}
-</div>
-
-<div id="discount">
-  {sec_head("", "折扣结构：优势是真是假", "用官方划线原价重算。原价下单价收敛成水平线 → 说明优势全部来自折扣力度，活动一结束就消失。")}
-  {table([("平台", None), ("折扣区间", None), ("原价下单条", None),
-          ("原价单价极差", None), ("折扣力度极差", None)], disc_rows)}
 </div>
 
 <div id="official">
@@ -1429,34 +2107,34 @@ cost_body = f"""
   </details>
 </div>
 
+<div id="allperiod">
+  {sec_head("", "三周期全清单（表）", "每个档位在月付 / 季付 / 年付三种承诺期下的单条成本。加粗＝该档三种周期里最省的那个；「—」＝该平台不提供该周期。")}
+  {table([("平台", None), ("档位", None), ("月付 / 条", None), ("季付 / 条", None),
+          ("年付 / 条", None), ("最优周期", None)], ap2_rows, "tw")}
+</div>
+
 <div id="appendix">
   {sec_head("", "方法论与原始数据", "本节列出全部原始输入与计算链条，便于复核与复用。")}
   <details>
     <summary>计算口径与归一化链条<span class="chev">›</span></summary>
     <div class="dbody">
-      <b>核心问题：</b>{len(PLATFORMS)} 个平台的「积分」是各自发行的内部计价币，币值互不相同 ——
-      同样一条 {SEC_PER_CLIP} 秒视频，即梦与小云雀各扣 <b>600</b> 分、libtv 扣 <b>1,380</b> 分、
-      Higgsfield 扣 <b>210</b> 分、Neowow 扣 <b>7,500</b> 分。直接比较积分消耗没有意义。<br><br>
       <b>归一化链条：</b><br>
-      ① <code>本币/积分 = 年费 ÷ (月积分 × 12)</code><br>
+      ① <code>本币/积分 = 该周期实付总额 ÷ (该周期月积分 × 周期月数)</code>　<span style="color:#8A9098">年付取 12、季付取 3、月付取 1</span><br>
       ② <code>单条成本 = 本币/积分 × 每条消耗积分</code> ← 唯一可跨平台比较的价格<br>
       ③ <code>月产能 = 月积分 ÷ 每条消耗积分</code><br>
-      ④ <code>边际成本 = Δ年费 ÷ Δ年产能</code><br>
-      ⑤ <code>达标总支出最省 = 覆盖目标月产能的最低年费档位</code><br>
-      ⑥ <code>组合最省 = 跨平台无界背包（容量向下取整）</code><br>
-      ⑦ USD 档位按 <code>1 USD = {RATE} CNY</code>（{UPDATED} CFETS 中间价）折算<br><br>
-      <b>数据范围：</b>本表仅覆盖年费（连续包年）档位；月度 / 季度 / 按次购买尚未纳入。因计价单位与折扣结构不同，需单独归一化后并入，故「最省」结论仅在年费口径内成立。<br><br>
-      <b>口径校验：</b>用各平台自己公示的兑换率反向验证步骤①。
-      <b>{COST["officialRateNote"]}</b>
+      ④ USD 档位按 <code>1 USD = {RATE} CNY</code>（{UPDATED} CFETS 中间价）折算<br><br>
+      <b>数据范围：</b>已覆盖 <b>{SCOPE["current"]}</b>（{SCOPE_COVERED}）；{SCOPE_PENDING}尚未纳入。<br><br>
+      <b>口径校验：</b>用各平台自己公示的兑换率反向验证步骤①。<b>{COST["officialRateNote"]}</b>
     </div>
   </details>
   <details>
     <summary>数据范围：本表覆盖到哪里<span class="chev">›</span></summary>
     <div class="dbody">
+      <div class="note" style="margin:0 0 14px"><b>价格口径：</b>{COST["priceRule"]}</div>
       {table([("选项", None), ("状态", None), ("说明", None)],
-             "".join(f'<tr><td>{x["label"]}</td>'
-                     f'<td class="ctr"><span class="tag {"v-good" if x["done"] else "v-warn"}">{x["status"]}</span></td>'
-                     f'<td style="white-space:normal">{x["note"]}</td></tr>' for x in SCOPE["items"]), "tw")}
+             "".join(f'<tr><td>{{x["label"]}}</td>'
+                     f'<td class="ctr"><span class="tag {{"v-good" if x["done"] else "v-warn"}}">{{x["status"]}}</span></td>'
+                     f'<td style="white-space:normal">{{x["note"]}}</td></tr>' for x in SCOPE["items"]), "tw")}
       <div class="sub" style="margin-top:10px">{SCOPE["impact"]}</div>
     </div>
   </details>
@@ -1464,40 +2142,238 @@ cost_body = f"""
     <summary>单条积分消耗（各平台生成页实测）<span class="chev">›</span></summary>
     <div class="dbody">
       {table([("平台", None), ("生成页规格", None), ("单条积分", None)],
-             "".join(f'<tr><td><span class="dot" style="background:{COLOR[p]}"></span>{p}</td>'
-                     f'<td style="white-space:normal">{COST["creditsSource"][p]}</td>'
-                     f'<td class="num strong">{CPV[p]:,}</td></tr>' for p in CPV), "tw")}
-    </div>
-  </details>
-  <details>
-    <summary>档位全清单（{len(ROWS)} 个可选积分档）<span class="chev">›</span></summary>
-    <div class="dbody">
-      {table([("平台", None), ("档位", None), ("积分档", None), ("月积分", None), ("年费", None),
-              ("折 CNY", None), ("元/积分", None), ("公示兑换率", None), ("划线原价", None)],
-             ap_rows, "tw")}
-      <div class="sub" style="margin-top:10px">公示兑换率一列为平台页面自行标注值，仅用于反向校验。Higgsfield 各档报价均不含 VAT 及地方税。</div>
+             "".join(f'<tr><td><span class="dot" style="background:{{COLOR[p]}}"></span>{{p}}</td>'
+                     f'<td style="white-space:normal">{{COST["creditsSource"][p]}}</td>'
+                     f'<td class="num strong">{{CPV[p]:,}}</td></tr>' for p in CPV), "tw")}
     </div>
   </details>
   <details>
     <summary>数据来源（{len(COST["sources"])} 项）<span class="chev">›</span></summary>
-    <div class="dbody">{table([("页面", None), ("提取到的数据", None)], src_rows, "tw")}</div>
+    <div class="dbody">
+      {table([("来源页", None), ("取得的数据", None)], src_rows, "tw")}
+    </div>
   </details>
+  <div class="note warn" style="margin-top:14px">
+    <b>{COST["risks"][0]["title"]}</b><br>{COST["risks"][0]["body"][0]}<br><br>{COST["risks"][0]["body"][1]}
+  </div>
 </div>
 
     </div>
   </details>
-</section>
+  </div>
+</main>
+</div>
 
+<div class="mobar">
+  <span class="mosum" id="moSum">单条成本 · 年付 · 最优在前 · 6/6 平台</span>
+  <button type="button" id="moOpen" aria-label="调整指标、周期与平台"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M1 4.2h7M11.6 4.2H14M1 10.8h2.4M7 10.8h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="9.8" cy="4.2" r="1.9" stroke="currentColor" stroke-width="1.7"/><circle cx="5.2" cy="10.8" r="1.9" stroke="currentColor" stroke-width="1.7"/></svg>调整</button>
+</div>
+{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　{len(ROWS)} 个可选积分档 × 3 个周期')}
+"""
+
+cost_body = f"""
+<div class="app">
+<aside class="side">
+  <div class="sgroup" id="sgView">
+    <div class="sgt">查看方式</div>
+    <div class="segv" id="viewSeg" data-seg="view" role="tablist" aria-label="查看方式">
+      <button type="button" class="on" data-v="all" role="tab">全档位对比<s>逐档成本 + 反查</s></button>
+      <button type="button" data-v="period" role="tab">先别急着下单<s>看懂周期与倒挂</s></button>
+    </div>
+  </div>
+  <div class="sgroup">
+    <div class="sgt">会员周期<span class="sgchip" id="segchipA">{len(ROWS)} 档</span></div>
+    <div class="segv segk" id="segA" role="tablist" aria-label="会员周期">
+      <button type="button" class="on" data-k="y" role="tab">年付<s>锁 12 个月</s></button>
+      <button type="button" data-k="q" role="tab">季付<s>锁 3 个月</s></button>
+      <button type="button" data-k="m" role="tab">月付<s>随时可停</s></button>
+    </div>
+  </div>
+  <div class="sgroup">
+    <div class="sgt">月产量</div>
+    <input type="range" id="tgt" class="cqr" min="1" max="200" step="1" value="30" aria-label="月产量">
+    <div class="srow">
+      <span class="qv" id="nv">30 条/月</span>
+      <span class="sub" id="ndur">900 秒 ≈ 15 分钟</span>
+    </div>
+    <span class="presets" id="presets">
+      <button type="button" class="cqp" data-n="5">5</button>
+      <button type="button" class="cqp" data-n="10">10</button>
+      <button type="button" class="cqp on" data-n="30">30</button>
+      <button type="button" class="cqp" data-n="50">50</button>
+      <button type="button" class="cqp" data-n="100">100</button>
+    </span>
+  </div>
+  <div class="sgroup">
+    <div class="sgt">平台<span class="sgchip" id="platN">{len(PLAT_SUM)}/{len(PLAT_SUM)}</span></div>
+    <div class="pf" id="platFilter">{SIDE_PLAT}</div>
+  </div>
+</aside>
+
+<main class="mainv">
+  <div class="tabs" data-seg="view" role="tablist" aria-label="查看方式">
+    <button type="button" class="on" data-v="all" role="tab">全档位对比<s>逐档成本 + 反查</s></button>
+    <button type="button" data-v="period" role="tab">先别急着下单<s>看懂周期与倒挂</s></button>
+  </div>
+  <div class="vhead">
+    <h1>同一条 {SEC_PER_CLIP} 秒视频，最贵档比最省档贵 <em>{WORST/BEST:.2f} 倍</em></h1>
+    <div class="vmeta">
+      <span><svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1" y="2.2" width="10" height="9" rx="1.6" stroke="currentColor" stroke-width="1.1"/><path d="M1 5h10M4 1v2.4M8 1v2.4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>数据时点 <b>{UPDATED}</b></span>
+      <span><svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.1"/><path d="M3.4 8.4V6.2M6 8.4V3.8M8.6 8.4V5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg><b>{len(PLAT_SUM)}</b> 平台 · <b>{NTIER}</b> 会员档 · <b>{len(ROWS)}</b> 积分档</span>
+      <span><svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M1.4 3.4h2.4l1-1.4h5.8v7.6H1.4z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>汇率 <b>1 USD = {RATE}</b></span>
+      <span><svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="4.8" stroke="currentColor" stroke-width="1.1"/><path d="M6 3.4v2.8l1.8 1.2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>口径 <b>{SCOPE["currentShort"]}</b></span>
+    </div>
+  </div>
+
+  {KPI_BARS}
+
+  <div class="vnote"><b>价格锚定</b>·本表价格锚定各平台官网【当前实时显示价】，该显示价已是活动价 / 优惠价 / 限时价的最终成交价。<details class="tiny"><summary>完整声明<span class="chev">›</span></summary><div class="dbody">{COST["liveNote"]}</div></details></div>
+
+
+<div class="vpanel" data-view="period" id="period">
+  <div class="vptitle">先别急着下单<span>承诺越久越便宜？全场有 {len(TRAPS)} 处例外 —— 先看懂倒挂，再决定充哪个周期</span></div>
+  <div class="chips">
+    <span class="chip"><b>年付</b> ¥{f2(PERIOD_LEAD["y"]["cost"])}<s>{PERIOD_LEAD["y"]["who"]}</s></span>
+    <span class="chip"><b>季付</b> ¥{f2(PERIOD_LEAD["q"]["cost"])}<s>{PERIOD_LEAD["q"]["who"]}</s></span>
+    <span class="chip"><b>月付</b> ¥{f2(PERIOD_LEAD["m"]["cost"])}<s>{PERIOD_LEAD["m"]["who"]}</s></span>
+  </div>
+  <div class="note warn" style="margin-top:14px">
+    <b>下单前，先看这三个坑：</b>
+    <ul style="margin:8px 0 0">
+      <li><b>别买季付。</b>小云雀全系季付比月付贵 <b>22%～96%</b> —— 付更多钱、
+          锁更久、拿同样产能。最贵的一档是 {TRAP_WORST["row"]["plat"]} {tname(TRAP_WORST["row"])}
+          （{TRAP_WORST["long"]}比{TRAP_WORST["short"]}贵 <b>{TRAP_WORST["pct"]*100:.1f}%</b>）。</li>
+      <li><b>年付不总是最省。</b>即梦标准会员月付给 4,000 积分、年付只给 2,210 ——
+          年付单价反而贵 <b>44%</b>。下单前确认年付有没有把积分缩水。</li>
+      <li><b>按月买可能更便宜。</b>全场月付最优 <b>¥{f2(PERIOD_LEAD["m"]["cost"])}/条</b>
+          比季付最优 ¥{f2(PERIOD_LEAD["q"]["cost"])}/条 还低，而且随时能停。
+          所以本站<b>不单独设季付榜</b> —— 三个独立榜会给出自相矛盾的建议。</li>
+    </ul>
+  </div>
+  {table([("平台", None), ("年付 ÷ 月付", None), ("季付 ÷ 月付", None),
+          ("判定", None), ("建议", None)], pp_rows)}
+  <details style="margin-top:14px">
+    <summary>周期倒挂全清单（{len(TRAPS)} 处 / {TRAP_TIERS} 个会员档）<span class="chev">›</span></summary>
+    <div class="dbody">
+      {table([("平台", None), ("档位", None), ("倒挂组合", None), ("单条成本", None),
+              ("溢价", None), ("实付对照", None)], trap_rows, "tw")}
+      <div class="sub" style="margin-top:10px">
+        溢价 = 长周期单条成本 ÷ 短周期单条成本 − 1。这些组合被短周期完全支配：
+        花更多钱、换更长的承诺期、拿同样的产能。
+      </div>
+    </div>
+  </details>
+</div>
+
+<div class="vpanel on" data-view="all" id="table">
+  <div class="reco">
+    <div class="recot">按左栏月产量反查 · 最省方案<span>1 条 = {SEC_PER_CLIP} 秒；改月产量或周期，这里即时重算</span></div>
+    <div class="tw"><table><thead><tr>
+      <th>方案类型</th><th>档位组合</th><th class="ctr">该周期支出</th>
+      <th class="ctr">实际产能</th><th class="ctr">单条成本</th></tr></thead>
+      <tbody id="rec">{_init_combo_html}</tbody></table></div>
+    <details class="tiny">
+      <summary>组合订阅怎么算的<span class="chev">›</span></summary>
+      <div class="dbody">
+        跨平台混合求解（无界背包）：允许不同平台档位叠加、同一档位可多份，最多 {4} 份。
+        多账号运营成本未计入，且按各档月产能向下取整（保守估计）。全场单档上限 {MAX_CAP:.0f} 条/月。
+      </div>
+    </details>
+  </div>
+    <div class="vptitle">全部档位单条成本<span>条形越长＝越省；上行＝用满产能的固有单价，下行＝按你当前产量的实际每条 · <b id="coverN" style="color:#D1FE17">—</b><br><b style="color:#D1FE17">口径＝单账号单平台</b>：1 个平台 + 1 个账号能做出你设定的月产量才计入排名；做不到的整行置灰。需要多账号时请用下方组合订阅。</span></div>
+  {PT_TABLES}
+</div>
+</main>
+  <div class="scrim" id="scrim"></div>
+</div>
+<div class="mobar">
+  <span class="mosum" id="moSum">全档位对比 · 年付 · 30 条/月 · 6/6 平台</span>
+  <button type="button" id="moOpen" aria-label="调整周期、月产量与平台筛选"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M1 4.2h7M11.6 4.2H14M1 10.8h2.4M7 10.8h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="9.8" cy="4.2" r="1.9" stroke="currentColor" stroke-width="1.7"/><circle cx="5.2" cy="10.8" r="1.9" stroke="currentColor" stroke-width="1.7"/></svg>调整</button>
+</div>
+
+<section id="more" class="reveal">
+  <div class="wrap">
+    <div class="sechead">
+      <h2><span class="ey">04</span>完整数据已独立成页</h2>
+      <div class="sd">达标阶梯、边际成本、官方公示对照、失败退分、三周期全清单、方法论与原始数据 —— 已重构为可切换指标的动态排名页。</div>
+    </div>
+    <a class="btn btn-white" href="cycles.html">进入「三周期全清单」→</a>
+  </div>
+</section>
+<div class="wrap">
 <section class="reveal">
-  {sec_head("09", "执行建议", "决策顺序：先定月产量 → 查「按产量测算」→ 用原价做压力测试。以下建议<b>仅适用于年费口径</b>。")}
+  {sec_head("", "执行建议", "决策顺序：先在左栏（手机端点右下角「调整」）定周期与月产量 → 看「全档位对比」顶部的反查结论 → 再逐档核对。以下建议以<b>年付口径</b>给出。")}
   <div class="note good"><ul style="margin-top:0">{budget_bullets}</ul></div>
   <div class="note warn" style="margin-top:12px">
     <b>{COST["risks"][0]["title"]}</b><br>{COST["risks"][0]["body"][0]}<br><br>{COST["risks"][0]["body"][1]}
   </div>
 </section>
-{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　数据采集 {UPDATED}　·　全部数值按统一口径重算，非平台宣传数字')}
 </div>
+{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　数据采集 {UPDATED}　·　全部数值按统一口径重算，非平台宣传数字')}
 """
+
+# ── 首页 ──────────────────────────────────────────────────────────
+home_body = f"""
+<div class="hero">
+  <div class="eyebrow">{BRAND} · Unified Benchmark</div>
+  <h1>把 AI 平台<br>放在<em>同一把尺子</em>上</h1>
+  <p class="lead">各平台用自己的积分币计价，币值互不相同。{BRAND} 先把它们压平到同一口径，再折算成可比较的现金成本与能力得分 —— 不采信宣传数字，只给可复核的结果。</p>
+  <div class="btns">
+    <a class="btn btn-white" href="#cost">进入平台成本对比</a>
+    <a class="btn btn-ghost" href="cycles.html">三周期全清单 · 动态排名</a>
+  </div>
+</div>
+
+<div class="wrap">
+<section id="cost" class="reveal" style="margin-top:40px">
+  <div class="sechead">
+    <h2><span class="ey">板块</span>两条对比线</h2>
+    <div class="sd">统一口径的方法论复用在同一套框架下：成本线已上线，能力线在建。</div>
+  </div>
+  <div class="grid g2">
+    <a class="entry" href="cost.html">
+      <span class="arrow">→</span>
+      <div class="et">LIVE · {UPDATED}</div>
+      <h3>平台成本对比</h3>
+      <p>{len(PLATFORMS)} 个平台、{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本。</p>
+      <div class="nums">
+        <div><s>¥{f2(BEST)}</s><em>最低单条</em></div>
+        <div><s>{WORST/BEST:.2f}×</s><em>最贵/最省</em></div>
+        <div><s>{len(ROWS)}</s><em>可选档位</em></div>
+      </div>
+    </a>
+    <a class="entry" href="cycles.html">
+      <span class="arrow">→</span>
+      <div class="et">LIVE · {UPDATED}</div>
+      <h3>三周期动态排名</h3>
+      <p>{len(ROWS)} 个可选积分档 × 年付 / 季付 / 月付，按指标动态排名，右侧散点看「花多少钱买到多少产能」。</p>
+      <div class="nums">
+        <div><s>{len(PERIODS)}</s><em>承诺周期</em></div>
+        <div><s>{len(TRAPS)}</s><em>周期倒挂</em></div>
+        <div><s>{len(ROWS)}</s><em>可选档位</em></div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="sechead">
+    <h2><span class="ey">结论</span>成本线速览</h2>
+    <div class="sd">完整数据、算法与风险说明见成本对比页。</div>
+  </div>
+  <div class="grid g5">
+    {kpi("单条成本最优", "¥" + f2(BEST), f'{_best["plat"]} {tname(_best)}<br>与次优 ¥{f2(_second["perVideo"])} 差 {(_second["perVideo"]/BEST-1)*100:.2f}%', "hi")}
+    {kpi("中产能最省", f'¥{_mid["priceCNY"]:,.0f}', f'{_mid["plat"]} {tname(_mid)}<br>¥{f2(_mid["perVideo"])}/条', "good")}
+    {kpi("大产能最省", f'¥{_top["priceCNY"]:,.0f}', f'{_top["plat"]} {tname(_top)}<br>{_top["mCap"]:.2f} 条/月', "good")}
+    {kpi("海外平台溢价", f'{_hg["perVideo"]/BEST:.2f}×', f'Higgsfield {_hg["tier"]} ¥{f2(_hg["perVideo"])}/条<br>无成本优势', "")}
+    {kpi("最差档位", f'{WORST/BEST:.2f}×', f'Higgsfield Starter ¥{f2(WORST)}/条<br>低档位多是高价试用', "")}
+  </div>
+</section>
+</div>
+
+{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　数据采集 {UPDATED}　·　全部数值按统一口径重算，非平台宣传数字')}
+"""
+
 
 # ── 排行榜页 ──────────────────────────────────────────────────────
 DIMS = VLM["methodology"]["dimensions"]
@@ -1551,8 +2427,10 @@ lb_body = f"""
 PAGES = {
     "index.html": page("首页", f"{BRAND} — {SITE['tagline']}。AI 平台成本对比与模型能力排行榜，统一口径折算，只给可复核的结果。",
                        nav("home"), home_body),
-    "cost.html": page("平台成本对比", f"{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本，含达标阶梯、折扣结构与投入产出测算。",
+    "cost.html": page("平台成本对比", f"{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本，含达标阶梯、边际成本与跨平台组合最省。",
                       nav("cost"), cost_body, cost_js=True),
+    "cycles.html": page("三周期全清单", f"{len(ROWS)} 个可选积分档 × 年付/季付/月付三周期，按指标动态排名，附全部原始数据与计算方法。",
+                        nav("cycles"), cycles_body, cost_js=True),
     "leaderboard-vlm.html": page(VLM["title"], VLM["intro"], nav("leaderboard-vlm"), lb_body),
 }
 
@@ -1597,35 +2475,108 @@ def selfcheck():
             errs.append(f"{name}: style 标签数异常")
         if html.count("<script>") != 1 or html.count("</script>") != 1:
             errs.append(f"{name}: script 标签数异常")
-        for tok in ("__PLANS__", "__COST__", "__SANS__", "__DISP__", "__MONO__", "{f2(", "None"):
+        for tok in ("__PLANS__", "__PTN__", "__CDATA__", "__COST__", "__SANS__", "__DISP__", "__MONO__", "{f2(", "None"):
             if tok in html:
                 errs.append(f"{name}: 残留占位符 {tok}")
         if re.search(r"(?:src|href)=\"https?://", html):
             errs.append(f"{name}: 存在外部资源请求（应保持零外部依赖）")
 
     cost = PAGES["cost.html"]
+    # 全站并集：JS/CSS/声明类检查必须在所有页面上找 —— 内容会随重构在页面间迁移，
+    # 只查单页会在迁移后误报（三周期全清单迁到 cycles.html 时就撞过）
+    _ALLHTML = "\n".join(PAGES.values())
     ids = set(re.findall(r'id="([a-z][a-z0-9-]*)"', cost))
     hrefs = set(re.findall(r'href="#([a-z][a-z0-9-]*)"', cost))
     miss = hrefs - ids
     if miss:
         errs.append(f"cost.html: 锚点无对应 id -> {sorted(miss)}")
 
-    n_th = len(re.findall(r"<th\b", cost.split('id="main"')[1].split("</tr>")[0]))
-    n_td = len(re.findall(r"<td\b", cost.split('id="main"')[1].split("</tr>")[1]))
-    if n_th != n_td:
-        errs.append(f"cost.html: 主表表头 {n_th} 列与数据行 {n_td} 列不一致")
+    # 三张周期表结构一致：列数、行数、表头都须相同
+    _ids = ("main", "main-q", "main-m")
+    _cols = {}
+    for _i in _ids:
+        if f'id="{_i}"' not in cost:
+            errs.append(f'cost.html: 缺少周期表 #{_i}')
+            continue
+        _blk = cost.split(f'id="{_i}"')[1]
+        _th = len(re.findall(r"<th\b", _blk.split("</tr>")[0]))
+        _td = len(re.findall(r"<td\b", _blk.split("</tr>")[1]))
+        _cols[_i] = _th
+        if _th != _td:
+            errs.append(f'cost.html: #{_i} 表头 {_th} 列与数据行 {_td} 列不一致')
+        _rows = len(re.findall(r"<tr\b", _blk.split("</tbody>")[0])) - 1   # 减去表头行
+        if _rows != MAIN_N[{"main": "y", "main-q": "q", "main-m": "m"}[_i]]:
+            errs.append(f'cost.html: #{_i} 行数 {_rows} 与数据层 {MAIN_N} 不符')
+    if len(set(_cols.values())) > 1:
+        errs.append(f"cost.html: 三张周期表列数不一致 {_cols}")
+    n_th = _cols.get("main", 0)
+
+    # ── 三周期全清单的「年付 / 条」列必须逐行等于主表单条成本 ──
+    #    两表同序（均按 perVideo 升序）。这条检查的存在理由：曾把列序写成 年/季/月
+    #    而表头写 月/季/年，整张表错位但每一列数字都「看起来合理」，肉眼与常规自检都抓不到。
+    try:
+        # 只取年付表（id="main" 之后到季付表之前），否则会把另外两张表的 data-rated 一并抓进来
+        main_pv = re.findall(r'data-rated="([\d.]+)"',
+                             cost.split('id="main"')[1].split('data-pt="q"')[0])
+        # 新页里列序自检的锚点
+        if 'id="main"' not in cost:
+            raise RuntimeError('成本页缺少主表')
+        # 三周期全清单表已迁到 cycles.html，改在那里比对
+        blk = PAGES["cycles.html"].split('id="allperiod"')[1].split('id="appendix"')[0]
+        tbl = re.search(r"<table.*?</table>", blk, re.S).group(0)
+        heads = [re.sub(r"<[^>]+>", "", x).strip()
+                 for x in re.findall(r"<th[^>]*>(.*?)</th>", tbl.split("</tr>")[0], re.S)]
+        yi = next(i for i, hh in enumerate(heads) if hh.startswith("年付"))
+        ap = []
+        for rr in re.findall(r"<tr>(.*?)</tr>", tbl, re.S)[1:]:
+            tds = re.findall(r"<td[^>]*>(.*?)</td>", rr, re.S)
+            if len(tds) > yi:
+                ap.append(re.sub(r"<[^>]+>", "", tds[yi]).replace("¥", "").replace(",", "").strip())
+        if len(ap) != len(main_pv):
+            errs.append(f"cost.html: 三周期全清单 {len(ap)} 行 vs 主表 {len(main_pv)} 行，行数不等")
+        else:
+            bad = [i for i, (a, b) in enumerate(zip(main_pv, ap), 1)
+                   if abs(float(a) - float(b)) > 0.005]
+            if bad:
+                errs.append(f"cost.html: 三周期全清单「年付」列与主表单条成本不一致（第 {bad[:5]} 行）")
+    except Exception as e:      # noqa: BLE001 —— 自检自身出错也必须暴露，不能静默
+        errs.append(f"cost.html: 三周期全清单列序自检失败 -> {e!r}")
+
+    # ── 数据范围文案一致性 ──
+    #    页面上的口径声明必须与数据层同步。曾经的坑：数据层已扩到三周期，
+    #    页面两处硬编码还写着「月度／季度会员后续补充」「仅在年费口径内成立」，
+    #    与同一页的「已覆盖」表格自相矛盾，而所有结构与数值自检都是绿的。
+    if SCOPE["current"] not in _ALLHTML:
+        errs.append(f'全站未体现数据层口径范围「{SCOPE["current"]}」')
+    for _stale in ("仅在年费口径内成立", "月度／季度会员后续补充",
+                   "月度 / 季度 / 按次购买尚未纳入", "需单独归一化后并入"):
+        if _stale in _ALLHTML:
+            errs.append(f"残留过期口径文案「{_stale}」")
 
     # ── 死引用检查：防止后续改动留下指向已删元素的 JS / CSS ──
     js_all = re.search(r"<script>(.*?)</script>", cost, re.S).group(1)
-    ids_html = set(re.findall(r'id="([\w-]+)"', cost))
+    ids_html = set(re.findall(r'id="([\w-]+)"', _ALLHTML))
     for eid in sorted(set(re.findall(r"getElementById\('([\w-]+)'\)", js_all))):
         if eid not in ids_html:
             errs.append(f"cost.html: JS 引用了不存在的元素 id -> #{eid}")
     _src = io.open(os.path.abspath(__file__), encoding="utf-8").read()
     css_block = _src[_src.index('CSS = r"""'):_src.index('JS = r"""')]
-    for cls in sorted(set(re.findall(r"\.([A-Za-z][\w-]*)", css_block))):
-        if cls not in cost:
-            errs.append(f"cost.html: CSS 类 .{cls} 在页面上无对应元素")
+    # ⚠ 三个坑，早期版本都踩了，导致这条检查形同虚设：
+    #   ① 在【整页】里搜类名 —— CSS 本身就在整页里，于是永远为真。
+    #   ② 只搜成本页 —— 首页/榜单页用到的类会被误报。
+    #   ③ 注释与 URL 里也含「.xxx」—— 须剔除注释，且点号前不能是字母（否则 www.w3.org 会抽出 .w3）
+    css_block = re.sub(r"/\*.*?\*/", "", css_block, flags=re.S)
+    _all = "\n".join(PAGES.values())
+    _all = re.sub(r"<style>.*?</style>", "", _all, flags=re.S)
+    _all = re.sub(r"<script>.*?</script>", "", _all, flags=re.S)
+    _used_cls = set()
+    for _m in re.findall(r'class="([^"]*)"', _all):
+        _used_cls.update(_m.split())
+    # 运行时由 JS 或浏览器加上的类，静态 HTML 里必然找不到
+    _RUNTIME_CLS = {"js", "in", "on", "top", "active", "pp", "pline", "combo-note"}
+    for cls in sorted(set(re.findall(r"(?<![\w./-])\.([A-Za-z][\w-]*)", css_block))):
+        if cls not in _used_cls and cls not in _RUNTIME_CLS:
+            errs.append(f"样式表里的 .{cls} 未在任何页面上使用")
     for m in re.finditer(r"^def (\w+)\(", _src, re.M):
         fn = m.group(1)
         if fn == "main":
@@ -1660,7 +2611,8 @@ for r in sorted(ROWS, key=lambda x: x["perVideo"]):
     print(f"{r['rank']:>3}  {r['plat']:<11}{r['tier']:<10}{(r['label'] or '-'):<10}{price:>10}"
           f"{r['perVideo']:>9.2f}{r['perSec']:>7.3f}{r['mCap']:>8.2f}{r['rel']:>7.3f}")
 print("-" * 78)
-print(f"共 {len(ROWS)} 档　最优 ¥{BEST:.2f}　最差 ¥{WORST:.2f}　极差 {WORST/BEST:.2f}×　主表 {n_th} 列")
+print(f"共 {len(ROWS)} 档　最优 ¥{BEST:.2f}　最差 ¥{WORST:.2f}　极差 {WORST/BEST:.2f}×　"
+      f"周期表 {len(PERIODS)} 张 × {n_th} 列")
 print()
 for name in sorted(PAGES):
     print("  %-24s %7d B" % (name, os.path.getsize(os.path.join(ROOT, name))))
@@ -1670,5 +2622,5 @@ if errs:
     for e in errs:
         print("   -", e)
     raise SystemExit(1)
-print("自检通过（11 项）：div 配对 / 文档完整 / style+script 标签 / 无残留占位符 / 零外部请求 / "
-      "锚点有效 / 表头列数一致 / JS 语法 / JS 引用的元素存在 / CSS 类页面存在 / 无死函数")
+print("自检通过（12 项）：div 配对 / 文档完整 / style+script 标签 / 无残留占位符 / 零外部请求 / "
+      "锚点有效 / 表头列数一致 / 三周期全清单列序 / JS 语法 / JS 引用的元素存在 / CSS 类页面存在 / 无死函数")

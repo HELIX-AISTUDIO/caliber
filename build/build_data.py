@@ -9,6 +9,8 @@ CALIBER · 数据层（唯一真相源）
         不同价的档位误判为同价，进而产出错误结论）。
   3. 只存「列表价 + 币种」这类原始事实；年费折算、汇率、单条成本、达标阶梯
      等派生量全部由 build_site.py 现算，本文件不存任何派生量。
+  4. 价格一律取页面【显示的实付价】，不录划线原价 —— 见下方 PRICE_RULE。
+     唯一例外是续费价 renewal，它是真实会发生的第二期扣款。
 
 运行：python build/build_data.py
 """
@@ -31,19 +33,26 @@ SITE = {
     "nav": [
         {"key": "home", "label": "首页", "href": "index.html"},
         {"key": "cost", "label": "平台成本对比", "href": "cost.html"},
+        {"key": "cycles", "label": "三周期全清单", "href": "cycles.html"},
         {"key": "leaderboard-vlm", "label": "视觉理解模型排行榜", "href": "leaderboard-vlm.html"},
     ],
 }
 
 # ═══════════ 平台 ═══════════
 PLATFORMS = {
-    "libtv":      {"name": "libtv",      "color": "#9CE6F3", "currency": "CNY", "region": "cn"},
-    "Neowow":     {"name": "Neowow",     "color": "#00C65A", "currency": "CNY", "region": "cn"},
-    "即梦":        {"name": "即梦",        "color": "#3280FF", "currency": "CNY", "region": "cn"},
-    "小云雀":      {"name": "小云雀",      "color": "#FABC00", "currency": "CNY", "region": "cn"},
+    "libtv":      {"name": "libtv",      "color": "#9CE6F3", "currency": "CNY", "region": "cn",
+                   "recurring": True, "tierLabel": "标准/进阶/高级/豪华/至尊"},
+    "Neowow":     {"name": "Neowow",     "color": "#00C65A", "currency": "CNY", "region": "cn",
+                   "recurring": False, "tierLabel": "PLUS/Pro/MAX/ULTRA"},
+    "即梦":        {"name": "即梦",        "color": "#3280FF", "currency": "CNY", "region": "cn",
+                   "recurring": True, "tierLabel": "基础/标准/高级/超级"},
+    "小云雀":      {"name": "小云雀",      "color": "#FABC00", "currency": "CNY", "region": "cn",
+                   "recurring": True, "tierLabel": "基础/标准/高级/超级"},
     "Higgsfield": {"name": "Higgsfield", "color": "#ED1572", "currency": "USD", "region": "global",
-                   "excludeTax": True},
-    "Tapnow":     {"name": "Tapnow",     "color": "#A78BFA", "currency": "USD", "region": "global"},
+                   "excludeTax": True, "recurring": False, "quarterly": False,
+                   "tierLabel": "Starter/Plus/Ultra"},
+    "Tapnow":     {"name": "Tapnow",     "color": "#A78BFA", "currency": "USD", "region": "global",
+                   "recurring": True, "tierLabel": "BASIC/PRO/ULTIMATE/MAX"},
 }
 
 # ═══════════ 汇率 ═══════════
@@ -69,75 +78,104 @@ CREDITS_SOURCE = {
 }
 
 # ═══════════ 档位清单 ═══════════
-#   credits: [{"credits": 月积分, "price": 列表价, "label": 可选展示名}, ...]
-#   单选项档位也写成列表，保持结构统一。
-#   renewal = 次年续费价；original = 划线原价（判断「优势是否依赖活动」）
+#   credits: [{"credits": 月积分, "price": 年付实付总额, "m": 月付实付总额,
+#              "q": 季付实付总额, "renewal": 次年续费价, "mCr": 月付口径月积分}, ...]
+#   五条约定：
+#     1) renewal 放【选项级】—— libtv 的次年续费价随积分档变、不随档位变：
+#        高级版 11.7K→¥3799 / 16.3K→¥5099；至尊版 50.5K→¥10999 / 66K→未公示。
+#        曾放在档位级，导致 11.7K 档被套上 16.3K 档的 ¥5099（2026-09-21 截图纠正）。
+#     2) 缺 q 键 = 该档无季付选项（目前只有 Higgsfield —— 平台不提供季付）。
+#        缺 renewal 键 = 未公示续费价；非连续包（Neowow / Higgsfield）整体无此键。
+#     3) m / q 一律取【稳态价】，即正常续买的单价。首期促销价不进数据。
+#        例：Tapnow BASIC 首月 $9、次月起 $15，此处 m 记 15。
+#     4) mCr 只在「该周期积分与年付不同」时出现。目前只有即梦标准会员：
+#        月付给 4,000 积分/月，年付与季付给 2,210 —— 平台确实如此，不是抄错。
+#        → 推论：积分不是档位的固有属性，每个周期各自抄卡片原文。
+#     5) 划线原价一律不录（含选项级），依据见下方 PRICE_RULE。
 PLANS = [
-    {"platform": "libtv", "tier": "标准版", "renewal": 759, "original": 729,
-     "credits": [{"credits": 1500, "price": 569}]},
-    {"platform": "libtv", "tier": "进阶版", "renewal": 1799, "original": 2199,
-     "credits": [{"credits": 4600, "price": 1199}]},
-    {"platform": "libtv", "tier": "高级版", "renewal": 5099, "original": 7399,
-     "credits": [{"credits": 11700, "price": 2999}, {"credits": 16300, "price": 3899}]},
-    {"platform": "libtv", "tier": "豪华版", "renewal": 7399, "original": 14999,
-     "credits": [{"credits": 32800, "price": 6699}]},
-    {"platform": "libtv", "tier": "至尊版", "renewal": 9599, "original": 22999,
-     "credits": [{"credits": 50500, "price": 9599}, {"credits": 66000, "price": 12499}]},
+    {"platform": "libtv", "tier": "标准版",
+     "credits": [{"credits": 1500, "price": 569, "m": 66, "q": 179, "renewal": 569}]},
+    {"platform": "libtv", "tier": "进阶版",
+     "credits": [{"credits": 4600, "price": 1199, "m": 199, "q": 499, "renewal": 1199}]},
+    {"platform": "libtv", "tier": "高级版",
+     "credits": [{"credits": 11700, "price": 2999, "m": 469, "q": 1159, "renewal": 3799},
+                 {"credits": 16300, "price": 3899, "m": 649, "q": 1599, "renewal": 5099}]},
+    {"platform": "libtv", "tier": "豪华版",
+     "credits": [{"credits": 32800, "price": 6699, "m": 1199, "q": 2699, "renewal": 7399}]},
+    {"platform": "libtv", "tier": "至尊版",
+     "credits": [{"credits": 50500, "price": 9599, "m": 1799, "q": 3899, "renewal": 10999},
+                 {"credits": 66000, "price": 12499, "m": 2299, "q": 4999}]},  # 66K 未标次年价
 
-    {"platform": "Neowow", "tier": "PLUS", "original": 1080,
-     "credits": [{"credits": 9000, "price": 599}]},
-    {"platform": "Neowow", "tier": "Pro", "original": 12950,
-     "credits": [{"credits": 32800, "price": 1599}, {"credits": 52800, "price": 2289},
-                 {"credits": 108000, "price": 4666}]},
-    {"platform": "Neowow", "tier": "MAX", "original": 34560,
-     "credits": [{"credits": 188000, "price": 7299}, {"credits": 288000, "price": 11059}]},
-    {"platform": "Neowow", "tier": "ULTRA", "original": 44160,
-     "credits": [{"credits": 368000, "price": 11899}]},
+    {"platform": "Neowow", "tier": "PLUS",
+     "credits": [{"credits": 9000, "price": 599, "m": 60, "q": 189}]},
+    {"platform": "Neowow", "tier": "Pro",
+     "credits": [{"credits": 32800, "price": 1599, "m": 219, "q": 628},
+                 {"credits": 52800, "price": 2289, "m": 348, "q": 899},
+                 {"credits": 108000, "price": 4666, "m": 718, "q": 1999}]},
+    {"platform": "Neowow", "tier": "MAX",
+     "credits": [{"credits": 188000, "price": 7299, "m": 1199, "q": 2999},
+                 {"credits": 288000, "price": 11059, "m": 1827, "q": 4599}]},
+    {"platform": "Neowow", "tier": "ULTRA",
+     "credits": [{"credits": 368000, "price": 11899, "m": 2296, "q": 5520}]},
 
-    {"platform": "即梦", "tier": "基础会员", "original": None,
-     "credits": [{"credits": 725, "price": 659}]},
-    {"platform": "即梦", "tier": "标准会员", "original": None,
-     "credits": [{"credits": 2210, "price": 1899}]},
-    {"platform": "即梦", "tier": "高级会员", "original": 10398,
-     "credits": [{"credits": 6200, "price": 2599}, {"credits": 12320, "price": 5199},
-                 {"credits": 18500, "price": 7799}, {"credits": 27700, "price": 11699}]},
-    {"platform": "即梦", "tier": "超级会员", "original": 43680,
-     "credits": [{"credits": 54600, "price": 21840}]},
+    {"platform": "即梦", "tier": "基础会员",
+     "credits": [{"credits": 725, "price": 659, "m": 69, "q": 188}]},
+    # 即梦标准会员：月付给 4,000 积分/月，年付与季付给 2,210 —— 见上方约定 4)
+    {"platform": "即梦", "tier": "标准会员",
+     "credits": [{"credits": 2210, "price": 1899, "m": 199, "q": 568, "mCr": 4000}]},
+    {"platform": "即梦", "tier": "高级会员",
+     # 积分以卡片「◆ X 积分每月」原文为准。滑块标签（6.2K / 18.5K / 27.7K）是约数，
+     # 真实值为 6,160 / 12,320 / 18,480 / 27,720 —— 曾按标签误录 6,200 / 18,500 / 27,700。
+     # 交叉验证：四档「¥1=X 积分」标牌同为 28，只有真实值能同时成立（约数会给出 29/28/28）。
+     "credits": [{"credits": 6160, "price": 2599, "m": 499, "q": 1399},
+                 {"credits": 12320, "price": 5199, "m": 998, "q": 1959},
+                 {"credits": 18480, "price": 7799, "m": 1498, "q": 2939},
+                 {"credits": 27720, "price": 11699, "m": 2246, "q": 4409}]},
+    {"platform": "即梦", "tier": "超级会员",
+     "credits": [{"credits": 54600, "price": 21840, "m": 4299, "q": 8189}]},
 
-    {"platform": "小云雀", "tier": "基础会员", "original": 759,
-     "credits": [{"credits": 830, "price": 453}]},
-    {"platform": "小云雀", "tier": "标准会员", "original": 1999,
-     "credits": [{"credits": 2320, "price": 1199}]},
-    {"platform": "小云雀", "tier": "高级会员", "original": 9999,
-     "credits": [{"credits": 6300, "price": 2649}, {"credits": 8600, "price": 3599},
-                 {"credits": 10200, "price": 4199}, {"credits": 12000, "price": 4999},
-                 {"credits": 18500, "price": 7799}, {"credits": 27700, "price": 10699}]},
-    {"platform": "小云雀", "tier": "超级会员", "original": 43680,
-     "credits": [{"credits": 54600, "price": 21840}]},
+    {"platform": "小云雀", "tier": "基础会员",
+     "credits": [{"credits": 830, "price": 453, "m": 38, "q": 219}]},
+    {"platform": "小云雀", "tier": "标准会员",
+     "credits": [{"credits": 2320, "price": 1199, "m": 100, "q": 589}]},
+    {"platform": "小云雀", "tier": "高级会员",
+     # 10.2K 档：4199/12/10150 → ¥10 = 290.07，与卡片标注吻合；曾误录 10200（反推 291.5 ✗）
+     # 27.7K 档：真实积分 27,720（滑块标签 27.7K 是约数），曾误录 27,700；用户 2026-09-21 裁定更正
+     # 18.5K 档仍为 18500 —— 该值与 6.3K/8.6K/12K 一样来自滑块标签，尚未取得卡片原文核对
+     "credits": [{"credits": 6300, "price": 2649, "m": 273, "q": 1488},
+                 {"credits": 8600, "price": 3599, "m": 374, "q": 1999},
+                 {"credits": 10150, "price": 4199, "m": 441, "q": 2349},
+                 {"credits": 12000, "price": 4999, "m": 519, "q": 1959},
+                 {"credits": 18500, "price": 7799, "m": 779, "q": 2939},
+                 {"credits": 27720, "price": 10699, "m": 1168, "q": 4408}]},
+    {"platform": "小云雀", "tier": "超级会员",
+     "credits": [{"credits": 54600, "price": 21840, "m": 2235, "q": 8189}]},
 
-    {"platform": "Higgsfield", "tier": "Starter", "original": 180,
-     "credits": [{"credits": 200, "price": 180}]},
-    {"platform": "Higgsfield", "tier": "Plus", "original": 588,
-     "credits": [{"credits": 1000, "price": 468}]},
-    {"platform": "Higgsfield", "tier": "Ultra", "original": 1548,
-     "credits": [{"credits": 3000, "price": 1188}, {"credits": 6000, "price": 2328},
-                 {"credits": 9000, "price": 3240}]},
+    # Higgsfield 平台不提供季付，故全部缺 q 键
+    {"platform": "Higgsfield", "tier": "Starter",
+     "credits": [{"credits": 200, "price": 180, "m": 15}]},
+    {"platform": "Higgsfield", "tier": "Plus",
+     "credits": [{"credits": 1000, "price": 468, "m": 49}]},
+    {"platform": "Higgsfield", "tier": "Ultra",
+     "credits": [{"credits": 3000, "price": 1188, "m": 129},
+                 {"credits": 6000, "price": 2328, "m": 220},
+                 {"credits": 9000, "price": 3240, "m": 310}]},
 
-    # ── Tapnow（USD；连续包年 50% OFF 口径）──
-    # 滑动档位，故每个选项的原价各不相同 —— 原价随选项下沉，见下方 model 说明
+    # ── Tapnow（USD 计价）──
+    # BASIC 月付取稳态价 $15（首月 $9 为促销，按用户裁定不入数据）
     {"platform": "Tapnow", "tier": "BASIC", "credits": [
-        {"credits": 1500, "price": 90, "original": 180}]},
+        {"credits": 1500, "price": 90, "m": 15, "q": 27}]},
     {"platform": "Tapnow", "tier": "PRO", "credits": [
-        {"credits": 3500,  "price": 315,  "original": 420},
-        {"credits": 6000,  "price": 540,  "original": 720},
-        {"credits": 9500,  "price": 855,  "original": 1140},
-        {"credits": 11500, "price": 1035, "original": 1380},
-        {"credits": 20000, "price": 1800, "original": 2400}]},
+        {"credits": 3500,  "price": 315,  "m": 30,  "q": 84},
+        {"credits": 6000,  "price": 540,  "m": 51,  "q": 144},
+        {"credits": 9500,  "price": 855,  "m": 81,  "q": 228},
+        {"credits": 11500, "price": 1035, "m": 98,  "q": 276},
+        {"credits": 20000, "price": 1800, "m": 170, "q": 480}]},
     {"platform": "Tapnow", "tier": "ULTIMATE", "credits": [
-        {"credits": 36000, "price": 2592, "original": 4320}]},
+        {"credits": 36000, "price": 2592, "m": 306, "q": 756}]},
     {"platform": "Tapnow", "tier": "MAX", "credits": [
-        {"credits": 72000,  "price": 5184, "original": 8640},
-        {"credits": 100000, "price": 7200, "original": 12000}]},
+        {"credits": 72000,  "price": 5184, "m": 612, "q": 1512},
+        {"credits": 100000, "price": 7200, "m": 850, "q": 2100}]},
 ]
 
 # ═══════════ 平台公示兑换率（仅作口径反向校验）═══════════
@@ -147,6 +185,19 @@ OFFICIAL_RATE = {
     "即梦":    {"基础会员": 13.0, "标准会员": 14.0},
     "小云雀":  {"基础会员": 21.9, "标准会员": 23.2, "高级会员": 28.8, "超级会员": 30.0},
 }
+# ── 订阅机制：连续包（自动续费）vs 非连续包（一次性，到期结束）──
+# 这是价格之外的一个独立维度，且带真实风险：
+#   连续包 → 到期自动扣款；续费价通常高于首期价；忘记取消 = 按高价再买一期
+#   非连续包 → 到期自动结束，无自动扣款、无续费价；首期价即全部成本
+# 因此折年规则必须分开：
+#   连续包：年均 = (首期 + 续费 x (期数-1)) / 期数
+#   非连续包：年均 = 首期价（不折算）
+RECURRING_NOTE = ("连续包年/包季/包月到期会自动扣款续费，且续费价通常高于首期价 —— "
+                  "其真实成本须按「首期 + 续费 × (期数−1)」折算，并存在「忘记取消」的实际风险。"
+                  "非连续包（Higgsfield、Neowow）为一次性购买，到期自动结束、无自动扣款、无续费价，"
+                  "首期价即为全部成本。故本表横向比较时按「你打算用多久」分流："
+                  "连续包要看续费后的均价，非连续包只看一口价。")
+
 OFFICIAL_RATE_NOTE = ("部分公示值按调价前的年费计算（Neowow MAX/Pro 尤为明显），"
                       "按现价实算低于公示值。故本表全部结论以「年费 ÷ (月积分 × 12)」"
                       "的实算值为准，公示值仅作口径校验。")
@@ -159,26 +210,39 @@ AD_CLAIM = {
     "小云雀":  {"tier": "超级会员", "perSec": 0.40},
 }
 
+# ── 价格录入铁律（用户 2026-09-21 裁定，优先级最高）──────────────────
+# 只取平台上【显示出来的实付价格】，忽略页面上的全部活动文字：
+#   忽略：划线原价、折扣徽标（限时5折 / 6.4折 / 77折）、买年卡立省、活动倒计时、赠品与赠送月数
+#   理由：显示价格本身已经把活动算进去了；再叠一层活动分析等于重复计算，还引入主观判断。
+#   正面副作用：录入字段从「显示价 + 划线价」减为「只显示价」，出错面减半。
+# 唯一例外：续费价 —— 它是【真实会发生的第二期扣款】，属价格而非宣传，必须记录。
+PRICE_RULE = ("本表全部价格均为平台页面【显示出来的实付价】，已含当期全部活动；"
+              "不引用、不分析任何划线原价、折扣徽标、立省百分比与赠品文字。"
+              "唯一例外是续费价 —— 它是真实会发生的第二期扣款，属价格而非宣传，有公示则记录。")
+
+# ── 时效声明（用户 2026-09-21 要求挂到页面显眼处）────────────────
+LIVE_NOTE = ("本表全部价格锚定各平台官网【当前实时显示价】。该显示价本身已是活动价 / 优惠价 / "
+             "限时价的最终成交价 —— 不再叠加、不再推算、不引用划线原价。"
+             "价格随时可能变动；一经发现变化，我们第一时间更正，并同步更新本页的数据时点。")
+
 # ═══════════ 数据范围 ═══════════
 # 明确「本表结论覆盖到哪里」——否则「最省」容易被误读为全平台最优。
 SCOPE = {
-    "current": "年费（连续包年）档位",
-    "currentShort": "年费档位",
-    "impact": "短周期选项缺少包年折扣，单位成本通常高于年费；"
-              "故本表的「最省」结论【仅在年费口径内成立】，不可直接外推到月付场景。",
-    "promoRule": "各平台页面除「年付折扣」外还常挂「限时活动福利」（如某模型限时折扣、"
-                 "无限用 N 天、赠送积分）。本表统一处理为："
-                 "【已体现在挂牌年价里的折扣（如年付 5 折）计入】；"
-                 "【与统一口径无关的其它模型折扣、时限权益、数额未公示的赠送 一律不计入】。"
-                 "理由：前者是价格，后者不是 —— 时限权益的价值取决于你在那几天用多少，"
-                 "无法折算成单条成本；数额未公示者无法量化。",
+    "current": "年费 / 季付 / 月付 三周期",
+    "currentShort": "年付 · 季付 · 月付",
+    "impact": "三周期的承诺期不同，单价不能混着读：年付最省但锁 12 个月，月付最贵但随时能停。"
+              "另有 11 个档位出现「承诺更久反而更贵」的倒挂（详见「用多久，买哪个周期」一节）。",
+    "promoRule": "各平台页面常挂「限时活动福利」（某模型限时折扣、无限用 N 天、赠送积分等）。"
+                 "本表统一不单独处置 —— 页面显示的实付价已含当期全部活动，"
+                 "再叠一层活动分析等于重复计算，还引入主观判断。唯一例外是续费价，"
+                 "它是有公示的第二期真实扣款，属价格而非宣传。",
     "items": [
         {"label": "年费 / 连续包年", "status": "已覆盖", "done": True,
-         "note": "本表全部档位均属此口径"},
-        {"label": "月度会员", "status": "后续补充", "done": False,
-         "note": "计价单位与折扣结构不同，需单独归一化"},
-        {"label": "季度会员", "status": "后续补充", "done": False,
-         "note": "同上"},
+         "note": "全部 44 个可选积分档"},
+        {"label": "季度会员", "status": "已覆盖", "done": True,
+         "note": "39 档有季付；Higgsfield 平台不提供季付"},
+        {"label": "月度会员", "status": "已覆盖", "done": True,
+         "note": "全部 44 档；Tapnow BASIC 按月付稳态价计（首月促销不计入）"},
         {"label": "按次购买（非会员）", "status": "后续补充", "done": False,
          "note": "用于「订阅 vs 按量」的划算性判断"},
     ],
@@ -203,29 +267,29 @@ CROSS_MIDNIGHT = ("跨零点提交时两家字节系平台的积分归属日不�
 
 # ═══════════ 风险（按用户答复收敛）═══════════
 RISKS = [
-    {"level": "warn", "title": "年费档位均为限时活动价，恢复原价后结论会变",
-     "body": ["用户确认：各平台年费均为限时活动价。按官方划线原价重算，"
-              "Neowow 各档单条成本大幅上升，全场最优解将转移 —— 详见「折扣结构」一节。",
+    {"level": "warn", "title": "年费档位均为限时活动价，活动退坡后结论会变",
+     "body": ["用户确认：各平台年费均为限时活动价。本表记录的是页面显示的实付价，"
+              "已含当期全部活动；活动一旦结束或退坡，页面显示价上升、单条成本随之上升，"
+              "排名可能变化。",
               "libtv 高级版与至尊版、即梦高级四档、小云雀高级六档、"
-              "Neowow Pro 三档与 MAX 两档均为联动定价，活动结束后可能同步调整。",
-              "其中 Tapnow 的年价本身就是「连续包年 50% OFF」的活动价"
-              "（如 PRO 3.5K 档 $35 → $26.25/月），且它是全场折扣力度最大的一家 —— "
-              "活动退坡对其单条成本的影响也最大。本表按折后年价计算，原价见「折扣结构」。"]},
+              "Neowow Pro 三档与 MAX 两档均为联动定价，活动结束后可能同步调整档位结构，"
+              "届时选项数量与积分档位都可能变。",
+              "六家中 Tapnow 的年价折让力度最大，活动退坡对其单条成本的影响也最大。"]},
 ]
 
 # ═══════════ 数据来源 ═══════════
 SOURCES = [
     {"page": "libtv 生成页",      "data": "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s → 1,380 积分"},
-    {"page": "libtv 订阅页",      "data": "五档年费 + 次年续费 + 划线原价；高级版 11.7K/16.3K、至尊版 50.5K/66K 联动"},
+    {"page": "libtv 订阅页",      "data": "五档年费 + 次年续费价；高级版 11.7K/16.3K、至尊版 50.5K/66K 联动"},
     {"page": "Neowow 生成页",     "data": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考 → 7,500 积分"},
-    {"page": "Neowow 订阅页",     "data": "四档年费 + 划线原价；Pro 三档、MAX 两档联动；ULTRA 无联动"},
+    {"page": "Neowow 订阅页",     "data": "四档年费；Pro 三档、MAX 两档联动；ULTRA 无联动"},
     {"page": "即梦生成页",        "data": "即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s → 600 积分"},
     {"page": "即梦订阅页",        "data": "四档年费；高级会员 6.2K–27.7K 四档联动；超级会员单档"},
     {"page": "小云雀生成页",      "data": "Seedance 2.5 · 16:9 · 720P · 30s → 600 积分（用户确认）"},
     {"page": "小云雀 订阅页",      "data": "四档年费；高级会员 6.3K–27.7K 六档联动"},
-    {"page": "Higgsfield 订阅页", "data": "Starter $15 / Plus $39（划线 $49）/ Ultra $99（划线 $129）；Ultra 为 3,000–9,000 分三档滑块"},
+    {"page": "Higgsfield 订阅页", "data": "Starter $15 / Plus $39 / Ultra $99；Ultra 为 3,000–9,000 分三档滑块"},
     {"page": "Higgsfield 生成页", "data": "Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard → 210 积分"},
-    {"page": "Tapnow 订阅页", "data": "USD 计价；连续包年 50% OFF。BASIC $90/年 1,500 分；"
+    {"page": "Tapnow 订阅页", "data": "USD 计价。BASIC $90/年 1,500 分；"
                                        "PRO 五档滑动 $315/540/855/1035/1800（3.5K–20K 分）；"
                                        "ULTIMATE $2592/年 36,000 分；MAX 两档 $5184/7200（72K / 100K 分）"},
     {"page": "Tapnow 生成页", "data": "Seedance 2.5 · 相同参数 → 1,200 积分（用户口径）"},
@@ -270,6 +334,9 @@ COST = {
     "officialRate": OFFICIAL_RATE, "officialRateNote": OFFICIAL_RATE_NOTE,
     "adClaim": AD_CLAIM,
     "scope": SCOPE,
+    "priceRule": PRICE_RULE,
+    "liveNote": LIVE_NOTE,
+    "recurringNote": RECURRING_NOTE,
     "retryPolicy": RETRY_POLICY, "retryNote": RETRY_NOTE,
     "crossMidnightNote": CROSS_MIDNIGHT,
     "risks": RISKS, "sources": SOURCES,
@@ -297,7 +364,24 @@ def main():
         for c in p["credits"]:
             assert set(c) >= {"credits", "price"}, "%s %s 选项缺键" % (p["platform"], p["tier"])
             assert c["price"] is not None and c["credits"] > 0
+            assert "original" not in c, \
+                "%s %s 选项含划线原价，违反 PRICE_RULE" % (p["platform"], p["tier"])
             n_opt += 1
+            # 三周期：月付必填；季付可有可无，但同一平台必须一致
+            assert c.get("m") is not None, \
+                "%s %s %s 档缺月付价 m" % (p["platform"], p["tier"], format(c["credits"], ","))
+            assert ("q" in c) == PLATFORMS[p["platform"]].get("quarterly", True), \
+                "%s %s 的季付键与平台 quarterly 标志不符" % (p["platform"], p["tier"])
+            # 续费价校验：只有连续包才该有；且次年续费不应低于首期
+            if c.get("renewal") is not None:
+                assert PLATFORMS[p["platform"]]["recurring"], \
+                    "%s 是非连续包，不应有续费价" % p["platform"]
+                assert c["renewal"] >= c["price"], \
+                    "%s %s %s 档：次年续费 %s 低于首期 %s，需复核" % (
+                        p["platform"], p["tier"], format(c["credits"], ","),
+                        c["renewal"], c["price"])
+        assert "original" not in p, \
+            "%s %s 含划线原价，违反 PRICE_RULE" % (p["platform"], p["tier"])
     print("\n数据层已建立：%d 平台 / %d 档位 / %d 个可选积分档" % (len(PLATFORMS), len(PLANS), n_opt))
 
 

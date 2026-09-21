@@ -1,6 +1,6 @@
 # robots.txt — 画布平台性价比对比
 # 溯源指纹: HX-CLB-WORK-20260921-A215F0AB
-版本指纹 (Edition): HX-CLB-ED-20260921-22C8184A
+版本指纹 (Edition): HX-CLB-ED-20260921-EAFABDA0
 # 版权所有 (c) 2026 HELIX AI Studio. 保留所有权利。
 #
 # 策略：全站禁止一切抓取。本页为定向分享文档，不需要被搜索收录，
