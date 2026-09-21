@@ -1099,9 +1099,8 @@ home_body = f"""
 """
 
 # ── 成本页 ────────────────────────────────────────────────────────
-SUBNAV = [("overview", "概览"), ("calc", "按产量测算"), ("table", "档位对比"),
-          ("ladder", "达标阶梯"), ("margin", "边际成本"), ("discount", "折扣结构"),
-          ("official", "官方对照"), ("retry", "失败退分"), ("appendix", "原始数据")]
+SUBNAV = [("overview", "结论速览"), ("calc", "我该买哪个"), ("table", "全档位对比"),
+          ("more", "更多数据")]
 
 subnav_html = ('<div class="subnav"><div class="inner">' +
                "".join(f'<a href="#{k}">{v}</a>' for k, v in SUBNAV) + "</div></div>")
@@ -1249,16 +1248,15 @@ cost_body = f"""
     <div class="pbest">最优：{tname(p["best"])}<br>{p["best"]["mCap"]:.2f} 条/月 · {p["best"]["perSec"]:.3f} 元/秒</div>
   </div>''' for p in PLAT_SUM)}
 </div>
-<div class="sub" style="margin-top:12px">
+<div class="sub" style="margin-top:10px">
   共 <b style="color:#C9CDD2">{len(PLAT_SUM)} 个平台 · {len({r["tier"] for r in ROWS})} 个会员档 · {len(ROWS)} 个可选积分档</b>
-  ——「可选积分档」指同一会员档下平台提供的不同积分/价格组合（联动定价），各档单价不同，故逐档列出。
+  （「可选积分档」＝同一会员档下不同的积分/价格组合）
 </div>
 
-<div class="note warn" style="margin-top:28px">
-  <b>数据范围说明：</b>本表目前仅覆盖各平台的<b>{SCOPE["current"]}</b>。
-  平台上另有<b>月度会员、季度会员</b>等更短周期选项，因计价单位与折扣结构不同，
-  后续将单独补充并纳入同口径对比。<br><br>
-  <b>{SCOPE["impact"]}</b>
+<div class="sub" style="margin-top:16px;padding:12px 15px;border-radius:12px;
+  background:rgba(255,201,60,.05);border:1px solid rgba(255,201,60,.2)">
+  <b style="color:#FFC93C">数据范围：</b>目前仅覆盖<b style="color:#C9CDD2">{SCOPE["current"]}</b>，
+  月度／季度会员后续补充。<b style="color:#C9CDD2">故「最省」结论仅在年费口径内成立。</b>
 </div>
 
 <section id="overview" class="reveal" style="margin-top:42px">
@@ -1328,32 +1326,41 @@ cost_body = f"""
           ("单条成本<br><span class=hm>用满产能 / 该产量</span>", "v"), ("元/秒", None)], main_rows, "tw scroll-y tw-main", "main")}
 </section>
 
-<section id="ladder" class="reveal">
-  {sec_head("03", "达标总支出阶梯", "「单条成本最省」≠「花钱最省」。按目标月产量反查覆盖该产能的最低年费档位（单一订阅）。")}
+<section id="more" class="reveal">
+  <div class="sechead">
+    <h2><span class="ey">04</span>更多对比数据</h2>
+    <div class="sd">以下为支撑上面结论的完整数据：达标阶梯、边际成本、折扣结构、官方公示对照、失败退分、方法论与原始清单。按需展开。</div>
+  </div>
+  <details>
+    <summary>展开全部对比数据（6 组表格 + 方法论）<span class="chev">›</span></summary>
+    <div class="dbody" style="padding-top:6px">
+
+<div id="ladder">
+  {sec_head("", "达标总支出阶梯", "「单条成本最省」≠「花钱最省」。按目标月产量反查覆盖该产能的最低年费档位（单一订阅）。")}
   {table([("目标月产量", None), ("最省方案", None), ("年支出", None), ("实际产能", None),
           ("单条成本", None), ("相对最优", None)], lad_rows, "tw")}
-</section>
+</div>
 
-<section id="margin" class="reveal">
-  {sec_head("04", "边际成本：升档值不值", f"从下一档升到上一档，每多买一条产能实际多花多少钱。标尺为全场最优 ¥{f2(BEST)}/条。")}
+<div id="margin">
+  {sec_head("", "边际成本：升档值不值", f"从下一档升到上一档，每多买一条产能实际多花多少钱。标尺为全场最优 ¥{f2(BEST)}/条。")}
   {table([("平台", None), ("升档路径", None), ("Δ年费", None), ("Δ年产", None),
           ("边际单条", None), ("达档均值", None), ("判定", None)], marg_rows)}
-</section>
+</div>
 
-<section id="discount" class="reveal">
-  {sec_head("05", "折扣结构：优势是真是假", "用官方划线原价重算。原价下单价收敛成水平线 → 说明优势全部来自折扣力度，活动一结束就消失。")}
+<div id="discount">
+  {sec_head("", "折扣结构：优势是真是假", "用官方划线原价重算。原价下单价收敛成水平线 → 说明优势全部来自折扣力度，活动一结束就消失。")}
   {table([("平台", None), ("折扣区间", None), ("原价下单条", None),
           ("原价单价极差", None), ("折扣力度极差", None)], disc_rows)}
-</section>
+</div>
 
-<section id="official" class="reveal">
-  {sec_head("06", "海报宣传价 vs 实际到手价", "各平台「低至 X 元/秒」多按非全能参考档位计算，与统一口径不可混用。")}
+<div id="official">
+  {sec_head("", "海报宣传价 vs 实际到手价", "各平台「低至 X 元/秒」多按非全能参考档位计算，与统一口径不可混用。")}
   {table([("平台", None), ("顶级档位", None), ("海报低至", None),
           ("全能参考实算", None), ("倍差", None)], claim_rows)}
-</section>
+</div>
 
-<section id="retry" class="reveal">
-  {sec_head("07", "失败重试成本", "五家平台失败均<b>不消耗积分</b> —— 本表全部单价按「成功出片才扣分」计算，与实际计费一致，无需再折算失败率。")}
+<div id="retry">
+  {sec_head("", "失败重试成本", "五家平台失败均<b>不消耗积分</b> —— 本表全部单价按「成功出片才扣分」计算，与实际计费一致，无需再折算失败率。")}
   {table([("平台", None), ("失败是否扣分", None), ("依据", None)], retry_rows, "tw")}
   <div class="note good" style="margin-top:14px">
     <b>为什么这一项重要：</b>若某平台失败不退分且失败率 20%，其实际单条成本需上浮 25%，足以反转全部排名。
@@ -1363,10 +1370,10 @@ cost_body = f"""
     <summary>跨零点提交的积分归属差异<span class="chev">›</span></summary>
     <div class="dbody">{COST["crossMidnightNote"]}</div>
   </details>
-</section>
+</div>
 
-<section id="appendix" class="reveal">
-  {sec_head("08", "方法论与原始数据", "本节列出全部原始输入与计算链条，便于复核与复用。")}
+<div id="appendix">
+  {sec_head("", "方法论与原始数据", "本节列出全部原始输入与计算链条，便于复核与复用。")}
   <details>
     <summary>计算口径与归一化链条<span class="chev">›</span></summary>
     <div class="dbody">
@@ -1417,6 +1424,10 @@ cost_body = f"""
   <details>
     <summary>数据来源（{len(COST["sources"])} 项）<span class="chev">›</span></summary>
     <div class="dbody">{table([("页面", None), ("提取到的数据", None)], src_rows, "tw")}</div>
+  </details>
+</div>
+
+    </div>
   </details>
 </section>
 
