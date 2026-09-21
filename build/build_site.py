@@ -37,6 +37,19 @@ SITE = load("site.json")
 PLATFORMS = load("platforms.json")
 COST = load("cost-seedance25.json")
 VLM = load("leaderboard-vlm.json")
+GLOSSARY = load("glossary.json")
+GLOS_MAP = {x["k"]: x for x in GLOSSARY["terms"]}
+
+
+def T(key, label=None):
+    """把一个术语包成可点开解释的 span。
+
+    ⚠ 只包术语本身，不改用词 —— 本站定位是专业测评，术语照用，
+      缺的是「读者从哪知道它什么意思」这个出口。
+    label 用于页面上的用词与词典标题不一致时（如页面写「会员周期」、词典条目叫「承诺期」）。
+    """
+    x = GLOS_MAP[key]
+    return f'<span class="tm" data-t="{key}">{label or x["t"]}</span>'
 
 BRAND, BRAND_CN = SITE["brand"], SITE["brandCn"]
 STUDIO, OWNER, YEAR = SITE["studio"], SITE["owner"], SITE["year"]
@@ -610,7 +623,40 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
 .tw{min-width:0}.vhead h1{font-family:__DISP__;font-size:clamp(20px,2.4vw,29px);font-weight:700;
   letter-spacing:-.03em;line-height:1.22;color:#fff;margin:0}.vhead h1 em{font-style:normal;color:#D1FE17}.vmeta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:11px;font-size:11.5px;
   line-height:1.75;color:#7A8088}
-.vsub{font-size:12.5px;line-height:1.75;color:#8A9098;margin-top:9px;max-width:720px}.vmeta b{color:#C9CDD2;font-weight:600}/* KPI 条三套（年/季/月），同一时刻只显示当前周期那套 */
+.vsub{font-size:12.5px;line-height:1.75;color:#8A9098;margin-top:9px;max-width:720px}
+
+/* ── 术语提示 ──
+   术语用词一字不改，只给一个出口。虚线提示「这里可以点」。
+   桌面：悬停出浮层（data-s 由 JS 从词典注入，避免 HTML 里重复塞长文案）
+   手机：点击就地展开（没有 hover，必须单独做） */
+.tm{border-bottom:1px dashed rgba(255,255,255,.34);cursor:help;position:relative;
+  transition:color .16s,border-color .16s}
+.tm:hover{color:#D1FE17;border-bottom-color:rgba(209,254,23,.7)}
+/* ⚠ 悬浮提示用 position:fixed 的独立浮层，不用 ::after。
+   绝对定位的提示框即使 visibility:hidden 也会撑大可滚动区域 ——
+   实测窄屏下把 body.scrollWidth 顶到 467（视口 390）。
+   fixed 元素不参与滚动区域计算，绕开这个问题。 */
+.tip{position:fixed;z-index:60;max-width:min(300px,74vw);pointer-events:none;
+  padding:9px 11px;border-radius:10px;font-size:11.5px;line-height:1.7;
+  color:#C9CDD2;background:#14161A;border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 10px 28px rgba(0,0,0,.6);opacity:0;transition:opacity .16s}
+.tip.on{opacity:1}
+/* 手机端展开块：整行铺满，不跟着文字换行跑 */
+/* ⚠ 硬约束到视口宽度：展开块可能被插在表格单元格等很宽的容器里，
+   只用 max-width:100% 会跟着父容器一起超出屏幕（实测 467px / 视口 390）。 */
+.tmx{display:none;box-sizing:border-box;max-width:calc(100vw - 30px);
+  overflow-wrap:anywhere;margin:10px 0 4px;padding:12px 13px;border-radius:12px;
+  background:rgba(209,254,23,.05);border:1px solid rgba(209,254,23,.22);
+  font-size:12px;line-height:1.8;color:#B9BEC4;white-space:normal}
+.tmx.on{display:block}
+.tmx b{color:#D1FE17;font-weight:600}
+.glist{display:flex;flex-direction:column;gap:0;border-top:1px solid rgba(255,255,255,.08)}
+.gterm{padding:20px 2px;border-bottom:1px solid rgba(255,255,255,.08);scroll-margin-top:76px}
+.gterm:target{background:rgba(209,254,23,.05)}
+.gt b{font-size:15px;color:#fff;font-weight:600}
+.gs{font-size:13px;color:#C9CDD2;line-height:1.75;margin-top:6px}
+.gl{font-size:12.5px;color:#8A9098;line-height:1.85;margin-top:9px;max-width:860px}
+.tmx a{color:#D1FE17}.vmeta b{color:#C9CDD2;font-weight:600}/* KPI 条三套（年/季/月），同一时刻只显示当前周期那套 */
 .kbar{display:none;gap:10px;grid-template-columns:repeat(auto-fit,minmax(148px,1fr))}
 .kbar.on{display:grid}.kb{padding:12px 14px;border-radius:13px;background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.085)}.kb.hi{border-color:rgba(209,254,23,.3);background:rgba(209,254,23,.055)}.kb s{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
@@ -978,6 +1024,50 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   });
 });
+
+/* ══════════ 全站通用：术语提示 ══════════
+   词典只注入一次，提示内容由 JS 填进 data-s（避免每个术语在 HTML 里重复一遍长文案）。 */
+var GLOS = __GLOS__;
+(function(){
+  var els = document.querySelectorAll('.tm');
+  if(!els.length) return;
+  var tip = document.createElement('div');
+  tip.className = 'tip';
+  document.body.appendChild(tip);
+  Array.prototype.forEach.call(els, function(el){
+    var x = GLOS[el.dataset.t];
+    if(!x) return;
+    /* 桌面：悬停出 fixed 浮层。位置按术语的视口坐标算，靠近右／下边缘时自动翻转。 */
+    el.addEventListener('mouseenter', function(){
+      var r = el.getBoundingClientRect();
+      tip.textContent = x.s;
+      tip.classList.add('on');
+      var tw = tip.offsetWidth, th = tip.offsetHeight, vw = window.innerWidth, vh = window.innerHeight;
+      var left = Math.min(Math.max(8, r.left), vw - tw - 8);
+      var top = r.bottom + 7;
+      if(top + th > vh - 8) top = r.top - th - 7;
+      tip.style.left = left + 'px';
+      tip.style.top = Math.max(8, top) + 'px';
+    });
+    el.addEventListener('mouseleave', function(){ tip.classList.remove('on'); });
+    el.addEventListener('click', function(e){
+      e.preventDefault();
+      /* 手机端点开——就地展开全文，不跳页。同时只保留一个展开块，避免页面被撑乱 */
+      var box = el.nextElementSibling;
+      var mine = box && box.classList.contains('tmx');
+      Array.prototype.forEach.call(document.querySelectorAll('.tmx.on'), function(b){
+        b.classList.remove('on');
+        if(b.previousElementSibling) b.previousElementSibling.classList.remove('on');
+      });
+      if(mine){ return; }
+      var d = document.createElement('div');
+      d.className = 'tmx on';
+      d.innerHTML = '<b>' + x.t + '</b>　' + x.l
+        + '<br><a href="glossary.html#' + el.dataset.t + '">术语表里还有 ' + Object.keys(GLOS).length + ' 条 ›</a>';
+      el.parentNode.insertBefore(d, el.nextSibling);
+    });
+  });
+})();
 
 /* ── 窄屏汉堡菜单：点开 / 点外收起 ──
    ⚠ 必须留在【基础 JS】里，且全站只能有一份。
@@ -1720,9 +1810,10 @@ for _k, _lbl, _mo, _f in PERIODS:
     _tid = "main" if _k == "y" else "main-" + _k
     PT_TABLES += (
         f'<div class="pt{_on}" data-pt="{_k}">'
-        + table([("#", "v"), ("平台", None), ("档位", None), (PT_HEAD[_k][0], "p"),
-                 ("每月可生成<br><span class=hm>该周期积分 ÷ 单条消耗</span>", "v"),
-                 ("单条成本<br><span class=hm>用满产能 / 该产量</span>", "v"), ("元/秒", None)],
+        + table([("#", "v"), ("平台", None), (T("jifenDang", "档位"), None), (PT_HEAD[_k][0], "p"),
+                 (T("yueChanNeng") + "<br><span class=hm>该周期积分 ÷ 单条消耗</span>", "v"),
+                 (T("danTiaoChengBen") + "<br><span class=hm>用满产能 / 该产量</span>", "v"),
+                 (T("yuanMiao"), None)],
                 MAIN_TB[_k], "tw scroll-y tw-main", _tid)
         + "</div>\n")
 
@@ -1933,8 +2024,13 @@ if _init_c:
 
 
 
+GLOS_JSON = json.dumps({x["k"]: {"t": x["t"], "s": x["s"], "l": x["l"]}
+                        for x in GLOSSARY["terms"]}, ensure_ascii=False)
+
+
 def page(title, desc, nav_html, body, cost_js=False):
     js = JS.replace("__COST__", COST_JS) if cost_js else JS.replace("__COST__", "")
+    js = js.replace("__GLOS__", GLOS_JSON)
     if cost_js:
         js = js.replace("__PLANS__", json.dumps(
             [{"plat": r["plat"], "tier": r["tier"], "label": r["label"], "color": r["color"],
@@ -2125,7 +2221,7 @@ cycles_body = f"""
     </div>
   </div>
   <div class="sgroup" id="sgPeriod">
-    <div class="sgt">会员周期<span class="sgchip" id="cycChip">44 档</span></div>
+    <div class="sgt">{T("chengnuoQi", "会员周期")}<span class="sgchip" id="cycChip">44 档</span></div>
     <div class="segv segk" id="cycSeg" role="tablist" aria-label="会员周期">
       <button type="button" class="on" data-k="y" role="tab">年付<s>锁 12 个月</s></button>
       <button type="button" data-k="q" role="tab">季付<s>锁 3 个月</s></button>
@@ -2152,7 +2248,7 @@ cycles_body = f"""
     <div class="vmeta">
       <span>数据时点 <b>{UPDATED}</b></span>
       <span><b>{len(PLAT_SUM)}</b> 平台 · <b>{NTIER}</b> 会员档 · <b>{len(ROWS)}</b> 积分档</span>
-      <span>口径 <b>{SCOPE["currentShort"]}</b></span>
+      <span>{T("koujing", "口径")} <b>{SCOPE["currentShort"]}</b></span>
       <span>当前 <b id="cycNow">单条成本 · 年付 · 最优在前</b></span>
     </div>
   </div>
@@ -2278,7 +2374,7 @@ cost_body = f"""
     </div>
   </div>
   <div class="sgroup">
-    <div class="sgt">会员周期<span class="sgchip" id="segchipA">{len(ROWS)} 档</span></div>
+    <div class="sgt">{T("chengnuoQi", "会员周期")}<span class="sgchip" id="segchipA">{len(ROWS)} 档</span></div>
     <div class="segv segk" id="segA" role="tablist" aria-label="会员周期">
       <button type="button" class="on" data-k="y" role="tab">年付<s>锁 12 个月</s></button>
       <button type="button" data-k="q" role="tab">季付<s>锁 3 个月</s></button>
@@ -2317,7 +2413,7 @@ cost_body = f"""
       <span><svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1" y="2.2" width="10" height="9" rx="1.6" stroke="currentColor" stroke-width="1.1"/><path d="M1 5h10M4 1v2.4M8 1v2.4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>数据时点 <b>{UPDATED}</b></span>
       <span><svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.1"/><path d="M3.4 8.4V6.2M6 8.4V3.8M8.6 8.4V5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg><b>{len(PLAT_SUM)}</b> 平台 · <b>{NTIER}</b> 会员档 · <b>{len(ROWS)}</b> 积分档</span>
       <span><svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M1.4 3.4h2.4l1-1.4h5.8v7.6H1.4z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>汇率 <b>1 USD = {RATE}</b></span>
-      <span><svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="4.8" stroke="currentColor" stroke-width="1.1"/><path d="M6 3.4v2.8l1.8 1.2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>口径 <b>{SCOPE["currentShort"]}</b></span>
+      <span><svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="4.8" stroke="currentColor" stroke-width="1.1"/><path d="M6 3.4v2.8l1.8 1.2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>{T("koujing", "口径")} <b>{SCOPE["currentShort"]}</b></span>
     </div>
   </div>
 
@@ -2376,7 +2472,7 @@ cost_body = f"""
       </div>
     </details>
   </div>
-    <div class="vptitle">全部档位 · 按「该周期支出」排名<span>名次＝<b style="color:#D1FE17">该周期总支出</b>由低到高（你实际要掏的钱），不是单条成本 —— 所以单价更低但档位更贵的会排在后面。<br>条形越长＝越省；上行＝用满产能的固有单价，下行＝按你当前产量的实际每条 · <b id="coverN" style="color:#D1FE17">—</b><br><b style="color:#D1FE17">口径＝单账号单平台</b>：1 个平台 + 1 个账号能做出你设定的月产量才计入排名；做不到的整行置灰。需要多账号时请用下方组合订阅。想看<b>按单价</b>排名请到「三周期全清单 · 动态排名」。</span></div>
+    <div class="vptitle">全部档位 · 按「该周期支出」排名<span>名次＝<b style="color:#D1FE17">该周期总支出</b>由低到高（你实际要掏的钱），不是单条成本 —— 所以单价更低但档位更贵的会排在后面。<br>条形越长＝越省；上行＝用满产能的固有单价，下行＝按你当前产量的实际每条 · <b id="coverN" style="color:#D1FE17">—</b><br><b style="color:#D1FE17">{T("koujing", "口径")}＝{T("danZhangHao", "单账号单平台")}</b>：1 个平台 + 1 个账号能做出你设定的月产量才计入排名；做不到的整行置灰。需要多账号时请用下方组合订阅。想看<b>按单价</b>排名请到「三周期全清单 · 动态排名」。</span></div>
   {PT_TABLES}
 </div>
 </main>
@@ -2471,6 +2567,31 @@ home_body = f"""
 """
 
 
+# ── 术语表页 ──────────────────────────────────────────────────────
+GLOS_ROW = "".join(
+    f'<div class="gterm" id="{x["k"]}">'
+    f'<div class="gt"><b>{x["t"]}</b></div>'
+    f'<div class="gs">{x["s"]}</div>'
+    f'<div class="gl">{x["l"]}</div></div>'
+    for x in GLOSSARY["terms"])
+
+glossary_body = f"""
+<div class="wrap">
+<section class="reveal" style="margin-top:34px">
+  <div class="sechead">
+    <h2><span class="ey">术语</span>术语表</h2>
+    <div class="sd">{GLOSSARY["intro"]}</div>
+  </div>
+  <div class="glist">{GLOS_ROW}</div>
+  <div class="sub" style="margin-top:22px">
+    点击页面中带虚线的术语，可就地展开该词的简要解释；每条都锚定到本页对应条目。
+  </div>
+</section>
+</div>
+{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　术语 {len(GLOSSARY["terms"])} 条')}
+"""
+
+
 # ── 排行榜页 ──────────────────────────────────────────────────────
 DIMS = VLM["methodology"]["dimensions"]
 dim_rows = "".join(
@@ -2527,6 +2648,8 @@ PAGES = {
                       nav("cost"), cost_body, cost_js=True),
     "cycles.html": page("三周期全清单", f"{len(ROWS)} 个可选积分档 × 年付/季付/月付三周期，按指标动态排名，附全部原始数据与计算方法。",
                         nav("cycles"), cycles_body, cost_js=True),
+    "glossary.html": page("术语表", f"{len(GLOSSARY['terms'])} 条口径与指标定义：口径、单条成本、承诺期、倒挂、组合订阅等。",
+                          nav("glossary"), glossary_body),
     "leaderboard-vlm.html": page(VLM["title"], VLM["intro"], nav("leaderboard-vlm"), lb_body),
 }
 
@@ -2669,7 +2792,7 @@ def selfcheck():
     for _m in re.findall(r'class="([^"]*)"', _all):
         _used_cls.update(_m.split())
     # 运行时由 JS 或浏览器加上的类，静态 HTML 里必然找不到
-    _RUNTIME_CLS = {"js", "in", "on", "top", "active", "pp", "pline", "combo-note"}
+    _RUNTIME_CLS = {"js", "in", "on", "top", "active", "pp", "pline", "combo-note", "tmx", "tip"}
     for cls in sorted(set(re.findall(r"(?<![\w./-])\.([A-Za-z][\w-]*)", css_block))):
         if cls not in _used_cls and cls not in _RUNTIME_CLS:
             errs.append(f"样式表里的 .{cls} 未在任何页面上使用")

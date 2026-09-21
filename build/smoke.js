@@ -233,6 +233,39 @@ async function run(browser) {
     await p.close();
   }
 
+  /* ══════════ 术语引导层 ══════════ */
+  log('\n── 术语引导（成本页 / 术语表页）──');
+  {
+    const p2 = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+    const e3 = []; p2.on('pageerror', e => e3.push(e.message));
+    await p2.goto(URL, { waitUntil: 'load' });
+    await p2.waitForTimeout(600);
+    const g = await p2.evaluate(() => {
+      const t = [...document.querySelectorAll('.tm')];
+      const e = t.find(x => x.offsetParent !== null);
+      let hover = false;
+      if (e) { e.dispatchEvent(new MouseEvent('mouseenter')); hover = !!document.querySelector('.tip.on'); e.dispatchEvent(new MouseEvent('mouseleave')); }
+      return { n: t.length, hover, nav: [...document.querySelectorAll('.nav .menu a')].some(a2 => a2.textContent.includes('术语表')) };
+    });
+    check('术语已标记且悬停出解释', g.n >= 5 && g.hover === true, `${g.n} 处`);
+    check('NAV 含术语表入口', g.nav === true);
+
+    const p3 = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+    const e4 = []; p3.on('pageerror', e => e4.push(e.message));
+    await p3.goto(URL.replace('cost.html', 'glossary.html'), { waitUntil: 'load' });
+    await p3.waitForTimeout(500);
+    const gl = await p3.evaluate(() => ({
+      n: document.querySelectorAll('.gterm').length,
+      minLen: Math.min(...[...document.querySelectorAll('.gterm .gl')].map(e => e.textContent.length)),
+      anchorOK: [...document.querySelectorAll('.gterm')].every(e => e.id),
+    }));
+    check('术语表条目齐全且都有详解', gl.n >= 15 && gl.minLen > 60, `${gl.n} 条 · 最短 ${gl.minLen} 字`);
+    check('每条术语都有锚点（可从页面深链）', gl.anchorOK === true);
+    check('术语表页无 JS 报错', e3.length === 0 && e4.length === 0);
+    if (SHOTS) await p3.screenshot({ path: path.join(OUT, 'smoke-glossary.png') });
+    await p2.close(); await p3.close();
+  }
+
   /* ══════════ 汉堡菜单：四页必须都能用 ══════════ */
   log('\n── 汉堡菜单（四页）──');
   for (const pg of ['index.html', 'cost.html', 'cycles.html', 'leaderboard-vlm.html']) {
@@ -246,11 +279,12 @@ async function run(browser) {
       open: document.querySelector('.nav').classList.contains('open'),
       drop: getComputedStyle(document.getElementById('nDrop')).display,
       items: document.querySelectorAll('#nDrop a').length,
+      total: document.querySelectorAll('.nav .menu a').length,
     }));
     await q.mouse.click(195, 790); await q.waitForTimeout(280);
     const shut = await q.evaluate(() => document.querySelector('.nav').classList.contains('open'));
     check(`${pg} 汉堡可开可合`,
-      st.open === true && st.drop !== 'none' && st.items === 4 && shut === false && e2.length === 0,
+      st.open === true && st.drop !== 'none' && st.items >= 4 && shut === false && e2.length === 0,
       `open=${st.open} drop=${st.drop} 项=${st.items} 收起=${!shut}`);
     await q.close();
   }
@@ -447,8 +481,8 @@ async function run(browser) {
       // 展开后必须在视口内 —— 只 toggle 类名却飘到屏外也算不可用
       top: Math.round(document.getElementById('nDrop').getBoundingClientRect().top),
     }));
-    check(`${f}：点汉堡可展开（4 项且在视口内）`,
-      o.open === true && o.drop === 'block' && o.aria === 'true' && o.items === 4 && o.top < 844,
+    check(`${f}：点汉堡可展开（导航项齐全且在视口内）`,
+      o.open === true && o.drop === 'block' && o.aria === 'true' && o.items >= 4 && o.top < 844,
       `open=${o.open} drop=${o.drop} aria=${o.aria} 项=${o.items} top=${o.top}`);
 
     await p.evaluate(() => document.documentElement.dispatchEvent(new MouseEvent('click', { bubbles: true })));

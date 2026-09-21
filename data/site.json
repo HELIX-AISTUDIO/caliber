@@ -24,6 +24,11 @@
       "href": "cycles.html"
     },
     {
+      "key": "glossary",
+      "label": "术语表",
+      "href": "glossary.html"
+    },
+    {
       "key": "leaderboard-vlm",
       "label": "视觉理解模型排行榜",
       "href": "leaderboard-vlm.html"
