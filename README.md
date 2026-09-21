@@ -106,7 +106,7 @@
 
 ## 版权
 
-版权所有 © 2026 HELIX AI 工作室. **保留所有权利。**
+版权所有 © 2026 HELIX AI Studio. **保留所有权利。**
 
 溯源指纹：`HX-CLB-20260921-A215F0AB`
 
@@ -192,4 +192,4 @@ python build/build_data.py
 
 ---
 
-<sub>溯源指纹 HX-CLB-20260921-A215F0AB · 版权所有 (c) 2026 HELIX AI 工作室</sub>
+<sub>溯源指纹 HX-CLB-20260921-A215F0AB · 版权所有 (c) 2026 HELIX AI Studio</sub>
