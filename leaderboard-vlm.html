@@ -316,14 +316,14 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
    上一版把侧栏做成「吸顶横向滚动条」，实测失败：吸顶块挡住内容，
    月产量与平台筛选被挤出视野、用户根本找不到。
    移动端的正确形态是「底部条 + 弹层」：不占首屏、信息一个不少、可发现。 */
-.mobar,.scrim,.nburger,.ndrop{display:none}
+.mobar,.scrim,.nburger,.ndrop,.sheet-hd{display:none}
 @media (max-width:1020px){
   /* ⚠ 必须显式 stretch：桌面端 .app 是 flex-start，窄屏转纵向后
      align-items:flex-start 会让交叉轴（横向）按内容宽度定尺寸，
      主区被里面的 760px 表格撑到 760px → 整页横向溢出。 */
   .app{flex-direction:column;align-items:stretch;gap:15px;padding:16px 15px 0}
   .side{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:60;width:auto;
-    max-height:80vh;overflow-y:auto;flex-direction:column;flex-wrap:nowrap;gap:17px;
+    max-height:74vh;overflow-y:auto;flex-direction:column;flex-wrap:nowrap;gap:17px;
     padding:18px 18px calc(20px + env(safe-area-inset-bottom,0px));
     border-radius:20px 20px 0 0;background:#0A0B0D;
     border:1px solid rgba(255,255,255,.12);border-bottom:0;
@@ -331,6 +331,19 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
     transform:translateY(103%);visibility:hidden;
     transition:transform .3s cubic-bezier(.22,1,.36,1),visibility .3s}
   .side.open{transform:none;visibility:visible}
+  /* 抽屉头：把手给「可下滑」的暗示，✕ 给明确的关闭出口 */
+  .sheet-hd{display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:3;background:#0A0B0D;
+    padding:16px 2px 12px;border-bottom:1px solid rgba(255,255,255,.09)}
+  .sheet-hd .grab{position:absolute;left:50%;top:7px;transform:translateX(-50%);
+    width:38px;height:4px;border-radius:2px;background:rgba(255,255,255,.26)}
+  .sheet-hd b{font-size:14px;color:#E4E7EA}
+  .sheet-x{-webkit-appearance:none;appearance:none;cursor:pointer;
+    width:34px;height:34px;border-radius:10px;font-size:14px;line-height:1;
+    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);
+    color:#C9CDD2;font-family:inherit;
+    display:flex;align-items:center;justify-content:center}
+  .sheet-x:active{background:rgba(255,255,255,.12)}
   .sgroup{flex:1 0 auto}
   .segv{flex-direction:row;gap:3px}
   .segv button{flex:1;text-align:center;padding:9px 5px;font-size:12px}

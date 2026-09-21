@@ -372,6 +372,20 @@ async function run(browser) {
       scrim: document.getElementById('scrim').classList.contains('open'),
     }));
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
+    // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，
+    // 没有 ✕ 的话用户找不到任何方式退出（用户实测被卡住）
+    const sx = await p.evaluate(() => {
+      const x = document.getElementById('sheetX');
+      if (!x) return { ok: false };
+      const r = x.getBoundingClientRect();
+      const side = document.querySelector('.side').getBoundingClientRect();
+      return { ok: true, visible: r.top >= 0 && r.bottom <= innerHeight,
+               size: Math.round(r.width), sheetTop: Math.round(side.top), vh: innerHeight };
+    });
+    check('抽屉有关闭按钮且可见', sx.ok && sx.visible && sx.size >= 30,
+      `✕ ${sx.size}px · 抽屉顶 ${sx.sheetTop}/${sx.vh}`);
+    check('抽屉不占满整屏（留下可点的遮罩）', sx.sheetTop > sx.vh * 0.15,
+      `抽屉顶 ${sx.sheetTop} / 视口 ${sx.vh}`);
     await p.mouse.click(215, 60);
     await p.waitForTimeout(400);
     const sh2 = await p.evaluate(() => document.querySelector('.side').classList.contains('open'));
