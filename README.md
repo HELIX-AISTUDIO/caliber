@@ -38,6 +38,30 @@
 
 ---
 
+## 线上地址
+
+**https://seedance-cost-benchmark.pages.dev**
+
+托管于 Cloudflare Pages（Direct Upload）。2026-09-21 实测通过：
+
+| 校验项 | 结果 |
+|---|---|
+| DNS | 172.66.44.147（Cloudflare 真实 IP） |
+| 微信内置浏览器 UA | **HTTP 200** ✅ |
+| Chrome UA | HTTP 200 ✅ |
+| `X-Frame-Options` | `DENY` |
+| `X-Robots-Tag` | `noindex, nofollow, noarchive, nosnippet, noimageindex, noai, noimageai` |
+| `Content-Security-Policy` | `default-src 'none'` 起手，仅放行内联 style/script |
+| `Referrer-Policy` / `X-Content-Type-Options` / `Permissions-Policy` | 均已下发 |
+
+> `_headers` 在本托管上**由响应头实际下发**（非 `<meta>` 层面），因此 `frame-ancestors` 级别的防护也生效。
+
+### 重新部署
+
+改动 `index.html` 后，把 `deploy/` 目录（5 个文件）重新拖到该项目的 Deployments 页即可，链接不变。
+
+---
+
 ## 部署要求（重要：微信内能否直开）
 
 **本页若要发给别人在微信里点开，托管选择是决定性的。** 2026-09-21 实测各托管对「微信内置浏览器 UA」的响应：
