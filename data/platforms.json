@@ -1,52 +1,60 @@
 {
-  "libtv": {
-    "name": "libtv",
-    "color": "#9CE6F3",
-    "currency": "CNY",
-    "region": "cn",
-    "recurring": true,
-    "tierLabel": "标准/进阶/高级/豪华/至尊"
-  },
-  "Neowow": {
-    "name": "Neowow",
-    "color": "#00C65A",
-    "currency": "CNY",
-    "region": "cn",
-    "recurring": false,
-    "tierLabel": "PLUS/Pro/MAX/ULTRA"
-  },
-  "即梦": {
-    "name": "即梦",
-    "color": "#3280FF",
-    "currency": "CNY",
-    "region": "cn",
-    "recurring": true,
-    "tierLabel": "基础/标准/高级/超级"
-  },
-  "小云雀": {
-    "name": "小云雀",
-    "color": "#FABC00",
-    "currency": "CNY",
-    "region": "cn",
-    "recurring": true,
-    "tierLabel": "基础/标准/高级/超级"
-  },
-  "Higgsfield": {
-    "name": "Higgsfield",
-    "color": "#ED1572",
-    "currency": "USD",
-    "region": "global",
-    "excludeTax": true,
-    "recurring": false,
-    "quarterly": false,
-    "tierLabel": "Starter/Plus/Ultra"
-  },
-  "Tapnow": {
-    "name": "Tapnow",
-    "color": "#A78BFA",
-    "currency": "USD",
-    "region": "global",
-    "recurring": true,
-    "tierLabel": "BASIC/PRO/ULTIMATE/MAX"
-  }
+ "libtv": {
+  "name": "libtv",
+  "color": "#9CE6F3",
+  "currency": "CNY",
+  "region": "cn",
+  "recurring": true,
+  "tierLabel": "标准/进阶/高级/豪华/至尊"
+ },
+ "Neowow": {
+  "name": "Neowow",
+  "color": "#00C65A",
+  "currency": "CNY",
+  "region": "cn",
+  "recurring": false,
+  "tierLabel": "PLUS/Pro/MAX/ULTRA"
+ },
+ "即梦": {
+  "name": "即梦",
+  "color": "#3280FF",
+  "currency": "CNY",
+  "region": "cn",
+  "recurring": true,
+  "tierLabel": "基础/标准/高级/超级"
+ },
+ "小云雀": {
+  "name": "小云雀",
+  "color": "#FABC00",
+  "currency": "CNY",
+  "region": "cn",
+  "recurring": true,
+  "tierLabel": "基础/标准/高级/超级"
+ },
+ "Higgsfield": {
+  "name": "Higgsfield",
+  "color": "#ED1572",
+  "currency": "USD",
+  "region": "global",
+  "excludeTax": true,
+  "recurring": false,
+  "quarterly": false,
+  "tierLabel": "Starter/Plus/Ultra"
+ },
+ "Tapnow": {
+  "name": "Tapnow",
+  "color": "#A78BFA",
+  "currency": "USD",
+  "region": "global",
+  "recurring": true,
+  "tierLabel": "BASIC/PRO/ULTIMATE/MAX"
+ },
+ "Seko": {
+  "name": "Seko",
+  "color": "#14D9C4",
+  "currency": "CNY",
+  "region": "cn",
+  "recurring": false,
+  "tierLabel": "标准/高级/至尊"
+ }
 }

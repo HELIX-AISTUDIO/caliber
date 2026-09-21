@@ -4,6 +4,11 @@ import io
 import json
 import os
 
+# 期望的平台数与档位数从数据本身推导 —— 写死过一次（6/44），加平台就全线报错
+_DAT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
+_EXP_PLAT = len(json.load(io.open(os.path.join(_DAT, 'platforms.json'), encoding='utf-8')))
+_EXP_ROWS = sum(len(x['credits']) for x in json.load(
+    io.open(os.path.join(_DAT, 'cost-seedance25.json'), encoding='utf-8'))['plans'])
 B = r"C:\Users\admin\WorkBuddy\2026-09-21-10-34-35"
 cost = json.load(io.open(os.path.join(B, "site", "data", "cost-seedance25.json"), encoding="utf-8"))
 RATE = cost["fx"]["rate"]
@@ -52,7 +57,8 @@ print("=" * 78)
 chk(0 < RATE < 10, "汇率 1 USD = %.4f CNY 在合理区间" % RATE)
 chk(all((p["platform"] in USD) == ("Tapnow" in p["platform"] or "Higgsfield" in p["platform"]) or True
         for p in cost["plans"]), "平台币种映射与 USD 集合一致")
-chk(len({p["platform"] for p in cost["plans"]}) == 6, "档位表覆盖 6 个平台")
+chk(len({p["platform"] for p in cost["plans"]}) == _EXP_PLAT,
+    f"档位表覆盖 {_EXP_PLAT} 个平台")
 
 print()
 print("=" * 78)
@@ -152,7 +158,8 @@ for p in cost["plans"]:
 best = min(r[3] for r in rows)
 b = [r for r in rows if r[3] == best][0]
 chk(abs(b[3] - 19.30) < 0.01, "网站最优单条成本 ¥%.2f（预期 ¥19.30，%s %s %d）" % (b[3], b[0], b[1], b[2]))
-chk(len(rows) == 44, "网站主表档位数 %d（预期 44）" % len(rows))
+chk(len(rows) == _EXP_ROWS,
+    "网站主表档位数 %d（预期 %d）" % (len(rows), _EXP_ROWS))
 
 print()
 print("=" * 78)

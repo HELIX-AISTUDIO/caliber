@@ -26,6 +26,7 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const URL = 'file:///' + path.join(ROOT, 'site', 'cost.html').replace(/\\/g, '/');
 const SHOTS = process.argv.includes('--shots');
 const OUT = path.join(ROOT, 'harvest');
+const ROWS_EXP = '47', QROWS_EXP = '39', PLATS_EXP = '7', LIBTV_Q_EXP = '7';
 
 const fails = [];
 const log = (...a) => console.log(...a);
@@ -63,7 +64,7 @@ async function run(browser) {
     check('默认周期＝年付且按钮高亮同步', d.period === 'y' && d.segOn.join() === 'y');
     check('默认视图＝全档位对比', d.viewOn.join() === 'all' && d.panel === 'all');
     check('KPI 条与周期一致', d.kbar === 'y');
-    check('年付表 44 行', d.rows === 44);
+    check(`年付表 ${ROWS_EXP} 行`, d.rows === Number(ROWS_EXP), `${d.rows} 行`);
     check('计算器有结果行', d.recRows > 0);
     check('桌面无横向溢出', d.scrollW === d.vw, `(${d.scrollW}/${d.vw})`);
     check('桌面不显示顶部 tab / 汉堡，横向菜单可见',
@@ -111,7 +112,8 @@ async function run(browser) {
       vis: [...document.querySelectorAll('.pt.on tbody tr')].filter(r => r.style.display !== 'none').length,
       chip: document.getElementById('platN').textContent,
     }));
-    check('平台筛选生效', aft.vis < before && aft.chip === '4/6', `${before}→${aft.vis} 芯片 ${aft.chip}`);
+    check('平台筛选生效', aft.vis < before && aft.chip === `${Number(PLATS_EXP) - 2}/${PLATS_EXP}`,
+      `${before}→${aft.vis} 芯片 ${aft.chip}`);
     await p.click('#platFilter .pfb[data-p="小云雀"]');
     await p.click('#platFilter .pfb[data-p="libtv"]');
     await p.waitForTimeout(250);
@@ -124,7 +126,7 @@ async function run(browser) {
     }));
     check('主表每行带平台 logo', cg.logos >= 39, `${cg.logos} 个`);
     check('单账号口径：月产 30 条时应有多档可行', /^[1-9]/.test(cg.cover), cg.cover);
-    check('筛选 chip 带平台 logo', cg.chipLogo === 6);
+    check('筛选 chip 带平台标识', cg.chipLogo === Number(PLATS_EXP), `${cg.chipLogo} 个`);
     check('覆盖率为单账号口径', !!cg.cover && cg.cover.indexOf('单账号口径') >= 0, cg.cover);
 
     // 元信息行：中文标签与数值之间必须有空格 —— flex 容器会裁掉文本节点首尾空白，
@@ -161,7 +163,7 @@ async function run(browser) {
       bars: [...document.querySelectorAll('#chart .cbar i')].slice(0, 3).map(i => i.style.width),
     }));
     const a = await snap();
-    check('排名图 44 行 + 字母标', a.rows === 44 && a.logos === 44);
+    check(`排名图 ${ROWS_EXP} 行 + 标识`, a.rows === Number(ROWS_EXP) && a.logos === Number(ROWS_EXP));
     check('首行＝最优档', a.first.indexOf('小云雀') >= 0 && a.first.indexOf('19.30') >= 0, a.first);
     // 第 2、3 名数值可能相同（此处都是 ¥20.00），故只要求「不是全部等长」
     check('条形长度可分辨（非全部等长）', new Set(a.bars).size >= 2, a.bars.join(' / '));
@@ -173,10 +175,10 @@ async function run(browser) {
       rk1: document.querySelectorAll('#pplot .pp.rk1').length,
       logoed: document.querySelectorAll('.clogo[class*="lg-"]').length,
     }));
-    check('散点 44 点', par.dots === 44, `${par.dots} 点`);
+    check(`散点 ${ROWS_EXP} 点`, par.dots === Number(ROWS_EXP), `${par.dots} 点`);
     check('连线机制已移除（无 .pline）', par.lines === 0, `${par.lines} 个`);
     check('rank1 点有标记且唯一', par.rk1 === 1, `${par.rk1} 个`);
-    check('平台 logo 用的是真图类', par.logoed === 44, `${par.logoed} 个`);
+    check(`平台标识齐全`, par.logoed === Number(ROWS_EXP), `${par.logoed} 个`);
 
     await p.click('#metricSeg button[data-m="cap"]');
     await p.waitForTimeout(400);
@@ -186,13 +188,14 @@ async function run(browser) {
     await p.click('#cycSeg button[data-k="q"]');
     await p.waitForTimeout(400);
     const c = await snap();
-    check('切季付：39 行 + 档位芯片跟随', c.rows === 39 && c.chip.indexOf('39') === 0);
+    check('切季付：行数与档位芯片跟随', c.rows === Number(QROWS_EXP) && c.chip.indexOf(String(QROWS_EXP)) === 0, `${c.rows} 行`);
 
     // 注意：季付下 Higgsfield 本来就没有档位，筛它不会改变行数 —— 要筛有季付的 libtv
     await p.click('#cycPlat .pfb[data-p="libtv"]');
     await p.waitForTimeout(350);
     const d = await snap();
-    check('平台筛选生效', d.rows === 32 && d.platN === '5/6', `${d.rows} 行 ${d.platN}`);
+    check('平台筛选生效', d.rows === Number(QROWS_EXP) - Number(LIBTV_Q_EXP)
+        && d.platN === `${Number(PLATS_EXP) - 1}/${PLATS_EXP}`, `${d.rows} 行 ${d.platN}`);
 
     // 用户要求：选了哪些平台，帕累托就只连这些平台的点
     const pare = await p.evaluate(() => {
@@ -205,7 +208,7 @@ async function run(browser) {
                                           && el.querySelector('b').textContent.indexOf('libtv') === 0),
                seg: path ? path.getAttribute('d').split('L').length : 0 };
     });
-    check('散点跟随平台筛选（点数减少）', pare.n === 32, `${pare.n} 点`);
+    check('散点跟随平台筛选（点数减少）', pare.n === Number(QROWS_EXP) - Number(LIBTV_Q_EXP), `${pare.n} 点`);
     check('散点已排除被筛掉的平台', pare.hasLibtv === false);
 
 
@@ -357,7 +360,8 @@ async function run(browser) {
     check('抽屉默认收起（position:fixed）', m.sidePos === 'fixed' && m.sideVisible === false);
     check('卡片形态生效', m.theadHidden === true && m.rowDisplay === 'grid');
     check('卡片高度 ≤110px', m.cardH > 0 && m.cardH <= 110, `${m.cardH}px`);
-    check('整页 ≤8 屏', m.screens <= 8, `${m.screens} 屏`);
+    // 上限随平台数增长：每多一个平台就多 3-4 张卡片，写死 8 屏会在加平台时误报
+    check(`整页 ≤${Math.ceil(Number(PLATS_EXP) * 1.3)} 屏`, m.screens <= Number(PLATS_EXP) * 1.3, `${m.screens} 屏`);
     check('手机无横向溢出', m.scrollW === m.vw, `(${m.scrollW}/${m.vw})`);
     check('「调整」按钮够大且高对比',
       m.btnH >= 38 && m.btnBg.includes('209, 254, 23'), `${m.btnH}px ${m.btnBg}`);

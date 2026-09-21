@@ -1,618 +1,662 @@
 {
-  "id": "cost-seedance25",
-  "type": "cost",
-  "title": "平台成本对比",
-  "eyebrow": "Cost Benchmark · Seedance 2.5",
-  "updatedAt": "2026-09-21",
-  "spec": {
-    "text": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考",
-    "secondsPerClip": 30,
-    "note": "全部平台的单条积分消耗均在此口径下测得，是本次对比成立的唯一前提。"
-  },
-  "fx": {
-    "pair": "USD_CNY",
-    "rate": 6.7487,
-    "asOf": "2026-09-21",
-    "source": "中国外汇交易中心（CFETS）人民币对美元中间价",
-    "note": "选用中间价而非银行牌价：中间价是当日官方定价，可引用可复核；实际结算按各银行现汇卖出价通常再高 0.5–1%。"
-  },
-  "creditsPerVideo": {
-    "libtv": 1380,
-    "Neowow": 7500,
-    "即梦": 600,
-    "小云雀": 600,
-    "Higgsfield": 210,
-    "Tapnow": 1200
-  },
-  "creditsSource": {
-    "libtv": "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s",
-    "Neowow": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考 · 分镜栏编辑",
-    "即梦": "即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s",
-    "小云雀": "Seedance 2.5 · 16:9 · 720P · 30s（用户确认 600 积分）",
-    "Higgsfield": "Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard",
-    "Tapnow": "Seedance 2.5 · 相同参数（用户口径）→ 1,200 积分"
-  },
-  "plans": [
+ "id": "cost-seedance25",
+ "type": "cost",
+ "title": "平台成本对比",
+ "eyebrow": "Cost Benchmark · Seedance 2.5",
+ "updatedAt": "2026-09-21",
+ "spec": {
+  "text": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考",
+  "secondsPerClip": 30,
+  "note": "全部平台的单条积分消耗均在此口径下测得，是本次对比成立的唯一前提。"
+ },
+ "fx": {
+  "pair": "USD_CNY",
+  "rate": 6.7487,
+  "asOf": "2026-09-21",
+  "source": "中国外汇交易中心（CFETS）人民币对美元中间价",
+  "note": "选用中间价而非银行牌价：中间价是当日官方定价，可引用可复核；实际结算按各银行现汇卖出价通常再高 0.5–1%。"
+ },
+ "creditsPerVideo": {
+  "libtv": 1380,
+  "Neowow": 7500,
+  "即梦": 600,
+  "小云雀": 600,
+  "Higgsfield": 210,
+  "Tapnow": 1200,
+  "Seko": 540
+ },
+ "creditsSource": {
+  "libtv": "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s",
+  "Neowow": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考 · 分镜栏编辑",
+  "即梦": "即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s",
+  "小云雀": "Seedance 2.5 · 16:9 · 720P · 30s（用户确认 600 积分）",
+  "Higgsfield": "Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard",
+  "Tapnow": "Seedance 2.5 · 相同参数（用户口径）→ 1,200 积分",
+  "Seko": "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30S → 540 积分"
+ },
+ "plans": [
+  {
+   "platform": "libtv",
+   "tier": "标准版",
+   "credits": [
     {
-      "platform": "libtv",
-      "tier": "标准版",
-      "credits": [
-        {
-          "credits": 1500,
-          "price": 569,
-          "m": 66,
-          "q": 179,
-          "renewal": 569
-        }
-      ]
-    },
-    {
-      "platform": "libtv",
-      "tier": "进阶版",
-      "credits": [
-        {
-          "credits": 4600,
-          "price": 1199,
-          "m": 199,
-          "q": 499,
-          "renewal": 1199
-        }
-      ]
-    },
-    {
-      "platform": "libtv",
-      "tier": "高级版",
-      "credits": [
-        {
-          "credits": 11700,
-          "price": 2999,
-          "m": 469,
-          "q": 1159,
-          "renewal": 3799
-        },
-        {
-          "credits": 16300,
-          "price": 3899,
-          "m": 649,
-          "q": 1599,
-          "renewal": 5099
-        }
-      ]
-    },
-    {
-      "platform": "libtv",
-      "tier": "豪华版",
-      "credits": [
-        {
-          "credits": 32800,
-          "price": 6699,
-          "m": 1199,
-          "q": 2699,
-          "renewal": 7399
-        }
-      ]
-    },
-    {
-      "platform": "libtv",
-      "tier": "至尊版",
-      "credits": [
-        {
-          "credits": 50500,
-          "price": 9599,
-          "m": 1799,
-          "q": 3899,
-          "renewal": 10999
-        },
-        {
-          "credits": 66000,
-          "price": 12499,
-          "m": 2299,
-          "q": 4999
-        }
-      ]
-    },
-    {
-      "platform": "Neowow",
-      "tier": "PLUS",
-      "credits": [
-        {
-          "credits": 9000,
-          "price": 599,
-          "m": 60,
-          "q": 189
-        }
-      ]
-    },
-    {
-      "platform": "Neowow",
-      "tier": "Pro",
-      "credits": [
-        {
-          "credits": 32800,
-          "price": 1599,
-          "m": 219,
-          "q": 628
-        },
-        {
-          "credits": 52800,
-          "price": 2289,
-          "m": 348,
-          "q": 899
-        },
-        {
-          "credits": 108000,
-          "price": 4666,
-          "m": 718,
-          "q": 1999
-        }
-      ]
-    },
-    {
-      "platform": "Neowow",
-      "tier": "MAX",
-      "credits": [
-        {
-          "credits": 188000,
-          "price": 7299,
-          "m": 1199,
-          "q": 2999
-        },
-        {
-          "credits": 288000,
-          "price": 11059,
-          "m": 1827,
-          "q": 4599
-        }
-      ]
-    },
-    {
-      "platform": "Neowow",
-      "tier": "ULTRA",
-      "credits": [
-        {
-          "credits": 368000,
-          "price": 11899,
-          "m": 2296,
-          "q": 5520
-        }
-      ]
-    },
-    {
-      "platform": "即梦",
-      "tier": "基础会员",
-      "credits": [
-        {
-          "credits": 725,
-          "price": 659,
-          "m": 69,
-          "q": 188
-        }
-      ]
-    },
-    {
-      "platform": "即梦",
-      "tier": "标准会员",
-      "credits": [
-        {
-          "credits": 2210,
-          "price": 1899,
-          "m": 199,
-          "q": 568,
-          "mCr": 4000
-        }
-      ]
-    },
-    {
-      "platform": "即梦",
-      "tier": "高级会员",
-      "credits": [
-        {
-          "credits": 6160,
-          "price": 2599,
-          "m": 499,
-          "q": 1399
-        },
-        {
-          "credits": 12320,
-          "price": 5199,
-          "m": 998,
-          "q": 1959
-        },
-        {
-          "credits": 18480,
-          "price": 7799,
-          "m": 1498,
-          "q": 2939
-        },
-        {
-          "credits": 27720,
-          "price": 11699,
-          "m": 2246,
-          "q": 4409
-        }
-      ]
-    },
-    {
-      "platform": "即梦",
-      "tier": "超级会员",
-      "credits": [
-        {
-          "credits": 54600,
-          "price": 21840,
-          "m": 4299,
-          "q": 8189
-        }
-      ]
-    },
-    {
-      "platform": "小云雀",
-      "tier": "基础会员",
-      "credits": [
-        {
-          "credits": 830,
-          "price": 453,
-          "m": 38,
-          "q": 219
-        }
-      ]
-    },
-    {
-      "platform": "小云雀",
-      "tier": "标准会员",
-      "credits": [
-        {
-          "credits": 2320,
-          "price": 1199,
-          "m": 100,
-          "q": 589
-        }
-      ]
-    },
-    {
-      "platform": "小云雀",
-      "tier": "高级会员",
-      "credits": [
-        {
-          "credits": 6300,
-          "price": 2649,
-          "m": 273,
-          "q": 1488
-        },
-        {
-          "credits": 8600,
-          "price": 3599,
-          "m": 374,
-          "q": 1999
-        },
-        {
-          "credits": 10150,
-          "price": 4199,
-          "m": 441,
-          "q": 2349
-        },
-        {
-          "credits": 12000,
-          "price": 4999,
-          "m": 519,
-          "q": 1959
-        },
-        {
-          "credits": 18500,
-          "price": 7799,
-          "m": 779,
-          "q": 2939
-        },
-        {
-          "credits": 27720,
-          "price": 10699,
-          "m": 1168,
-          "q": 4408
-        }
-      ]
-    },
-    {
-      "platform": "小云雀",
-      "tier": "超级会员",
-      "credits": [
-        {
-          "credits": 54600,
-          "price": 21840,
-          "m": 2235,
-          "q": 8189
-        }
-      ]
-    },
-    {
-      "platform": "Higgsfield",
-      "tier": "Starter",
-      "credits": [
-        {
-          "credits": 200,
-          "price": 180,
-          "m": 15
-        }
-      ]
-    },
-    {
-      "platform": "Higgsfield",
-      "tier": "Plus",
-      "credits": [
-        {
-          "credits": 1000,
-          "price": 468,
-          "m": 49
-        }
-      ]
-    },
-    {
-      "platform": "Higgsfield",
-      "tier": "Ultra",
-      "credits": [
-        {
-          "credits": 3000,
-          "price": 1188,
-          "m": 129
-        },
-        {
-          "credits": 6000,
-          "price": 2328,
-          "m": 220
-        },
-        {
-          "credits": 9000,
-          "price": 3240,
-          "m": 310
-        }
-      ]
-    },
-    {
-      "platform": "Tapnow",
-      "tier": "BASIC",
-      "credits": [
-        {
-          "credits": 1500,
-          "price": 90,
-          "m": 15,
-          "q": 27
-        }
-      ]
-    },
-    {
-      "platform": "Tapnow",
-      "tier": "PRO",
-      "credits": [
-        {
-          "credits": 3500,
-          "price": 315,
-          "m": 30,
-          "q": 84
-        },
-        {
-          "credits": 6000,
-          "price": 540,
-          "m": 51,
-          "q": 144
-        },
-        {
-          "credits": 9500,
-          "price": 855,
-          "m": 81,
-          "q": 228
-        },
-        {
-          "credits": 11500,
-          "price": 1035,
-          "m": 98,
-          "q": 276
-        },
-        {
-          "credits": 20000,
-          "price": 1800,
-          "m": 170,
-          "q": 480
-        }
-      ]
-    },
-    {
-      "platform": "Tapnow",
-      "tier": "ULTIMATE",
-      "credits": [
-        {
-          "credits": 36000,
-          "price": 2592,
-          "m": 306,
-          "q": 756
-        }
-      ]
-    },
-    {
-      "platform": "Tapnow",
-      "tier": "MAX",
-      "credits": [
-        {
-          "credits": 72000,
-          "price": 5184,
-          "m": 612,
-          "q": 1512
-        },
-        {
-          "credits": 100000,
-          "price": 7200,
-          "m": 850,
-          "q": 2100
-        }
-      ]
+     "credits": 1500,
+     "price": 569,
+     "m": 66,
+     "q": 179,
+     "renewal": 569
     }
-  ],
-  "officialRate": {
-    "libtv": {
-      "标准版": 31.25,
-      "进阶版": 45.45
-    },
-    "Neowow": {
-      "PLUS": 180.0,
-      "Pro": 282.0,
-      "MAX": 350.0,
-      "ULTRA": 371.0
-    },
-    "即梦": {
-      "基础会员": 13.0,
-      "标准会员": 14.0
-    },
-    "小云雀": {
-      "基础会员": 21.9,
-      "标准会员": 23.2,
-      "高级会员": 28.8,
-      "超级会员": 30.0
-    }
+   ]
   },
-  "officialRateNote": "部分公示值按调价前的年费计算（Neowow MAX/Pro 尤为明显），按现价实算低于公示值。故本表全部结论以「年费 ÷ (月积分 × 12)」的实算值为准，公示值仅作口径校验。",
-  "adClaim": {
-    "libtv": {
-      "tier": "至尊版",
-      "perSec": 0.36
-    },
-    "Neowow": {
-      "tier": "ULTRA",
-      "perSec": 0.26
-    },
-    "即梦": {
-      "tier": "超级会员",
-      "perSec": 0.4
-    },
-    "小云雀": {
-      "tier": "超级会员",
-      "perSec": 0.4
+  {
+   "platform": "libtv",
+   "tier": "进阶版",
+   "credits": [
+    {
+     "credits": 4600,
+     "price": 1199,
+     "m": 199,
+     "q": 499,
+     "renewal": 1199
     }
+   ]
   },
-  "scope": {
-    "current": "年费 / 季付 / 月付 三周期",
-    "currentShort": "年付 · 季付 · 月付",
-    "impact": "三周期的承诺期不同，单价不能混着读：年付最省但锁 12 个月，月付最贵但随时能停。另有 11 个档位出现「承诺更久反而更贵」的倒挂（详见「用多久，买哪个周期」一节）。",
-    "promoRule": "各平台页面常挂「限时活动福利」（某模型限时折扣、无限用 N 天、赠送积分等）。本表统一不单独处置 —— 页面显示的实付价已含当期全部活动，再叠一层活动分析等于重复计算，还引入主观判断。唯一例外是续费价，它是有公示的第二期真实扣款，属价格而非宣传。",
-    "items": [
-      {
-        "label": "年费 / 连续包年",
-        "status": "已覆盖",
-        "done": true,
-        "note": "全部 44 个可选积分档"
-      },
-      {
-        "label": "季度会员",
-        "status": "已覆盖",
-        "done": true,
-        "note": "39 档有季付；Higgsfield 平台不提供季付"
-      },
-      {
-        "label": "月度会员",
-        "status": "已覆盖",
-        "done": true,
-        "note": "全部 44 档；Tapnow BASIC 按月付稳态价计（首月促销不计入）"
-      },
-      {
-        "label": "按次购买（非会员）",
-        "status": "后续补充",
-        "done": false,
-        "note": "用于「订阅 vs 按量」的划算性判断"
-      }
-    ]
+  {
+   "platform": "libtv",
+   "tier": "高级版",
+   "credits": [
+    {
+     "credits": 11700,
+     "price": 2999,
+     "m": 469,
+     "q": 1159,
+     "renewal": 3799
+    },
+    {
+     "credits": 16300,
+     "price": 3899,
+     "m": 649,
+     "q": 1599,
+     "renewal": 5099
+    }
+   ]
   },
-  "priceRule": "本表全部价格均为平台页面【显示出来的实付价】，已含当期全部活动；不引用、不分析任何划线原价、折扣徽标、立省百分比与赠品文字。唯一例外是续费价 —— 它是真实会发生的第二期扣款，属价格而非宣传，有公示则记录。",
-  "liveNote": "本表全部价格锚定各平台官网【当前实时显示价】。该显示价本身已是活动价 / 优惠价 / 限时价的最终成交价 —— 不再叠加、不再推算、不引用划线原价。价格随时可能变动；一经发现变化，我们第一时间更正，并同步更新本页的数据时点。",
-  "recurringNote": "连续包年/包季/包月到期会自动扣款续费，且续费价通常高于首期价 —— 其真实成本须按「首期 + 续费 × (期数−1)」折算，并存在「忘记取消」的实际风险。非连续包（Higgsfield、Neowow）为一次性购买，到期自动结束、无自动扣款、无续费价，首期价即为全部成本。故本表横向比较时按「你打算用多久」分流：连续包要看续费后的均价，非连续包只看一口价。",
-  "retryPolicy": [
+  {
+   "platform": "libtv",
+   "tier": "豪华版",
+   "credits": [
     {
-      "plat": "libtv",
-      "retry": "不扣",
-      "basis": "用户实测"
-    },
-    {
-      "plat": "Neowow",
-      "retry": "不扣",
-      "basis": "用户实测"
-    },
-    {
-      "plat": "即梦",
-      "retry": "不扣",
-      "basis": "用户实测"
-    },
-    {
-      "plat": "小云雀",
-      "retry": "不扣",
-      "basis": "用户实测"
-    },
-    {
-      "plat": "Higgsfield",
-      "retry": "不扣，自动退还",
-      "basis": "官方文档 + 用户实测"
-    },
-    {
-      "plat": "Tapnow",
-      "retry": "不扣",
-      "basis": "用户实测（与其他平台同口径）"
+     "credits": 32800,
+     "price": 6699,
+     "m": 1199,
+     "q": 2699,
+     "renewal": 7399
     }
-  ],
-  "retryNote": "各平台失败均不消耗积分（用户实测口径），故本表全部单价与实际计费一致，排名不受失败率影响，可直接按单价决策。Higgsfield 另有官方文档保证：failed / nsfw 请求不计费，预扣积分自动退还，排队取消亦退，超时标记失败不扣费（唯一例外 Grok —— 一经开始生成即扣费）。",
-  "crossMidnightNote": "跨零点提交时两家字节系平台的积分归属日不同：23:55 提交、0:05 完成时，即梦计入前一天、小云雀计入后一天；小云雀若未在零点前完成，未用完的当日积分会作废。",
-  "risks": [
+   ]
+  },
+  {
+   "platform": "libtv",
+   "tier": "至尊版",
+   "credits": [
     {
-      "level": "warn",
-      "title": "年费档位均为限时活动价，活动退坡后结论会变",
-      "body": [
-        "用户确认：各平台年费均为限时活动价。本表记录的是页面显示的实付价，已含当期全部活动；活动一旦结束或退坡，页面显示价上升、单条成本随之上升，排名可能变化。",
-        "libtv 高级版与至尊版、即梦高级四档、小云雀高级六档、Neowow Pro 三档与 MAX 两档均为联动定价，活动结束后可能同步调整档位结构，届时选项数量与积分档位都可能变。",
-        "六家中 Tapnow 的年价折让力度最大，活动退坡对其单条成本的影响也最大。"
-      ]
+     "credits": 50500,
+     "price": 9599,
+     "m": 1799,
+     "q": 3899,
+     "renewal": 10999
+    },
+    {
+     "credits": 66000,
+     "price": 12499,
+     "m": 2299,
+     "q": 4999
     }
-  ],
-  "sources": [
+   ]
+  },
+  {
+   "platform": "Neowow",
+   "tier": "PLUS",
+   "credits": [
     {
-      "page": "libtv 生成页",
-      "data": "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s → 1,380 积分"
-    },
-    {
-      "page": "libtv 订阅页",
-      "data": "五档年费 + 次年续费价；高级版 11.7K/16.3K、至尊版 50.5K/66K 联动"
-    },
-    {
-      "page": "Neowow 生成页",
-      "data": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考 → 7,500 积分"
-    },
-    {
-      "page": "Neowow 订阅页",
-      "data": "四档年费；Pro 三档、MAX 两档联动；ULTRA 无联动"
-    },
-    {
-      "page": "即梦生成页",
-      "data": "即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s → 600 积分"
-    },
-    {
-      "page": "即梦订阅页",
-      "data": "四档年费；高级会员 6.2K–27.7K 四档联动；超级会员单档"
-    },
-    {
-      "page": "小云雀生成页",
-      "data": "Seedance 2.5 · 16:9 · 720P · 30s → 600 积分（用户确认）"
-    },
-    {
-      "page": "小云雀 订阅页",
-      "data": "四档年费；高级会员 6.3K–27.7K 六档联动"
-    },
-    {
-      "page": "Higgsfield 订阅页",
-      "data": "Starter $15 / Plus $39 / Ultra $99；Ultra 为 3,000–9,000 分三档滑块"
-    },
-    {
-      "page": "Higgsfield 生成页",
-      "data": "Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard → 210 积分"
-    },
-    {
-      "page": "Tapnow 订阅页",
-      "data": "USD 计价。BASIC $90/年 1,500 分；PRO 五档滑动 $315/540/855/1035/1800（3.5K–20K 分）；ULTIMATE $2592/年 36,000 分；MAX 两档 $5184/7200（72K / 100K 分）"
-    },
-    {
-      "page": "Tapnow 生成页",
-      "data": "Seedance 2.5 · 相同参数 → 1,200 积分（用户口径）"
+     "credits": 9000,
+     "price": 599,
+     "m": 60,
+     "q": 189
     }
+   ]
+  },
+  {
+   "platform": "Neowow",
+   "tier": "Pro",
+   "credits": [
+    {
+     "credits": 32800,
+     "price": 1599,
+     "m": 219,
+     "q": 628
+    },
+    {
+     "credits": 52800,
+     "price": 2289,
+     "m": 348,
+     "q": 899
+    },
+    {
+     "credits": 108000,
+     "price": 4666,
+     "m": 718,
+     "q": 1999
+    }
+   ]
+  },
+  {
+   "platform": "Neowow",
+   "tier": "MAX",
+   "credits": [
+    {
+     "credits": 188000,
+     "price": 7299,
+     "m": 1199,
+     "q": 2999
+    },
+    {
+     "credits": 288000,
+     "price": 11059,
+     "m": 1827,
+     "q": 4599
+    }
+   ]
+  },
+  {
+   "platform": "Neowow",
+   "tier": "ULTRA",
+   "credits": [
+    {
+     "credits": 368000,
+     "price": 11899,
+     "m": 2296,
+     "q": 5520
+    }
+   ]
+  },
+  {
+   "platform": "即梦",
+   "tier": "基础会员",
+   "credits": [
+    {
+     "credits": 725,
+     "price": 659,
+     "m": 69,
+     "q": 188
+    }
+   ]
+  },
+  {
+   "platform": "即梦",
+   "tier": "标准会员",
+   "credits": [
+    {
+     "credits": 2210,
+     "price": 1899,
+     "m": 199,
+     "q": 568,
+     "mCr": 4000
+    }
+   ]
+  },
+  {
+   "platform": "即梦",
+   "tier": "高级会员",
+   "credits": [
+    {
+     "credits": 6160,
+     "price": 2599,
+     "m": 499,
+     "q": 1399
+    },
+    {
+     "credits": 12320,
+     "price": 5199,
+     "m": 998,
+     "q": 1959
+    },
+    {
+     "credits": 18480,
+     "price": 7799,
+     "m": 1498,
+     "q": 2939
+    },
+    {
+     "credits": 27720,
+     "price": 11699,
+     "m": 2246,
+     "q": 4409
+    }
+   ]
+  },
+  {
+   "platform": "即梦",
+   "tier": "超级会员",
+   "credits": [
+    {
+     "credits": 54600,
+     "price": 21840,
+     "m": 4299,
+     "q": 8189
+    }
+   ]
+  },
+  {
+   "platform": "小云雀",
+   "tier": "基础会员",
+   "credits": [
+    {
+     "credits": 830,
+     "price": 453,
+     "m": 38,
+     "q": 219
+    }
+   ]
+  },
+  {
+   "platform": "小云雀",
+   "tier": "标准会员",
+   "credits": [
+    {
+     "credits": 2320,
+     "price": 1199,
+     "m": 100,
+     "q": 589
+    }
+   ]
+  },
+  {
+   "platform": "小云雀",
+   "tier": "高级会员",
+   "credits": [
+    {
+     "credits": 6300,
+     "price": 2649,
+     "m": 273,
+     "q": 1488
+    },
+    {
+     "credits": 8600,
+     "price": 3599,
+     "m": 374,
+     "q": 1999
+    },
+    {
+     "credits": 10150,
+     "price": 4199,
+     "m": 441,
+     "q": 2349
+    },
+    {
+     "credits": 12000,
+     "price": 4999,
+     "m": 519,
+     "q": 1959
+    },
+    {
+     "credits": 18500,
+     "price": 7799,
+     "m": 779,
+     "q": 2939
+    },
+    {
+     "credits": 27720,
+     "price": 10699,
+     "m": 1168,
+     "q": 4408
+    }
+   ]
+  },
+  {
+   "platform": "小云雀",
+   "tier": "超级会员",
+   "credits": [
+    {
+     "credits": 54600,
+     "price": 21840,
+     "m": 2235,
+     "q": 8189
+    }
+   ]
+  },
+  {
+   "platform": "Higgsfield",
+   "tier": "Starter",
+   "credits": [
+    {
+     "credits": 200,
+     "price": 180,
+     "m": 15
+    }
+   ]
+  },
+  {
+   "platform": "Higgsfield",
+   "tier": "Plus",
+   "credits": [
+    {
+     "credits": 1000,
+     "price": 468,
+     "m": 49
+    }
+   ]
+  },
+  {
+   "platform": "Higgsfield",
+   "tier": "Ultra",
+   "credits": [
+    {
+     "credits": 3000,
+     "price": 1188,
+     "m": 129
+    },
+    {
+     "credits": 6000,
+     "price": 2328,
+     "m": 220
+    },
+    {
+     "credits": 9000,
+     "price": 3240,
+     "m": 310
+    }
+   ]
+  },
+  {
+   "platform": "Tapnow",
+   "tier": "BASIC",
+   "credits": [
+    {
+     "credits": 1500,
+     "price": 90,
+     "m": 15,
+     "q": 27
+    }
+   ]
+  },
+  {
+   "platform": "Tapnow",
+   "tier": "PRO",
+   "credits": [
+    {
+     "credits": 3500,
+     "price": 315,
+     "m": 30,
+     "q": 84
+    },
+    {
+     "credits": 6000,
+     "price": 540,
+     "m": 51,
+     "q": 144
+    },
+    {
+     "credits": 9500,
+     "price": 855,
+     "m": 81,
+     "q": 228
+    },
+    {
+     "credits": 11500,
+     "price": 1035,
+     "m": 98,
+     "q": 276
+    },
+    {
+     "credits": 20000,
+     "price": 1800,
+     "m": 170,
+     "q": 480
+    }
+   ]
+  },
+  {
+   "platform": "Tapnow",
+   "tier": "ULTIMATE",
+   "credits": [
+    {
+     "credits": 36000,
+     "price": 2592,
+     "m": 306,
+     "q": 756
+    }
+   ]
+  },
+  {
+   "platform": "Tapnow",
+   "tier": "MAX",
+   "credits": [
+    {
+     "credits": 72000,
+     "price": 5184,
+     "m": 612,
+     "q": 1512
+    },
+    {
+     "credits": 100000,
+     "price": 7200,
+     "m": 850,
+     "q": 2100
+    }
+   ]
+  },
+  {
+   "platform": "Seko",
+   "tier": "标准会员",
+   "credits": [
+    {
+     "credits": 500,
+     "price": 576,
+     "m": 39
+    }
+   ]
+  },
+  {
+   "platform": "Seko",
+   "tier": "高级会员",
+   "credits": [
+    {
+     "credits": 3000,
+     "price": 2880,
+     "m": 195
+    }
+   ]
+  },
+  {
+   "platform": "Seko",
+   "tier": "至尊会员",
+   "credits": [
+    {
+     "credits": 10000,
+     "price": 8400,
+     "m": 569
+    }
+   ]
+  }
+ ],
+ "officialRate": {
+  "libtv": {
+   "标准版": 31.25,
+   "进阶版": 45.45
+  },
+  "Neowow": {
+   "PLUS": 180.0,
+   "Pro": 282.0,
+   "MAX": 350.0,
+   "ULTRA": 371.0
+  },
+  "即梦": {
+   "基础会员": 13.0,
+   "标准会员": 14.0
+  },
+  "小云雀": {
+   "基础会员": 21.9,
+   "标准会员": 23.2,
+   "高级会员": 28.8,
+   "超级会员": 30.0
+  }
+ },
+ "officialRateNote": "部分公示值按调价前的年费计算（Neowow MAX/Pro 尤为明显），按现价实算低于公示值。故本表全部结论以「年费 ÷ (月积分 × 12)」的实算值为准，公示值仅作口径校验。",
+ "adClaim": {
+  "libtv": {
+   "tier": "至尊版",
+   "perSec": 0.36
+  },
+  "Neowow": {
+   "tier": "ULTRA",
+   "perSec": 0.26
+  },
+  "即梦": {
+   "tier": "超级会员",
+   "perSec": 0.4
+  },
+  "小云雀": {
+   "tier": "超级会员",
+   "perSec": 0.4
+  }
+ },
+ "scope": {
+  "current": "年费 / 季付 / 月付 三周期",
+  "currentShort": "年付 · 季付 · 月付",
+  "impact": "三周期的承诺期不同，单价不能混着读：年付最省但锁 12 个月，月付最贵但随时能停。另有 11 个档位出现「承诺更久反而更贵」的倒挂（详见「用多久，买哪个周期」一节）。",
+  "promoRule": "各平台页面常挂「限时活动福利」（某模型限时折扣、无限用 N 天、赠送积分等）。本表统一不单独处置 —— 页面显示的实付价已含当期全部活动，再叠一层活动分析等于重复计算，还引入主观判断。唯一例外是续费价，它是有公示的第二期真实扣款，属价格而非宣传。",
+  "items": [
+   {
+    "label": "年费 / 连续包年",
+    "status": "已覆盖",
+    "done": true,
+    "note": "全部 44 个可选积分档"
+   },
+   {
+    "label": "季度会员",
+    "status": "已覆盖",
+    "done": true,
+    "note": "39 档有季付；Higgsfield 平台不提供季付"
+   },
+   {
+    "label": "月度会员",
+    "status": "已覆盖",
+    "done": true,
+    "note": "全部 44 档；Tapnow BASIC 按月付稳态价计（首月促销不计入）"
+   },
+   {
+    "label": "按次购买（非会员）",
+    "status": "后续补充",
+    "done": false,
+    "note": "用于「订阅 vs 按量」的划算性判断"
+   }
   ]
+ },
+ "priceRule": "本表全部价格均为平台页面【显示出来的实付价】，已含当期全部活动；不引用、不分析任何划线原价、折扣徽标、立省百分比与赠品文字。唯一例外是续费价 —— 它是真实会发生的第二期扣款，属价格而非宣传，有公示则记录。",
+ "liveNote": "本表全部价格锚定各平台官网【当前实时显示价】。该显示价本身已是活动价 / 优惠价 / 限时价的最终成交价 —— 不再叠加、不再推算、不引用划线原价。价格随时可能变动；一经发现变化，我们第一时间更正，并同步更新本页的数据时点。",
+ "recurringNote": "连续包年/包季/包月到期会自动扣款续费，且续费价通常高于首期价 —— 其真实成本须按「首期 + 续费 × (期数−1)」折算，并存在「忘记取消」的实际风险。非连续包（Higgsfield、Neowow）为一次性购买，到期自动结束、无自动扣款、无续费价，首期价即为全部成本。故本表横向比较时按「你打算用多久」分流：连续包要看续费后的均价，非连续包只看一口价。",
+ "retryPolicy": [
+  {
+   "plat": "libtv",
+   "retry": "不扣",
+   "basis": "用户实测"
+  },
+  {
+   "plat": "Neowow",
+   "retry": "不扣",
+   "basis": "用户实测"
+  },
+  {
+   "plat": "即梦",
+   "retry": "不扣",
+   "basis": "用户实测"
+  },
+  {
+   "plat": "小云雀",
+   "retry": "不扣",
+   "basis": "用户实测"
+  },
+  {
+   "plat": "Higgsfield",
+   "retry": "不扣，自动退还",
+   "basis": "官方文档 + 用户实测"
+  },
+  {
+   "plat": "Tapnow",
+   "retry": "不扣",
+   "basis": "用户实测（与其他平台同口径）"
+  }
+ ],
+ "retryNote": "各平台失败均不消耗积分（用户实测口径），故本表全部单价与实际计费一致，排名不受失败率影响，可直接按单价决策。Higgsfield 另有官方文档保证：failed / nsfw 请求不计费，预扣积分自动退还，排队取消亦退，超时标记失败不扣费（唯一例外 Grok —— 一经开始生成即扣费）。",
+ "crossMidnightNote": "跨零点提交时两家字节系平台的积分归属日不同：23:55 提交、0:05 完成时，即梦计入前一天、小云雀计入后一天；小云雀若未在零点前完成，未用完的当日积分会作废。",
+ "risks": [
+  {
+   "level": "warn",
+   "title": "年费档位均为限时活动价，活动退坡后结论会变",
+   "body": [
+    "用户确认：各平台年费均为限时活动价。本表记录的是页面显示的实付价，已含当期全部活动；活动一旦结束或退坡，页面显示价上升、单条成本随之上升，排名可能变化。",
+    "libtv 高级版与至尊版、即梦高级四档、小云雀高级六档、Neowow Pro 三档与 MAX 两档均为联动定价，活动结束后可能同步调整档位结构，届时选项数量与积分档位都可能变。",
+    "六家中 Tapnow 的年价折让力度最大，活动退坡对其单条成本的影响也最大。"
+   ]
+  },
+  {
+   "level": "warn",
+   "title": "Seko 月付为首购优惠价，次月起按原价",
+   "body": [
+    "Seko 月付三个档位页面均标「首购优惠」：标准 ¥39（划线 ¥60）、高级 ¥195（划线 ¥300）、至尊 ¥569（划线 ¥875）。按本表口径，已录页面显示的实付价。",
+    "但该优惠通常只适用于首次购买的一个月。若你要连续用，第二个月起按原价续购，单条成本会明显上升 —— 以标准会员为例：¥39 → ¥60 时，单条成本由 ¥42.12 升至 ¥64.80。按年购买（8 折，月均 ¥48）则不受此影响。",
+    "另外注意：Seko 没有季付，年付与月付均为一次性购买、到期即止，不存在自动续费与续费价。"
+   ]
+  }
+ ],
+ "sources": [
+  {
+   "page": "libtv 生成页",
+   "data": "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s → 1,380 积分"
+  },
+  {
+   "page": "libtv 订阅页",
+   "data": "五档年费 + 次年续费价；高级版 11.7K/16.3K、至尊版 50.5K/66K 联动"
+  },
+  {
+   "page": "Neowow 生成页",
+   "data": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考 → 7,500 积分"
+  },
+  {
+   "page": "Neowow 订阅页",
+   "data": "四档年费；Pro 三档、MAX 两档联动；ULTRA 无联动"
+  },
+  {
+   "page": "即梦生成页",
+   "data": "即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s → 600 积分"
+  },
+  {
+   "page": "即梦订阅页",
+   "data": "四档年费；高级会员 6.2K–27.7K 四档联动；超级会员单档"
+  },
+  {
+   "page": "小云雀生成页",
+   "data": "Seedance 2.5 · 16:9 · 720P · 30s → 600 积分（用户确认）"
+  },
+  {
+   "page": "小云雀 订阅页",
+   "data": "四档年费；高级会员 6.3K–27.7K 六档联动"
+  },
+  {
+   "page": "Higgsfield 订阅页",
+   "data": "Starter $15 / Plus $39 / Ultra $99；Ultra 为 3,000–9,000 分三档滑块"
+  },
+  {
+   "page": "Higgsfield 生成页",
+   "data": "Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard → 210 积分"
+  },
+  {
+   "page": "Tapnow 订阅页",
+   "data": "USD 计价。BASIC $90/年 1,500 分；PRO 五档滑动 $315/540/855/1035/1800（3.5K–20K 分）；ULTIMATE $2592/年 36,000 分；MAX 两档 $5184/7200（72K / 100K 分）"
+  },
+  {
+   "page": "Tapnow 生成页",
+   "data": "Seedance 2.5 · 相同参数 → 1,200 积分（用户口径）"
+  }
+ ]
 }
