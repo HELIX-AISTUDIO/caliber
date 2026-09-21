@@ -543,7 +543,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
       <span class="sub" id="tgtsec">= 900 秒 ≈ 15 分钟素材</span>
     </div>
     <table><thead><tr><th>方案类型</th><th>档位组合</th><th class="ctr">年支出</th>
-    <th class="ctr">实际产能</th><th class="ctr">单条成本</th></tr></thead><tbody id="rec"></tbody></table>
+    <th class="ctr">实际产能</th><th class="ctr" id="vth">单条成本</th></tr></thead><tbody id="rec"></tbody></table>
     <div class="sub" style="margin-top:10px">「组合订阅」允许多份订阅叠加（多账号），用于产量超出单档位上限时；多账号运营成本未计入。</div>
   </div>
 </section>
@@ -852,6 +852,10 @@ function syncCq(fromCalc){
   var inp = document.getElementById('cq'); if(!inp) return;
   var N = Math.max(1, parseInt(inp.value || '10', 10));
   var N = Math.min(200, N);
+  /* 节流：拖动时 input 会高频触发，而 N 只在跨整数时变化。
+     不跳过会导致每一帧都重排 35 行 DOM，拖起来发滞。 */
+  if(window.__lastCqN === N) return;
+  window.__lastCqN = N;
   var val = document.getElementById('cqval');
   if(val) val.textContent = N + ' 条/月';
   cqPaintPresets(N);
@@ -880,10 +884,46 @@ function syncCq(fromCalc){
   });
   Array.prototype.forEach.call(cells, function(td){
     var v = needOf(parseFloat(td.dataset.c), parseFloat(td.dataset.p));
-    if(!v){ td.innerHTML = '<span class="cq-no">产能过低</span>'; return; }
+    if(!v){
+      td.dataset.total = '';
+      td.innerHTML = '<span class="cq-no">产能过低</span>';
+      return;
+    }
+    td.dataset.total = v.total;
     var t = '\u00a5' + v.total.toLocaleString() + (v.n > 1 ? ' \u00b7 ' + v.n + '\u00d7' : '');
     td.innerHTML = (v.total === best) ? '<span class="cq-best">' + t + ' 最省</span>' : t;
   });
+  /* 排名跟随月产量：按「该产量的年支出」升序重排，产能过低者沉底并重编号 */
+  var tb = document.querySelector('#main tbody');
+  if(tb){
+    var rs = Array.prototype.slice.call(tb.querySelectorAll('tr'));
+    rs.forEach(function(r){
+      var td = r.querySelector('.cqcell');
+      var t = td ? td.dataset.total : '';
+      r.__total = (t === '' || t == null) ? null : parseFloat(t);
+    });
+    rs.sort(function(x, y){
+      if(x.__total == null && y.__total == null) return 0;
+      if(x.__total == null) return 1;
+      if(y.__total == null) return -1;
+      return x.__total - y.__total;
+    });
+    rs.forEach(function(r, i){
+      tb.appendChild(r);
+      var rk = r.querySelector('.rk');
+      if(!rk) return;
+      var bb = rk.querySelector('b'), ss = rk.querySelector('s');
+      if(bb) bb.textContent = (r.__total == null ? '\u2014' : (i + 1));
+      if(ss) ss.textContent = (r.__total == null || !best) ? '产能过低'
+                            : (r.__total / best).toFixed(2) + '\u00d7';
+    });
+    rs.forEach(function(r){ r.classList.remove('top'); });
+    if(rs.length && rs[0].__total != null) rs[0].classList.add('top');
+  }
+  /* 排序指示箭头跟随当前排序依据 */
+  var vth = document.getElementById('vth');
+  if(vth) vth.textContent = '单条成本';
+  if(th) th.textContent = '月产 ' + N + ' 条的年支出 \u2193';
 }
 
 /* ── 产量测算 ── */
