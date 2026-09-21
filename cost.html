@@ -796,15 +796,22 @@ document.documentElement.classList.add('js');
      一旦菜单顺序与页面顺序不一致（章节被挪动过），高亮就会乱跳。 */
   var map = links.map(function(a){ return {a:a, el:document.querySelector(a.getAttribute('href'))}; })
                  .filter(function(x){ return x.el; })
-                 .sort(function(p,q){ return p.el.offsetTop - q.el.offsetTop; });
+                 .sort(function(p,q){ return p.el.offsetTop - q.el.offsetTop; });   /* 仅定序，不参与阈值判定 */
   var lastIdx = -1;
+  function stickPx(){
+    var cs = getComputedStyle(document.documentElement);
+    return (parseFloat(cs.getPropertyValue('--navh')) || 57)
+         + (parseFloat(cs.getPropertyValue('--subh')) || 50) + 24;
+  }
   function upd(){
-    var y = window.scrollY + (parseFloat(getComputedStyle(document.documentElement)
-              .getPropertyValue('--navh')) || 57)
-            + (parseFloat(getComputedStyle(document.documentElement)
-              .getPropertyValue('--subh')) || 50) + 24;
-    var idx = 0;
-    for(var i=0;i<map.length;i++){ if(map[i].el.offsetTop <= y) idx = i; }
+    /* 必须用视口坐标（getBoundingClientRect）判定，不能混用 offsetTop 与 scrollY：
+       offsetTop 相对 offsetParent（这里是 .wrap，位于 hero 之下，差约 350px），
+       scrollY 相对文档 —— 两个坐标系不同会把判定整体往后推一个 hero 的高度，
+       表现为「点 A 却高亮 A 的下一个」。 */
+    var off = stickPx(), idx = 0;
+    for(var i=0;i<map.length;i++){
+      if(map[i].el.getBoundingClientRect().top - off <= 0) idx = i;
+    }
     /* 滚到底部时强制选中最后一项，避免末节过短而永远选不中 */
     if(window.innerHeight + window.scrollY >= document.body.scrollHeight - 4){
       idx = map.length - 1;
