@@ -1,0 +1,17 @@
+# 统一换行符，避免 Windows / macOS / Linux 协作时产生整文件 diff 噪音
+* text=auto eol=lf
+
+*.html  text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+LICENSE text eol=lf
+_headers text eol=lf
+.nojekyll text eol=lf
+.gitignore text eol=lf
+
+# 二进制
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.woff2 binary
