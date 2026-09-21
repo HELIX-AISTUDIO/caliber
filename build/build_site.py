@@ -257,7 +257,15 @@ PLAT_SUM.sort(key=lambda x: x["lo"])
 # 指纹：随数据集变化
 import hashlib
 _sig = json.dumps([COST["plans"], RATE, SPEC, BRAND], ensure_ascii=False, sort_keys=True)
-FP = "HX-CLB-" + UPDATED.replace("-", "") + "-" + hashlib.sha256(_sig.encode()).hexdigest()[:8].upper()
+# ── 溯源指纹（两级）──────────────────────────────────────────────
+# FP_WORK    作品指纹：永久稳定，回答「这始终是我的作品」，任何数据更新都不变。
+#            所有对外文件（LICENSE / robots / _headers / SECURITY）统一携带它，
+#            避免随数据变化而失效 —— 这曾是本项目的真实缺陷（页面与许可文件指纹不一致）。
+# FP_EDITION 版本指纹：随数据哈希变化，回答「这是哪一版」。
+FP_WORK = "HX-CLB-WORK-20260921-A215F0AB"
+FP_EDITION = "HX-CLB-ED-" + UPDATED.replace("-", "") + "-" + \
+             hashlib.sha256(_sig.encode()).hexdigest()[:8].upper()
+FP = FP_WORK   # 兼容旧引用
 
 
 def f2(v):
@@ -966,7 +974,7 @@ def nav(active):
 def legal():
     return (f'<div class="legal"><div class="legal-t">{COPY}</div>'
             f'<div class="legal-b">{TERMS}</div>'
-            f'<div class="legal-f">溯源指纹 <span class="fp">{FP}</span>　·　'
+            f'<div class="legal-f">溯源指纹 <span class="fp">{FP_WORK}</span>　·　版本 <span class="fp">{FP_EDITION}</span>　·　'
             f'{BRAND} · {BRAND_CN}　·　{STUDIO} 出品　·　数据采集 {UPDATED}</div></div>')
 
 
@@ -1019,7 +1027,7 @@ def page(title, desc, nav_html, body, cost_js=False):
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23D1FE17'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23D1FE17'/%3E%3C/svg%3E">
 <!-- ============================================================
-     {FP}
+     {FP_WORK}　|　{FP_EDITION}
      {COPY}
      数据采集时点：{UPDATED}　作者：{OWNER}
      {TERMS}
@@ -1028,7 +1036,8 @@ def page(title, desc, nav_html, body, cost_js=False):
 <meta name="copyright" content="{COPY}">
 <meta name="rights" content="{TERMS}">
 <meta name="dcterms.rights" content="{COPY}">
-<meta name="fingerprint" content="{FP}">
+<meta name="fingerprint" content="{FP_WORK}">
+<meta name="edition" content="{FP_EDITION}">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate, noai, noimageai">
 <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
@@ -1525,12 +1534,24 @@ def write_all():
         for d in (ROOT, DEPLOY):
             with io.open(os.path.join(d, name), "w", encoding="utf-8") as f:
                 f.write(html)
-    # 公网附加文件
+    # 公网附加文件：统一把作品指纹替换为当前值，并补上版本指纹
     import shutil
     for extra in ("_headers", "robots.txt", "LICENSE", "SECURITY.md"):
         src = os.path.join(ROOT, extra)
-        if os.path.exists(src):
-            shutil.copy2(src, os.path.join(DEPLOY, extra))
+        if not os.path.exists(src):
+            continue
+        txt = io.open(src, encoding="utf-8").read()
+        # 任何旧指纹（含 HX-CLB-XXXX / HX-CLB-WORK-XXXX）统一替换为当前作品指纹
+        txt = re.sub(r"HX-CLB-[0-9A-Za-z-]+", FP_WORK, txt)
+        if "版本指纹" not in txt:
+            txt = re.sub(r"(溯源指纹[^\n]*\n)",
+                         r"\1版本指纹 (Edition): " + FP_EDITION + "\n", txt, count=1)
+        else:
+            txt = re.sub(r"版本指纹 \(Edition\): HX-CLB-[0-9A-Za-z-]+",
+                         "版本指纹 (Edition): " + FP_EDITION, txt, count=1)
+        io.open(src, "w", encoding="utf-8").write(txt)
+        shutil.copy2(src, os.path.join(DEPLOY, extra))
+    print("  静态文件指纹已同步：%s / %s" % (FP_WORK, FP_EDITION))
 
 
 def selfcheck():
