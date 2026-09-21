@@ -124,6 +124,21 @@ for r in ROWS:
 SINGLES = list(BY_TIER.values())
 
 
+CQ_DEFAULT = 30          # 表格滑块默认值；构建时按此预渲染，无 JS 也正确
+
+
+def delivered(r, n_col=None):
+    """该产量下每条实际成本 = 该档年支出（含多份叠加）÷ 月产量；不可行返回 None"""
+    n_col = CQ_DEFAULT if n_col is None else n_col
+    cap = r["mCap"]
+    if cap <= 0:
+        return None
+    cnt = int(math.ceil(n_col / cap - 1e-9))
+    if cnt > 4:
+        return None
+    return cnt * r["priceCNY"] / n_col
+
+
 def tname(r):
     return r["tier"] + (f' · {r["label"]}' if r["multi"] else "")
 
@@ -533,6 +548,7 @@ input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,2
 .qv{font-family:__MONO__;font-size:15px;font-weight:700;color:#D1FE17;letter-spacing:-.03em;
   min-width:78px}
 .tb-hint{flex-basis:100%;margin:0}
+th .hm{font-size:9px;letter-spacing:.04em;text-transform:none;color:#5A6069;font-weight:600}
 /* ── 覆盖平台清单 ── */
 .pcard{padding:15px 17px}
 .pcard .pn{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;color:#fff}
@@ -875,15 +891,21 @@ function rerank(src){
   });
   rs.forEach(function(r, i){
     tb.appendChild(r);
-    var rk = r.querySelector('.rk'); if(!rk) return;
-    var b = rk.querySelector('b'), ss = rk.querySelector('s');
-    if(r.__t == null){
-      if(b) b.textContent = '\u2014';
-      if(ss) ss.textContent = '产能过低';
-    } else {
-      if(b) b.textContent = i + 1;
-      if(ss) ss.textContent = money(r.__t) + (r.__n > 1 ? ' \u00b7 ' + r.__n + '\u00d7' : '');
+    var rk = r.querySelector('.rk');
+    if(rk){
+      var b = rk.querySelector('b'), ss = rk.querySelector('s');
+      if(r.__t == null){
+        if(b) b.textContent = '\u2014';
+        if(ss) ss.textContent = '产能过低';
+      } else {
+        if(b) b.textContent = i + 1;
+        if(ss) ss.textContent = money(r.__t) + (r.__n > 1 ? ' \u00b7 ' + r.__n + '\u00d7' : '');
+      }
     }
+    var c2 = r.querySelector('td[data-rated] s');
+    if(c2) c2.textContent = (r.__t == null)
+      ? '该产量下产能过低'
+      : '该产量 ' + money(r.__t / N) + '/条';
   });
   rs.forEach(function(r){ r.classList.remove('top'); });
   if(rs.length && rs[0].__t != null) rs[0].classList.add('top');
@@ -1138,7 +1160,7 @@ for r in sorted(ROWS, key=lambda x: x["perVideo"]):
         f'<td>{r["tier"]}{vl}</td>'
         f'<td class="num cell2"><b>{price_disp}</b><s>{sub}</s></td>'
         f'<td class="num">{r["monthly"]:,}</td>'
-        f'<td class="num"><span class="strong">¥{f2(r["perVideo"])}</span>'
+        f'<td class="num cell2" data-rated="{r["perVideo"]:.2f}"><span class="strong">¥{f2(r["perVideo"])}</span>'f'<s>{("该产量 ¥" + f2(delivered(r)) + "/条") if delivered(r) else "该产量下产能过低"}</s>'
         f'<div class="mini{mc}"><i style="--w:{w:.1f}%;width:{w:.1f}%"></i></div></td>'
         f'<td class="num cell2"><b>{r["perSec"]:.3f}</b><s>元/秒</s></td></tr>')
 
@@ -1334,7 +1356,7 @@ cost_body = f"""
 </section>
 
 <section id="table" class="reveal">
-  {sec_head("02", "全档位对比", "条形越长＝越省（以全场最优价为 100%）。「排名」格副行显示<b>当前月产量下</b>该档的年支出——拖动上方滑块，排名与副行会一起重算。")}
+  {sec_head("02", "全档位对比", "条形越长＝越省（以全场最优价为 100%）。「排名」格副行显示<b>当前月产量下</b>该档的年支出——拖动上方滑块，排名与副行会一起重算。「单条成本」列上行＝<b>产能用满时的单价</b>（档位固有属性，不随产量变）；下行＝<b>按你当前产量折算的实际每条</b>（买多了用不满就会变贵）。排名依据是年支出，故两者次序可能不同。")}
   <div class="toolbar">
     <span class="sub">月产量</span>
     <input type="range" id="q" class="cqr" min="1" max="200" step="1" value="30"
@@ -1351,7 +1373,7 @@ cost_body = f"""
     <span class="sub tb-hint">拖动即按该产量的年支出重排全表；产能过低者沉底。全场单档上限 91 条/月，超出按同档多份叠加（最多 4 份）。</span>
   </div>
   {table([("#", "v"), ("平台", None), ("档位", None), ("年费", "p"), ("月积分", None),
-          ("单条成本", "v"), ("元/秒", None)], main_rows, "tw scroll-y tw-main", "main")}
+          ("单条成本<br><span class=hm>用满产能 / 该产量</span>", "v"), ("元/秒", None)], main_rows, "tw scroll-y tw-main", "main")}
 </section>
 
 <section id="ladder" class="reveal">
