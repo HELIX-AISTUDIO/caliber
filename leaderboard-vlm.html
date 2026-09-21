@@ -326,6 +326,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
 .legal-f .fp{background:#0B0B0B;color:#D1FE17;padding:2.5px 9px;border-radius:6px;font-weight:600;letter-spacing:-.02em}
 
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:18px}
+/* 表格内部滚动：固定高度 + 右侧竖向滚动条（参照 arena.ai 榜页） */
+.tw.scroll-y{max-height:440px;overflow-y:auto;overscroll-behavior:contain}
+.tw.tw-main{max-height:min(72vh,640px)}
+.tw.scroll-y::-webkit-scrollbar{width:10px;height:10px}
+.tw.scroll-y::-webkit-scrollbar-track{background:rgba(255,255,255,.03);border-radius:6px}
+.tw.scroll-y::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:6px;
+  border:2px solid transparent;background-clip:content-box}
+.tw.scroll-y::-webkit-scrollbar-thumb:hover{background:rgba(209,254,23,.45);
+  background-clip:content-box;border:2px solid transparent}
+.tw.scroll-y{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
+/* 内部滚动时表头常驻 */
+.tw.scroll-y thead th{position:sticky;top:0;z-index:2;
+  background:linear-gradient(180deg,rgba(22,27,24,.98),rgba(16,20,18,.96));
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .tw table{min-width:760px}
 .tw::-webkit-scrollbar{height:9px}
 .tw::-webkit-scrollbar-thumb{background:#2A2E34;border-radius:5px}

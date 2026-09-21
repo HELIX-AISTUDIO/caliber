@@ -186,6 +186,27 @@ def f2(v):
     return f"{v:,.2f}"
 
 
+# ── 主表「月产 N 条的年支出」列：构建时按默认 10 条预渲染 ──
+# 不依赖 JS，脚本失效时该列依然正确显示，JS 只负责改数字后重算
+CQ_DEFAULT = 10
+_cq_pool = [p["priceCNY"] for p in plans if p["mCap"] >= CQ_DEFAULT]
+CQ_BEST = min(_cq_pool) if _cq_pool else None
+
+
+def cq_cell(p):
+    if p["mCap"] < CQ_DEFAULT:
+        return '<span class="cq-no">产能不足</span>'
+    t = f'¥{p["priceCNY"]:,.0f}'
+    return f'<span class="cq-best">{t} 最省</span>' if p["priceCNY"] == CQ_BEST else t
+
+
+def cq_default_text():
+    secs = CQ_DEFAULT * 30
+    mins = secs / 60
+    dur = f'{mins/60:.1f} 小时' if mins >= 60 else f'{mins:.0f} 分钟'
+    return f'= {secs:,} 秒 ≈ {dur}素材（1 条 = 30 秒）'
+
+
 # ── KPI 与建议取数（全部由数据派生，避免硬编码档位名）──
 _mid_pool = [r for r in ladder if 13 <= r["hi"] <= 28]
 mid = (min(_mid_pool, key=lambda r: r["plan"]["perVideoCNY"]) if _mid_pool else ladder[0])
@@ -200,7 +221,7 @@ def _risk_html():
         badge = ('<span class="warnbadge">最高</span>' if lv == "high"
                  else ('<span class="warnbadge" style="background:#FABF00">待核实</span>' if lv == "warn" else ""))
         out += (f'<details><summary>{badge}{r["title"]}<span class="chev">›</span></summary>'
-                f'<div class="dbody">{"<br><br>".join(r.get("body", []))}</div></details>')
+                f'<div class="dbody">{"<br><br>".join(r.get("body", []))}</div>')
     return out
 
 
@@ -545,6 +566,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
 .legal-f .fp{background:#0B0B0B;color:#D1FE17;padding:2.5px 9px;border-radius:6px;font-weight:600;letter-spacing:-.02em}
 
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:18px}
+/* 表格内部滚动：固定高度 + 右侧竖向滚动条（参照 arena.ai 榜页） */
+.tw.scroll-y{max-height:440px;overflow-y:auto;overscroll-behavior:contain}
+.tw.tw-main{max-height:min(72vh,640px)}
+.tw.scroll-y::-webkit-scrollbar{width:10px;height:10px}
+.tw.scroll-y::-webkit-scrollbar-track{background:rgba(255,255,255,.03);border-radius:6px}
+.tw.scroll-y::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:6px;
+  border:2px solid transparent;background-clip:content-box}
+.tw.scroll-y::-webkit-scrollbar-thumb:hover{background:rgba(209,254,23,.45);
+  background-clip:content-box;border:2px solid transparent}
+.tw.scroll-y{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
+/* 内部滚动时表头常驻 */
+.tw.scroll-y thead th{position:sticky;top:0;z-index:2;
+  background:linear-gradient(180deg,rgba(22,27,24,.98),rgba(16,20,18,.96));
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .tw table{min-width:760px}
 .tw::-webkit-scrollbar{height:9px}
 .tw::-webkit-scrollbar-thumb{background:#2A2E34;border-radius:5px}
@@ -963,7 +998,7 @@ for p in sorted(plans, key=lambda x: x["perVideoCNY"]):
         f'<td class="num cbar"><span class="strong">¥{f2(p["perVideoCNY"])}</span>{mini_bar(p["perVideoCNY"])}</td>'
         f'<td class="num cell2"><b>{p["perSecCNY"]:.3f}</b><s>元/秒</s></td>'
         f'<td class="num cell2"><b>{p["mCap"]:.2f}</b><s>条/月</s></td>'
-        f'<td class="num cqcell" data-p="{p["priceCNY"]:.2f}" data-c="{p["mCap"]:.4f}"></td></tr>')
+        f'<td class="num cqcell" data-p="{p["priceCNY"]:.2f}" data-c="{p["mCap"]:.4f}">{cq_cell(p)}</td></tr>')
 
 lad_rows = ""
 for i, r in enumerate(ladder):
@@ -1123,15 +1158,15 @@ cost_body = f"""
   </div>
   <div class="toolbar">
     <span class="sub">自定义月产量</span>
-    <input type="number" id="cq" class="cqin" min="1" max="2000" step="1" value="30">
-    <span class="sub cqhint" id="cqhint">= 900 秒 ≈ 15 分钟素材（1 条 = 30 秒）</span>
+    <input type="number" id="cq" class="cqin" min="1" max="2000" step="1" value="{CQ_DEFAULT}">
+    <span class="sub cqhint" id="cqhint">{cq_default_text()}</span>
   </div>
-  <div class="tw"><table id="main"><thead><tr>
+  <div class="tw scroll-y tw-main"><table id="main"><thead><tr>
     <th onclick="sortBy('v',this)">#</th><th>平台</th><th>档位</th>
     <th onclick="sortBy('p',this)" class="ctr">年费</th><th class="ctr">月积分</th>
     <th onclick="sortBy('v',this)" class="ctr">单条成本 ↓</th><th class="ctr">元/秒</th>
     <th onclick="sortBy('c',this)" class="ctr">月产能 ↓</th>
-    <th class="ctr" id="cqth">月产 30 条的年支出</th>
+    <th class="ctr" id="cqth">月产 {CQ_DEFAULT} 条的年支出</th>
   </tr></thead><tbody>
 {main_rows}
   </tbody></table></div>
@@ -1164,10 +1199,10 @@ cost_body = f"""
     <h2><span class="ey">04</span>边际成本：升档值不值</h2>
     <div class="sd">从下一档升到上一档，每多买一条产能实际多花多少钱。标尺为全场最优 ¥{f2(best)}/条。</div>
   </div>
-  <details><summary>展开完整边际成本对照（16 行）<span class="chev">›</span></summary><div class="dbody"><div class="tw"><table><thead><tr>
+  <div class="tw scroll-y"><div class="tw"><table><thead><tr>
     <th>平台</th><th>升档路径</th><th class="ctr">Δ年费</th><th class="ctr">Δ年产</th>
     <th class="ctr">边际单条</th><th class="ctr">达档均值</th><th class="ctr">判定</th>
-  </tr></thead><tbody>{marg_rows}</tbody></table></div></div></details>
+  </tr></thead><tbody>{marg_rows}</tbody></table></div></div>
   <details style="margin-top:14px">
     <summary>价格陷阱拐点在哪？<span class="chev">›</span></summary>
     <div class="dbody">
@@ -1185,10 +1220,10 @@ cost_body = f"""
     <h2><span class="ey">05</span>折扣结构：优势是真是假</h2>
     <div class="sd">用官方公示原价重算。原价下单价收敛成水平线 → 说明优势全部来自折扣力度，活动一结束就消失。「原价」列为页面划线价或次年续费全额，二者口径不同，仅用于判断「优势是否依赖活动」。</div>
   </div>
-  <details><summary>展开折扣结构原始数据（5 行）<span class="chev">›</span></summary><div class="dbody"><div class="tw"><table><thead><tr>
+  <div class="tw scroll-y"><div class="tw"><table><thead><tr>
     <th>平台</th><th class="ctr">折扣区间</th><th class="ctr">原价下单条（CNY）</th>
     <th class="ctr">原价单价极差</th><th class="ctr">折扣力度极差</th>
-  </tr></thead><tbody>{disc_rows}</tbody></table></div></div></details>
+  </tr></thead><tbody>{disc_rows}</tbody></table></div></div>
   <details style="margin-top:14px">
     <summary>谁的「规模经济」是假的？<span class="chev">›</span></summary>
     <div class="dbody">
@@ -1210,9 +1245,9 @@ cost_body = f"""
     <h2><span class="ey">06</span>海报宣传价 vs 实际到手价</h2>
     <div class="sd">各平台「低至 X 元/秒」均按非全能参考档位计算，与统一口径不可混用。</div>
   </div>
-  <details><summary>展开海报价与实际到手价对照（4 行）<span class="chev">›</span></summary><div class="dbody"><div class="tw"><table><thead><tr>
+  <div class="tw scroll-y"><div class="tw"><table><thead><tr>
     <th>平台</th><th>顶级档位</th><th class="ctr">海报「低至」</th><th class="ctr">全能参考实算</th><th class="ctr">倍差</th>
-  </tr></thead><tbody>{clm_rows}</tbody></table></div></div></details>
+  </tr></thead><tbody>{clm_rows}</tbody></table></div></div>
   <div class="note" style="margin-top:14px">
     <b>即梦与小云雀都报「¥0.40/秒」，倍差同为 1.69×，但小云雀实算 {XQ['perSecCNY']:.3f} 元/秒、即梦 {JM['perSecCNY']:.3f} 元/秒 —— 同一句「低至 0.40 元/秒」，小云雀实际成本高出 {XQ['perSecCNY']/JM['perSecCNY']-1:+.1%}。</b>
     Neowow {[c for c in claims if c['plat']=='Neowow'][0]['ratio']:.2f}× 的倍差为五家最高。
