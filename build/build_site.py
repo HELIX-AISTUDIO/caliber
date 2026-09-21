@@ -186,14 +186,39 @@ def f2(v):
 # ── 主表「月产 N 条的年支出」列：构建时按默认 10 条预渲染 ──
 # 不依赖 JS，脚本失效时该列依然正确显示，JS 只负责改数字后重算
 CQ_DEFAULT = 10
-_cq_pool = [p["priceCNY"] for p in plans if p["mCap"] >= CQ_DEFAULT]
-CQ_BEST = min(_cq_pool) if _cq_pool else None
+CQ_MAX_STACK = 4   # 同档最多叠加份数；超过则视为该档不适合承接此产量
+
+
+def cq_need(p, n_target=None):
+    """某档覆盖目标月产量的最低支出：可行返回 (份数, 总价)，不可行返回 None。
+    单一档位产能不足时按同档多份叠加（与计算器「组合订阅最省」同一逻辑）。"""
+    n_target = CQ_DEFAULT if n_target is None else n_target
+    if p["mCap"] <= 0:
+        return None
+    n = math.ceil(n_target / p["mCap"] - 1e-9)
+    if n > CQ_MAX_STACK:
+        return None
+    return n, n * p["priceCNY"]
+
+
+_cq_all = [cq_need(p) for p in plans]
+CQ_BEST = min(v[1] for v in _cq_all if v) if any(_cq_all) else None
+
 
 def cq_cell(p):
-    if p["mCap"] < CQ_DEFAULT:
-        return '<span class="cq-no">产能不足</span>'
-    t = f'¥{p["priceCNY"]:,.0f}'
-    return f'<span class="cq-best">{t} 最省</span>' if p["priceCNY"] == CQ_BEST else t
+    v = cq_need(p)
+    if not v:
+        return '<span class="cq-no">产能过低</span>'
+    n, total = v
+    t = f'¥{total:,.0f}' + (f' · {n}×' if n > 1 else '')
+    return f'<span class="cq-best">{t} 最省</span>' if total == CQ_BEST else t
+
+
+def cq_max_note():
+    mx = max(p['mCap'] for p in plans)
+    return (f'全场单档产能上限 {mx:.0f} 条/月；超出时按同档多份叠加计算'
+            f'（最多 {CQ_MAX_STACK} 份，标 ×N）。')
+
 
 def cq_default_text():
     secs = CQ_DEFAULT * 30
@@ -802,16 +827,22 @@ function syncCq(fromCalc){
   if(th) th.textContent = '月产 ' + N + ' 条的年支出';
   if(hint) hint.textContent = '= ' + secs.toLocaleString() + ' 秒 ≈ ' +
     (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '（1 条 = 30 秒）';
-  var cells = document.querySelectorAll('.cqcell'), best = Infinity;
+  var MAX_STACK = 4, cells = document.querySelectorAll('.cqcell'), best = Infinity;
+  function needOf(c, p){
+    if(!(c > 0)) return null;
+    var n = Math.ceil(N / c - 1e-9);
+    if(n > MAX_STACK) return null;
+    return {n:n, total:n * p};
+  }
   Array.prototype.forEach.call(cells, function(td){
-    var p = parseFloat(td.dataset.p), c = parseFloat(td.dataset.c);
-    if(c >= N && p < best) best = p;
+    var v = needOf(parseFloat(td.dataset.c), parseFloat(td.dataset.p));
+    if(v && v.total < best) best = v.total;
   });
   Array.prototype.forEach.call(cells, function(td){
-    var p = parseFloat(td.dataset.p), c = parseFloat(td.dataset.c);
-    if(c < N){ td.innerHTML = '<span class="cq-no">产能不足</span>'; return; }
-    var t = '\u00a5' + p.toLocaleString();
-    td.innerHTML = (p === best) ? '<span class="cq-best">' + t + ' 最省</span>' : t;
+    var v = needOf(parseFloat(td.dataset.c), parseFloat(td.dataset.p));
+    if(!v){ td.innerHTML = '<span class="cq-no">产能过低</span>'; return; }
+    var t = '\u00a5' + v.total.toLocaleString() + (v.n > 1 ? ' \u00b7 ' + v.n + '\u00d7' : '');
+    td.innerHTML = (v.total === best) ? '<span class="cq-best">' + t + ' 最省</span>' : t;
   });
 }
 
@@ -1226,6 +1257,7 @@ cost_body = f"""
            value="{CQ_DEFAULT}" aria-label="自定义月产量">
     <span class="cqval" id="cqval">{CQ_DEFAULT} 条/月</span>
     <span class="sub cqhint" id="cqhint">{cq_default_text()}</span>
+    <span class="sub cqhint" style="flex-basis:100%">{cq_max_note()}</span>
     <span class="cqpresets" id="cqpresets">
       <button type="button" class="cqp" data-n="5">5</button>
       <button type="button" class="cqp" data-n="10">10</button>
