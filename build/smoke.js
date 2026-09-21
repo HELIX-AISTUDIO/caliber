@@ -529,6 +529,16 @@ async function run(browser) {
     });
     check('反查表两块结构对称（每行都带标签）', sym.same === true, sym.labels.join('  ‖  '));
 
+    // 反查卡要与「全部档位排名」同样紧凑 —— 上一版纵向大卡约 190px/张，
+    // 用户反馈「结构好乱，而且太大了」。
+    const rh = await p.evaluate(() => {
+      const rec = [...document.querySelectorAll('.tw-rec tbody tr')].map(t => Math.round(t.getBoundingClientRect().height));
+      const main = [...document.querySelectorAll('.tw-main.on tbody tr')].slice(0, 3).map(t => Math.round(t.getBoundingClientRect().height));
+      return { rec, main, max: Math.max.apply(null, rec), same: rec.length > 0 };
+    });
+    check('反查卡高度与排名卡同级（≤150px）', rh.same && rh.max <= 150,
+      `反查 ${rh.rec.join('/')}px ｜ 排名 ${rh.main.join('/')}px`);
+
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，
     // 没有 ✕ 的话用户找不到任何方式退出（用户实测被卡住）
