@@ -53,6 +53,7 @@ UPDATED = COST["updatedAt"]
 CPV = COST["creditsPerVideo"]
 OFFICIAL_RATE = COST["officialRate"]
 AD_CLAIM = COST["adClaim"]
+SCOPE = COST["scope"]
 COLOR = {k: v["color"] for k, v in PLATFORMS.items()}
 CU = {"CNY": "¥", "USD": "$"}
 
@@ -1165,10 +1166,18 @@ cost_body = f"""
     <span><i></i>可选档位 <b>{len(ROWS)}</b></span>
     <span><i></i>汇率 <b>1 USD = {RATE}</b></span>
     <span><i></i>口径依据 <b>年费 ÷ (月积分 × 12)</b></span>
+    <span><i></i>口径范围 <b>{SCOPE["currentShort"]}</b></span>
   </div>
 </div>
 
 <div class="wrap">
+<div class="note warn" style="margin-top:28px">
+  <b>数据范围说明：</b>本表目前仅覆盖各平台的<b>{SCOPE["current"]}</b>。
+  平台上另有<b>月度会员、季度会员</b>等更短周期选项，因计价单位与折扣结构不同，
+  后续将单独补充并纳入同口径对比。<br><br>
+  <b>{SCOPE["impact"]}</b>
+</div>
+
 <section id="overview" class="reveal" style="margin-top:42px">
   <div class="grid g5">
     {kpi("单条成本最优", f"¥{f2(BEST)}", f"{_best['plat']} {tname(_best)}<br>{_best['mCap']:.2f} 条/月 · ¥{_best['perSec']:.3f}/秒", "hi")}
@@ -1285,8 +1294,19 @@ cost_body = f"""
       ⑤ <code>达标总支出最省 = 覆盖目标月产能的最低年费档位</code><br>
       ⑥ <code>组合最省 = 跨平台无界背包（容量向下取整）</code><br>
       ⑦ USD 档位按 <code>1 USD = {RATE} CNY</code>（{UPDATED} CFETS 中间价）折算<br><br>
+      <b>数据范围：</b>本表仅覆盖年费（连续包年）档位；月度 / 季度 / 按次购买尚未纳入。因计价单位与折扣结构不同，需单独归一化后并入，故「最省」结论仅在年费口径内成立。<br><br>
       <b>口径校验：</b>用各平台自己公示的兑换率反向验证步骤①。
       <b>{COST["officialRateNote"]}</b>
+    </div>
+  </details>
+  <details>
+    <summary>数据范围：本表覆盖到哪里<span class="chev">›</span></summary>
+    <div class="dbody">
+      {table([("选项", None), ("状态", None), ("说明", None)],
+             "".join(f'<tr><td>{x["label"]}</td>'
+                     f'<td class="ctr"><span class="tag {"v-good" if x["done"] else "v-warn"}">{x["status"]}</span></td>'
+                     f'<td style="white-space:normal">{x["note"]}</td></tr>' for x in SCOPE["items"]), "tw")}
+      <div class="sub" style="margin-top:10px">{SCOPE["impact"]}</div>
     </div>
   </details>
   <details>
@@ -1314,7 +1334,7 @@ cost_body = f"""
 </section>
 
 <section class="reveal">
-  {sec_head("09", "执行建议", "决策顺序：先定月产量 → 查「按产量测算」→ 用原价做压力测试。")}
+  {sec_head("09", "执行建议", "决策顺序：先定月产量 → 查「按产量测算」→ 用原价做压力测试。以下建议<b>仅适用于年费口径</b>。")}
   <div class="note good"><ul style="margin-top:0">{budget_bullets}</ul></div>
   <div class="note warn" style="margin-top:12px">
     <b>{COST["risks"][0]["title"]}</b><br>{COST["risks"][0]["body"][0]}<br><br>{COST["risks"][0]["body"][1]}

@@ -140,6 +140,25 @@ AD_CLAIM = {
     "小云雀":  {"tier": "超级会员", "perSec": 0.40},
 }
 
+# ═══════════ 数据范围 ═══════════
+# 明确「本表结论覆盖到哪里」——否则「最省」容易被误读为全平台最优。
+SCOPE = {
+    "current": "年费（连续包年）档位",
+    "currentShort": "年费档位",
+    "impact": "短周期选项缺少包年折扣，单位成本通常高于年费；"
+              "故本表的「最省」结论【仅在年费口径内成立】，不可直接外推到月付场景。",
+    "items": [
+        {"label": "年费 / 连续包年", "status": "已覆盖", "done": True,
+         "note": "本表全部档位均属此口径"},
+        {"label": "月度会员", "status": "后续补充", "done": False,
+         "note": "计价单位与折扣结构不同，需单独归一化"},
+        {"label": "季度会员", "status": "后续补充", "done": False,
+         "note": "同上"},
+        {"label": "按次购买（非会员）", "status": "后续补充", "done": False,
+         "note": "用于「订阅 vs 按量」的划算性判断"},
+    ],
+}
+
 # ═══════════ 失败重试是否扣积分（用户实测口径）═══════════
 RETRY_POLICY = [
     {"plat": "libtv",      "retry": "不扣", "basis": "用户实测"},
@@ -217,6 +236,7 @@ COST = {
     "plans": PLANS,
     "officialRate": OFFICIAL_RATE, "officialRateNote": OFFICIAL_RATE_NOTE,
     "adClaim": AD_CLAIM,
+    "scope": SCOPE,
     "retryPolicy": RETRY_POLICY, "retryNote": RETRY_NOTE,
     "crossMidnightNote": CROSS_MIDNIGHT,
     "risks": RISKS, "sources": SOURCES,
