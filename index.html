@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="5 个画布平台 Seedance 2.5 出片成本与性价比对比：libtv / Neowow / 即梦 / 小云雀 / Higgsfield，统一口径折算为单条成本与达标最省方案。">
+<meta property="og:title" content="画布平台 · Seedance 2.5 出片成本与性价比对比">
+<meta property="og:description" content="5 个平台 20 个档位，统一折算为单条成本（CNY），含达标总支出阶梯与折扣结构透视。">
+<title>画布平台 Seedance 2.5 性价比对比</title>
+<!-- ============================================================
+     CS-VPC-20260921-8CE5B15F
+     © 2026 COLORS-STUDIO. 保留所有权利 / All Rights Reserved.
+     数据采集时点：2026-09-21　作者：COLORS-STUDIO
+     本页内容（含全部价格数据、归一化模型、边际成本与达标阶梯算法、结论文字及版面设计）为作者原创成果。未经书面许可，禁止：复制或转载全文/部分内容、二次发布或镜像托管、用于商业用途、用于任何 AI 模型的训练或微调、移除或篡改版权声明与溯源指纹。允许：转发原始链接、引用结论并注明出处。
+     ============================================================ -->
+<meta name="author" content="COLORS-STUDIO">
+<meta name="copyright" content="© 2026 COLORS-STUDIO. 保留所有权利 / All Rights Reserved.">
+<meta name="rights" content="本页内容（含全部价格数据、归一化模型、边际成本与达标阶梯算法、结论文字及版面设计）为作者原创成果。未经书面许可，禁止：复制或转载全文/部分内容、二次发布或镜像托管、用于商业用途、用于任何 AI 模型的训练或微调、移除或篡改版权声明与溯源指纹。允许：转发原始链接、引用结论并注明出处。">
+<meta name="dcterms.rights" content="© 2026 COLORS-STUDIO. 保留所有权利 / All Rights Reserved.">
+<meta name="fingerprint" content="CS-VPC-20260921-8CE5B15F">
+<!-- 反爬与反 AI 抓取：不索引、不归档、不摘要、不用于模型训练 -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate, noai, noimageai">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="bingbot" content="noindex, nofollow, noarchive">
+<!-- 内容安全策略：本页为完全自包含文件，禁止加载任何外部资源、禁止被 iframe 嵌入、禁止表单外发 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden}
+body{background:#000;color:#DEE0E3;font:14px/1.7 "Inter","Inter Display","SN Pro","Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;overflow-x:hidden;
+  padding:0 0 80px;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px));
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;letter-spacing:-.006em;
+  -webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+/* 固定光晕：translate3d 提升合成层，避免移动端滚动时重绘卡顿 */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  transform:translate3d(0,0,0);will-change:transform;
+  background:
+    radial-gradient(940px 520px at 10% -8%,rgba(209,254,23,.11),transparent 66%),
+    radial-gradient(720px 440px at 102% 6%,rgba(237,21,114,.08),transparent 66%),
+    radial-gradient(860px 520px at 46% 106%,rgba(156,230,243,.055),transparent 66%)}
+.topbar{height:4px;background:linear-gradient(90deg,#D1FE17,#9DE500 55%,#ED1572);position:relative;z-index:2}
+.hero{position:relative;z-index:1;padding:38px 0 6px;margin-bottom:24px}
+.hero .inner{max-width:1240px;margin:0 auto;padding:0 24px}
+
+/* ── 浮窗主框（复刻 higgsfield 玻璃面板） ── */
+.hfcard{position:relative;overflow:hidden;border:1.5px solid #D1FE17;border-radius:24px;
+  padding:34px 32px 32px;background:rgba(11,11,11,.62);
+  -webkit-backdrop-filter:blur(40px) saturate(1.25);backdrop-filter:blur(40px) saturate(1.25);
+  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.08),0 0 76px rgba(209,254,23,.20),0 22px 60px rgba(0,0,0,.7);
+  background-image:
+    linear-gradient(rgba(209,254,23,.062) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(209,254,23,.062) 1px,transparent 1px);
+  background-size:46px 46px}
+.hfcard::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 120%,rgba(209,254,23,.10),transparent 62%)}
+h1{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:31px;font-weight:700;color:#fff;letter-spacing:-.035em;
+  line-height:1.2;position:relative;z-index:1}
+.hero .sub{color:#9EA2AD;font-size:13px;margin-top:11px;letter-spacing:0;position:relative;z-index:1}
+.hl{display:inline-block;margin-top:16px;margin-right:9px;padding:9px 17px;border-radius:999px;
+  background:#D1FE17;color:#0B0B0B;font-size:12.5px;font-weight:700;letter-spacing:-.01em;
+  box-shadow:0 0 22px rgba(209,254,23,.4);position:relative;z-index:1}
+.spec{display:inline-block;margin-top:16px;padding:9px 17px;border-radius:999px;font-size:12.5px;
+  font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;letter-spacing:-.01em;color:#D1FE17;
+  background:rgba(11,11,11,.55);border:1px solid rgba(209,254,23,.34);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);position:relative;z-index:1}
+.disc{margin-top:20px;display:flex;gap:11px;align-items:flex-start;padding:13px 17px;border-radius:14px;
+  background:rgba(250,188,0,.09);border:1px solid rgba(250,188,0,.34);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  font-size:12.5px;color:#E4D3A8;line-height:1.65;position:relative;z-index:1;letter-spacing:0}
+.disc b{color:#FABC00;font-weight:600}
+.disc-i{flex:0 0 19px;height:19px;border-radius:50%;background:#FABC00;color:#0B0B0B;
+  font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:2px;
+  font-family:"Inter","Inter Display","SN Pro","Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif}
+
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+h2{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:17px;font-weight:700;margin:46px 0 15px;padding-left:14px;
+  border-left:4px solid #D1FE17;color:#fff;letter-spacing:-.018em}
+h3{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;font-weight:700;margin:25px 0 11px;color:#C8CAD0;letter-spacing:-.01em}
+
+/* ── 玻璃浮窗卡片 ── */
+.card,.kpi,.note{background:rgba(11,11,11,.62);border:1px solid rgba(255,255,255,.14);
+  border-radius:24px;-webkit-backdrop-filter:blur(24px) saturate(1.2);backdrop-filter:blur(24px) saturate(1.2);
+  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.05),0 12px 34px rgba(0,0,0,.58)}
+.card{padding:19px 21px}
+.grid{display:grid;gap:15px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g5{grid-template-columns:repeat(auto-fit,minmax(206px,1fr))}
+.kpi{padding:17px 19px;position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#2E3031}
+.kpi.good::before{background:#D1FE17}
+.kpi.info::before{background:#3280FF}
+.kpi.warn::before{background:#FABC00}
+.kpi.bad::before{background:#FB2C36}
+.kpi.pink::before{background:#ED1572}
+.kpi.hi{border-color:rgba(209,254,23,.62);box-shadow:inset 0 0 0 .61px rgba(209,254,23,.18),0 0 44px rgba(209,254,23,.16),0 12px 34px rgba(0,0,0,.6)}
+.kpi.hi .v{color:#D1FE17}
+.kpi .t{font-size:11px;color:#9EA2AD;letter-spacing:.07em;font-weight:600;text-transform:uppercase}
+.kpi .v{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:23px;font-weight:600;margin:9px 0 5px;color:#fff;letter-spacing:-.025em}
+.kpi .d{font-size:12px;color:#9EA2AD;line-height:1.6;letter-spacing:0}
+
+/* ── 表格 ── */
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
+  background:rgba(11,11,11,.62);border:1px solid rgba(255,255,255,.14);border-radius:24px;overflow:hidden;
+  -webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
+  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.05),0 12px 34px rgba(0,0,0,.58)}
+th{background:rgba(255,255,255,.045);color:#9EA2AD;font-weight:600;font-size:11px;text-align:left;
+  padding:12px 13px;white-space:nowrap;letter-spacing:.055em;text-transform:uppercase;
+  border-bottom:1px solid rgba(255,255,255,.14);cursor:pointer;user-select:none}
+th:hover{color:#D1FE17}
+th.ctr,td.ctr{text-align:center}
+td{padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.055);white-space:nowrap;color:#DEE0E3;letter-spacing:0}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:rgba(209,254,23,.05)}
+tbody tr.top{background:rgba(209,254,23,.07)}
+tbody tr.top td:first-child{box-shadow:inset 4px 0 0 #D1FE17}
+.num{text-align:right;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;letter-spacing:-.02em}
+.cny{font-size:10.5px;color:#717684;font-weight:400;letter-spacing:0}
+.strong{color:#D1FE17;font-weight:600}
+.ybest{color:#0B0B0B;font-weight:700;background:#D1FE17}
+.rk{color:#5E636E;font-weight:600}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:middle;
+  box-shadow:0 0 8px currentColor}
+.tagu{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:10px;
+  font-weight:700;letter-spacing:.04em;background:rgba(237,21,114,.2);color:#FF6BAE;border:1px solid rgba(237,21,114,.55)}
+
+/* ── 条形图 ── */
+.bar-row{display:grid;grid-template-columns:212px 1fr 78px;align-items:center;gap:12px;margin-bottom:8px}
+.bar-label{font-size:12.5px;color:#DEE0E3;letter-spacing:0}
+.bar-track{height:16px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.bar-fill{height:100%;border-radius:6px;transition:width .55s cubic-bezier(.22,1,.36,1)}
+.b-good{background:linear-gradient(90deg,#829B19,#D1FE17);box-shadow:0 0 14px rgba(209,254,23,.35)}
+.b-mid{background:linear-gradient(90deg,#B07A00,#FABC00)}
+.b-bad{background:linear-gradient(90deg,#7A1234,#ED1572)}
+.bar-val{text-align:right;font-size:12.5px;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;color:#DEE0E3;letter-spacing:-.02em}
+
+/* ── 标签 ── */
+.tag{display:inline-block;padding:3px 11px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.03em}
+.v-good{background:#D1FE17;color:#0B0B0B;box-shadow:0 0 14px rgba(209,254,23,.35)}
+.v-warn{background:rgba(250,188,0,.15);color:#FABC00;border:1px solid rgba(250,188,0,.45)}
+.v-bad{background:rgba(251,44,54,.14);color:#FF6568;border:1px solid rgba(251,44,54,.42)}
+
+/* ── 说明块 ── */
+.note{padding:15px 19px;font-size:13px;color:#DEE0E3;border-left:4px solid #D1FE17;letter-spacing:0}
+.note.warn{border-left-color:#FABC00;background:rgba(24,19,7,.72)}
+.note.good{border-left-color:#D1FE17;background:rgba(15,20,8,.72)}
+.note.pink{border-left-color:#ED1572;background:rgba(22,8,17,.72)}
+.note b{color:#fff;font-weight:600}
+.note+.note{margin-top:12px}
+ul{margin:9px 0 0 19px}
+li{margin:7px 0;color:#DEE0E3;font-size:13px;letter-spacing:0}
+li::marker{color:#D1FE17}
+code{background:rgba(209,254,23,.11);border:1px solid rgba(209,254,23,.22);padding:2px 7px;border-radius:7px;
+  font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:#D1FE17;font-weight:500;letter-spacing:-.02em}
+.ctrl{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:16px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:320px;height:6px;border-radius:4px;outline:none;
+  background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;
+  background:#D1FE17;cursor:pointer;border:4px solid #000;box-shadow:0 0 16px rgba(209,254,23,.75)}
+.big{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:20px;font-weight:600;color:#D1FE17;letter-spacing:-.025em}
+.mono{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:-.02em}
+.foot{margin-top:50px;color:#5E636E;font-size:12px;text-align:center;
+  border-top:1px solid rgba(255,255,255,.1);padding-top:20px;letter-spacing:0}
+/* ── 版权与溯源块 ── */
+.legal{margin-top:20px;padding:16px 20px;border-radius:20px;background:rgba(11,11,11,.62);
+  border:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
+  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.05);font-size:11.5px;color:#717684;
+  line-height:1.75;letter-spacing:0}
+.legal-t{color:#C8CAD0;font-weight:600;font-size:12.5px;margin-bottom:6px}
+.legal-f{margin-top:8px;color:#5E636E}
+.legal-f .fp{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#D1FE17;font-weight:500;letter-spacing:-.02em;
+  background:rgba(209,254,23,.09);border:1px solid rgba(209,254,23,.22);padding:1px 7px;border-radius:6px}
+/* ── 打印 / 存 PDF：强制浅色，版权页保留 ── */
+@media print{
+  body{background:#fff!important;color:#000!important;padding:0}
+  body::before{display:none!important}
+  .topbar{background:#000!important}
+  .hfcard,.card,.kpi,.note,table,.legal{background:#fff!important;border-color:#9AA0A6!important;
+    box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .hfcard{background-image:none!important;border-color:#111!important}
+  h1,h2,h3,.kpi .v,.strong,.legal-t,.bar-val,td,th,li{color:#000!important}
+  .hl{background:#000!important;color:#fff!important;box-shadow:none!important}
+  .disc{background:#fff!important;border-color:#B8860B!important;color:#333!important}
+  .disc b,.disc-i{color:#8A6D00!important}
+  .tw{overflow:visible!important}
+  .tw table{min-width:0!important}
+  th{background:#F1F3F4!important;color:#000!important}
+  a{color:#000!important}
+}
+.mb22{margin-bottom:22px}
+.sub{color:#9EA2AD;font-size:12.5px;letter-spacing:0}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:24px}
+.tw table{min-width:720px}
+.tw::-webkit-scrollbar{height:9px}
+.tw::-webkit-scrollbar-thumb{background:#2E3031;border-radius:5px}
+.tw::-webkit-scrollbar-track{background:transparent}
+/* 微信 X5 / 旧 WebView 不支持 backdrop-filter：退化为不透明面，保证文字对比度 */
+@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){
+  .card,.kpi,.note,table{background:#0F1113}
+  .hfcard{background:#070A05}
+  .spec{background:#0B0B0B}
+}
+@media (max-width:820px){
+  .topbar{height:3px}
+  .hero{padding:24px 0 4px;margin-bottom:20px}
+  .hero .inner,.wrap{padding:0 14px}
+  .hfcard{padding:24px 19px 22px;border-radius:20px;background-size:34px 34px}
+  h1{font-size:20px;letter-spacing:-.03em}
+  h2{font-size:15px;margin:32px 0 12px}
+  .g5,.g3{grid-template-columns:1fr 1fr}
+  .kpi .v{font-size:19px}
+  .bar-row{grid-template-columns:1fr 62px;gap:8px}
+  .bar-label{grid-column:1;font-size:12px}
+  .bar-track{grid-column:1}
+  .bar-val{grid-column:2;grid-row:1/3;align-self:center}
+  .ctrl{gap:10px}
+  input[type=range]{width:100%}
+  .spec{font-size:11px}
+  .card,.kpi,.note,table{border-radius:18px}
+}
+@media (max-width:520px){ .g5,.g3{grid-template-columns:1fr} }
+</style></head><body>
+
+<div class="topbar"></div>
+<div class="hero"><div class="inner"><div class="hfcard">
+<h1>画布平台 · Seedance 2.5 出片成本与性价比对比</h1>
+<div class="sub">5 个平台 / 20 个档位 · 币种 CNY + USD · 汇率 1 USD = 6.7487 CNY（2026-09-21）</div>
+<div><span class="hl">全部折算为同一口径可比</span><span class="spec">Seedance 2.5 · 720p · 16:9 · 30s · 全能参考</span></div>
+<div class="disc"><span class="disc-i">!</span><span>
+<b>价格说明：</b>本页所有会员年费与单条生成价格，均取决于各平台<b>当前的活动力度与限时优惠</b>，随活动周期、渠道与档位政策浮动，<b>仅代表本页数据采集时点（2026-09-21）的情况，不代表最终价格</b>。请以下单时平台页面实际显示为准。
+</span></div>
+</div></div></div>
+
+<div class="wrap">
+
+<h2>一、计算口径</h2>
+<div class="note">
+<b>核心问题：</b>五个平台的「积分」是各自发行的内部计价币，币值互不相同 —— 同样一条 30 秒视频，即梦扣 <b>600</b> 分、小云雀扣 <b>800</b> 分、libtv 扣 <b>1,380</b> 分、Higgsfield 扣 <b>210</b> 分、Neowow 扣 <b>7,500</b> 分。<b>直接比较积分消耗没有意义</b>，必须先压平币值再折算成现金。<br><br>
+<b>归一化链条：</b><br>
+① <code>本币/积分 = 年费 ÷ (月积分 × 12)</code><br>
+② <code>单条成本 = 本币/积分 × 每条消耗积分</code> &nbsp;← 唯一可跨平台比较的价格<br>
+③ <code>月产能 = 月积分 ÷ 每条消耗积分</code>　<code>年产能 = 月产能 × 12</code><br>
+④ <code>边际成本 = Δ年费 ÷ Δ年产能</code> &nbsp;← 判断升级档位是否值得<br>
+⑤ <code>达标总支出最省 = 覆盖目标月产能的最低年费档位</code><br>
+⑥ USD 档位按 <code>1 USD = 6.7487 CNY</code>（2026-09-21 中国外汇交易中心中间价）折 CNY 后统一排序<br><br>
+<b>口径校验：</b>用各平台自己公示的兑换率反向验证步骤①。Neowow 公示 180 / 282 / 350 / 371 积分/元，本表推算 <b>180.3 / 282.5 / 350.9 / 371.1</b>；小云雀公示 ¥10 = 21.9 / 23.2 / 28.8 / 30.0 积分，本表推算 21.98 / 23.22 / 28.80 / 30.00；libtv、即梦同样吻合。全表最大偏差 <b>1.55%</b>，归一化口径成立。<br><br>
+<b>⚠ 价格时效性声明：</b>本页所有会员年费与单条生成价格，均取决于各平台<b>当前的活动力度与限时优惠</b>，会随活动周期、渠道与档位政策浮动，<b>仅代表 2026-09-21 采集时点的情况，不代表最终价格</b>。本页的价值在于「方法」而非「数字」—— 归一化公式与阶梯算法在任何价格下都成立，把最新价格代入即可自行重算。请以下单时平台页面实际显示为准。
+</div>
+
+<h2>二、关键结论</h2>
+<div class="grid g5">
+  <div class="kpi hi"><div class="t">全场单条成本最优</div>
+    <div class="v">¥20.21</div>
+    <div class="d">Neowow ULTRA（49.07 条/月，¥11,899/年）<br>
+    即梦超级会员 ¥20.22 实质并列，差 0.07%</div></div>
+
+  <div class="kpi good"><div class="t">20 条/月附近最省</div>
+    <div class="v">¥5,199</div>
+    <div class="d">即梦高级会员，20.53 条/月，¥21.10/条<br>
+    单价与总支出<i>双优</i>，最干净的一档</div></div>
+
+  <div class="kpi good"><div class="t">39–49 条/月最省</div>
+    <div class="v">¥11,899</div>
+    <div class="d">Neowow ULTRA。月需 ≤49 条时年费仅为即梦超级的 54%，单价几乎持平</div></div>
+
+  <div class="kpi pink"><div class="t">海外平台溢价</div>
+    <div class="v">2.31×</div>
+    <div class="d">Higgsfield 最优档 Ultra ¥46.77/条<br>
+    <b>海外平台在这条赛道没有成本优势</b></div></div>
+
+  <div class="kpi bad"><div class="t">单价最差档位</div>
+    <div class="v">5.26×</div>
+    <div class="d">Higgsfield Starter ¥106.29/条<br>
+    低档位普遍是「高价试用」陷阱</div></div>
+</div>
+
+<h2>三、全档位主表（按单条成本升序，统一折算 CNY）</h2>
+<div class="note" style="margin-bottom:14px">
+Higgsfield 三档为 USD 报价，年费栏显示本币并在下方标注折合 CNY；「单条成本」与「相对最优」两列已统一折算，故可直接排序。Higgsfield 报价<b>不含 VAT 及地方税</b>，实际到手成本需再上浮。
+</div>
+<div class="tw"><table id="main"><thead><tr>
+<th onclick="sortBy('v',this)">#</th><th>平台</th><th>档位</th>
+<th onclick="sortBy('p',this)" class="ctr">年费</th><th class="ctr">月积分</th>
+<th class="ctr">元/积分</th>
+<th onclick="sortBy('v',this)" class="ctr">单条成本 ▾</th><th class="ctr">元/秒</th>
+<th onclick="sortBy('c',this)" class="ctr">月产能 ▾</th><th class="ctr">年产能</th><th class="ctr">相对最优</th>
+</tr></thead><tbody>
+<tr class="top" data-v="20.2089" data-c="49.067" data-p="11899.00"><td class="ctr rk">①</td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>ULTRA</td><td class="num">¥11,899</td><td class="num">368,000</td><td class="num">0.00269</td><td class="num strong">¥20.21</td><td class="num">0.674</td><td class="num">49.07</td><td class="num">589</td><td class="num ybest">1.000×</td></tr><tr class="" data-v="20.2222" data-c="90.000" data-p="21840.00"><td class="ctr rk">②</td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>超级会员</td><td class="num">¥21,840</td><td class="num">54,000</td><td class="num">0.03370</td><td class="num strong">¥20.22</td><td class="num">0.674</td><td class="num">90.00</td><td class="num">1080</td><td class="num ">1.001×</td></tr><tr class="" data-v="21.0998" data-c="20.533" data-p="5199.00"><td class="ctr rk">③</td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>高级会员</td><td class="num">¥5,199</td><td class="num">12,320</td><td class="num">0.03517</td><td class="num strong">¥21.10</td><td class="num">0.703</td><td class="num">20.53</td><td class="num">246</td><td class="num ">1.044×</td></tr><tr class="" data-v="21.3759" data-c="38.400" data-p="9850.00"><td class="ctr rk">4</td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>MAX</td><td class="num">¥9,850</td><td class="num">288,000</td><td class="num">0.00285</td><td class="num strong">¥21.38</td><td class="num">0.713</td><td class="num">38.40</td><td class="num">461</td><td class="num ">1.058×</td></tr><tr class="" data-v="21.8591" data-c="36.594" data-p="9599.00"><td class="ctr rk">5</td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>至尊版</td><td class="num">¥9,599</td><td class="num">50,500</td><td class="num">0.01584</td><td class="num strong">¥21.86</td><td class="num">0.729</td><td class="num">36.59</td><td class="num">439</td><td class="num ">1.082×</td></tr><tr class="" data-v="23.4873" data-c="23.768" data-p="6699.00"><td class="ctr rk">6</td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>豪华版</td><td class="num">¥6,699</td><td class="num">32,800</td><td class="num">0.01702</td><td class="num strong">¥23.49</td><td class="num">0.783</td><td class="num">23.77</td><td class="num">285</td><td class="num ">1.162×</td></tr><tr class="" data-v="26.5509" data-c="14.400" data-p="4588.00"><td class="ctr rk">7</td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>Pro</td><td class="num">¥4,588</td><td class="num">108,000</td><td class="num">0.00354</td><td class="num strong">¥26.55</td><td class="num">0.885</td><td class="num">14.40</td><td class="num">173</td><td class="num ">1.314×</td></tr><tr class="" data-v="26.6667" data-c="68.250" data-p="21840.00"><td class="ctr rk">8</td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>超级会员</td><td class="num">¥21,840</td><td class="num">54,600</td><td class="num">0.03333</td><td class="num strong">¥26.67</td><td class="num">0.889</td><td class="num">68.25</td><td class="num">819</td><td class="num ">1.320×</td></tr><tr class="" data-v="27.5083" data-c="11.812" data-p="3899.00"><td class="ctr rk">9</td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>高级版</td><td class="num">¥3,899</td><td class="num">16,300</td><td class="num">0.01993</td><td class="num strong">¥27.51</td><td class="num">0.917</td><td class="num">11.81</td><td class="num">142</td><td class="num ">1.361×</td></tr><tr class="" data-v="27.7722" data-c="15.000" data-p="4999.00"><td class="ctr rk">10</td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>高级会员</td><td class="num">¥4,999</td><td class="num">12,000</td><td class="num">0.03472</td><td class="num strong">¥27.77</td><td class="num">0.926</td><td class="num">15.00</td><td class="num">180</td><td class="num ">1.374×</td></tr><tr class="" data-v="29.9750" data-c="3.333" data-p="1199.00"><td class="ctr rk">11</td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>进阶版</td><td class="num">¥1,199</td><td class="num">4,600</td><td class="num">0.02172</td><td class="num strong">¥29.97</td><td class="num">0.999</td><td class="num">3.33</td><td class="num">40</td><td class="num ">1.483×</td></tr><tr class="" data-v="34.4540" data-c="2.900" data-p="1199.00"><td class="ctr rk">12</td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>标准会员</td><td class="num">¥1,199</td><td class="num">2,320</td><td class="num">0.04307</td><td class="num strong">¥34.45</td><td class="num">1.148</td><td class="num">2.90</td><td class="num">35</td><td class="num ">1.705×</td></tr><tr class="" data-v="36.3855" data-c="1.038" data-p="453.00"><td class="ctr rk">13</td><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>基础会员</td><td class="num">¥453</td><td class="num">830</td><td class="num">0.04548</td><td class="num strong">¥36.39</td><td class="num">1.213</td><td class="num">1.04</td><td class="num">12</td><td class="num ">1.800×</td></tr><tr class="" data-v="41.5972" data-c="1.200" data-p="599.00"><td class="ctr rk">14</td><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>PLUS</td><td class="num">¥599</td><td class="num">9,000</td><td class="num">0.00555</td><td class="num strong">¥41.60</td><td class="num">1.387</td><td class="num">1.20</td><td class="num">14</td><td class="num ">2.058×</td></tr><tr class="" data-v="42.9638" data-c="3.683" data-p="1899.00"><td class="ctr rk">15</td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>标准会员</td><td class="num">¥1,899</td><td class="num">2,210</td><td class="num">0.07161</td><td class="num strong">¥42.96</td><td class="num">1.432</td><td class="num">3.68</td><td class="num">44</td><td class="num ">2.126×</td></tr><tr class="" data-v="43.6233" data-c="1.087" data-p="569.00"><td class="ctr rk">16</td><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>标准版</td><td class="num">¥569</td><td class="num">1,500</td><td class="num">0.03161</td><td class="num strong">¥43.62</td><td class="num">1.454</td><td class="num">1.09</td><td class="num">13</td><td class="num ">2.159×</td></tr><tr class="" data-v="45.4483" data-c="1.208" data-p="659.00"><td class="ctr rk">17</td><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>基础会员</td><td class="num">¥659</td><td class="num">725</td><td class="num">0.07575</td><td class="num strong">¥45.45</td><td class="num">1.515</td><td class="num">1.21</td><td class="num">14</td><td class="num ">2.249×</td></tr><tr class="" data-v="46.7685" data-c="14.286" data-p="8017.46"><td class="ctr rk">18</td><td><span class="dot" style="background:#ED1572"></span>Higgsfield<span class=tagu>USD</span></td><td>Ultra</td><td class="num">$1,188<div class="cny">≈¥8,017</div></td><td class="num">3,000</td><td class="num">0.22271</td><td class="num strong">¥46.77</td><td class="num">1.559</td><td class="num">14.29</td><td class="num">171</td><td class="num ">2.314×</td></tr><tr class="" data-v="55.2719" data-c="4.762" data-p="3158.39"><td class="ctr rk">19</td><td><span class="dot" style="background:#ED1572"></span>Higgsfield<span class=tagu>USD</span></td><td>Plus</td><td class="num">$468<div class="cny">≈¥3,158</div></td><td class="num">1,000</td><td class="num">0.26320</td><td class="num strong">¥55.27</td><td class="num">1.842</td><td class="num">4.76</td><td class="num">57</td><td class="num ">2.735×</td></tr><tr class="" data-v="106.2920" data-c="0.952" data-p="1214.77"><td class="ctr rk">20</td><td><span class="dot" style="background:#ED1572"></span>Higgsfield<span class=tagu>USD</span></td><td>Starter</td><td class="num">$180<div class="cny">≈¥1,215</div></td><td class="num">200</td><td class="num">0.50615</td><td class="num strong">¥106.29</td><td class="num">3.543</td><td class="num">0.95</td><td class="num">11</td><td class="num ">5.260×</td></tr>
+</tbody></table></div>
+<div class="sub" style="margin-top:10px">左右滑动查看完整表格 · 点击表头可排序 ·「相对最优」= 本档单条成本 ÷ 全场最低单条成本（1.000× 为最优）</div>
+
+<h2>四、单条成本排行</h2>
+<div class="card"><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#00C65A"></span>Neowow ULTRA</div><div class="bar-track"><div class="bar-fill b-good" style="width:19.0%"></div></div><div class="bar-val">¥20.21</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#3280FF"></span>即梦 超级会员</div><div class="bar-track"><div class="bar-fill b-good" style="width:19.0%"></div></div><div class="bar-val">¥20.22</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#3280FF"></span>即梦 高级会员</div><div class="bar-track"><div class="bar-fill b-good" style="width:19.9%"></div></div><div class="bar-val">¥21.10</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#00C65A"></span>Neowow MAX</div><div class="bar-track"><div class="bar-fill b-good" style="width:20.1%"></div></div><div class="bar-val">¥21.38</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 至尊版</div><div class="bar-track"><div class="bar-fill b-mid" style="width:20.6%"></div></div><div class="bar-val">¥21.86</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 豪华版</div><div class="bar-track"><div class="bar-fill b-mid" style="width:22.1%"></div></div><div class="bar-val">¥23.49</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#00C65A"></span>Neowow Pro</div><div class="bar-track"><div class="bar-fill b-mid" style="width:25.0%"></div></div><div class="bar-val">¥26.55</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#FABC00"></span>小云雀 超级会员</div><div class="bar-track"><div class="bar-fill b-mid" style="width:25.1%"></div></div><div class="bar-val">¥26.67</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 高级版</div><div class="bar-track"><div class="bar-fill b-mid" style="width:25.9%"></div></div><div class="bar-val">¥27.51</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#FABC00"></span>小云雀 高级会员</div><div class="bar-track"><div class="bar-fill b-mid" style="width:26.1%"></div></div><div class="bar-val">¥27.77</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 进阶版</div><div class="bar-track"><div class="bar-fill b-mid" style="width:28.2%"></div></div><div class="bar-val">¥29.97</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#FABC00"></span>小云雀 标准会员</div><div class="bar-track"><div class="bar-fill b-bad" style="width:32.4%"></div></div><div class="bar-val">¥34.45</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#FABC00"></span>小云雀 基础会员</div><div class="bar-track"><div class="bar-fill b-bad" style="width:34.2%"></div></div><div class="bar-val">¥36.39</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#00C65A"></span>Neowow PLUS</div><div class="bar-track"><div class="bar-fill b-bad" style="width:39.1%"></div></div><div class="bar-val">¥41.60</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#3280FF"></span>即梦 标准会员</div><div class="bar-track"><div class="bar-fill b-bad" style="width:40.4%"></div></div><div class="bar-val">¥42.96</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#9CE6F3"></span>libtv 标准版</div><div class="bar-track"><div class="bar-fill b-bad" style="width:41.0%"></div></div><div class="bar-val">¥43.62</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#3280FF"></span>即梦 基础会员</div><div class="bar-track"><div class="bar-fill b-bad" style="width:42.8%"></div></div><div class="bar-val">¥45.45</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#ED1572"></span>Higgsfield Ultra</div><div class="bar-track"><div class="bar-fill b-bad" style="width:44.0%"></div></div><div class="bar-val">¥46.77</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#ED1572"></span>Higgsfield Plus</div><div class="bar-track"><div class="bar-fill b-bad" style="width:52.0%"></div></div><div class="bar-val">¥55.27</div></div><div class="bar-row"><div class="bar-label"><span class="dot" style="background:#ED1572"></span>Higgsfield Starter</div><div class="bar-track"><div class="bar-fill b-bad" style="width:100.0%"></div></div><div class="bar-val">¥106.29</div></div></div>
+<div class="note good" style="margin-top:14px">
+<b>看点：</b>Neowow ULTRA 与即梦超级会员的「元/秒」均为 <b>¥0.674</b>，完全相同 —— 两家顶级档位的定价密度已收敛到同一水平，此时比拼的不再是单价而是年费门槛与产能上限。Higgsfield 最优档为 <b>¥1.559/秒</b>，约为前者的 2.3 倍。
+</div>
+
+<h2>五、边际成本阶梯：升档到底值不值</h2>
+<div class="note" style="margin-bottom:14px">
+<b>边际成本</b>指从下一档升到上一档，每多获得一条视频产能实际多花多少钱。<b>判定标尺为全场最优单价 ¥20.21/条</b>：边际成本 ≤ ¥20.5 说明这一步买到的产能已达到甚至优于全场最优水平；¥20.5–26 为一般；&gt; ¥26 说明你在为不需要的产能付费。
+</div>
+<div class="tw"><table><thead><tr>
+<th>平台</th><th>升档路径</th><th class="ctr">Δ年费</th><th class="ctr">Δ年产能</th>
+<th class="ctr">边际单条成本</th><th class="ctr">达档平均成本</th><th class="ctr">判定</th>
+</tr></thead><tbody><tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>标准版 → 进阶版</td><td class="num">¥630</td><td class="num">+27 条/年</td><td class="num strong">¥23.37</td><td class="num">29.97</td><td><span class="tag v-warn">一般</span></td></tr><tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>进阶版 → 高级版</td><td class="num">¥2,700</td><td class="num">+102 条/年</td><td class="num strong">¥26.54</td><td class="num">27.51</td><td><span class="tag v-bad">不建议</span></td></tr><tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>高级版 → 豪华版</td><td class="num">¥2,800</td><td class="num">+143 条/年</td><td class="num strong">¥19.52</td><td class="num">23.49</td><td><span class="tag v-good">强烈推荐</span></td></tr><tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>豪华版 → 至尊版</td><td class="num">¥2,900</td><td class="num">+154 条/年</td><td class="num strong">¥18.84</td><td class="num">21.86</td><td><span class="tag v-good">强烈推荐</span></td></tr><tr><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>PLUS → Pro</td><td class="num">¥3,989</td><td class="num">+158 条/年</td><td class="num strong">¥25.18</td><td class="num">26.55</td><td><span class="tag v-warn">一般</span></td></tr><tr><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>Pro → MAX</td><td class="num">¥5,262</td><td class="num">+288 条/年</td><td class="num strong">¥18.27</td><td class="num">21.38</td><td><span class="tag v-good">强烈推荐</span></td></tr><tr><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>MAX → ULTRA</td><td class="num">¥2,049</td><td class="num">+128 条/年</td><td class="num strong">¥16.01</td><td class="num">20.21</td><td><span class="tag v-good">强烈推荐</span></td></tr><tr><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>基础会员 → 标准会员</td><td class="num">¥1,240</td><td class="num">+30 条/年</td><td class="num strong">¥41.75</td><td class="num">42.96</td><td><span class="tag v-bad">不建议</span></td></tr><tr><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>标准会员 → 高级会员</td><td class="num">¥3,300</td><td class="num">+202 条/年</td><td class="num strong">¥16.32</td><td class="num">21.10</td><td><span class="tag v-good">强烈推荐</span></td></tr><tr><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>高级会员 → 超级会员</td><td class="num">¥16,641</td><td class="num">+834 条/年</td><td class="num strong">¥19.96</td><td class="num">20.22</td><td><span class="tag v-good">强烈推荐</span></td></tr><tr><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>基础会员 → 标准会员</td><td class="num">¥746</td><td class="num">+22 条/年</td><td class="num strong">¥33.38</td><td class="num">34.45</td><td><span class="tag v-bad">不建议</span></td></tr><tr><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>标准会员 → 高级会员</td><td class="num">¥3,800</td><td class="num">+145 条/年</td><td class="num strong">¥26.17</td><td class="num">27.77</td><td><span class="tag v-bad">不建议</span></td></tr><tr><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>高级会员 → 超级会员</td><td class="num">¥16,841</td><td class="num">+639 条/年</td><td class="num strong">¥26.36</td><td class="num">26.67</td><td><span class="tag v-bad">不建议</span></td></tr><tr><td><span class="dot" style="background:#ED1572"></span>Higgsfield</td><td>Starter → Plus</td><td class="num">¥1,944</td><td class="num">+46 条/年</td><td class="num strong">¥42.52</td><td class="num">55.27</td><td><span class="tag v-bad">不建议</span></td></tr><tr><td><span class="dot" style="background:#ED1572"></span>Higgsfield</td><td>Plus → Ultra</td><td class="num">¥4,859</td><td class="num">+114 条/年</td><td class="num strong">¥42.52</td><td class="num">46.77</td><td><span class="tag v-bad">不建议</span></td></tr></tbody></table></div>
+<div class="note" style="margin-top:14px">
+<b>关键发现：</b><br>
+① <b>全场最优升级：</b>Neowow MAX → ULTRA，边际 ¥16.01/条，<b>低于全场最优单价 ¥20.21</b> —— 这一步买到的产能比市场上任何单一档位都便宜。<br>
+② <b>全场最差升级：</b>Higgsfield Starter → Plus，边际 ¥42.52/条，是最优解 2.10 倍。<br>
+③ <b>升级路径并不单调。</b>libtv 在「进阶 → 高级」处回升、即梦在「高级 → 超级」处回升，<b>这两处就是各自设置的「价格陷阱拐点」</b>：到了这里继续升档性价比明显劣化，宁可选另一家的对应档位。<br>
+④ <b>小云雀与 Higgsfield 的阶梯最陡：</b>两家从最低档往上的边际成本远高于国内第一梯队，说明它们的低档位不是「便宜入口」而是「高价试用装」，要降到有竞争力的单价必须直接上顶档。
+</div>
+
+<h2>六、达标总支出阶梯（核心结论表）</h2>
+<div class="note warn" style="margin-bottom:14px">
+<b>「单条成本最省」≠「花钱最省」。</b>若你的产量用不满某个高档位，为多余的产能付费反而不如买一个单价更高但刚好够用的小档位。下表按「单一订阅」约束（不重复开卡、不混平台）列出每个产量区间的最省方案。
+</div>
+<div class="tw"><table><thead><tr>
+<th class="ctr">目标月产量区间</th><th>最省方案</th><th class="ctr">年支出</th>
+<th class="ctr">实际产能</th><th class="ctr">单条成本</th><th class="ctr">相对最优单价</th>
+</tr></thead><tbody><tr><td class="num">0 – 1.04 条</td><td><span class="dot" style="background:#FABC00"></span>小云雀 基础会员</td><td class="num strong">¥453</td><td class="num">1.04 条/月</td><td class="num">¥36.39</td><td class="num">1.80×</td></tr><tr><td class="num">1.09 – 1.20 条</td><td><span class="dot" style="background:#00C65A"></span>Neowow PLUS</td><td class="num strong">¥599</td><td class="num">1.20 条/月</td><td class="num">¥41.60</td><td class="num">2.06×</td></tr><tr><td class="num">1.21 – 3.33 条</td><td><span class="dot" style="background:#9CE6F3"></span>libtv 进阶版</td><td class="num strong">¥1,199</td><td class="num">3.33 条/月</td><td class="num">¥29.97</td><td class="num">1.48×</td></tr><tr><td class="num">3.33 – 3.68 条</td><td><span class="dot" style="background:#3280FF"></span>即梦 标准会员</td><td class="num strong">¥1,899</td><td class="num">3.68 条/月</td><td class="num">¥42.96</td><td class="num">2.13×</td></tr><tr><td class="num">3.68 – 4.76 条</td><td><span class="dot" style="background:#ED1572"></span>Higgsfield Plus</td><td class="num strong">¥3,158</td><td class="num">4.76 条/月</td><td class="num">¥55.27</td><td class="num">2.74×</td></tr><tr><td class="num">4.76 – 11.81 条</td><td><span class="dot" style="background:#9CE6F3"></span>libtv 高级版</td><td class="num strong">¥3,899</td><td class="num">11.81 条/月</td><td class="num">¥27.51</td><td class="num">1.36×</td></tr><tr><td class="num">11.81 – 14.40 条</td><td><span class="dot" style="background:#00C65A"></span>Neowow Pro</td><td class="num strong">¥4,588</td><td class="num">14.40 条/月</td><td class="num">¥26.55</td><td class="num">1.31×</td></tr><tr><td class="num">14.40 – 15.00 条</td><td><span class="dot" style="background:#FABC00"></span>小云雀 高级会员</td><td class="num strong">¥4,999</td><td class="num">15.00 条/月</td><td class="num">¥27.77</td><td class="num">1.37×</td></tr><tr><td class="num">15.00 – 20.53 条</td><td><span class="dot" style="background:#3280FF"></span>即梦 高级会员</td><td class="num strong">¥5,199</td><td class="num">20.53 条/月</td><td class="num">¥21.10</td><td class="num">1.04×</td></tr><tr><td class="num">20.53 – 23.77 条</td><td><span class="dot" style="background:#9CE6F3"></span>libtv 豪华版</td><td class="num strong">¥6,699</td><td class="num">23.77 条/月</td><td class="num">¥23.49</td><td class="num">1.16×</td></tr><tr><td class="num">23.77 – 36.59 条</td><td><span class="dot" style="background:#9CE6F3"></span>libtv 至尊版</td><td class="num strong">¥9,599</td><td class="num">36.59 条/月</td><td class="num">¥21.86</td><td class="num">1.08×</td></tr><tr><td class="num">36.59 – 38.40 条</td><td><span class="dot" style="background:#00C65A"></span>Neowow MAX</td><td class="num strong">¥9,850</td><td class="num">38.40 条/月</td><td class="num">¥21.38</td><td class="num">1.06×</td></tr><tr><td class="num">38.40 – 49.07 条</td><td><span class="dot" style="background:#00C65A"></span>Neowow ULTRA</td><td class="num strong">¥11,899</td><td class="num">49.07 条/月</td><td class="num">¥20.21</td><td class="num">1.00×</td></tr><tr><td class="num">49.07 – 90.00 条</td><td><span class="dot" style="background:#3280FF"></span>即梦 超级会员</td><td class="num strong">¥21,840</td><td class="num">90.00 条/月</td><td class="num">¥20.22</td><td class="num">1.00×</td></tr></tbody></table></div>
+<div class="sub" style="margin-top:10px">被支配档位（可覆盖区间不足 0.1 条/月，无采购价值）：libtv 标准版（仅覆盖 1.04–1.09 条/月）、即梦 基础会员（仅覆盖 1.20–1.21 条/月）</div>
+<div class="note" style="margin-top:14px">
+<b>三个反直觉结论：</b><br>
+① <b>libtv 单价全线最贵，却占据四个产量区间的最省解</b>（最低 21.86 vs 全场最优 20.21，贵 8%）。原因是它的档位切分最密、产能粒度小、浪费少；而 Neowow（1.2 → 14.4 → 38.4 → 49.1）与即梦（3.7 → 20.5 → 90）档位跨度大，中间存在大量「必须为用不到的产能付费」的断档。<br>
+② <b>Higgsfield 唯一占位的区间是 3.68–4.76 条/月，而它上榜的原因不是单价低 —— 是国内档位在该产能段存在断档。</b>libtv 进阶版止于 3.33 条、高级版直接跳到 11.81 条，即梦标准版止于 3.68 条、高级版跳到 20.53 条，中间近 8 条产能无人覆盖；此时 Higgsfield Plus ¥3,158/年（4.76 条）反而成了最省解，尽管它的单条成本高达 ¥55.27（全场最优的 2.7 倍）。<b>这说明产能断档比单价更能决定最优解。</b><br>
+③ <b>小云雀只在 基础会员（0.00–1.04 条/月）、高级会员（14.40–15.00 条/月） 两个极窄区间占位</b>：低端靠 ¥453 的绝对低价（但月产能仅 1.04 条），中端靠 ¥4,999 恰好卡在 15.00 条。它与即梦年费几乎相同（超级档均 ¥21,840），但单条消耗 800 积分 vs 即梦 600 积分 —— <b>同为字节系、同价不同量</b>，导致它在主流产能段（15–90 条/月）完全没有竞争力。
+</div>
+
+<h3>自定义产量测算</h3>
+<div class="card">
+  <div class="ctrl">
+    <span class="sub">目标月产量</span>
+    <input type="range" id="tgt" min="1" max="200" value="30">
+    <span class="big" id="tgtv">30 条/月</span>
+  </div>
+  <div class="tw"><table><thead><tr><th>方案类型</th><th>档位组合</th><th class="ctr">年支出</th>
+  <th class="ctr">实际产能</th><th class="ctr">单条成本</th></tr></thead><tbody id="rec"></tbody></table></div>
+  <div class="sub" style="margin-top:10px">「组合订阅」允许多份订阅叠加（多账号），用于产量超出单档位上限时。多账号的运营成本未计入。</div>
+</div>
+
+<h2>七、折扣结构透视：高档位的优势是真是假</h2>
+<div class="note warn" style="margin-bottom:14px">
+本次得出的单价优势，可能来自两种完全不同的来源：<b>(A) 真实规模效应</b> —— 买得多，平台真的给更低的单价；<b>(B) 折扣力度差异</b> —— 原价是线性的，便宜纯粹因为本次活动折扣更深。<br>
+区分方法：把每个档位换回<b>官方公示原价</b>（Higgsfield 取其月付价×12）再算一次单条成本。若原价下的单价收敛成一条水平线，说明优势全部来自折扣（B），活动一结束就会消失。
+</div>
+<div class="tw"><table><thead><tr>
+<th>平台</th><th class="ctr">本次折扣区间</th><th class="ctr">原价下单条成本区间（CNY）</th>
+<th class="ctr">原价单价极差</th><th class="ctr">折扣力度极差</th>
+</tr></thead><tbody><tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td class="num">4.2–7.8 折</td><td class="num">¥52.20 – ¥55.89</td><td class="num ybest">7.1%</td><td class="num ">87.0%</td></tr><tr><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td class="num">2.7–5.5 折</td><td class="num">¥74.94 – ¥75.00</td><td class="num ybest">0.1%</td><td class="num ">105.8%</td></tr><tr><td><span class="dot" style="background:#3280FF"></span>即梦</td><td class="num">5.0–5.0 折</td><td class="num">¥40.44 – ¥42.20</td><td class="num ybest">4.3%</td><td class="num ybest">0.0%</td></tr><tr><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td class="num">5.0–6.0 折</td><td class="num">¥53.33 – ¥60.96</td><td class="num ybest">14.3%</td><td class="num ">20.0%</td></tr><tr><td><span class="dot" style="background:#ED1572"></span>Higgsfield</td><td class="num">7.7–10.0 折</td><td class="num">¥60.94 – ¥106.29</td><td class="num ">74.4%</td><td class="num ">30.3%</td></tr></tbody></table></div>
+<div class="note good" style="margin-top:14px">
+<b>结论：</b><br>
+<b>① Neowow 的「规模经济」是假的。</b>按原价，其四档单条成本全部为 <b>¥75.00</b>（原价内在逻辑为固定 100 积分/元），极差 0.1%。所有价差都来自折扣力度（PLUS 55 折 → ULTRA 27 折）。<b>折扣退坡，优势归零。</b><br>
+<b>② libtv 同样如此，</b>原价极差 7.1%，折扣从 8 折拉到 4 折。<br>
+<b>③ 只有即梦一家是真正的「统一折扣」结构。</b>即梦两个档位均为 <b>5.0 折</b>，折扣极差 <b>0.0%</b> —— 它的 ¥21.10 → ¥20.22 斜率完全来自<b>平台真实定价结构</b>，不受活动影响。小云雀为 5.0–6.0 折（折扣极差 20.0%），原价极差 14.3%，是五家中<b>唯一原价就有真实规模效应</b>（即梦 4.3%）之外还有一定档位定价差异的平台，价格结构比 Neowow / libtv 实在。<br>
+<b>④ Higgsfield 是唯一「年付折扣即全部」的平台，</b>折扣区间 10–8 折且 Starter 无折扣；其原价极差 74.4% 幅度最大，说明<b>它靠档位规模定价而非促销</b>，价格稳定性反而最好。<br>
+<b>⑤ 决策含义：</b>若打算长期（跨活动周期）使用，应<b>按原价排序决策</b>。按原价，国内排序为：即梦超级 ¥40.44 &lt; 即梦高级 ¥42.20 &lt; libtv 高级 ¥52.20 &lt; 小云雀超级 ¥53.33 &lt; Neowow 全档 ¥75.00。<b>Neowow 在最坏情形下垫底。</b>
+</div>
+
+<h2>八、海外 vs 国内：Higgsfield 的定位</h2>
+<div class="grid g3">
+  <div class="kpi pink"><div class="t">Higgsfield Ultra</div>
+    <div class="v">$1,188</div>
+    <div class="d">折 ¥8,017/年 · 3,000 积分/月 · 14.3 条/月<br>
+    单条 ¥46.77（$6.93）</div></div>
+
+  <div class="kpi info"><div class="t">同价位国内替代</div>
+    <div class="v">¥9,599</div>
+    <div class="d">libtv 至尊版，36.6 条/月，¥21.86/条<br>
+    <b>比 Higgsfield Ultra 便宜 ¥-1,582，产能多 22.3 条/月</b></div></div>
+
+  <div class="kpi warn"><div class="t">Higgsfield 隐藏成本</div>
+    <div class="v">+6–10%</div>
+    <div class="d">报价不含 VAT 与地方税；跨境结算按<b>现汇卖出价</b>（高于中间价）+ 可能的境外交易手续费</div></div>
+</div>
+<div class="note pink" style="margin-top:14px">
+<b>结论：Higgsfield 在这条赛道上没有成本优势 —— 选它只能是内容质量或工作流的理由，不能是省钱的理由。</b><br>
+它的最优档 Ultra 折合 ¥46.77/条，是全场最优（Neowow ULTRA ¥20.21）的 <b>2.31 倍</b>；即使与 libtv 至尊版同价位对比（¥9,599 vs 折 ¥8,017），Higgsfield 的产能少 22.3 条/月、单价贵 114%。<br>
+<b>唯一可考虑的场景：</b>你已有 Higgsfield 存量订阅、或强依赖它独有的模型（Soul V2 / Cinema Studio / 参考图链锁脸能力）—— 此时它的价值在功能而非单价。按其月产能上限仅 14.3 条，<b>它也只能承担关键镜头的精修，不可能作为量产主力</b>。<br>
+<b>一个必须说明的例外：</b>Higgsfield <b>Plus</b> 档（$468/年，4.76 条/月）在第六节的阶梯上确实赢下了一个区间（3.68–4.76 条/月）。但这<b>不是因为它的价格有竞争力</b>（¥55.27/条，全场最优的 2.7 倍），而是因为国内平台恰好在该产能段存在断档。换言之，这个位置是别人让出来的，不是它抢来的 —— 一旦国内平台把档位切细，它就会立刻出局。<br>
+<b>务必注意：</b>Higgsfield 积分<b>月底清零、不结转</b>；年付为一次性全额扣款且自动续订（Terms 9.3(a)），需提前手动取消。
+</div>
+
+<h2>九、海报宣传价 vs 实际到手价</h2>
+<div class="note warn" style="margin-bottom:14px">
+各平台海报上的「低至 X 元/秒」<b>全部按非全能参考的最低价档位计算</b>，与本次统一口径不可混用。下表为同一顶级档位下，海报宣称值与按 7500 / 800 / 1380 / 600 积分实算的到手值对比。
+</div>
+<div class="tw"><table><thead><tr>
+<th>平台</th><th>顶级档位</th><th class="ctr">海报「低至」</th><th class="ctr">全能参考实算</th><th class="ctr">倍差</th>
+</tr></thead><tbody><tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>至尊版</td><td class="num">¥0.36</td><td class="num strong">¥0.729</td><td class="num">2.02×</td></tr><tr><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>ULTRA</td><td class="num">¥0.26</td><td class="num strong">¥0.674</td><td class="num">2.59×</td></tr><tr><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>超级会员</td><td class="num">¥0.40</td><td class="num strong">¥0.674</td><td class="num">1.69×</td></tr><tr><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>超级会员</td><td class="num">¥0.40</td><td class="num strong">¥0.889</td><td class="num">2.22×</td></tr></tbody></table></div>
+<div class="note" style="margin-top:14px">
+<b>解读：</b>倍差 = 全能参考模式相对基础模式的成本溢价。Neowow 2.59× 溢价最高；<b>即梦与小云雀均报「¥0.40/秒」，倍差同为 1.69×，但小云雀实算 0.889 元/秒、即梦 0.674 元/秒 —— 同样一句「低至 0.40 元/秒」，小云雀的实际成本高出 +31.9%</b>。若你的工作流强依赖「全能参考」（本次统一口径即如此），海报价格对你全部失效。
+</div>
+
+<h2>十、必须核实的五项风险</h2>
+<div class="note warn">
+<b>1. 年费档位均为限时活动价，恢复原价后结论会变（详见第七节）。</b>
+按原价重算，Neowow ULTRA 单条成本由 ¥20.21 升至 <b>¥75.00</b>，全场最优解变为即梦超级会员（¥40.44/条）。
+<br><br>
+<b>2. 小云雀「高级会员」年费口径已按你的截图修正。</b>
+公开渠道另有「¥4,199」与「3.8 折后 ¥759」两种说法，本表以你提供的订阅页 <b>¥4,999（原价 ¥9,999）</b> 为准。若实际为其他值，小云雀全档位结论需重算。
+<br><br>
+<b>3. ⚠ 小云雀单条积分 800 与截图显示的 600 冲突，这是本次最大的不确定项。</b>
+你文字给出 <b>800 积分/条</b>，但小云雀生成页截图显示 <b>600（划线 780）</b>。<br>
+<b>交叉验证支持 800：</b>按 800 积分算，超级会员单条 = ¥26.67 = ¥0.889/秒，与其海报「Seedance 2.5 限时 5 折、低至 0.4 元/秒」吻合（0.889 × 0.5 ≈ 0.44）；<b>按 600 积分则算出 ¥20.00/条 = ¥0.667/秒，折后仅 ¥0.33/秒，与海报的 0.4 元/秒明显不符。</b>故判定 800 有效、截图疑为误附即梦生成页。<br>
+<b>影响量化：</b>若 600 才是真实值，小云雀超级会员单条成本将从 ¥26.67 降至 <b>¥20.00</b>，月产能从 68.25 升至 91.0 条，<b>直接与即梦超级并列全场最优，并可能夺取 49–90 条/月区间的最省解</b>。这一条必须定死。
+<br><br>
+<b>4. Higgsfield 的两项税务与结算成本未计入。</b>
+页面明示报价不含 VAT 与地方税；跨境支付按现汇卖出价结算（高于中间价约 0.5–1%）并可能叠加境外交易手续费。综合实际成本比本表高约 6–10%，即 Ultra 实际约 <b>¥50.51/条</b>。另其年付为一次性全额扣款且默认自动续订。
+<br><br>
+<b>5. 失败重试是否扣积分 —— 隐性成本影响最大，且五家口径未知。</b>
+本次按「成功出片才扣分」的理想情况计算。若某平台失败率 20% 且不退积分，其实际单条成本需上浮 <b>25%</b>，足以反转排名。另需注意 <b>Higgsfield 积分月底清零、不结转</b>，产量波动月份的实际成本会进一步高于本表估算。
+</div>
+
+<h2>十一、执行建议</h2>
+<div class="note good" style="margin-bottom:14px">
+<b>决策顺序：先定月产量 → 查第六节阶梯表 → 落到唯一档位 → 再用第七节的原价排序做压力测试。</b>
+不要从「哪家单价低」入手：单价最优解（Neowow ULTRA，49.07 条/月）对绝大多数人都是产能过剩，而且它的优势已被证明<b>完全依赖折扣</b>。
+</div>
+<ul>
+<li><b>月产 ≤ 1.04 条：</b>小云雀基础会员 ¥453/年 —— 全场最低入门支出（但月产能仅 1.04 条，只够跑通流程）。</li>
+<li><b>月产 1.04–1.20 条：</b>libtv 标准版 ¥569 → 随后 Neowow PLUS ¥599（覆盖 1.2 条）。</li>
+<li><b>月产 1.20–3.33 条：</b>libtv 进阶版 ¥1,199/年。</li>
+<li><b>月产 3.33–3.68 条：</b>即梦标准会员 ¥1,899。</li>
+<li><b>月产 3.68–4.76 条：</b><b>Higgsfield Plus</b> ¥3,158/年（折 $468，4.76 条/月）—— 这是 Higgsfield 唯一占位的区间，原因是国内档位在 3.33–11.81 条之间出现近 8 条产能断档。</li>
+<li><b>月产 4.76–11.81 条：</b>libtv 高级版 ¥3,899/年 —— 产量跨度最大的一段；libtv 单价最贵却在这里最省，因为它产能粒度最小、浪费最少。</li>
+<li><b>月产 11.81–14.40 条：</b>Neowow Pro ¥4,588/年。</li>
+<li><b>月产 14.40–15.00 条：</b>小云雀高级会员 ¥4,999/年 —— 小云雀在阶梯上的唯一中端占位。</li>
+<li><b>月产 15.00–20.53 条：</b>即梦高级会员 ¥5,199/年。全表唯一的「单价 + 总支出双优」档位，产量落此区间无需再比。</li>
+<li><b>月产 20.53–36.59 条：</b>libtv 豪华版 ¥6,699（≤23.77）→ libtv 至尊版 ¥9,599（23.77–36.59）。</li>
+<li><b>月产 36.59–49.07 条：</b>Neowow MAX ¥9,850（≤38.40）→ Neowow ULTRA ¥11,899（38.40–49.07）。</li>
+<li><b>月产 49.07–90 条：</b>即梦超级会员 ¥21,840/年。此时不要用 Neowow 双开 ULTRA（¥23,798 换 98 条/月），单条成本相同但总价更高。</li>
+<li><b>月产 &gt; 90 条：</b>2× Neowow ULTRA ¥23,798 换 98.1 条/月；150 条时最优为 Neowow MAX × 4 共 ¥39,400/年。</li>
+<li><b>被支配档位（不单独采购）：</b>libtv 标准版（仅覆盖 1.04–1.09 条/月）、即梦 基础会员（仅覆盖 1.20–1.21 条/月） —— 可覆盖区间不足 0.1 条/月，备货价值低于其相邻档位。</li>
+<li><b>海外需求：</b>Higgsfield 建议作为关键镜头精修通道（Ultra 月上限 14.3 条），不要作为量产主力；其 Ultra 折 ¥46.77/条是全场最优的 2.31 倍。若只需 3.7–4.8 条/月，它的 Plus 档反而值得考虑。</li>
+<li><b>不要买：</b>即梦基础会员（¥45.45/条）、即梦标准会员（¥42.96/条）、libtv 标准版（¥43.62/条）、Higgsfield Starter（¥106.29/条）—— 单价都在最优解 2.1 倍以上且月产能不足 1.3 条。</li>
+<li><b>小云雀 vs 即梦的取舍：</b>同为字节系、同价（超级档均 ¥21,840/年），但小云雀单条耗 800 积分 vs 即梦 600 积分。按你给出的 800 口径，<b>小云雀超级在任一产量区间都不如即梦超级，无价格理由选购</b>；选它只能是短剧流水线、CLI/API 工作流等非价格能力。另据公开反馈，小云雀<b>无官方客服渠道，积分返还与权益咨询无反馈路径</b>。</li>
+</ul>
+
+<h2>十二、附录：原始数据全清单</h2>
+<div class="note mb22">
+本节完整列出本次计算所依据的<b>全部原始输入</b>，不含任何推算值。20 个档位、5 条积分消耗、4 条海报宣传价、10 张来源截图逐一登记。
+</div>
+
+<h3>附 1 · 统一测试口径（用户指定）</h3>
+<div class="card mb22">
+<code>Seedance 2.5 · 720p · 16:9 · 30s · 全能参考</code>
+<div class="sub" style="margin-top:9px">五个平台的单条积分消耗均在此口径下测得（Higgsfield 生成页已确认 Model: Seedance 2.5 / 30s / 16:9 / 720p），是本次对比成立的唯一前提。</div>
+</div>
+
+<h3>附 2 · 单条积分消耗（各平台生成页实测）</h3>
+<div class="mb22"><div class="tw"><table><thead><tr>
+<th>平台</th><th class="ctr">生成页显示的档位/规格</th><th class="ctr">单条消耗积分</th>
+</tr></thead><tbody>
+<tr><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>Seedance 2.5 · 720p · 16:9 · 30s · 全能参考 · 分镜栏编辑</td><td class="num strong">7,500</td></tr>
+<tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s</td><td class="num strong">1,380</td></tr>
+<tr><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s</td><td class="num strong">600</td></tr>
+<tr><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>Seedance 2.5 · 16:9（横屏）· 720P · 30s（用户口径 800；截图显示 600，见风险 3）</td><td class="num strong">800</td></tr>
+<tr><td><span class="dot" style="background:#ED1572"></span>Higgsfield</td><td>Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard</td><td class="num strong">210</td></tr>
+</tbody></table></div></div>
+
+<h3>附 3 · 年费档位与月积分（共 20 档）</h3>
+<div class="mb22"><div class="tw"><table><thead><tr>
+<th>平台</th><th>档位</th><th class="ctr">币种</th><th class="ctr">年费（活动价）</th><th class="ctr">折合 CNY</th>
+<th class="ctr">月积分</th><th class="ctr">年积分</th><th class="ctr">每条消耗</th>
+<th class="ctr">平台公示兑换率</th><th class="ctr">原价</th>
+</tr></thead><tbody>['<tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>标准版</td><td class="ctr">CNY</td><td class="num">¥569</td><td class="num">—</td><td class="num">1,500</td><td class="num">18,000</td><td class="num">1,380</td><td class="num">¥10 = 31.2 积分</td><td class="num">¥729</td></tr>', '<tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>进阶版</td><td class="ctr">CNY</td><td class="num">¥1,199</td><td class="num">—</td><td class="num">4,600</td><td class="num">55,200</td><td class="num">1,380</td><td class="num">¥10 = 45.5 积分</td><td class="num">¥2,199</td></tr>', '<tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>高级版</td><td class="ctr">CNY</td><td class="num">¥3,899</td><td class="num">—</td><td class="num">16,300</td><td class="num">195,600</td><td class="num">1,380</td><td class="num">—</td><td class="num">¥7,399</td></tr>', '<tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>豪华版</td><td class="ctr">CNY</td><td class="num">¥6,699</td><td class="num">—</td><td class="num">32,800</td><td class="num">393,600</td><td class="num">1,380</td><td class="num">—</td><td class="num">¥14,999</td></tr>', '<tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>至尊版</td><td class="ctr">CNY</td><td class="num">¥9,599</td><td class="num">—</td><td class="num">50,500</td><td class="num">606,000</td><td class="num">1,380</td><td class="num">—</td><td class="num">¥22,999</td></tr>', '<tr><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>PLUS</td><td class="ctr">CNY</td><td class="num">¥599</td><td class="num">—</td><td class="num">9,000</td><td class="num">108,000</td><td class="num">7,500</td><td class="num">¥10 = 180.0 积分</td><td class="num">¥1,080</td></tr>', '<tr><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>Pro</td><td class="ctr">CNY</td><td class="num">¥4,588</td><td class="num">—</td><td class="num">108,000</td><td class="num">1,296,000</td><td class="num">7,500</td><td class="num">¥10 = 282.0 积分</td><td class="num">¥12,950</td></tr>', '<tr><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>MAX</td><td class="ctr">CNY</td><td class="num">¥9,850</td><td class="num">—</td><td class="num">288,000</td><td class="num">3,456,000</td><td class="num">7,500</td><td class="num">¥10 = 350.0 积分</td><td class="num">¥34,560</td></tr>', '<tr><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>ULTRA</td><td class="ctr">CNY</td><td class="num">¥11,899</td><td class="num">—</td><td class="num">368,000</td><td class="num">4,416,000</td><td class="num">7,500</td><td class="num">¥10 = 371.0 积分</td><td class="num">¥44,160</td></tr>', '<tr><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>基础会员</td><td class="ctr">CNY</td><td class="num">¥659</td><td class="num">—</td><td class="num">725</td><td class="num">8,700</td><td class="num">600</td><td class="num">¥10 = 13.0 积分</td><td class="num">—</td></tr>', '<tr><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>标准会员</td><td class="ctr">CNY</td><td class="num">¥1,899</td><td class="num">—</td><td class="num">2,210</td><td class="num">26,520</td><td class="num">600</td><td class="num">¥10 = 14.0 积分</td><td class="num">—</td></tr>', '<tr><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>高级会员</td><td class="ctr">CNY</td><td class="num">¥5,199</td><td class="num">—</td><td class="num">12,320</td><td class="num">147,840</td><td class="num">600</td><td class="num">—</td><td class="num">¥10,398</td></tr>', '<tr><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>超级会员</td><td class="ctr">CNY</td><td class="num">¥21,840</td><td class="num">—</td><td class="num">54,000</td><td class="num">648,000</td><td class="num">600</td><td class="num">—</td><td class="num">¥43,680</td></tr>', '<tr><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>基础会员</td><td class="ctr">CNY</td><td class="num">¥453</td><td class="num">—</td><td class="num">830</td><td class="num">9,960</td><td class="num">800</td><td class="num">¥10 = 21.9 积分</td><td class="num">¥759</td></tr>', '<tr><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>标准会员</td><td class="ctr">CNY</td><td class="num">¥1,199</td><td class="num">—</td><td class="num">2,320</td><td class="num">27,840</td><td class="num">800</td><td class="num">¥10 = 23.2 积分</td><td class="num">¥1,999</td></tr>', '<tr><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>高级会员</td><td class="ctr">CNY</td><td class="num">¥4,999</td><td class="num">—</td><td class="num">12,000</td><td class="num">144,000</td><td class="num">800</td><td class="num">¥10 = 28.8 积分</td><td class="num">¥9,999</td></tr>', '<tr><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>超级会员</td><td class="ctr">CNY</td><td class="num">¥21,840</td><td class="num">—</td><td class="num">54,600</td><td class="num">655,200</td><td class="num">800</td><td class="num">¥10 = 30.0 积分</td><td class="num">¥43,680</td></tr>', '<tr><td><span class="dot" style="background:#ED1572"></span>Higgsfield</td><td>Starter</td><td class="ctr">USD</td><td class="num">$180</td><td class="num">¥1,215</td><td class="num">200</td><td class="num">2,400</td><td class="num">210</td><td class="num">—</td><td class="num">$180</td></tr>', '<tr><td><span class="dot" style="background:#ED1572"></span>Higgsfield</td><td>Plus</td><td class="ctr">USD</td><td class="num">$468</td><td class="num">¥3,158</td><td class="num">1,000</td><td class="num">12,000</td><td class="num">210</td><td class="num">—</td><td class="num">$588</td></tr>', '<tr><td><span class="dot" style="background:#ED1572"></span>Higgsfield</td><td>Ultra</td><td class="ctr">USD</td><td class="num">$1,188</td><td class="num">¥8,017</td><td class="num">3,000</td><td class="num">36,000</td><td class="num">210</td><td class="num">—</td><td class="num">$1,548</td></tr>']</tbody></table></div></div>
+<div class="sub" style="margin-bottom:22px">
+兑换率一列为平台页面自行公示值，仅用于反向校验第①步归一化口径。「原价」来自订阅页划线价或次年续费说明；Higgsfield 取其月付价×12。Higgsfield 三档报价均不含 VAT 及地方税。<br>
+<b>⚠ 本表为 2026-09-21 采集快照，全部价格取决于各平台当期活动与限时优惠力度，不代表最终价格，以下单时平台页面显示为准。</b>
+</div>
+
+<h3>附 4 · 平台海报公示「低至 X 元/秒」</h3>
+<div class="mb22"><div class="tw"><table><thead><tr>
+<th>平台</th><th>顶级档位</th><th class="ctr">海报宣称</th><th class="ctr">对照本表实算</th>
+</tr></thead><tbody>
+<tr><td><span class="dot" style="background:#9CE6F3"></span>libtv</td><td>至尊版</td><td class="num">¥0.36 / 秒</td><td class="num">¥0.729 / 秒</td></tr>
+<tr><td><span class="dot" style="background:#00C65A"></span>Neowow</td><td>ULTRA</td><td class="num">¥0.26 / 秒</td><td class="num">¥0.674 / 秒</td></tr>
+<tr><td><span class="dot" style="background:#3280FF"></span>即梦</td><td>超级会员</td><td class="num">¥0.40 / 秒</td><td class="num">¥0.674 / 秒</td></tr>
+<tr><td><span class="dot" style="background:#FABC00"></span>小云雀</td><td>超级会员</td><td class="num">¥0.40 / 秒</td><td class="num">¥0.889 / 秒</td></tr>
+</tbody></table></div></div>
+
+<h3>附 5 · 币种折算依据</h3>
+<div class="card mb22">
+<code>1 USD = 6.7487 CNY</code>
+<div class="sub" style="margin-top:9px">
+来源：2026-09-21 中国外汇交易中心（CFETS）人民币对美元中间价。选用中间价而非银行牌价，原因：① 中间价是当日官方定价，可引用、可复核；② 实际结算按各银行<b>现汇卖出价</b>，通常比中间价高 0.5–1%，若叠加境外交易手续费，综合成本再增。<br>
+<b>敏感度：</b>汇率每变动 1%，Higgsfield 全部档位的单条成本同步变动约 1%（Ultra 约 ±¥0.47/条），不足以改变「海外平台单价高于国内第一梯队」这一结论。
+</div>
+</div>
+
+<h3>附 6 · 数据来源截图（共 10 张）</h3>
+<div class="tw"><table><thead><tr><th class="ctr">文件名</th><th class="ctr">页面</th><th>提取到的数据</th></tr></thead>
+<tbody><tr><td class="mono" style="font-size:12px">image-20260921103951115.png</td><td>Neowow 生成页</td><td style="white-space:normal">Seedance 2.5 / 720p / 16:9 / 30s / 全能参考 → 7,500 积分</td></tr><tr><td class="mono" style="font-size:12px">image-20260921104040323.png</td><td>libtv 生成页</td><td style="white-space:normal">Seedance 2.5 / 全能参考 / 16:9 · 720P · 30s → 1,380 积分</td></tr><tr><td class="mono" style="font-size:12px">image-20260921104133181.png</td><td>即梦生成页</td><td style="white-space:normal">即梦 Seedance 2.5 / 16:9 / 720P / 全能参考 / 30s → 600 积分</td></tr><tr><td class="mono" style="font-size:12px">image-20260921104634858.png</td><td>libtv 订阅页</td><td style="white-space:normal">标准/进阶/高级/豪华/至尊 五档年费 + 划线原价 + 兑换率</td></tr><tr><td class="mono" style="font-size:12px">image-20260921104907634.png</td><td>Neowow 订阅页</td><td style="white-space:normal">PLUS/Pro/MAX/ULTRA 四档年费 + 划线原价 + 1元=X积分</td></tr><tr><td class="mono" style="font-size:12px">image-20260921105119599.png</td><td>即梦订阅页</td><td style="white-space:normal">基础/标准/高级/超级 四档年费 + 首年5折与次年全额</td></tr><tr><td class="mono" style="font-size:12px">Clipboard_Screenshot.png（小云雀 会员价）</td><td>小云雀 订阅页</td><td style="white-space:normal">基础 ¥453 / 标准 ¥1,199 / 高级 ¥4,999 / 超级 ¥21,840（含划线原价与 ¥10=X积分）· 亦为本次配色参考</td></tr><tr><td class="mono" style="font-size:12px">Clipboard_Screenshot-1.png（小云雀 生成页）</td><td>小云雀 生成页</td><td style="white-space:normal">Seedance 2.5 / 16:9（横屏）/ 720P / 30s → 界面显示 600（划线 780）；用户口径 800，见风险 3</td></tr><tr><td class="mono" style="font-size:12px">Clipboard_Screenshot-2.png（Higgsfield 档位）</td><td>Higgsfield 订阅页</td><td style="white-space:normal">Starter $15 / Plus $39 / Ultra $99（月付折年付口径），含年付折扣与积分滑块</td></tr><tr><td class="mono" style="font-size:12px">Clipboard_Screenshot-3.png（Higgsfield 生成页）</td><td>Higgsfield 生成页</td><td style="white-space:normal">Model: Seedance 2.5 / 30s / 16:9 / 720p / Bitrate Standard → 210 积分</td></tr></tbody></table></div>
+
+<div class="foot">数据来源：各平台订阅页与生成页截图（2026-09-21） · 全部数值由脚本按统一口径重算，非平台宣传数字<br>
+<b style="color:#FABC00">本页价格为 2026-09-21 采集快照，取决于各平台当期活动与限时优惠力度，不代表最终价格。</b></div>
+
+<div class="legal">
+  <div class="legal-t">© 2026 COLORS-STUDIO. 保留所有权利 / All Rights Reserved.</div>
+  <div class="legal-b">本页内容（含全部价格数据、归一化模型、边际成本与达标阶梯算法、结论文字及版面设计）为作者原创成果。未经书面许可，禁止：复制或转载全文/部分内容、二次发布或镜像托管、用于商业用途、用于任何 AI 模型的训练或微调、移除或篡改版权声明与溯源指纹。允许：转发原始链接、引用结论并注明出处。</div>
+  <div class="legal-f">溯源指纹 <span class="fp">CS-VPC-20260921-8CE5B15F</span>　·　作者 COLORS-STUDIO　·　数据采集 2026-09-21</div>
+</div>
+</div>
+
+<script>
+var PLANS = [{"plat": "libtv", "tier": "标准版", "price": 569.0, "mCap": 1.087, "perVideo": 43.623, "color": "#9CE6F3"}, {"plat": "libtv", "tier": "进阶版", "price": 1199.0, "mCap": 3.3333, "perVideo": 29.975, "color": "#9CE6F3"}, {"plat": "libtv", "tier": "高级版", "price": 3899.0, "mCap": 11.8116, "perVideo": 27.508, "color": "#9CE6F3"}, {"plat": "libtv", "tier": "豪华版", "price": 6699.0, "mCap": 23.7681, "perVideo": 23.487, "color": "#9CE6F3"}, {"plat": "libtv", "tier": "至尊版", "price": 9599.0, "mCap": 36.5942, "perVideo": 21.859, "color": "#9CE6F3"}, {"plat": "Neowow", "tier": "PLUS", "price": 599.0, "mCap": 1.2, "perVideo": 41.597, "color": "#00C65A"}, {"plat": "Neowow", "tier": "Pro", "price": 4588.0, "mCap": 14.4, "perVideo": 26.551, "color": "#00C65A"}, {"plat": "Neowow", "tier": "MAX", "price": 9850.0, "mCap": 38.4, "perVideo": 21.376, "color": "#00C65A"}, {"plat": "Neowow", "tier": "ULTRA", "price": 11899.0, "mCap": 49.0667, "perVideo": 20.209, "color": "#00C65A"}, {"plat": "即梦", "tier": "基础会员", "price": 659.0, "mCap": 1.2083, "perVideo": 45.448, "color": "#3280FF"}, {"plat": "即梦", "tier": "标准会员", "price": 1899.0, "mCap": 3.6833, "perVideo": 42.964, "color": "#3280FF"}, {"plat": "即梦", "tier": "高级会员", "price": 5199.0, "mCap": 20.5333, "perVideo": 21.1, "color": "#3280FF"}, {"plat": "即梦", "tier": "超级会员", "price": 21840.0, "mCap": 90.0, "perVideo": 20.222, "color": "#3280FF"}, {"plat": "小云雀", "tier": "基础会员", "price": 453.0, "mCap": 1.0375, "perVideo": 36.386, "color": "#FABC00"}, {"plat": "小云雀", "tier": "标准会员", "price": 1199.0, "mCap": 2.9, "perVideo": 34.454, "color": "#FABC00"}, {"plat": "小云雀", "tier": "高级会员", "price": 4999.0, "mCap": 15.0, "perVideo": 27.772, "color": "#FABC00"}, {"plat": "小云雀", "tier": "超级会员", "price": 21840.0, "mCap": 68.25, "perVideo": 26.667, "color": "#FABC00"}, {"plat": "Higgsfield", "tier": "Starter", "price": 1214.77, "mCap": 0.9524, "perVideo": 106.292, "color": "#ED1572"}, {"plat": "Higgsfield", "tier": "Plus", "price": 3158.39, "mCap": 4.7619, "perVideo": 55.272, "color": "#ED1572"}, {"plat": "Higgsfield", "tier": "Ultra", "price": 8017.46, "mCap": 14.2857, "perVideo": 46.768, "color": "#ED1572"}];
+function pk(t){
+  var c = PLANS.filter(function(p){ return p.mCap >= t - 1e-9; })
+               .sort(function(a,b){ return a.price - b.price; });
+  return c.length ? c[0] : null;
+}
+function stk(t){
+  var arr = PLANS.map(function(p){
+    var n = Math.ceil(t / p.mCap);
+    return {p:p, n:n, total:n*p.price, cap:n*p.mCap};
+  });
+  arr.sort(function(a,b){ return a.total - b.total; });
+  return arr[0];
+}
+function render(){
+  var t = parseFloat(document.getElementById('tgt').value);
+  document.getElementById('tgtv').textContent = t + ' 条/月';
+  var h = '', s = pk(t);
+  if (s){
+    h += '<tr><td>单一订阅最省</td>'
+      +  '<td><span class="dot" style="background:'+s.color+'"></span>'+s.plat+' '+s.tier+'</td>'
+      +  '<td class="num strong">\u00a5'+s.price.toLocaleString()+'</td>'
+      +  '<td class="num">'+s.mCap.toFixed(2)+' 条/月</td>'
+      +  '<td class="num">\u00a5'+s.perVideo.toFixed(2)+'</td></tr>';
+  } else {
+    h += '<tr><td>单一订阅最省</td><td colspan="4" style="color:#FABC00">'
+      +  '无单一档位可覆盖（上限 '+Math.max.apply(null,PLANS.map(function(p){return p.mCap;})).toFixed(1)+' 条/月），须组合订阅</td></tr>';
+  }
+  var b = stk(t);
+  h += '<tr><td>组合订阅最省</td>'
+    +  '<td><span class="dot" style="background:'+b.p.color+'"></span>'+b.p.plat+' '+b.p.tier+(b.n>1?' \u00d7 '+b.n:'')+'</td>'
+    +  '<td class="num strong">\u00a5'+b.total.toLocaleString()+'</td>'
+    +  '<td class="num">'+b.cap.toFixed(1)+' 条/月</td>'
+    +  '<td class="num">\u00a5'+b.p.perVideo.toFixed(2)+'</td></tr>';
+  var u = PLANS.slice().sort(function(a,b){ return a.perVideo - b.perVideo; })[0];
+  h += '<tr style="opacity:.62"><td>参考：全场最低单价</td>'
+    +  '<td><span class="dot" style="background:'+u.color+'"></span>'+u.plat+' '+u.tier+'</td>'
+    +  '<td class="num">\u00a5'+u.price.toLocaleString()+'</td>'
+    +  '<td class="num">'+u.mCap.toFixed(2)+' 条/月</td>'
+    +  '<td class="num">\u00a5'+u.perVideo.toFixed(2)+'</td></tr>';
+  document.getElementById('rec').innerHTML = h;
+}
+function sortBy(k, el){
+  var tb = document.querySelector('#main tbody');
+  var rs = Array.prototype.slice.call(tb.querySelectorAll('tr'));
+  var dir = el.dataset.dir === 'asc' ? -1 : 1;
+  el.dataset.dir = dir === 1 ? 'asc' : 'desc';
+  rs.sort(function(a,b){ return (parseFloat(a.dataset[k]) - parseFloat(b.dataset[k])) * dir; });
+  rs.forEach(function(r){ tb.appendChild(r); });
+}
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('tgt').addEventListener('input', render);
+  render();
+});
+</script>
+</body></html>

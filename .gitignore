@@ -1,0 +1,19 @@
+# 构建与工作区产物（不属于发布内容）
+*.py
+__pycache__/
+*.pyc
+harvest/
+outputs/
+.wbapp_*
+.workbuddy/
+.visualizer/
+*.tmp
+*.log
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
