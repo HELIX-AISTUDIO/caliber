@@ -95,8 +95,7 @@ w("cost-seedance25.json", {
         {"platform": "libtv", "tier": "高级版", "price": 3899, "currency": "CNY",
          "monthlyCredits": 16300, "renewal": 5099, "original": 7399, "originalNote": "划线原价",
          "creditsOptions": [
-             {"monthlyCredits": 11700, "price": None, "label": "11.7K 档",
-              "note": "价格未获取。截图显示的是 16.3K 档的价格，11700 档价格不同（页面为联动定价）"},
+             {"monthlyCredits": 11700, "price": 2999, "label": "11.7K 档"},
              {"monthlyCredits": 16300, "price": 3899, "label": "16.3K 档"}
          ]},
         {"platform": "libtv", "tier": "豪华版", "price": 6699, "renewal": 7399, "currency": "CNY",
@@ -105,10 +104,19 @@ w("cost-seedance25.json", {
          "monthlyCredits": 50500, "original": 22999, "originalNote": "划线原价"},
         {"platform": "Neowow", "tier": "PLUS", "price": 599, "currency": "CNY",
          "monthlyCredits": 9000, "original": 1080, "originalNote": "划线原价"},
-        {"platform": "Neowow", "tier": "Pro", "price": 4588, "currency": "CNY",
-         "monthlyCredits": 108000, "original": 12950, "originalNote": "划线原价"},
-        {"platform": "Neowow", "tier": "MAX", "price": 9850, "currency": "CNY",
-         "monthlyCredits": 288000, "original": 34560, "originalNote": "划线原价"},
+        {"platform": "Neowow", "tier": "Pro", "price": 4666, "currency": "CNY",
+         "monthlyCredits": 108000, "original": 12950, "originalNote": "划线原价",
+         "creditsOptions": [
+             {"monthlyCredits": 32800, "price": 1599, "label": "3.28W 档"},
+             {"monthlyCredits": 52800, "price": 2289, "label": "5.28W 档"},
+             {"monthlyCredits": 108000, "price": 4666, "label": "10.8W 档"}
+         ]},
+        {"platform": "Neowow", "tier": "MAX", "price": 11059, "currency": "CNY",
+         "monthlyCredits": 288000, "original": 34560, "originalNote": "划线原价",
+         "creditsOptions": [
+             {"monthlyCredits": 188000, "price": 7299, "label": "18.8W 档"},
+             {"monthlyCredits": 288000, "price": 11059, "label": "28.8W 档"}
+         ]},
         {"platform": "Neowow", "tier": "ULTRA", "price": 11899, "currency": "CNY",
          "monthlyCredits": 368000, "original": 44160, "originalNote": "划线原价"},
         {"platform": "即梦", "tier": "基础会员", "price": 659, "currency": "CNY",
@@ -118,20 +126,28 @@ w("cost-seedance25.json", {
         {"platform": "即梦", "tier": "高级会员", "price": 5199, "currency": "CNY",
          "monthlyCredits": 12320, "original": 10398, "originalNote": "次年续费全额",
          "creditsOptions": [
-             {"monthlyCredits": 6200, "price": None, "label": "6.2K 档"},
+             {"monthlyCredits": 6200, "price": 2599, "label": "6.2K 档"},
              {"monthlyCredits": 12320, "price": 5199, "label": "12.3K 档"},
-             {"monthlyCredits": 18500, "price": None, "label": "18.5K 档"},
-             {"monthlyCredits": 27700, "price": None, "label": "27.7K 档"}
-         ],
-         "creditsOptionsNote": "页面为四档联动定价，仅 12.3K 档价格（¥5,199）已获取。"},
+             {"monthlyCredits": 18500, "price": 7799, "label": "18.5K 档"},
+             {"monthlyCredits": 27700, "price": 11699, "label": "27.7K 档"}
+         ]},
         {"platform": "即梦", "tier": "超级会员", "price": 21840, "currency": "CNY",
-         "monthlyCredits": 54600, "original": 43680, "originalNote": "次年续费全额"},
+         "monthlyCredits": 54600, "original": 43680, "originalNote": "次年续费全额",
+         "creditsOptionsNote": "页面未见联动积分档，按单档计。"},
         {"platform": "小云雀", "tier": "基础会员", "price": 453, "currency": "CNY",
          "monthlyCredits": 830, "original": 759, "originalNote": "划线原价"},
         {"platform": "小云雀", "tier": "标准会员", "price": 1199, "currency": "CNY",
          "monthlyCredits": 2320, "original": 1999, "originalNote": "划线原价"},
         {"platform": "小云雀", "tier": "高级会员", "price": 4999, "currency": "CNY",
-         "monthlyCredits": 12000, "original": 9999, "originalNote": "划线原价"},
+         "monthlyCredits": 12000, "original": 9999, "originalNote": "划线原价",
+         "creditsOptions": [
+             {"monthlyCredits": 6300, "price": 2649, "label": "6.3K 档"},
+             {"monthlyCredits": 8600, "price": 3599, "label": "8.6K 档"},
+             {"monthlyCredits": 10200, "price": 4199, "label": "10.2K 档"},
+             {"monthlyCredits": 12000, "price": 4999, "label": "12K 档"},
+             {"monthlyCredits": 18500, "price": 7799, "label": "18.5K 档"},
+             {"monthlyCredits": 27700, "price": 10699, "label": "27.7K 档"}
+         ]},
         {"platform": "小云雀", "tier": "超级会员", "price": 21840, "currency": "CNY",
          "monthlyCredits": 54600, "original": 43680, "originalNote": "划线原价"},
         {"platform": "Higgsfield", "tier": "Starter", "price": 180, "currency": "USD",
@@ -139,25 +155,27 @@ w("cost-seedance25.json", {
         {"platform": "Higgsfield", "tier": "Plus", "price": 468, "currency": "USD",
          "monthlyCredits": 1000, "original": 588, "originalNote": "月付×12"},
         {"platform": "Higgsfield", "tier": "Ultra", "price": 1188, "currency": "USD",
-         "monthlyCredits": 3000, "original": 1548, "originalNote": "月付×12"}
+         "monthlyCredits": 3000, "original": 1548, "originalNote": "月付×12",
+         "creditsOptions": [
+             {"monthlyCredits": 3000, "price": 1188, "label": "$99/月档"},
+             {"monthlyCredits": 6000, "price": 2328, "label": "$194/月档"},
+             {"monthlyCredits": 9000, "price": 3240, "label": "$270/月档"}
+         ],
+         "creditsOptionsNote": "价格为「按月付折年付」口径的月费×12；原价按各档月付价×12 计。"}
     ],
 
     # 待补数据清单（价格未知的积分档与平台，补齐后自动进入计算）
     "pending": [
-        {"item": "libtv 高级版 · 11.7K 档价格",
-         "why": "同档位不同积分对应不同价格（页面联动定价），当前仅有 16.3K 档的 ¥3,899"},
-        {"item": "即梦高级会员 · 6.2K / 18.5K / 27.7K 三档价格",
-         "why": "页面四档联动定价，仅 12.3K 档的 ¥5,199 已获取"},
-        {"item": "即梦基础/标准的次年续费价",
-         "why": "判断跨年使用的真实成本"},
-        {"item": "小云雀四档的次年续费价",
-         "why": "同上；libtv 五档已从截图读全（759/1799/5099/7399/9599）"},
-        {"item": "Neowow 是否有积分档位可选",
-         "why": "当前按固定值 9,000 / 108,000 / 288,000 / 368,000 计算，需确认有无联动档"},
-        {"item": "Higgsfield 积分滑块各档价格",
-         "why": "Pro 600–900、Max 1,800–5,400 仅知起步价"},
         {"item": "五家的失败重试是否扣积分",
-         "why": "影响最大：失败率 20% 且不退分 = 实际成本 +25%，足以反转全部排名"}
+         "why": "影响最大：失败率 20% 且不退分 = 实际成本 +25%，足以反转全部排名"},
+        {"item": "Higgsfield Pro（600–900）与 Max（1,800–5,400）滑块各档价格",
+         "why": "Ultra 三档已录入；Pro/Max 仍仅知起步价 $23 / $59"},
+        {"item": "Neowow ULTRA 是否有联动积分档",
+         "why": "Pro（3 档）与 MAX（2 档）已确认联动，ULTRA 当前按固定 368,000/月"},
+        {"item": "libtv 至尊版是否也有联动积分档",
+         "why": "高级版已确认双档，其余四档按当前所见为固定值"},
+        {"item": "即梦基础/标准 与 小云雀 的次年续费价",
+         "why": "用户暂不提供，暂用划线原价代替；影响跨年使用的真实成本估算"}
     ],
 
     # 数据来源截图
