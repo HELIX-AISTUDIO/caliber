@@ -386,6 +386,34 @@ async function run(browser) {
       `✕ ${sx.size}px · 抽屉顶 ${sx.sheetTop}/${sx.vh}`);
     check('抽屉不占满整屏（留下可点的遮罩）', sx.sheetTop > sx.vh * 0.15,
       `抽屉顶 ${sx.sheetTop} / 视口 ${sx.vh}`);
+
+    // 抽屉默认半开（不挡视线），且把手必须能拖动
+    const pk = await p.evaluate(() => {
+      const s = document.querySelector('.side'); const r = s.getBoundingClientRect();
+      return { peek: s.classList.contains('peek'), h: Math.round(r.height), vh: innerHeight };
+    });
+    check('抽屉默认半开（≤50% 视口）', pk.peek === true && pk.h <= pk.vh * 0.5,
+      `${Math.round(pk.h / pk.vh * 100)}%`);
+    const dg = await p.evaluate(async () => {
+      const s = document.querySelector('.side'), hd = document.querySelector('.sheet-hd');
+      const h0 = s.getBoundingClientRect().height;
+      const r = hd.getBoundingClientRect();
+      const cy = r.top + r.height / 2;
+      const ev = (t, y) => hd.dispatchEvent(new PointerEvent(t, { clientY: y, bubbles: true, pointerId: 1 }));
+      ev('pointerdown', cy);
+      const dragging = s.classList.contains('dragging');
+      for (let i = 1; i <= 6; i++) ev('pointermove', cy - i * 30);
+      const h1 = s.getBoundingClientRect().height;
+      ev('pointerup', cy - 180);
+      await new Promise(r2 => setTimeout(r2, 420));
+      return { dragging, h0: Math.round(h0), h1: Math.round(h1),
+               h2: Math.round(s.getBoundingClientRect().height), peek: s.classList.contains('peek') };
+    });
+    // 阈值取 +20：抽屉高度受【内容自然高度】限制，成本页内容只到 425px，
+    // 上拉 180px 也只能涨到 425 —— 断言要的是「拖动能改变高度」，不是「能拖无限高」
+    check('把手可拖动（上拉变高）', dg.h1 > dg.h0 + 20, `${dg.h0} → ${dg.h1}`);
+    check('拖拽中有 dragging 态', dg.dragging === true);
+    check('松手吸附不回弹', dg.h2 >= dg.h1 - 30, `松手后 ${dg.h2}`);
     await p.mouse.click(215, 60);
     await p.waitForTimeout(400);
     const sh2 = await p.evaluate(() => document.querySelector('.side').classList.contains('open'));

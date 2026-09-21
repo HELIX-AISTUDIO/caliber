@@ -791,18 +791,26 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
      主区被里面的 760px 表格撑到 760px → 整页横向溢出。 */
   .app{flex-direction:column;align-items:stretch;gap:15px;padding:16px 15px 0}
   .side{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:60;width:auto;
-    max-height:74vh;overflow-y:auto;flex-direction:column;flex-wrap:nowrap;gap:17px;
+    max-height:78vh;overflow-y:auto;flex-direction:column;flex-wrap:nowrap;gap:17px;
+    will-change:max-height,transform;
     padding:18px 18px calc(20px + env(safe-area-inset-bottom,0px));
     border-radius:20px 20px 0 0;background:#0A0B0D;
     border:1px solid rgba(255,255,255,.12);border-bottom:0;
     box-shadow:0 -18px 44px rgba(0,0,0,.62);
     transform:translateY(103%);visibility:hidden;
-    transition:transform .3s cubic-bezier(.22,1,.36,1),visibility .3s}
-  .side.open{transform:none;visibility:visible}
+    transition:transform .34s cubic-bezier(.22,1,.36,1),max-height .34s cubic-bezier(.22,1,.36,1),
+      visibility .34s}
+  /* 半开（默认）与全开：只差一个 max-height，内容超出时组件内滚动，不会有够不着的内容 */
+  .side.open{transform:none;visibility:visible;max-height:78vh}
+  .side.peek{max-height:42vh}
+  /* 拖动中关掉过渡 —— 有过渡就会「追手指」，手感发飘 */
+  .side.dragging{transition:none!important}
   /* 抽屉头：把手给「可下滑」的暗示，✕ 给明确的关闭出口 */
   .sheet-hd{display:flex;align-items:center;justify-content:space-between;
     position:sticky;top:0;z-index:3;background:#0A0B0D;
-    padding:16px 2px 12px;border-bottom:1px solid rgba(255,255,255,.09)}
+    padding:16px 2px 12px;border-bottom:1px solid rgba(255,255,255,.09);
+    cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+  .sheet-hd:active{cursor:grabbing}
   .sheet-hd .grab{position:absolute;left:50%;top:7px;transform:translateX(-50%);
     width:38px;height:4px;border-radius:2px;background:rgba(255,255,255,.26)}
   .sheet-hd b{font-size:14px;color:#E4E7EA}
@@ -1515,14 +1523,62 @@ document.addEventListener('DOMContentLoaded', function(){
 
   /* 移动端底部抽屉 */
   var side = document.querySelector('.side'), scrim = document.getElementById('scrim');
-  function setSheet(open){
-    if(side) side.classList.toggle('open', open);
+  /* open＝可见；peek＝半开（默认）。拖动与吸附都走这里，状态只有一个来源。 */
+  function setSheet(open, peek){
+    if(side){
+      side.classList.toggle('open', open);
+      side.classList.toggle('peek', !!open && !!peek);
+      side.classList.remove('dragging');
+      side.style.maxHeight = '';
+    }
     if(scrim) scrim.classList.toggle('open', open);
   }
   var moOpen = document.getElementById('moOpen');
   if(moOpen) moOpen.addEventListener('click', function(){
-    setSheet(!(side && side.classList.contains('open')));
+    var on = side && side.classList.contains('open');
+    setSheet(!on, !on);                   /* 打开时默认半开（peek） */
   });
+
+  /* ── 把手拖拽：上拉展开 / 下拉关闭，跟手 1:1，松手吸附三档 ──
+     之前把手只是装饰，用户拉它没反应。 */
+  (function(){
+    var hd = side && side.querySelector('.sheet-hd');
+    if(!hd) return;
+    var VH = 0, startY = 0, startH = 0, dragging = false, FULL = 0, PEEK = 0;
+    hd.addEventListener('pointerdown', function(e){
+      if(e.target.closest('#sheetX')) return;      /* ✕ 只负责关闭，不参与拖拽 */
+      dragging = true; VH = window.innerHeight;
+      startY = e.clientY; startH = side.getBoundingClientRect().height;
+      /* ⚠ 三档阈值必须按【内容自然高度】算，不能只看视口：
+         内容只有 476px 时，按 844 视口算「全开」永远够不到，松手就会回落。 */
+      var nat = side.scrollHeight;
+      FULL = Math.min(nat, VH * 0.80);
+      PEEK = Math.min(nat, VH * 0.42);
+      side.classList.add('dragging');
+      try{ hd.setPointerCapture(e.pointerId); }catch(err){}
+    });
+    hd.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      var h = startH - (e.clientY - startY);        /* 向上拖 → 变高 */
+      side.style.maxHeight = Math.max(VH * 0.18, Math.min(FULL, h)) + 'px';
+      side.classList.add('open');
+      side.classList.remove('peek');
+      scrim && scrim.classList.add('open');
+    });
+    function release(){
+      if(!dragging) return;
+      dragging = false;
+      var h = side.getBoundingClientRect().height;
+      side.classList.remove('dragging');
+      side.style.maxHeight = '';
+      if(h < PEEK * 0.66){ setSheet(false, false); }               /* 拖得很低 → 收起 */
+      else if(h < (PEEK + FULL) / 2){ setSheet(true, true); }      /* 吸附：半开 */
+      else { setSheet(true, false); }                               /* 吸附：全开 */
+    }
+    hd.addEventListener('pointerup', release);
+    hd.addEventListener('pointercancel', release);
+    hd.addEventListener('lostpointercapture', release);
+  })();
   if(scrim) scrim.addEventListener('click', function(){ setSheet(false); });
   /* ✕ 关闭 —— 抽屉一打开就会盖住底部「调整」按钮，必须有独立出口 */
   var sx = document.getElementById('sheetX');

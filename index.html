@@ -323,18 +323,26 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
      主区被里面的 760px 表格撑到 760px → 整页横向溢出。 */
   .app{flex-direction:column;align-items:stretch;gap:15px;padding:16px 15px 0}
   .side{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:60;width:auto;
-    max-height:74vh;overflow-y:auto;flex-direction:column;flex-wrap:nowrap;gap:17px;
+    max-height:78vh;overflow-y:auto;flex-direction:column;flex-wrap:nowrap;gap:17px;
+    will-change:max-height,transform;
     padding:18px 18px calc(20px + env(safe-area-inset-bottom,0px));
     border-radius:20px 20px 0 0;background:#0A0B0D;
     border:1px solid rgba(255,255,255,.12);border-bottom:0;
     box-shadow:0 -18px 44px rgba(0,0,0,.62);
     transform:translateY(103%);visibility:hidden;
-    transition:transform .3s cubic-bezier(.22,1,.36,1),visibility .3s}
-  .side.open{transform:none;visibility:visible}
+    transition:transform .34s cubic-bezier(.22,1,.36,1),max-height .34s cubic-bezier(.22,1,.36,1),
+      visibility .34s}
+  /* 半开（默认）与全开：只差一个 max-height，内容超出时组件内滚动，不会有够不着的内容 */
+  .side.open{transform:none;visibility:visible;max-height:78vh}
+  .side.peek{max-height:42vh}
+  /* 拖动中关掉过渡 —— 有过渡就会「追手指」，手感发飘 */
+  .side.dragging{transition:none!important}
   /* 抽屉头：把手给「可下滑」的暗示，✕ 给明确的关闭出口 */
   .sheet-hd{display:flex;align-items:center;justify-content:space-between;
     position:sticky;top:0;z-index:3;background:#0A0B0D;
-    padding:16px 2px 12px;border-bottom:1px solid rgba(255,255,255,.09)}
+    padding:16px 2px 12px;border-bottom:1px solid rgba(255,255,255,.09);
+    cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+  .sheet-hd:active{cursor:grabbing}
   .sheet-hd .grab{position:absolute;left:50%;top:7px;transform:translateX(-50%);
     width:38px;height:4px;border-radius:2px;background:rgba(255,255,255,.26)}
   .sheet-hd b{font-size:14px;color:#E4E7EA}
