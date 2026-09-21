@@ -95,8 +95,9 @@ w("cost-seedance25.json", {
         {"platform": "libtv", "tier": "高级版", "price": 3899, "currency": "CNY",
          "monthlyCredits": 16300, "renewal": 5099, "original": 7399, "originalNote": "划线原价",
          "creditsOptions": [
-             {"monthlyCredits": 11700, "label": "11.7K 档"},
-             {"monthlyCredits": 16300, "label": "16.3K 档"}
+             {"monthlyCredits": 11700, "price": None, "label": "11.7K 档",
+              "note": "价格未获取。截图显示的是 16.3K 档的价格，11700 档价格不同（页面为联动定价）"},
+             {"monthlyCredits": 16300, "price": 3899, "label": "16.3K 档"}
          ]},
         {"platform": "libtv", "tier": "豪华版", "price": 6699, "renewal": 7399, "currency": "CNY",
          "monthlyCredits": 32800, "original": 14999, "originalNote": "划线原价"},
@@ -116,7 +117,13 @@ w("cost-seedance25.json", {
          "monthlyCredits": 2210, "original": None, "originalNote": "页面未公示"},
         {"platform": "即梦", "tier": "高级会员", "price": 5199, "currency": "CNY",
          "monthlyCredits": 12320, "original": 10398, "originalNote": "次年续费全额",
-         "creditsOptionsNote": "页面提供 6.2K / 12.3K / 18.5K / 27.7K 四档积分可选，本表仅录入 12.3K 档（¥5,199）；其余三档价格未获取，故未计入对比。"},
+         "creditsOptions": [
+             {"monthlyCredits": 6200, "price": None, "label": "6.2K 档"},
+             {"monthlyCredits": 12320, "price": 5199, "label": "12.3K 档"},
+             {"monthlyCredits": 18500, "price": None, "label": "18.5K 档"},
+             {"monthlyCredits": 27700, "price": None, "label": "27.7K 档"}
+         ],
+         "creditsOptionsNote": "页面为四档联动定价，仅 12.3K 档价格（¥5,199）已获取。"},
         {"platform": "即梦", "tier": "超级会员", "price": 21840, "currency": "CNY",
          "monthlyCredits": 54600, "original": 43680, "originalNote": "次年续费全额"},
         {"platform": "小云雀", "tier": "基础会员", "price": 453, "currency": "CNY",
@@ -133,6 +140,24 @@ w("cost-seedance25.json", {
          "monthlyCredits": 1000, "original": 588, "originalNote": "月付×12"},
         {"platform": "Higgsfield", "tier": "Ultra", "price": 1188, "currency": "USD",
          "monthlyCredits": 3000, "original": 1548, "originalNote": "月付×12"}
+    ],
+
+    # 待补数据清单（价格未知的积分档与平台，补齐后自动进入计算）
+    "pending": [
+        {"item": "libtv 高级版 · 11.7K 档价格",
+         "why": "同档位不同积分对应不同价格（页面联动定价），当前仅有 16.3K 档的 ¥3,899"},
+        {"item": "即梦高级会员 · 6.2K / 18.5K / 27.7K 三档价格",
+         "why": "页面四档联动定价，仅 12.3K 档的 ¥5,199 已获取"},
+        {"item": "即梦基础/标准的次年续费价",
+         "why": "判断跨年使用的真实成本"},
+        {"item": "小云雀四档的次年续费价",
+         "why": "同上；libtv 五档已从截图读全（759/1799/5099/7399/9599）"},
+        {"item": "Neowow 是否有积分档位可选",
+         "why": "当前按固定值 9,000 / 108,000 / 288,000 / 368,000 计算，需确认有无联动档"},
+        {"item": "Higgsfield 积分滑块各档价格",
+         "why": "Pro 600–900、Max 1,800–5,400 仅知起步价"},
+        {"item": "五家的失败重试是否扣积分",
+         "why": "影响最大：失败率 20% 且不退分 = 实际成本 +25%，足以反转全部排名"}
     ],
 
     # 数据来源截图

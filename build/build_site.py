@@ -66,13 +66,25 @@ CU = {"CNY": "¥", "USD": "$"}
 
 # RAW 行：(平台, 档位, 年费, 币种, 月积分, 每条消耗积分, 原价, 原价说明, 积分档标签)
 # 同一档位提供多个积分选项（creditsOptions）时，每个选项展开为一行（价格相同）
+SKIPPED = []   # 价格未获取的积分档，排除出计算并登记
+
+
 def _rows():
+    """把 plans 展开为待计算行。
+    注意：同一档位的不同积分选项**各自有价格**（平台为联动定价），
+    因此每个选项必须带自己的 price；price 为 None 的选项跳过计算。"""
     out = []
     for p in COST["plans"]:
         opts = p.get("creditsOptions")
         if opts:
             for o in opts:
-                out.append((p["platform"], p["tier"], p["price"], p["currency"],
+                price = o.get("price")
+                if price is None:
+                    SKIPPED.append({"plat": p["platform"], "tier": p["tier"],
+                                    "credits": o["monthlyCredits"],
+                                    "label": o.get("label", "")})
+                    continue
+                out.append((p["platform"], p["tier"], price, p["currency"],
                             o["monthlyCredits"], CPV[p["platform"]], p["original"],
                             p["originalNote"], o.get("label", "")))
         else:
@@ -80,6 +92,7 @@ def _rows():
                         p["monthlyCredits"], CPV[p["platform"]], p["original"],
                         p["originalNote"], ""))
     return out
+
 
 RAW = _rows()
 OFFICIAL = {(pl, ti): r for pl, d in COST["officialRate"].items() for ti, r in d.items()}
@@ -907,6 +920,7 @@ cost_body = f"""
   <a href="#calc">按产量测算</a>
   <a href="#official">官方公示对照</a>
   <a href="#risk">风险</a>
+  <a href="#pending">待补数据</a>
   <a href="#appendix">原始数据</a>
 </div></div>
 
@@ -1070,7 +1084,24 @@ cost_body = f"""
 
 <section id="appendix" class="reveal">
   <div class="sechead">
-    <h2><span class="ey">08</span>方法论与原始数据</h2>
+    <section id="pending" class="reveal">
+  <div class="sechead">
+    <h2><span class="ey">08</span>待补数据</h2>
+    <div class="sd">以下项目尚未获取或需确认，补齐后自动进入计算，页面无需改动。</div>
+  </div>
+  <details open>
+    <summary><span class="warnbadge" style="background:#FABF00">待补</span>{len(COST.get("pending", []))} 项待补 / 待确认<span class="chev">›</span></summary>
+    <div class="dbody">
+      <table><thead><tr><th>项目</th><th>为什么需要</th></tr></thead><tbody>
+      {"".join(f'<tr><td style="white-space:normal"><b>{x["item"]}</b></td>'
+               f'<td style="white-space:normal">{x["why"]}</td></tr>' for x in COST.get("pending", []))}
+      </tbody></table>
+      {"<h3>已排除出计算的积分档</h3><table><thead><tr><th>平台</th><th>档位</th><th class=\"ctr\">月积分</th><th>说明</th></tr></thead><tbody>" + "".join(f'<tr><td>{x["plat"]}</td><td>{x["tier"]}</td><td class=\"num\">{x["credits"]:,}</td><td>价格未获取，未纳入计算</td></tr>' for x in SKIPPED) + "</tbody></table>" if SKIPPED else ""}
+    </div>
+  </details>
+</section>
+
+<h2><span class="ey">09</span>方法论与原始数据</h2>
     <div class="sd">本节列出全部原始输入与计算链条，不含推算值，便于复核与复用。</div>
   </div>
   <details>
@@ -1119,13 +1150,13 @@ cost_body = f"""
 
 <section class="reveal">
   <div class="sechead">
-    <h2><span class="ey">09</span>执行建议</h2>
+    <h2><span class="ey">10</span>执行建议</h2>
     <div class="sd">决策顺序：先定月产量 → 查达标阶梯 → 落到唯一档位 → 用原价排序做压力测试。</div>
   </div>
   <div class="note good">
     <ul style="margin-top:0">
       {PLAN_BULLETS}
-      <li><b>被支配档位（单独采购无意义）：</b>{so_far} —— 同价多积分选项时只计入高配档：libtv 高级版的 11.7K 档与 16.3K 档同为 ¥3,899，低配档被严格支配，不进阶梯与边际对比（主表中仍保留供查阅）。</li>
+      <li><b>被支配档位（单独采购无意义）：</b>{so_far} —— 可覆盖区间不足 0.1 条/月。另有 {len(SKIPPED)} 个积分档因价格未获取而**未纳入计算**，见下方「待补数据」。</li>
       <li><b>海外需求：</b>Higgsfield 仅建议作关键镜头精修通道（Ultra 月上限 {HG['mCap']:.1f} 条）；Ultra 折 ¥{f2(HG['perVideoCNY'])}/条是全场最优的 {HG['perVideoCNY']/best:.2f} 倍，含税后约 ¥{HG['perVideoCNY']*1.08:.2f}/条。若只需 3.7–4.8 条/月，其 Plus 档反而值得考虑。</li>
       <li><b>不要买：</b>即梦基础会员（¥{f2(G('即梦','基础会员')['perVideoCNY'])}/条）、即梦标准会员（¥{f2(G('即梦','标准会员')['perVideoCNY'])}/条）、libtv 标准版（¥{f2(G('libtv','标准版')['perVideoCNY'])}/条）、Higgsfield Starter（¥{f2(worst)}/条）—— 单价均在最优解 2.0 倍以上且月产能不足 1.5 条。</li>
       <li><b>小云雀 vs 即梦：</b>二者超级会员<b>完全同规格</b> —— 同为 ¥21,840 首年 / ¥43,680 次年、同为 54,600 积分/月、同为 ¥1 = 30 积分、同为 600 积分/条，折算单条成本完全相同（<b>¥{f2(XQ['perVideoCNY'])}</b>）。选谁只看非价格能力：工作流完整度、CLI/API 支持、客服响应。公开反馈称小云雀<b>无官方客服渠道</b>。</li>
