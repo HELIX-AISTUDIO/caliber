@@ -529,5 +529,28 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 
+/* ── 窄屏汉堡菜单：点开 / 点外收起 ──
+   ⚠ 必须留在【基础 JS】里，且全站只能有一份。
+   按钮由共享的 nav() 组件渲染，四页都有；此前这段写在 COST_JS 内，而 cost_js=False 的
+   首页与排行榜页根本不注入该块 → 这两页「有按钮、没监听」，手机上点了完全不动。
+   又因按钮只在窄屏显示（桌面 display:none），桌面端测试连按钮都看不见，
+   两个因素叠加，使这个缺口在所有桌面断言里都是隐形的。
+   注：重复绑定同样致命 —— 两份监听各 toggle 一次＝互相抵消，表现仍是「点了没反应」。 */
+(function(){
+  var nv = document.querySelector('.nav'), nbg = document.getElementById('nBurger');
+  if(!nv || !nbg) return;
+  nbg.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = nv.classList.toggle('open');
+    nbg.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', function(e){
+    if(nv.classList.contains('open') && !nv.contains(e.target)){
+      nv.classList.remove('open');
+      nbg.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+
 </script>
 </body></html>

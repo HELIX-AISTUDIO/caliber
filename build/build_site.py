@@ -454,7 +454,8 @@ def main_rows_for(key):
         rows += (
             f'<tr class="{top}" data-plat="{r["plat"]}" data-v="{p["perVideo"]:.4f}" '
             f'data-p="{p["payCNY"]:.2f}" data-c="{p["cap"]:.4f}">'
-            f'<td class="ctr rk"><b>{p["rank"]}</b><s>{p["rel"]:.2f}×</s></td>'
+            f'<td class="ctr rk"><b>{p["rank"]}</b>'
+            f'<s>¥{p["payCNY"]:,.0f}{ {"y": "/年", "q": "/季", "m": "/月"}[key] }</s></td>'
             f'<td><span class="plc">{plogo(r["plat"], "plgo")}</span>{r["plat"]}{usd}</td>'
             f'<td>{r["tier"]}{vl}</td>'
             f'<td class="num cell2" data-l="{PT_HEAD[key][0]}"><b>{price_disp}</b><s>{sub}</s></td>'
@@ -956,6 +957,29 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   });
 });
+
+/* ── 窄屏汉堡菜单：点开 / 点外收起 ──
+   ⚠ 必须留在【基础 JS】里，且全站只能有一份。
+   按钮由共享的 nav() 组件渲染，四页都有；此前这段写在 COST_JS 内，而 cost_js=False 的
+   首页与排行榜页根本不注入该块 → 这两页「有按钮、没监听」，手机上点了完全不动。
+   又因按钮只在窄屏显示（桌面 display:none），桌面端测试连按钮都看不见，
+   两个因素叠加，使这个缺口在所有桌面断言里都是隐形的。
+   注：重复绑定同样致命 —— 两份监听各 toggle 一次＝互相抵消，表现仍是「点了没反应」。 */
+(function(){
+  var nv = document.querySelector('.nav'), nbg = document.getElementById('nBurger');
+  if(!nv || !nbg) return;
+  nbg.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = nv.classList.toggle('open');
+    nbg.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', function(e){
+    if(nv.classList.contains('open') && !nv.contains(e.target)){
+      nv.classList.remove('open');
+      nbg.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
 __COST__
 """
 
@@ -1225,7 +1249,8 @@ function rerank(src){
         if(ss) ss.textContent = '产能过低';
       } else {
         if(b) b.textContent = i + 1;
-        if(ss) ss.textContent = money(r.__t) + (r.__n > 1 ? ' \u00b7 ' + r.__n + '\u00d7' : '');
+        if(ss) ss.textContent = money(r.__t) + ({y: '/\u5e74', q: '/\u5b63', m: '/\u6708'}[PK] || '')
+          + (r.__n > 1 ? ' \u00b7 \u4e70 ' + r.__n + ' \u4efd' : '');
       }
     }
     var c2 = r.querySelector('td[data-rated] s');
@@ -1489,20 +1514,6 @@ document.addEventListener('DOMContentLoaded', function(){
   /* 选完「查看方式」自动收起 —— 切了视图就该看内容，不该还挡着 */
   Array.prototype.forEach.call(document.querySelectorAll('[data-seg="view"] button'), function(b){
     b.addEventListener('click', function(){ setSheet(false); });
-  });
-
-  /* 窄屏汉堡菜单：点开/点外/点链接都收起 */
-  var nv = document.querySelector('.nav'), nbg = document.getElementById('nBurger');
-  if(nbg) nbg.addEventListener('click', function(e){
-    e.stopPropagation();
-    var open = nv.classList.toggle('open');
-    nbg.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-  document.addEventListener('click', function(e){
-    if(nv && nv.classList.contains('open') && !nv.contains(e.target)){
-      nv.classList.remove('open');
-      if(nbg) nbg.setAttribute('aria-expanded', 'false');
-    }
   });
 
   /* ── 三周期全清单页：四个控件组 ── */
@@ -2280,7 +2291,7 @@ cost_body = f"""
       </div>
     </details>
   </div>
-    <div class="vptitle">全部档位单条成本<span>条形越长＝越省；上行＝用满产能的固有单价，下行＝按你当前产量的实际每条 · <b id="coverN" style="color:#D1FE17">—</b><br><b style="color:#D1FE17">口径＝单账号单平台</b>：1 个平台 + 1 个账号能做出你设定的月产量才计入排名；做不到的整行置灰。需要多账号时请用下方组合订阅。</span></div>
+    <div class="vptitle">全部档位 · 按「该周期支出」排名<span>名次＝<b style="color:#D1FE17">该周期总支出</b>由低到高（你实际要掏的钱），不是单条成本 —— 所以单价更低但档位更贵的会排在后面。<br>条形越长＝越省；上行＝用满产能的固有单价，下行＝按你当前产量的实际每条 · <b id="coverN" style="color:#D1FE17">—</b><br><b style="color:#D1FE17">口径＝单账号单平台</b>：1 个平台 + 1 个账号能做出你设定的月产量才计入排名；做不到的整行置灰。需要多账号时请用下方组合订阅。想看<b>按单价</b>排名请到「三周期全清单 · 动态排名」。</span></div>
   {PT_TABLES}
 </div>
 </main>

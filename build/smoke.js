@@ -233,6 +233,28 @@ async function run(browser) {
     await p.close();
   }
 
+  /* ══════════ 汉堡菜单：四页必须都能用 ══════════ */
+  log('\n── 汉堡菜单（四页）──');
+  for (const pg of ['index.html', 'cost.html', 'cycles.html', 'leaderboard-vlm.html']) {
+    const q = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    const e2 = []; q.on('pageerror', e => e2.push(e.message));
+    await q.goto(URL.replace('cost.html', pg), { waitUntil: 'load' });
+    await q.waitForTimeout(420);
+    await q.click('#nBurger');
+    await q.waitForTimeout(300);
+    const st = await q.evaluate(() => ({
+      open: document.querySelector('.nav').classList.contains('open'),
+      drop: getComputedStyle(document.getElementById('nDrop')).display,
+      items: document.querySelectorAll('#nDrop a').length,
+    }));
+    await q.mouse.click(195, 790); await q.waitForTimeout(280);
+    const shut = await q.evaluate(() => document.querySelector('.nav').classList.contains('open'));
+    check(`${pg} 汉堡可开可合`,
+      st.open === true && st.drop !== 'none' && st.items === 4 && shut === false && e2.length === 0,
+      `open=${st.open} drop=${st.drop} 项=${st.items} 收起=${!shut}`);
+    await q.close();
+  }
+
   /* ══════════ 首页散点图 ══════════ */
   log('\n── 首页 index.html（帕累托散点）──');
   {
@@ -357,6 +379,45 @@ async function run(browser) {
 
     check('手机无 JS 报错', errs.length === 0, errs.slice(0, 2).join(' | '));
     if (SHOTS) await p.screenshot({ path: path.join(OUT, 'smoke-mobile.png') });
+    await p.close();
+  }
+
+  /* ══════════ 四页手机端导航（汉堡菜单） ══════════
+     这条断言的存在理由：汉堡按钮由共享 nav() 渲染在四页，但它的监听曾经只写在
+     COST_JS 里（仅 cost/cycles 注入）。首页与排行榜页因此「有按钮、没监听」，
+     手机上点了完全不动 —— 而旧断言只查了「按钮可见」（且按钮在桌面 display:none），
+     于是测试全绿、线上照坏。教训：可见 ≠ 可用，交互必须真点一次。 */
+  log('\n── 四页汉堡菜单（手机 390×844）──');
+  for (const f of ['index.html', 'cost.html', 'cycles.html', 'leaderboard-vlm.html']) {
+    const p = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const errs = [];
+    p.on('pageerror', e => errs.push('pageerror: ' + e.message));
+    await p.goto(URL.replace('cost.html', f), { waitUntil: 'load' });
+    await p.waitForTimeout(400);
+
+    await p.click('#nBurger');
+    await p.waitForTimeout(300);
+    const o = await p.evaluate(() => ({
+      open: document.querySelector('.nav').classList.contains('open'),
+      drop: getComputedStyle(document.getElementById('nDrop')).display,
+      aria: document.getElementById('nBurger').getAttribute('aria-expanded'),
+      items: document.querySelectorAll('#nDrop nav a').length,
+      // 展开后必须在视口内 —— 只 toggle 类名却飘到屏外也算不可用
+      top: Math.round(document.getElementById('nDrop').getBoundingClientRect().top),
+    }));
+    check(`${f}：点汉堡可展开（4 项且在视口内）`,
+      o.open === true && o.drop === 'block' && o.aria === 'true' && o.items === 4 && o.top < 844,
+      `open=${o.open} drop=${o.drop} aria=${o.aria} 项=${o.items} top=${o.top}`);
+
+    await p.evaluate(() => document.documentElement.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    await p.waitForTimeout(250);
+    const c = await p.evaluate(() => ({
+      open: document.querySelector('.nav').classList.contains('open'),
+      aria: document.getElementById('nBurger').getAttribute('aria-expanded'),
+    }));
+    check(`${f}：点空白处收起且 aria 复位`, c.open === false && c.aria === 'false');
+
+    check(`${f}：无 JS 报错`, errs.length === 0, errs.slice(0, 2).join(' | '));
     await p.close();
   }
 }

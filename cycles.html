@@ -637,6 +637,29 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 
+/* ── 窄屏汉堡菜单：点开 / 点外收起 ──
+   ⚠ 必须留在【基础 JS】里，且全站只能有一份。
+   按钮由共享的 nav() 组件渲染，四页都有；此前这段写在 COST_JS 内，而 cost_js=False 的
+   首页与排行榜页根本不注入该块 → 这两页「有按钮、没监听」，手机上点了完全不动。
+   又因按钮只在窄屏显示（桌面 display:none），桌面端测试连按钮都看不见，
+   两个因素叠加，使这个缺口在所有桌面断言里都是隐形的。
+   注：重复绑定同样致命 —— 两份监听各 toggle 一次＝互相抵消，表现仍是「点了没反应」。 */
+(function(){
+  var nv = document.querySelector('.nav'), nbg = document.getElementById('nBurger');
+  if(!nv || !nbg) return;
+  nbg.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = nv.classList.toggle('open');
+    nbg.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', function(e){
+    if(nv.classList.contains('open') && !nv.contains(e.target)){
+      nv.classList.remove('open');
+      nbg.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+
 /* ══════════════════════════════════════════════════════════════
    成本页：总投入产出（月产量滑块 + 单条产出价值 → ROI）
    外加「全档位对比」按该产量的年支出重排（排名格副行直接显示该产量下的年支出）
@@ -902,7 +925,8 @@ function rerank(src){
         if(ss) ss.textContent = '产能过低';
       } else {
         if(b) b.textContent = i + 1;
-        if(ss) ss.textContent = money(r.__t) + (r.__n > 1 ? ' \u00b7 ' + r.__n + '\u00d7' : '');
+        if(ss) ss.textContent = money(r.__t) + ({y: '/\u5e74', q: '/\u5b63', m: '/\u6708'}[PK] || '')
+          + (r.__n > 1 ? ' \u00b7 \u4e70 ' + r.__n + ' \u4efd' : '');
       }
     }
     var c2 = r.querySelector('td[data-rated] s');
@@ -1166,20 +1190,6 @@ document.addEventListener('DOMContentLoaded', function(){
   /* 选完「查看方式」自动收起 —— 切了视图就该看内容，不该还挡着 */
   Array.prototype.forEach.call(document.querySelectorAll('[data-seg="view"] button'), function(b){
     b.addEventListener('click', function(){ setSheet(false); });
-  });
-
-  /* 窄屏汉堡菜单：点开/点外/点链接都收起 */
-  var nv = document.querySelector('.nav'), nbg = document.getElementById('nBurger');
-  if(nbg) nbg.addEventListener('click', function(e){
-    e.stopPropagation();
-    var open = nv.classList.toggle('open');
-    nbg.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-  document.addEventListener('click', function(e){
-    if(nv && nv.classList.contains('open') && !nv.contains(e.target)){
-      nv.classList.remove('open');
-      if(nbg) nbg.setAttribute('aria-expanded', 'false');
-    }
   });
 
   /* ── 三周期全清单页：四个控件组 ── */
