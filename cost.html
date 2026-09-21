@@ -292,10 +292,22 @@ summary .warnbadge{font-size:10px;font-weight:800;color:#0B0B0B;background:#FFC9
 .toolbar{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:12px;
   padding:11px 15px;border-radius:12px;background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.09)}
-.cqin{width:88px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
-  border-radius:8px;color:#fff;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:600;
-  padding:6px 9px;outline:none;letter-spacing:-.02em}
-.cqin:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}
+.cqrange{-webkit-appearance:none;appearance:none;width:210px;height:4px;border-radius:999px;
+  outline:none;background:rgba(255,255,255,.12);cursor:pointer}
+.cqrange::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;
+  background:#D1FE17;border:3px solid #000;cursor:pointer;
+  transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.cqrange::-webkit-slider-thumb:hover{transform:scale(1.12)}
+.cqrange::-moz-range-thumb{width:17px;height:17px;border-radius:50%;background:#D1FE17;
+  border:3px solid #000;cursor:pointer}
+.cqval{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:700;color:#D1FE17;
+  letter-spacing:-.03em;min-width:82px}
+.cqpresets{display:inline-flex;gap:5px;margin-left:auto}
+.cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
+  font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;
+  cursor:pointer;transition:color .2s,border-color .2s,background .2s;letter-spacing:-.01em}
+.cqp:hover{color:#fff;border-color:rgba(255,255,255,.36)}
+.cqp.on{color:#0B0B0B;background:#D1FE17;border-color:#D1FE17;font-weight:700}
 .cqhint{color:#767C85}
 .cq-best{color:#0B0B0B;background:#D1FE17;font-weight:800;padding:1px 7px;border-radius:5px}
 .cq-no{color:#5A6069}
@@ -510,8 +522,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
   </div>
   <div class="toolbar">
     <span class="sub">自定义月产量</span>
-    <input type="number" id="cq" class="cqin" min="1" max="2000" step="1" value="10">
+    <input type="range" id="cq" class="cqrange" min="1" max="200" step="1"
+           value="10" aria-label="自定义月产量">
+    <span class="cqval" id="cqval">10 条/月</span>
     <span class="sub cqhint" id="cqhint">= 300 秒 ≈ 5 分钟素材（1 条 = 30 秒）</span>
+    <span class="cqpresets" id="cqpresets">
+      <button type="button" class="cqp" data-n="5">5</button>
+      <button type="button" class="cqp" data-n="10">10</button>
+      <button type="button" class="cqp" data-n="30">30</button>
+      <button type="button" class="cqp" data-n="50">50</button>
+      <button type="button" class="cqp" data-n="100">100</button>
+    </span>
   </div>
   <div class="tw scroll-y tw-main"><table id="main"><thead><tr>
     <th onclick="sortBy('v',this)">#</th><th>平台</th><th>档位</th>
@@ -804,9 +825,29 @@ function sortBy(k, el){
   rs.forEach(function(r){ tb.appendChild(r); });
 }
 /* ── 主表自定义产量列 ── */
-function syncCq(){
+var CQ_LOCK = false;   /* 联动时防止两个滑块互相触发造成死循环 */
+
+function cqPaintPresets(N){
+  var ps = document.querySelectorAll('#cqpresets .cqp');
+  Array.prototype.forEach.call(ps, function(b){
+    b.classList.toggle('on', parseInt(b.dataset.n, 10) === N);
+  });
+}
+
+function syncCq(fromCalc){
   var inp = document.getElementById('cq'); if(!inp) return;
-  var N = Math.max(1, parseInt(inp.value || '30', 10));
+  var N = Math.max(1, parseInt(inp.value || '10', 10));
+  var N = Math.min(200, N);
+  var val = document.getElementById('cqval');
+  if(val) val.textContent = N + ' 条/月';
+  cqPaintPresets(N);
+  /* 与「按产量反查最省方案」的滑块双向联动：同页两个控件控制同一件事，不联动会互相打架 */
+  var tgt = document.getElementById('tgt');
+  if(tgt && !fromCalc && !CQ_LOCK){
+    CQ_LOCK = true; tgt.value = Math.min(parseInt(tgt.max, 10) || 200, N);
+    tgt.dispatchEvent(new Event('input', {bubbles:true}));
+    CQ_LOCK = false;
+  }
   var th = document.getElementById('cqth'), hint = document.getElementById('cqhint');
   var secs = N * 30, mins = secs / 60;
   if(th) th.textContent = '月产 ' + N + ' 条的年支出';
@@ -846,6 +887,11 @@ function render(){
   var t = parseFloat(el.value);
   var secs = t * 30, mins = secs / 60;
   document.getElementById('tgtv').textContent = t + ' 条/月';
+  var cqEl = document.getElementById('cq');
+  if(cqEl && !CQ_LOCK && parseInt(cqEl.value, 10) !== t){
+    cqEl.value = Math.min(parseInt(cqEl.max, 10) || 200, t);
+    syncCq(true);
+  }
   var dv = document.getElementById('tgtsec');
   if(dv) dv.textContent = '= ' + secs.toLocaleString() + ' 秒 ≈ ' +
     (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '素材';
@@ -872,7 +918,17 @@ document.addEventListener('DOMContentLoaded', function(){
   var el = document.getElementById('tgt');
   if(el){ el.addEventListener('input', render); render(); }
   var cq = document.getElementById('cq');
-  if(cq){ cq.addEventListener('input', syncCq); syncCq(); }
+  if(cq){
+    cq.addEventListener('input', function(){ syncCq(false); });
+    var ps = document.querySelectorAll('#cqpresets .cqp');
+    Array.prototype.forEach.call(ps, function(b){
+      b.addEventListener('click', function(){
+        cq.value = b.dataset.n;
+        syncCq(false);
+      });
+    });
+    syncCq(false);
+  }
   /* 点击子导航时立即高亮，不等 scrollspy 节流 */
   Array.prototype.forEach.call(document.querySelectorAll('.subnav a[href^="#"]'), function(a){
     a.addEventListener('click', function(){

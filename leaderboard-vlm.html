@@ -292,10 +292,22 @@ summary .warnbadge{font-size:10px;font-weight:800;color:#0B0B0B;background:#FFC9
 .toolbar{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:12px;
   padding:11px 15px;border-radius:12px;background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.09)}
-.cqin{width:88px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
-  border-radius:8px;color:#fff;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;font-weight:600;
-  padding:6px 9px;outline:none;letter-spacing:-.02em}
-.cqin:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}
+.cqrange{-webkit-appearance:none;appearance:none;width:210px;height:4px;border-radius:999px;
+  outline:none;background:rgba(255,255,255,.12);cursor:pointer}
+.cqrange::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;
+  background:#D1FE17;border:3px solid #000;cursor:pointer;
+  transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.cqrange::-webkit-slider-thumb:hover{transform:scale(1.12)}
+.cqrange::-moz-range-thumb{width:17px;height:17px;border-radius:50%;background:#D1FE17;
+  border:3px solid #000;cursor:pointer}
+.cqval{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:700;color:#D1FE17;
+  letter-spacing:-.03em;min-width:82px}
+.cqpresets{display:inline-flex;gap:5px;margin-left:auto}
+.cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
+  font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;
+  cursor:pointer;transition:color .2s,border-color .2s,background .2s;letter-spacing:-.01em}
+.cqp:hover{color:#fff;border-color:rgba(255,255,255,.36)}
+.cqp.on{color:#0B0B0B;background:#D1FE17;border-color:#D1FE17;font-weight:700}
 .cqhint{color:#767C85}
 .cq-best{color:#0B0B0B;background:#D1FE17;font-weight:800;padding:1px 7px;border-radius:5px}
 .cq-no{color:#5A6069}
