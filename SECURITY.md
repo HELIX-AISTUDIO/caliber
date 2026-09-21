@@ -53,15 +53,17 @@
 - 页面**零外部请求**（无 CDN、无字体、无统计脚本），因此不存在通过第三方资源泄露访问数据的通道。
 - `@media print` 浅色适配：**存成 PDF 时版权块与指纹一并保留**，堵住「打印再转发」这条最省事的搬运路径。
 
-### 5. 边缘层（可选，但这是唯一能真正加门槛的静态方案）
+### 5. 边缘层（推荐部署到 Cloudflare Pages，使本层真正生效）
 
-`_headers` 文件已备好（Cloudflare Pages / Netlify 约定）。**注意：GitHub Pages 会忽略它**，只有把域名挂到 Cloudflare 后才会生效。
+`_headers` 文件已备好（Cloudflare Pages / Netlify 约定）。**注意：GitHub Pages 会忽略它**，那些响应头就只停留在 `<meta>` 层面，防护力大打折扣。
 
-一旦走 Cloudflare，就能用上静态站唯一的真实防护手段：
-- WAF 速率限制（同一 IP 高频抓取直接拦）
-- Bot Fight Mode / 已验证机器人规则
-- 对 `/index.html` 直接请求与来源异常的请求做质询（JS Challenge）
-- 隐藏源站、自定义 `X-Robots-Tag: noindex, noai`
+**本项目推荐部署到 Cloudflare Pages**（详见 README「部署要求」），原因之一就是 `_headers` 会在那里真正生效：
+
+- `Content-Security-Policy`、`X-Frame-Options: DENY`、`Referrer-Policy` 由响应头下发（比 `<meta>` 强，`<meta>` 无法设置 `frame-ancestors`）
+- `X-Robots-Tag: noindex, noai, noimageai` 由响应头下发，覆盖面大于页面 meta
+- 后续还可叠加：WAF 速率限制（同一 IP 高频抓取直接拦）、Bot Fight Mode、对异常来源的 JS Challenge、隐藏源站
+
+这也是静态站**唯一**能真正加访问门槛的路径 —— 若要更强的控制，只能改用带鉴权的托管（见下一节）。
 
 ---
 
