@@ -608,6 +608,51 @@ async function run(browser) {
       await p.waitForTimeout(300);
     }
 
+    // 产能口径切换的两条硬约束（用户报的 bug）：
+    //   1. 月付的「整个周期」＝一个自然月，与「每月」数学等价 → 点了必须【毫无反应】
+    //   2. 季付会变，但点回「每月」必须【逐像素复原】（列宽不得残留放大）
+    // 早先因重建文本比服务端原文长（`30.8 条` → `30.8 条/月`），
+    // 「单条成本」列的 max-content 被永久撑大且不回退。
+    {
+      const sig = () => p.evaluate(() => {
+        const pt = document.querySelector('.pt.on');
+        const ths = [...pt.querySelectorAll('thead th')];
+        return { cols: ths.map(t2 => Math.round(t2.getBoundingClientRect().width)).join(','),
+                 /* ⚠ 必须取「单账号最多」那行 —— 「该产量」行与产能口径无关，不会变 */
+                 txt: [...pt.querySelectorAll('tbody [data-capmax]')]
+                        .filter(e => e.textContent.indexOf('单账号最多') >= 0)
+                        .map(e => e.textContent).join('|').slice(0, 60),
+                 kpi: [...document.querySelectorAll('.kbar.on .kb>s')].map(e => e.textContent).join('|') };
+      });
+      // 月产量拉到 100 —— 否则默认 30 条时全是「该产量」行，测不出变化
+      await p.evaluate(() => { const t2 = document.getElementById('tgt');
+        t2.value = 100; t2.dispatchEvent(new Event('input', { bubbles: true })); });
+      await p.waitForTimeout(500);
+      // 月付：来回切，签名必须完全不变
+      await p.click('#segA button[data-k="m"]'); await p.waitForTimeout(500);
+      const m0 = await sig();
+      await p.click('#capSeg button[data-cap="p"]'); await p.waitForTimeout(400);
+      const m1 = await sig();
+      await p.click('#capSeg button[data-cap="m"]'); await p.waitForTimeout(400);
+      const m2 = await sig();
+      check('月付：点「整个周期」毫无反应',
+        m1.cols === m0.cols && m1.txt === m0.txt && m1.kpi === m0.kpi,
+        m1.cols === m0.cols ? '列宽一致' : `列宽 ${m0.cols} → ${m1.cols}`);
+      check('月付：切回「每月」仍然一致',
+        m2.cols === m0.cols && m2.txt === m0.txt, '');
+      // 季付：会变，但能复原
+      await p.click('#segA button[data-k="q"]'); await p.waitForTimeout(500);
+      const q0 = await sig();
+      await p.click('#capSeg button[data-cap="p"]'); await p.waitForTimeout(400);
+      const q1 = await sig();
+      await p.click('#capSeg button[data-cap="m"]'); await p.waitForTimeout(400);
+      const q2 = await sig();
+      check('季付：切「整个周期」确实变化', q1.txt !== q0.txt, q1.txt.slice(0, 26));
+      check('季付：切回「每月」逐像素复原', q2.cols === q0.cols && q2.txt === q0.txt,
+        q2.cols === q0.cols ? '列宽一致' : `列宽 ${q0.cols} → ${q2.cols}`);
+      await p.click('#segA button[data-k="m"]'); await p.waitForTimeout(400);
+    }
+
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，
     // 没有 ✕ 的话用户找不到任何方式退出（用户实测被卡住）

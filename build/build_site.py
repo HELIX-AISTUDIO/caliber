@@ -1348,6 +1348,11 @@ function capShow(k, v, d){ return (v * capMul(k)).toFixed(d === undefined ? 1 : 
 function capLab(k){ return CAPU === 'p' ? '每' + CAPWORD[k] + '可生成' : '每月可生成'; }
 /* 需求值也要换到同一口径，否则「最多 554 条」与「不够 30」没法对读 */
 function reqShow(k, N){ return CAPU === 'p' ? (N * CAPMONTHS[k]) + ' ' + capUnit(k) : N + ' 条/月'; }
+/* 该周期在当前口径下，显示是否真的变了。
+   月付的「整个周期」就是一个自然月（乘数＝1）—— 此时两种口径**数学上完全等价**，
+   输出必须与「每月」逐字符相同，否则点了会有反应。
+   用户明确要求：月付点「整个周期」应无反应；季付有变化，点回「每月」要复原。 */
+function capChanged(k){ return CAPU === 'p' && CAPMONTHS[k] !== 1; }
 
 /* 把页面上所有「产能」显示切到当前口径。
    改的是显示，不动任何排序/结论 —— 两种口径下排名完全一致。 */
@@ -1374,14 +1379,24 @@ function applyCap(){
   var _n = readN();
   Array.prototype.forEach.call(document.querySelectorAll('.pt.on [data-capmax]'), function(el){
     if(el.textContent.indexOf('单账号最多') < 0) return;   /* 「该产量」行与此口径无关 */
-    var v = parseFloat(el.getAttribute('data-capmax')) * capMul(k);
-    el.textContent = '单账号最多 ' + (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + ' ' + capUnit(k)
-                   + ' · 不够 ' + reqShow(k, _n);
+    var raw = parseFloat(el.getAttribute('data-capmax'));
+    if(capChanged(k)){
+      var vp = raw * capMul(k);
+      el.textContent = '单账号最多 ' + (vp >= 100 ? vp.toFixed(0) : vp.toFixed(1)) + ' ' + capUnit(k)
+                     + ' · 不够 ' + reqShow(k, _n);
+    } else {
+      /* ⚠ 每月口径必须【逐字符还原服务端原文】：`单账号最多 %.1f 条 · 不够 %d`。
+         早先两种口径都带单位，于是第一次切换就把文本永久加长
+         （`30.8 条` → `30.8 条/月`），单元格 max-content 变大把「单条成本」列撑宽，
+         且点回「每月」也不复原 —— 用户报的正是这一列。
+         「重建」本身幂等，但幂等 ≠ 与原值相同。 */
+      el.textContent = '单账号最多 ' + raw.toFixed(1) + ' 条 · 不够 ' + _n;
+    }
   });
   /* KPI：「30 条/月 · 最省」这类标签 */
   Array.prototype.forEach.call(document.querySelectorAll('.kbar [data-n]'), function(el){
     var n = el.getAttribute('data-n');
-    el.textContent = (CAPU === 'p' ? '本周期 ' : '') + (n * capMul(k)) + ' ' + capUnit(k) + ' · 最省';
+    el.textContent = (capChanged(k) ? '本周期 ' : '') + (n * capMul(k)) + ' ' + capUnit(k) + ' · 最省';
   });
   /* 侧栏开关的高亮与提示 */
   Array.prototype.forEach.call(document.querySelectorAll('#capSeg button, #capSeg2 button'), function(b){
