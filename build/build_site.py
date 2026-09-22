@@ -626,6 +626,7 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
 .budhome .budn{width:7.2em;font-size:15px;padding:5px 9px}
 .budseg{margin-left:auto}
 .budseg button{padding:7px 13px;font-size:12px}
+.budr{width:100%;margin-top:13px;display:block}
 .budbig{margin-top:15px;font-size:15px;line-height:1.85;color:#D7DBDF}
 .budbig b{font-size:19px;color:#D1FE17;font-weight:800;font-family:__MONO__}
 .budbig .up{font-size:12.5px;color:#8A9098}
@@ -1762,6 +1763,17 @@ function applyMo(){
   });
 }
 
+/* 预算滑块用【对数刻度】：滑块 0–1000 映射到 ¥300–¥50,000。
+   线性刻度实测不行 —— 上限要覆盖到 ¥49,000（Tapnow 高价档），
+   而主力预算区间 ¥500–3,000 只占 6% 行程（约 24px），根本拖不准。
+   对数下同一区间占到约 30%，且高价段仍然够得着。 */
+var BUD_MIN = 300, BUD_MAX = 50000;
+function budFromSlider(v){ return Math.max(BUD_MIN, Math.round(BUD_MIN * Math.pow(BUD_MAX / BUD_MIN, v / 1000) / 100) * 100); }
+function sliderFromBud(b){
+  b = Math.min(BUD_MAX, Math.max(BUD_MIN, b || BUD_MIN));
+  return Math.round(1000 * Math.log(b / BUD_MIN) / Math.log(BUD_MAX / BUD_MIN));
+}
+
 /* 首页的预算反查有自己的周期状态（首页没有全局周期切换）。
    ⚠ 默认必须与主站 DEFK 一致（月付）—— 曾有用户从首页点进来发现是年付开头。 */
 var HPK = DEFK;
@@ -1777,6 +1789,7 @@ function budgetCalc(inp, out, unitEl, k){
   if(unitEl) unitEl.textContent = '（按' + kz + '计算）';
   var b = parseInt(inp.value, 10);
   if(isNaN(b) || b < 0) b = 0;
+
 
   var priced = PLANS.filter(function(p){ return p.pc[k] != null && p.cp[k] > 0; });
   var afford = priced.filter(function(p){ return p.pc[k] <= b; });
@@ -1812,6 +1825,13 @@ function budgetCalc(inp, out, unitEl, k){
 }
 
 function renderBudget(){
+  var inp = document.getElementById('hbud'), rng = document.getElementById('hbudR');
+  /* 滑块与数字框双向联动：拖滑块写数字框，改数字框挪滑块。
+     两者都写同一个 renderBudget，故不会互相触发成环。 */
+  if(inp && rng){
+    var v = parseInt(inp.value, 10);
+    if(!isNaN(v) && v > 0) rng.value = sliderFromBud(v);
+  }
   budgetCalc(document.getElementById('hbud'), document.getElementById('hbudOut'), null, HPK);
   var seg = document.getElementById('hbudSeg');
   if(seg){
@@ -2218,6 +2238,13 @@ document.addEventListener('DOMContentLoaded', function(){
   if(hbIn){
     hbIn.addEventListener('input', renderBudget);
     hbIn.addEventListener('change', renderBudget);
+  }
+  var hbR = document.getElementById('hbudR');
+  if(hbR){
+    hbR.addEventListener('input', function(){
+      if(hbIn) hbIn.value = budFromSlider(parseFloat(hbR.value));
+      renderBudget();
+    });
   }
   var hSeg = document.getElementById('hbudSeg');
   if(hSeg){
@@ -3384,6 +3411,8 @@ home_body = f"""
         <button type="button" data-k="y" role="tab">年付</button>
       </span>
     </div>
+    <input type="range" id="hbudR" class="cqr budr" min="0" max="1000" step="1"
+      value="450" aria-label="预算滑块">   <!-- 450 → ¥3,000，与数字框默认值一致 -->
     <div class="budout budbig" id="hbudOut">—</div>
     <div class="budtip">「再加多少能跳档」是本表最有价值的一栏 ——
       实测预算曲线不单调，花不到门槛钱就白花了。完整对比见
