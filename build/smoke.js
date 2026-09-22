@@ -784,6 +784,37 @@ async function run(browser) {
       await p.click('#segA button[data-k="m"]'); await p.waitForTimeout(300);
     }
 
+    // 按项目反查：纯除法（总量 ÷ 工期），且【不】替用户估出片率。
+    // 不自动应用 —— 它会改写月产量，必须由用户点按钮确认。
+    {
+      const setPj = (n, m) => p.evaluate(([a2, b2]) => {
+        const i = document.getElementById('pjN'), j = document.getElementById('pjM');
+        i.value = a2; i.dispatchEvent(new Event('input', { bubbles: true }));
+        j.value = b2; j.dispatchEvent(new Event('input', { bubbles: true }));
+      }, [n, m]);
+      const pjOut = () => p.evaluate(() => document.getElementById('pjOut').innerText.replace(/\s+/g, ' ').trim());
+      const nNow = () => p.evaluate(() => document.getElementById('nv').value);
+
+      const before = await nNow();
+      await setPj(60, 3); await p.waitForTimeout(200);
+      const o1 = await pjOut();
+      check('项目反查：60 ÷ 3 = 20 条/月', /=\s*20 条\/月/.test(o1), o1);
+      check('项目反查：预览不自动改写月产量', (await nNow()) === before, `${before} → ${await nNow()}`);
+
+      await setPj(1000, 3); await p.waitForTimeout(200);
+      const o2 = await pjOut();
+      check('项目反查：超出量程时钳到 200 并明示', /200 条\/月/.test(o2) && /滑块上限/.test(o2), o2);
+
+      await setPj(0, 3); await p.waitForTimeout(200);
+      check('项目反查：非法总量给提示', /请填写正整数/.test(await pjOut()));
+
+      await setPj(300, 12); await p.waitForTimeout(200);
+      await p.click('#pjGo'); await p.waitForTimeout(500);
+      const after = await nNow();
+      check('项目反查：点应用后月产量 = 25', after === '25', after);
+      await setPj(60, 3); await p.waitForTimeout(150);
+    }
+
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，
     // 没有 ✕ 的话用户找不到任何方式退出（用户实测被卡住）
