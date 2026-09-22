@@ -571,8 +571,11 @@ async function run(browser) {
     check('KPI 含「月付最优」且值正确', cc.all.some(x => x.indexOf('月付最优') >= 0 && x.indexOf('24.56') >= 0));
     check('KPI 含「季付值得吗」并写明依据', cc.all.some(x => x.indexOf('季付值得吗') >= 0 && x.indexOf('从未赢过') >= 0));
     // 不绑具体金额 —— 默认周期已改为月付，最优值随之不同（月付 ¥24.56 / 年付 ¥19.30）
-    check('原「单条成本最优」卡片保留（未丢信息）',
-      cc.all.some(x => x.indexOf('单条成本最优') >= 0 && /¥[\d,.]+/.test(x)), cc.all[0]);
+    // 首卡措辞已改为「{周期}最优 · {平台}{档位}」，并把产能与价格并列 ——
+    // 产能间接决定性价比（单条成本＝本周期实付 ÷ 本周期产能），必须同屏可见。
+    check('首卡写明周期、且产能与价格并列',
+      /^(月付|季付|年付)最优 · /.test(cc.all[0]) && /¥[\d,.]+/.test(cc.all[0]) && /换 [\d,]+ 条/.test(cc.all[0]),
+      cc.all[0]);
     check('KPI 卡说明文字均未被截断', cc.overflow === 0, `截断 ${cc.overflow} 张`);
     // 结论卡同样收紧到排名卡量级（曾 106px，排名卡 65px）
     check('结论卡与排名卡同级（≤90px）', cc.h <= 90, `${cc.h}px`);

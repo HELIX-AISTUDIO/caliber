@@ -2270,8 +2270,18 @@ def kpis_for(key):
         tot, cnt, r = min(ok, key=lambda x: x[0])
         return {"row": r, "total": tot, "cnt": cnt}
 
-    out = [("单条成本最优", f'¥{f2(best["byP"][key]["perVideo"])}',
-            f'{best["plat"]} {tname(best)}', True)]
+    # 首卡把「周期」写进措辞 —— 用户在季付页看到 ¥30.00，必须知道
+    # 这是「¥8,189 换 273 条」的单价，而不是某个孤立的月单价。
+    # 已决定周期的用户关心的就是「这一笔钱在本周期内买到了什么」。
+    _b = best["byP"][key]
+    _pn = {"y": "年付", "q": "季付", "m": "月付"}[key]
+    _mo = {"y": 12, "q": 3, "m": 1}[key]
+    # 卡片只有约 12 个汉字宽，所以拆成两行：
+    #   标签行＝「季付最优 · 即梦超级」  说明行＝「¥8,189 换 273 条」
+    # 档位名去掉「会员」与积分档后缀（表里有全称），否则两行都放不下。
+    _short = best["tier"].replace("会员", "")
+    out = [(f'{_pn}最优 · {best["plat"]}{_short}', f'¥{f2(_b["perVideo"])}',
+            f'¥{_b["payCNY"]:,.0f} 换 {_b["cap"] * _mo:,.0f} 条', True)]
     _u = {"y": "/年", "q": "/季", "m": "/月"}[key]
     for n, lbl in ((30, "30 条/月 · 最省"), (90, "90 条/月 · 最省")):
         c = cheapest_for(n)
