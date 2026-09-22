@@ -1471,9 +1471,13 @@ function applyCap(){
     if(hint) hint.textContent = CAPU === 'p' ? '整个周期' : '每月';
   });
   syncSlider(true);        /* 口径变了 → 单位与量程跟着变，并回写当前值 */
-  /* 三周期页的产能指标名也要随口径变（此前恒为「每月可生成」）。
+  /* 三周期页的产能指标名与数值都要随口径变。
      ⚠ 跟【三周期页自己的周期】CT.k，不是成本页的 PK。 */
   CM.cap.lb = capLab(CT.k);
+  var _cn = document.getElementById('cycNow');
+  if(_cn) _cn.textContent = CM[CT.m].lb + ' \u00b7 ' + PERLB[CT.k] + ' \u00b7 '
+    + (CT.o === 'best' ? '最优在前' : '最差在前');
+  if(typeof renderChart === 'function' && document.getElementById('chart')) renderChart();
   renderBudget();          /* 预算反查按周期算，换周期必须重算 */
   renderRec(null, true);   /* 反查卡的产能格走它自己的渲染路径，强制重画 */
 }
@@ -1952,7 +1956,15 @@ var CDATA = __CDATA__;
 var MI = {cost: 0, cap: 1, sec: 2, pay: 3};
 var CM = {
   cost: {lb: '单条成本', low: true,  f: function(v){ return '\u00a5' + v.toFixed(2); }},
-  cap:  {lb: '每月可生成', low: false, f: function(v){ return v.toFixed(2) + ' \u6761'; }},
+  /* ⚠ 产能值必须随【产能口径】缩放，并在后面给出换算好的总时长 ——
+     此前固定输出「91.00 条」，切到「整个周期」毫无反应，用户还得自己乘月数、
+     自己乘单条时长。 */
+  cap:  {lb: '每月可生成', low: false, f: function(v){
+    var x = v * capMul(CT.k), sec = x * SECC;
+    var dur = sec >= 3600 ? (sec / 3600).toFixed(1) + ' 小时'
+                          : Math.round(sec / 60) + ' 分钟';
+    return x.toFixed(2) + ' ' + capUnit(CT.k) + ' \u00b7 ' + dur;
+  }},
   sec:  {lb: '元/秒', low: true,  f: function(v){ return v.toFixed(3); }},
   pay:  {lb: '该周期实付', low: true,  f: function(v){ return '\u00a5' + Math.round(v).toLocaleString(); }}
 };
