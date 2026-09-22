@@ -144,6 +144,7 @@ for i, r in enumerate(sorted(ROWS, key=lambda x: x["perVideo"]), 1):
 # 默认落在第一项（月付）—— 首屏 narrative 与 KPI 都跟着走。
 PERIODS = [("m", "月付", 1, "payM"), ("q", "季付", 3, "payQ"), ("y", "年付", 12, "payY")]
 _DEFAULT_K = PERIODS[0][0]          # 默认周期＝顺序第一项。全站唯一来源。
+MONTHOF = {k: mo for k, _l, mo, _f in PERIODS}   # 各周期月数，供量纲换算
 for r in ROWS:
     r["byP"] = {}
     for key, _lbl, months, field in PERIODS:
@@ -451,7 +452,9 @@ def _sub_deliver(r, key, n=None):
         return "该周期不可用"
     if p["cap"] < n:
         return "单账号最多 %.1f 条 · 不够 %d" % (p["cap"], n)
-    return "该产量 ¥%s/条 · 1 个账号" % f2(p["payCNY"] / n)
+    # ⚠ 必须除以「月产量 × 本周期月数」——payCNY 是【该周期总额】，
+    #   只除月产量会把季付/年付的价格放大 3/12 倍（月付因月数=1 才碰巧正确）。
+    return "该产量 ¥%s/条 · 1 个账号" % f2(p["payCNY"] / (n * MONTHOF[key]))
 
 
 # 主表：7 列，无「月产能」「年支出」列（用户裁定去掉）
@@ -1747,7 +1750,8 @@ function rerank(src){
       if(r.__t == null){
         c2.textContent = '单账号最多 ' + parseFloat(r.dataset.c).toFixed(1) + ' 条 · 不够 ' + N;
       } else {
-        c2.textContent = '该产量 ' + money(r.__t / N) + '/条 · 1 个账号';
+        /* ⚠ 与 _sub_deliver 同源：__t 是该周期总额，必须除以 (月产量 × 月数) */
+        c2.textContent = '该产量 ' + money(r.__t / (N * CAPMONTHS[PK])) + '/条 · 1 个账号';
       }
     }
   });

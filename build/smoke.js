@@ -759,6 +759,31 @@ async function run(browser) {
       check('表格区也出现测试口径（直达链接的用户也能看到）', tbl === true);
     }
 
+    // 单条成本副行「该产量 ¥X/条」＝ 该周期实付 ÷ (月产量 × 月数)。
+    // 曾漏掉「×月数」，把季付显示成 3 倍、年付显示成 12 倍
+    // （年付 Neowow 正确值 ¥24.33 被显示成 ¥292）。
+    {
+      /* ⚠ 必须先切回「每月」口径 —— 上一段测试会把它留在「整周期」，
+         那时滑块数字是周期总量，本段的「25」就不是 25 条/月了。 */
+      await p.click('#capSeg button[data-cap="m"]'); await p.waitForTimeout(300);
+      for (const [k, mo] of [['m', 1], ['q', 3], ['y', 12]]) {
+        await p.click(`#segA button[data-k="${k}"]`); await p.waitForTimeout(400);
+        await p.evaluate(() => { const t2 = document.getElementById('tgt');
+          t2.value = 25; t2.dispatchEvent(new Event('input', { bubbles: true })); });
+        await p.waitForTimeout(500);
+        const r = await p.evaluate(() => {
+          const tr = [...document.querySelectorAll('.pt.on tbody tr')]
+            .find(x => !x.classList.contains('out'));
+          return { pay: parseFloat(tr.dataset.p), cell: tr.querySelector('[data-rated]').innerText.replace(/\s+/g, ' ') };
+        });
+        const want = r.pay / (25 * mo);
+        const shown = parseFloat((r.cell.match(/该产量 ¥([\d.]+)/) || [])[1] || '0');
+        check(`${k} 副行量纲正确（实付 ÷ 月产量 ÷ 月数）`,
+          Math.abs(shown - want) <= 1.0, `显示 ¥${shown} ｜ 应为 ¥${want.toFixed(2)}`);
+      }
+      await p.click('#segA button[data-k="m"]'); await p.waitForTimeout(300);
+    }
+
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，
     // 没有 ✕ 的话用户找不到任何方式退出（用户实测被卡住）

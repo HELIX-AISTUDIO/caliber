@@ -775,7 +775,7 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
     </div>
   </details>
   <div class="note warn" style="margin-top:14px">
-    <b>年费档位均为限时活动价，活动退坡后结论会变</b><br>用户确认：各平台年费均为限时活动价。本表记录的是页面显示的实付价，已含当期全部活动；活动一旦结束或退坡，页面显示价上升、单条成本随之上升，排名可能变化。<br><br>libtv 高级版与至尊版、即梦高级四档、小云雀高级六档、Neowow Pro 三档与 MAX 两档均为联动定价，活动结束后可能同步调整档位结构，届时选项数量与积分档位都可能变。
+    <b>积分按月发放，不能提前支取 —— 「该周期产能」是累计可得，不是随即可用</b><br>各周期的会员积分（月付 / 季付 / 年付）均【按月发放】：买年付拿到的是 12 个月的发放额度，不是一次到账的 12 倍积分；季付同理。<br><br>因此本表的「该周期产能」应读作【该周期内累计可得的总量】，而不是【下单后即可支配的总量】。
   </div>
 </div>
 
@@ -1461,7 +1461,8 @@ function rerank(src){
       if(r.__t == null){
         c2.textContent = '单账号最多 ' + parseFloat(r.dataset.c).toFixed(1) + ' 条 · 不够 ' + N;
       } else {
-        c2.textContent = '该产量 ' + money(r.__t / N) + '/条 · 1 个账号';
+        /* ⚠ 与 _sub_deliver 同源：__t 是该周期总额，必须除以 (月产量 × 月数) */
+        c2.textContent = '该产量 ' + money(r.__t / (N * CAPMONTHS[PK])) + '/条 · 1 个账号';
       }
     }
   });
