@@ -787,6 +787,9 @@ async function run(browser) {
     // 按项目反查：纯除法（总量 ÷ 工期），且【不】替用户估出片率。
     // 不自动应用 —— 它会改写月产量，必须由用户点按钮确认。
     {
+      // 侧栏已分「排名 / 反查」两区，按项目反查在反查区 —— 默认隐藏，须先切换
+      await p.click('#moSeg button[data-mo="lookup"]', { timeout: 4000 });
+      await p.waitForTimeout(300);
       const setPj = (n, m) => p.evaluate(([a2, b2]) => {
         const i = document.getElementById('pjN'), j = document.getElementById('pjM');
         i.value = a2; i.dispatchEvent(new Event('input', { bubbles: true }));
@@ -813,6 +816,8 @@ async function run(browser) {
       const after = await nNow();
       check('项目反查：点应用后月产量 = 25', after === '25', after);
       await setPj(60, 3); await p.waitForTimeout(150);
+      await p.click('#moSeg button[data-mo="rank"]', { timeout: 4000 });
+      await p.waitForTimeout(250);
     }
 
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);

@@ -568,16 +568,15 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   letter-spacing:-.038em;line-height:1.07}h1 em{font-style:normal;color:#D1FE17}.hero .lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75}.meta{display:flex;gap:20px;flex-wrap:wrap;margin-top:22px;font-size:12.5px;color:#767C85}.meta span{display:inline-flex;align-items:center;gap:7px}.meta i{width:5px;height:5px;border-radius:50%;background:#D1FE17;flex:0 0 5px}.meta b{color:#C9CDD2;font-weight:600;font-family:__MONO__}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
   text-decoration:none;white-space:nowrap;
   transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s}.btn-white{background:#fff;color:#0B0B0B}.btn-white:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,255,255,.2)}.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}.btn-ghost:hover{border-color:rgba(255,255,255,.45);transform:translateY(-2px)}h2{font-family:__DISP__;font-size:20px;font-weight:750;color:#fff;letter-spacing:-.025em;line-height:1.3}h2 .ey{display:inline-block;font-family:__MONO__;font-size:12px;font-weight:600;color:#D1FE17;
-  margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:__DISP__;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.card,.kpi,.note,.entry,.legal,details{
+  margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:__DISP__;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.card, .note, .entry, .legal, details{
   background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 46%,rgba(0,0,0,.30));
   -webkit-backdrop-filter:blur(28px) saturate(150%);backdrop-filter:blur(28px) saturate(150%);
   border:1px solid rgba(255,255,255,.12);border-radius:18px;
   box-shadow:inset 0 0 0 .61px rgba(255,255,255,.07),inset 0 1px 0 rgba(255,255,255,.05),
              0 1px 2px rgba(0,0,0,.45),0 10px 24px rgba(0,0,0,.4),0 30px 60px rgba(0,0,0,.48)}
-@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){.card,.kpi,.note,.entry,.legal,details,.nav{
+@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){.card, .note, .entry, .legal, details, .nav{
     background:linear-gradient(158deg,#161B18,#0D110F)}
-}.card{padding:20px 22px}.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}.g5{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}.kpi{padding:18px 20px}.kpi .t{font-size:9.5px;color:#767C85;font-weight:700;letter-spacing:.13em;text-transform:uppercase}.kpi .v{font-family:__MONO__;font-size:clamp(30px,3.2vw,46px);font-weight:700;color:#fff;
-  margin:12px 0 6px;letter-spacing:-.032em;line-height:1.15}.kpi.good .v,.kpi.hi .v{color:#D1FE17}.kpi.hi{border-color:rgba(209,254,23,.45)}.kpi .d{font-size:12px;color:#8A9099;line-height:1.65}.kpi .d b{color:#C9CDD2}.entry{display:block;text-decoration:none;padding:26px;position:relative;
+}.card{padding:20px 22px}.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}.entry{display:block;text-decoration:none;padding:26px;position:relative;
   transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .3s}.entry:hover{transform:translateY(-4px);border-color:rgba(209,254,23,.42);
   box-shadow:inset 0 0 0 .61px rgba(255,255,255,.09),0 26px 60px rgba(0,0,0,.62),0 0 42px rgba(209,254,23,.09)}.entry .et{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#767C85;
   font-family:__MONO__;margin-bottom:12px}.entry h3{margin:0 0 9px;font-size:18px;font-weight:750;color:#fff}.entry p{color:#8A9099;font-size:13px;line-height:1.65;margin-bottom:16px}.entry .nums{display:flex;gap:22px;flex-wrap:wrap;padding-top:16px;
@@ -614,20 +613,33 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
    这个问「有多少钱能做多少条」。 */
 .bud{margin-top:13px;padding:13px 15px;border-radius:13px;
   border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.028)}
-.budh{font-size:13px;font-weight:700;color:#D7DBDF}
-.budh span{font-size:11.5px;font-weight:500;color:#7A8088;margin-left:7px}
 .budrow{display:flex;align-items:center;gap:9px;margin-top:10px;flex-wrap:wrap}
 .budlbl{font-size:11.5px;color:#8A9098}
 .budn{width:6.4em}
-.budunit{font-size:11px;color:#6E747C}
 .budout{margin-top:10px;font-size:12.5px;line-height:1.8;color:#A8AEB6}
 .budout b{color:#D1FE17;font-weight:700}
 .budout .up{color:#8A9098;font-size:12px}
 .budout .no{color:#FF8A5B}
+/* 首页版：更大更醒目 —— 它是本站最直观的一个入口 */
+.budhome{padding:18px 20px;border-radius:15px;border-color:rgba(209,254,23,.18);
+  background:rgba(209,254,23,.045)}
+.budhome .budrow{gap:11px;margin-top:0}
+.budhome .budlbl{font-size:13px}
+.budhome .budn{width:7.2em;font-size:15px;padding:5px 9px}
+.budseg{margin-left:auto}
+.budseg button{padding:7px 13px;font-size:12px}
+.budbig{margin-top:15px;font-size:15px;line-height:1.85;color:#D7DBDF}
+.budbig b{font-size:19px;color:#D1FE17;font-weight:800;font-family:__MONO__}
+.budbig .up{font-size:12.5px;color:#8A9098}
+.budbig .up b{font-size:14px;font-family:inherit}
+.budtip{margin-top:11px;font-size:11.5px;line-height:1.7;color:#767C85}
+.budtip a{color:#9AA85E;text-decoration:none;border-bottom:1px dashed rgba(209,254,23,.35)}
+.budtip a:hover{color:#D1FE17}
 /* 按项目反查 —— 纯除法：总量 ÷ 工期 = 月产量。不碰出片率。 */
 .pj{margin-top:10px;padding:11px 12px;border-radius:11px;
   border:1px dashed rgba(209,254,23,.22);background:rgba(209,254,23,.035)}
 .pjh{font-size:12px;font-weight:700;color:#C9CDD2}
+.sgroup.hide{display:none}
 .pjh span{font-size:10.5px;font-weight:500;color:#7A8088;margin-left:6px}
 .prow{display:flex;align-items:baseline;gap:7px;margin-top:9px;flex-wrap:wrap}
 .prow .nval i{font-size:10.5px;color:#7A8088;font-style:normal}
@@ -670,10 +682,9 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
   background:transparent;color:#9AA0A8;font-family:inherit;font-size:13px;font-weight:600;
   text-align:left;padding:9px 12px;border-radius:10px;cursor:pointer;line-height:1.25;
   transition:background .16s,color .16s,border-color .16s}.segv button s{display:block;font-size:10.5px;font-weight:400;text-decoration:none;
-  color:#6E747C;margin-top:2px}.segv button:hover{background:rgba(255,255,255,.045);color:#D7DBDF}.segv button.on{background:rgba(209,254,23,.10);border-color:rgba(209,254,23,.34);color:#D1FE17}.segv button.on s{color:#9AA85E}.segv.segk{flex-direction:row;gap:3px}.segv.segk button{flex:1;text-align:center;padding:9px 5px;font-size:12px}.side .cqr{width:100%}.srow{display:flex;align-items:baseline;gap:9px;margin-top:7px;flex-wrap:wrap}
-/* ⚠ 侧栏很窄：产量输入框 + 单位 + 时长挤一行会断开（「条/」与「月」分两行）。
+  color:#6E747C;margin-top:2px}.segv button:hover{background:rgba(255,255,255,.045);color:#D7DBDF}.segv button.on{background:rgba(209,254,23,.10);border-color:rgba(209,254,23,.34);color:#D1FE17}.segv button.on s{color:#9AA85E}.segv.segk{flex-direction:row;gap:3px}.segv.segk button{flex:1;text-align:center;padding:9px 5px;font-size:12px}.side .cqr{width:100%}.srow{display:flex;align-items:baseline;gap:9px;margin-top:7px;flex-wrap:wrap}/* ⚠ 侧栏很窄：产量输入框 + 单位 + 时长挤一行会断开（「条/」与「月」分两行）。
    允许换行并锁住各自不断行，时长整体落到第二行。 */
-.nval,.budunit{white-space:nowrap}
+.nval{white-space:nowrap}
 .srow>#ndur,#ndur{white-space:nowrap}.pf{display:flex;flex-wrap:wrap;gap:5px}.pfb{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:9px;
   border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03);
   color:#8A9098;font-family:inherit;font-size:11.5px;font-weight:600;cursor:pointer;
@@ -905,9 +916,9 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   transition:opacity .62s cubic-bezier(.22,1,.36,1),transform .62s cubic-bezier(.22,1,.36,1)}.reveal.in{opacity:1;transform:none}.hero>*{animation:fadeUp .7s cubic-bezier(.22,1,.36,1) both}.hero>*:nth-child(2){animation-delay:.06s}.hero>*:nth-child(3){animation-delay:.12s}.hero>*:nth-child(4){animation-delay:.18s}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal,.hero>*{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}
 }
-@media print{body{background:#fff!important;color:#000!important;padding:0}body::before,body::after,.hero::before,.hero::after{display:none!important}.card,.kpi,.note,.entry,.legal,details,.nav,table{
+@media print{body{background:#fff!important;color:#000!important;padding:0}body::before,body::after,.hero::before,.hero::after{display:none!important}.card, .note, .entry, .legal, details, .nav, table{
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
-    box-shadow:none!important;background:#fff!important}.nav{position:static!important}.promo{background:#D1FE17!important;color:#000!important}.brand .bw b,.menu a,h1,h2,h3,td,th,li,.kpi .v,.lead,.meta{color:#000!important}.legal{background:#F2FFB8!important}.legal-t,.legal-b,.legal-f{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
+    box-shadow:none!important;background:#fff!important}.nav{position:static!important}.promo{background:#D1FE17!important;color:#000!important}.brand .bw b, .menu a, h1, h2, h3, td, th, li, .lead, .meta{color:#000!important}.legal{background:#F2FFB8!important}.legal-t,.legal-b,.legal-f{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
 }
 @media (max-width:820px){.promo{font-size:11.5px;padding:9px 14px;gap:9px}.nav .inner{padding:10px 15px;gap:11px;flex-wrap:wrap}
   /* ⚠ 原先这里是 .nav .spec{display:none} —— 手机端把「测试口径」整个藏掉，
@@ -915,15 +926,13 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
      该口径「是本次对比成立的唯一前提」—— 它不是补充信息，是结论的一部分。
      改为换行独占一行，始终可见；不做引导/弹窗（那是把关键前提延迟交付）。 */
   .nav .spec{margin-left:0;flex:1 1 100%;order:9;font-size:11px;line-height:1.5;
-    padding-top:7px;margin-top:2px;border-top:1px solid rgba(255,255,255,.08)}.hero{padding:36px 15px 4px}.wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}.kpi .v{font-size:26px}.entry{padding:20px}.card,.kpi,.note,.legal,table,details,.entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g5,.g2{grid-template-columns:1fr 1fr}
+    padding-top:7px;margin-top:2px;border-top:1px solid rgba(255,255,255,.08)}.hero{padding:36px 15px 4px}.wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}.entry{padding:20px}.card, .note, .legal, table, details, .entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g2{grid-template-columns:1fr 1fr}
   /* ── KPI：竖排五张卡会吃掉 1.5 屏，用户滚到反查与表格之前就以为「页面到头了」。
      改成横向滑动的一行，高度固定，下方内容自然进入首屏。 */
   .grid.g5{display:flex;overflow-x:auto;overscroll-behavior-x:auto;gap:10px;
     scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;
     margin:0 -15px;padding:2px 15px 6px;scrollbar-width:none}
   .grid.g5::-webkit-scrollbar{display:none}
-  .grid.g5>.kpi{flex:0 0 64%;min-width:0;scroll-snap-align:start}
-  .grid.g5>.kpi .v{font-size:24px}
   /* ── 反查表：套用与「全部档位排名」同一套卡片节奏 ──
      5 列在手机上必然横滑；上一版做成「标签在上、值在下」的纵向大卡，占太高、看着散。
      用户要求跟排名卡一样大小，故复用同一套：1fr + auto 两列、11px 内边距、圆角 13。 */
@@ -1028,7 +1037,7 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   .tw-main tbody td:nth-child(7) s{display:none}
 
 }
-@media (max-width:520px){.g5,.g2{grid-template-columns:1fr} }/* ── 窄屏：左栏改为【底部抽屉】+ 底部摘要条 ──
+@media (max-width:520px){.g2{grid-template-columns:1fr} }/* ── 窄屏：左栏改为【底部抽屉】+ 底部摘要条 ──
    上一版把侧栏做成「吸顶横向滚动条」，实测失败：吸顶块挡住内容，
    月产量与平台筛选被挤出视野、用户根本找不到。
    移动端的正确形态是「底部条 + 弹层」：不占首屏、信息一个不少、可发现。 */
@@ -1719,16 +1728,36 @@ function projectNeed(){
    与 renderRec（月产量 → 最省）互为反向：给定预算，找该周期内能买到的最大产能。
    附带「再加多少钱能跳档」—— 实测预算曲线非单调（¥500 与 ¥1,000 买到同样产能），
    跨不过门槛就白花钱，这件事用户自己看不出来。 */
-function renderBudget(){
-  var out = document.getElementById('budOut'), inp = document.getElementById('bud');
+/* ── 侧栏功能分区：排名 / 反查 ──
+   两个功能区各取所需，不必共用同一套筛选。标记为 both 的组
+   （会员周期、产能口径、月产量）两个区都要用，切换时不隐藏。 */
+var MO = 'rank';
+function applyMo(){
+  var seg = document.getElementById('moSeg');
+  if(!seg) return;
+  Array.prototype.forEach.call(seg.querySelectorAll('button'), function(b){
+    b.classList.toggle('on', b.getAttribute('data-mo') === MO);
+  });
+  var chip = document.getElementById('moChip');
+  if(chip) chip.textContent = MO === 'rank' ? '排名' : '反查';
+  Array.prototype.forEach.call(document.querySelectorAll('.side .sgroup[data-mo]'), function(g){
+    var m = g.getAttribute('data-mo');
+    g.classList.toggle('hide', m !== 'both' && m !== MO);
+  });
+}
+
+/* 首页的预算反查有自己的周期状态（首页没有全局周期切换） */
+var HPK = 'y';
+
+/* 通用：把预算结果算进指定元素。成本页与首页各一份实例。 */
+function budgetCalc(inp, out, unitEl, k){
   if(!out || !inp) return;
-  var k = PK, mo = CAPMONTHS[k], kz = {y:'年付',q:'季付',m:'月付'}[k];
+  var mo = CAPMONTHS[k], kz = {y:'年付',q:'季付',m:'月付'}[k];
   /* ⚠ 预算反查的单位跟【周期】走，不跟产能口径走 ——
      capUnit() 在「每月」口径下对季付/年付也返回「条/月」，会把 273 条/季
      写成「273 条/月」，差 3 倍。预算天然是按周期算的。 */
   var u = '条/' + CAPWORD[k];
-  var bu = document.getElementById('budUnit');
-  if(bu) bu.textContent = '（按' + kz + '计算）';
+  if(unitEl) unitEl.textContent = '（按' + kz + '计算）';
   var b = parseInt(inp.value, 10);
   if(isNaN(b) || b < 0) b = 0;
 
@@ -1758,6 +1787,16 @@ function renderBudget(){
     html += '<br><span class="up">已是该周期内产能最高的档位</span>';
   }
   out.innerHTML = html;
+}
+
+function renderBudget(){
+  budgetCalc(document.getElementById('hbud'), document.getElementById('hbudOut'), null, HPK);
+  var seg = document.getElementById('hbudSeg');
+  if(seg){
+    Array.prototype.forEach.call(seg.querySelectorAll('button'), function(b){
+      b.classList.toggle('on', b.getAttribute('data-k') === HPK);
+    });
+  }
 }
 
 function renderRec(src, force){
@@ -2138,12 +2177,33 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   }
 
-  /* 预算反查：输入即算 */
-  var bIn = document.getElementById('bud');
-  if(bIn){
-    bIn.addEventListener('input', renderBudget);
-    bIn.addEventListener('change', renderBudget);
-    renderBudget();
+  /* 预算反查：输入即算（首页实例） */
+  var hbIn = document.getElementById('hbud');
+  if(hbIn){
+    hbIn.addEventListener('input', renderBudget);
+    hbIn.addEventListener('change', renderBudget);
+  }
+  var hSeg = document.getElementById('hbudSeg');
+  if(hSeg){
+    Array.prototype.forEach.call(hSeg.querySelectorAll('button'), function(b){
+      b.addEventListener('click', function(){
+        HPK = b.getAttribute('data-k');
+        renderBudget();
+      });
+    });
+  }
+  renderBudget();
+
+  /* 侧栏功能分区切换 */
+  var moSeg = document.getElementById('moSeg');
+  if(moSeg){
+    Array.prototype.forEach.call(moSeg.querySelectorAll('button'), function(b){
+      b.addEventListener('click', function(){
+        MO = b.getAttribute('data-mo');
+        applyMo();
+      });
+    });
+    applyMo();
   }
 
   /* 产能口径开关：两页各有一组（成本页 capSeg / 全清单页 capSeg2），任一页点了全站同步 */
@@ -2353,10 +2413,6 @@ def foot(text):
             f'\u3000|\u3000<a href="#" id="introAgain" style="color:#8A9098;'
             f'border-bottom:1px dashed rgba(255,255,255,.3)">\u65b0\u624b\u5f15\u5bfc</a></div>')
 
-
-def kpi(t, v, d, cls="", vcls="rv"):
-    return (f'<div class="kpi {cls}"><div class="t">{t}</div>'
-            f'<div class="v">{v}</div><div class="d">{d}</div></div>')
 
 
 def sec_head(num, title, desc=""):
@@ -3082,14 +3138,21 @@ cost_body = f"""
 <div class="app">
 <aside class="side">
   {SHEET_HEAD}
-  <div class="sgroup" id="sgView">
+  <div class="sgroup">
+    <div class="sgt">功能<span class="sgchip" id="moChip">排名</span></div>
+    <div class="segv segk" id="moSeg" role="tablist" aria-label="功能分区">
+      <button type="button" class="on" data-mo="rank" role="tab">排名<s>看谁最省</s></button>
+      <button type="button" data-mo="lookup" role="tab">反查<s>我有条件，能买啥</s></button>
+    </div>
+  </div>
+  <div class="sgroup" id="sgView" data-mo="rank">
     <div class="sgt">查看方式</div>
     <div class="segv" id="viewSeg" data-seg="view" role="tablist" aria-label="查看方式">
       <button type="button" class="on" data-v="all" role="tab">全档位对比<s>逐档成本 + 反查</s></button>
       <button type="button" data-v="period" role="tab">先别急着下单<s>看懂周期与倒挂</s></button>
     </div>
   </div>
-  <div class="sgroup">
+  <div class="sgroup" data-mo="both">
     <div class="sgt">{T("chengnuoQi", "会员周期")}<span class="sgchip" id="segchipA">{len(ROWS)} 档</span></div>
     <div class="segv segk" id="segA" role="tablist" aria-label="会员周期">
       <button type="button" class="on" data-k="m" role="tab">月付<s>随时可停</s></button>
@@ -3097,7 +3160,7 @@ cost_body = f"""
       <button type="button" data-k="y" role="tab">年付<s>锁 12 个月</s></button>
     </div>
   </div>
-  <div class="sgroup">
+  <div class="sgroup" data-mo="both">
     <div class="sgt">产能口径<span class="sgchip">每月</span></div>
     <div class="segv" id="capSeg" role="tablist" aria-label="产能口径">
       <button type="button" class="on" data-cap="m" role="tab">每月<s>91 条/月</s></button>
@@ -3107,10 +3170,24 @@ cost_body = f"""
       <span style="font-size:11px;line-height:1.6;color:#7A8088">只影响「能做多少」的显示单位，不改变排名与结论。</span>
     </div>
   </div>
-  <div class="sgroup">
+  <div class="sgroup" data-mo="both">
     <div class="sgt" id="nLbl">月产量</div>
+    <input type="range" id="tgt" class="cqr" min="1" max="200" step="1" value="30" aria-label="月产量">
+    <div class="srow">
+      <span class="nval"><input type="number" id="nv" class="nvi" min="1" max="2400" step="1"
+        inputmode="numeric" aria-label="产量"><i id="nU">条/月</i></span>
+      <span class="sub" id="ndur">900 秒 ≈ 15 分钟</span>
+    </div>
+    <span class="presets" id="presets">
+      <button type="button" class="cqp" data-n="5">5</button>
+      <button type="button" class="cqp on" data-n="30">30</button>
+      <button type="button" class="cqp" data-n="100">100</button>
+    </span>
+  </div>
+  <div class="sgroup" data-mo="lookup">
+    <div class="sgt">按项目反查<span class="sgchip">总量 ÷ 工期</span></div>
     <div class="pj" id="pjBox">
-      <div class="pjh">按项目反查<span>—— 只知道总量和截止日也能用</span></div>
+      <div class="pjh">只知道总量和截止日也能用<span>—— 结果写进上面的月产量</span></div>
       <div class="prow">
         <span class="budlbl">总量</span>
         <span class="nval"><input type="number" id="pjN" class="nvi budn" min="1" step="1"
@@ -3124,19 +3201,8 @@ cost_body = f"""
       <div class="pjnote">填的是<b>需生成条数</b>（请先按自己的经验把成片条数放大，含废片余量）——
         本站不替你估算出片率。</div>
     </div>
-    <input type="range" id="tgt" class="cqr" min="1" max="200" step="1" value="30" aria-label="月产量">
-    <div class="srow">
-      <span class="nval"><input type="number" id="nv" class="nvi" min="1" max="2400" step="1"
-        inputmode="numeric" aria-label="产量"><i id="nU">条/月</i></span>
-      <span class="sub" id="ndur">900 秒 ≈ 15 分钟</span>
-    </div>
-    <span class="presets" id="presets">
-      <button type="button" class="cqp" data-n="5">5</button>
-      <button type="button" class="cqp on" data-n="30">30</button>
-      <button type="button" class="cqp" data-n="100">100</button>
-    </span>
   </div>
-  <div class="sgroup">
+  <div class="sgroup" data-mo="rank">
     <div class="sgt">平台<span class="sgchip" id="platN">{len(PLAT_SUM)}/{len(PLAT_SUM)}</span></div>
     <div class="pf" id="platFilter">{SIDE_PLAT}</div>
   </div>
@@ -3206,16 +3272,6 @@ cost_body = f"""
       <th class="ctr">实际产能</th><th class="ctr">单条成本</th></tr></thead>
       <tbody id="rec">{_init_combo_html}</tbody></table></div>
 
-    <div class="bud" id="budBox">
-      <div class="budh">按预算反查<span>—— 我有多少钱，最多能做多少条 · 换个方向问同一个问题</span></div>
-      <div class="budrow">
-        <span class="budlbl">预算</span>
-        <span class="nval">¥<input type="number" id="bud" class="nvi budn" min="0" step="100"
-          inputmode="numeric" value="3000" aria-label="预算金额"></span>
-        <span class="budunit" id="budUnit">（按年付计算）</span>
-      </div>
-      <div class="budout" id="budOut">—</div>
-    </div>
 
     <div class="scopenote">本站只算<b>产出量的成本性价比</b> —— 不含有效出片率、ROI、其他模型与画质。
       <a href="glossary.html#scope">算什么 · 不算什么 ›</a></div>
@@ -3273,7 +3329,31 @@ home_body = f"""
 </div>
 
 <div class="wrap">
-<section id="cost" class="reveal" style="margin-top:40px">
+<section id="budget" class="reveal" style="margin-top:40px">
+  <div class="sechead">
+    <h2><span class="ey">先用一下</span>我有多少钱，最多能做多少条？</h2>
+    <div class="sd">本站最常见的问法其实是反过来的 —— 不是「要 N 条花多少钱」，
+      而是「我预算就这么多，能做多少」。填个数字就有答案。</div>
+  </div>
+  <div class="bud budhome">
+    <div class="budrow">
+      <span class="budlbl">预算</span>
+      <span class="nval">¥<input type="number" id="hbud" class="nvi budn" min="0" step="100"
+        inputmode="numeric" value="3000" aria-label="预算金额"></span>
+      <span class="segv segk budseg" id="hbudSeg" role="tablist" aria-label="会员周期">
+        <button type="button" data-k="m" role="tab">月付</button>
+        <button type="button" data-k="q" role="tab">季付</button>
+        <button type="button" class="on" data-k="y" role="tab">年付</button>
+      </span>
+    </div>
+    <div class="budout budbig" id="hbudOut">—</div>
+    <div class="budtip">「再加多少能跳档」是本表最有价值的一栏 ——
+      实测预算曲线不单调，花不到门槛钱就白花了。完整对比见
+      <a href="cost.html">平台成本对比 ›</a></div>
+  </div>
+</section>
+
+<section id="cost" class="reveal" style="margin-top:44px">
   <div class="sechead">
     <h2><span class="ey">板块</span>两条对比线</h2>
     <div class="sd">统一口径的方法论复用在同一套框架下：成本线已上线，能力线在建。</div>
@@ -3304,19 +3384,6 @@ home_body = f"""
   </div>
 </section>
 
-<section class="reveal">
-  <div class="sechead">
-    <h2><span class="ey">结论</span>成本线速览</h2>
-    <div class="sd">完整数据、算法与风险说明见成本对比页。</div>
-  </div>
-  <div class="grid g5">
-    {kpi("单条成本最优", "¥" + f2(BEST), f'{_best["plat"]} {tname(_best)}<br>与次优 ¥{f2(_second["perVideo"])} 差 {(_second["perVideo"]/BEST-1)*100:.2f}%', "hi")}
-    {kpi("中产能最省", f'¥{_mid["priceCNY"]:,.0f}', f'{_mid["plat"]} {tname(_mid)}<br>¥{f2(_mid["perVideo"])}/条', "good")}
-    {kpi("大产能最省", f'¥{_top["priceCNY"]:,.0f}', f'{_top["plat"]} {tname(_top)}<br>{_top["mCap"]:.2f} 条/月', "good")}
-    {kpi("海外平台溢价", f'{_hg["perVideo"]/BEST:.2f}×', f'Higgsfield {_hg["tier"]} ¥{f2(_hg["perVideo"])}/条<br>无成本优势', "")}
-    {kpi("最差档位", f'{WORST/BEST:.2f}×', f'Higgsfield Starter ¥{f2(WORST)}/条<br>低档位多是高价试用', "")}
-  </div>
-</section>
 </div>
 
 {foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　数据采集 {UPDATED}　·　全部数值按统一口径重算，非平台宣传数字')}
@@ -3399,7 +3466,7 @@ lb_body = f"""
 # ═══════════════════════════════════════════════════════════════════
 PAGES = {
     "index.html": page("首页", f"{BRAND} — {SITE['tagline']}。AI 平台成本对比与模型能力排行榜，统一口径折算，只给可复核的结果。",
-                       nav("home"), home_body),
+                       nav("home"), home_body, cost_js=True),
     "cost.html": page("平台成本对比", f"{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本，含达标阶梯、边际成本与跨平台组合最省。",
                       nav("cost"), cost_body, cost_js=True),
     "cycles.html": page("三周期全清单", f"{len(ROWS)} 个可选积分档 × 年付/季付/月付三周期，按指标动态排名，附全部原始数据与计算方法。",
