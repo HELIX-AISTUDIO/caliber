@@ -1332,6 +1332,7 @@ COST_JS = r"""
 var PLANS = __PLANS__;
 var PT_N = __PTN__;         /* 每个周期各有几档可比 */
 var DEFK = '__DEFK__';      /* 默认周期：与 Python 侧 PERIODS[0] 同源 */
+var SECC = __SECCLIP__;     /* 单条时长（秒），与 Python 侧同源 */
 var MAX_STACK = 4;          /* 同档最多叠加份数 */
 var CQ_LOCK = false, CQ_LAST = null;
 var PK = 'm';               /* 当前周期：默认月付（顺序第一项） */
@@ -1406,6 +1407,7 @@ function applyCap(){
     var hint = seg.parentNode.querySelector('.sgchip');
     if(hint) hint.textContent = CAPU === 'p' ? '整个周期' : '每月';
   });
+  syncSlider(true);        /* 口径变了 → 单位与量程跟着变，并回写当前值 */
   renderRec(null, true);   /* 反查卡的产能格走它自己的渲染路径，强制重画 */
 }
 var CV = 'all';             /* 当前视图：all 全档位对比 / buy 我该买哪个 / period 周期对照 */
@@ -1426,7 +1428,7 @@ function updateMoSum(){
   }
   var on = document.querySelectorAll('#platFilter .pfb.on').length;
   var tot = document.querySelectorAll('#platFilter .pfb').length;
-  el.textContent = VIEW_LBL[CV] + ' · ' + PER_LBL[PK] + ' · ' + readN() + ' 条/月 · ' + on + '/' + tot + ' 平台';
+  el.textContent = VIEW_LBL[CV] + ' · ' + PER_LBL[PK] + ' · ' + (readN() * capMul(PK)) + ' ' + capUnit(PK) + ' · ' + on + '/' + tot + ' 平台';
 }
 
 /* ── 周期切换 ──
@@ -1510,12 +1512,62 @@ function applyPlatFilter(){
 /* 单滑块：左栏 #tgt 是唯一的产量来源，两个视图共用它 */
 function linkN(N, src){
   var a = document.getElementById('tgt');
-  if(a && a !== src) a.value = N;
+  if(a && a !== src) a.value = N * capMul(PK);   /* 另一根滑块也要按当前口径写 */
 }
 
-function readN(src){
-  var el = (src && src.value) ? src : document.getElementById('tgt');
-  return Math.max(1, Math.min(200, parseInt(el && el.value || '30', 10)));
+/* 规范量：目标【月产量】。全站比较逻辑一律以它为准 ——
+   无论滑块当前是什么单位，最终都折算回月产量，排名结果与口径无关。 */
+var NMON = 30;
+
+/* ⚠ readN() 必须是【纯读】。
+   早先它顺带把滑块值写回 NMON —— 切周期时 applyPeriod 的中间环节会用
+   「新周期的乘数」去读「旧周期的滑块值」，把规范量污染
+   （年付 360 条/年 被当成 360 条/季 读 → NMON 从 30 漂到 36）。
+   NMON 现在只由滑块的 input 事件更新一处。 */
+function readN(){ return NMON; }
+
+/* 滑块上的值 → 目标月产量。滑块单位随口径变：
+   整周期·年付 输入的 1680 条/年 即 140 条/月。 */
+function sliderToN(raw){
+  var m = capMul(PK);
+  return m > 1 ? Math.max(1, Math.round(raw / m)) : Math.max(1, Math.min(200, raw));
+}
+function nToSlider(N){ return N * capMul(PK); }
+
+/* 按当前口径刷新滑块的单位、量程与读数显示。
+   ⚠ 量程必须跟着变：年付周期口径要能滑到 200×12＝2400 条/年，
+     否则滑块物理上到不了用户想表达的量。 */
+function syncSlider(setValue){
+  var sl = document.getElementById('tgt');
+  if(!sl) return;
+  var m = capMul(PK), v = NMON * m;
+  sl.max = 200 * m;
+  /* 步长＝乘数：月产量必须是整数，若步长仍为 1，季付下拖到 140 会被
+     折成 47 条/月再显示成 141 条/季 —— 用户拖到哪就跳一格。
+     ⚠ min 必须同时设为 0：step 是【相对 min】的增量，
+       min=1 + step=12 的合法值是 1,13,25…，360 不合法会被吸附成 361。 */
+  sl.min = 0;
+  sl.step = m;
+  /* 拖动中只改量程与文字，不回写 value —— 否则取整会让滑块跳
+     （raw 430 / 乘数 12 → NMON 36 → 回写 432）。只在口径或周期切换时回写。 */
+  if(setValue) sl.value = v;
+  var nv = document.getElementById('nv');
+  if(nv) nv.textContent = v + ' ' + capUnit(PK);
+  var nd = document.getElementById('ndur');
+  if(nd){
+    var sec = v * SECC;   /* JS 侧的常量名是 SECC（Python 侧叫 SEC_PER_CLIP） */
+    nd.textContent = sec >= 3600
+      ? (sec / 3600).toFixed(1) + ' 小时素材'
+      : Math.round(sec) + ' 秒 \u2248 ' + Math.round(sec / 60) + ' 分钟素材';
+  }
+  var nl = document.getElementById('nLbl');
+  if(nl) nl.textContent = m > 1 ? '周期产量' : '月产量';
+  /* 预设按钮的值同样按口径换算，并标出当前选中项 */
+  Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp'), function(b){
+    var n = parseInt(b.dataset.n, 10);
+    b.textContent = String(n * m);
+    b.classList.toggle('on', n === NMON);
+  });
 }
 
 /* 单账号口径：1 个账号 = 1 个档位，产能不够就是做不到（不允许同档多份）。
@@ -1590,17 +1642,8 @@ function renderRec(src, force){
   if(CQ_LAST === N && !force) return;   /* 节流：拖动时高频触发，N 未变则跳过 */
   CQ_LAST = N;
 
-  var secs = N * 30, mins = secs / 60;
-  var nv = document.getElementById('nv');
-  if(nv) nv.textContent = N + ' 条/月';
-  var nd = document.getElementById('ndur');
-  if(nd) nd.textContent = '= ' + secs.toLocaleString() + ' 秒 \u2248 ' +
-    (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '素材';
-  var qv = document.getElementById('nv');
-  if(qv) qv.textContent = N + ' 条/月';
-  Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp'), function(b){
-    b.classList.toggle('on', parseInt(b.dataset.n, 10) === N);
-  });
+  /* 滑块的量程/读数/预设高亮统一由 syncSlider() 负责 ——
+     这里再写一遍会与它打架（早先两处都写，其中一处硬编码「条/月」）。 */
 
   /* 方案表 */
   var single = null;
@@ -1902,8 +1945,10 @@ document.addEventListener('DOMContentLoaded', function(){
   function onSlide(el){
     if(!el) return;
     el.addEventListener('input', function(){
+      NMON = sliderToN(parseInt(el.value, 10) || 1);   /* NMON 的唯一更新点 */
       CQ_LAST = null;
-      linkN(readN(el), el);
+      syncSlider(false);                                /* 量程/文字跟上，不回写 value */
+      linkN(NMON, el);
       updateMoSum();
       renderRec(el); rerank(el);
     });
@@ -1920,10 +1965,15 @@ document.addEventListener('DOMContentLoaded', function(){
 
   Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp'), function(b){
     b.addEventListener('click', function(){
-      var N = parseInt(b.dataset.n, 10);
+      /* data-n 是【月产量】的预设值（5/10/30/50/100）——
+         按钮上显示的数字会按口径换算（年付周期口径显示 60/120/360/600/1200），
+         但这里始终是月产量。 */
+      NMON = parseInt(b.dataset.n, 10);
       CQ_LAST = null;
-      linkN(N, null);
-      renderRec(); rerank();
+      syncSlider(true);
+      linkN(NMON, null);
+      updateMoSum();
+      renderRec(null, true); rerank();
     });
   });
 
@@ -2488,7 +2538,7 @@ GUIDE = """
 
 def page(title, desc, nav_html, body, cost_js=False):
     js = JS.replace("__COST__", COST_JS) if cost_js else JS.replace("__COST__", "")
-    js = js.replace("__GLOS__", GLOS_JSON).replace("__DEFK__", _DEFAULT_K)
+    js = js.replace("__GLOS__", GLOS_JSON).replace("__DEFK__", _DEFAULT_K).replace("__SECCLIP__", str(SEC_PER_CLIP))
     if cost_js:
         js = js.replace("__PLANS__", json.dumps(
             [{"plat": r["plat"], "tier": r["tier"], "label": r["label"], "color": r["color"],
@@ -2867,7 +2917,7 @@ cost_body = f"""
     </div>
   </div>
   <div class="sgroup">
-    <div class="sgt">月产量</div>
+    <div class="sgt" id="nLbl">月产量</div>
     <input type="range" id="tgt" class="cqr" min="1" max="200" step="1" value="30" aria-label="月产量">
     <div class="srow">
       <span class="qv" id="nv">30 条/月</span>

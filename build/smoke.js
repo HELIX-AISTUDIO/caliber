@@ -684,6 +684,34 @@ async function run(browser) {
       await p.click('#segA button[data-k="m"]'); await p.waitForTimeout(400);
     }
 
+    // 滑块必须跟着产能口径换单位与量程（用户报：怎么滑都只在跟月产能上限比）
+    {
+      const sl = () => p.evaluate(() => {
+        const s = document.getElementById('tgt');
+        return { max: s.max, step: s.step, val: s.value,
+                 unit: document.getElementById('nv').textContent.trim(),
+                 lbl: document.getElementById('nLbl').textContent.trim(),
+                 pres: [...document.querySelectorAll('#presets .cqp')].map(x => x.textContent).join('/') };
+      });
+      await p.click('#capSeg button[data-cap="m"]'); await p.waitForTimeout(400);
+      await p.click('#segA button[data-k="y"]'); await p.waitForTimeout(400);
+      const mo = await sl();
+      await p.click('#capSeg button[data-cap="p"]'); await p.waitForTimeout(500);
+      const yr = await sl();
+      check('年付·周期口径：滑块量程放大到 2400 条/年',
+        yr.max === '2400' && yr.val === '360' && yr.unit.indexOf('条/年') > 0, `${yr.max} / ${yr.val} / ${yr.unit}`);
+      check('年付·周期口径：步长＝12（月产量必须整数）', yr.step === '12', yr.step);
+      check('年付·周期口径：标题与预设同步换算',
+        yr.lbl === '周期产量' && yr.pres === '60/120/360/600/1200', `${yr.lbl} ${yr.pres}`);
+      check('每月口径不变', mo.max === '200' && mo.unit.indexOf('条/月') > 0 && mo.lbl === '月产量',
+        `${mo.max} / ${mo.unit} / ${mo.lbl}`);
+      // 切回每月后再切年付，NMON 不得漂移
+      await p.click('#capSeg button[data-cap="m"]'); await p.waitForTimeout(400);
+      const back = await sl();
+      check('来回切口径后月产量不漂移', back.val === '30' && back.unit === '30 条/月', back.unit);
+      await p.click('#segA button[data-k="m"]'); await p.waitForTimeout(400);
+    }
+
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，
     // 没有 ✕ 的话用户找不到任何方式退出（用户实测被卡住）

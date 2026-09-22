@@ -643,7 +643,7 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
     </div>
   </div>
   <div class="sgroup">
-    <div class="sgt">月产量</div>
+    <div class="sgt" id="nLbl">月产量</div>
     <input type="range" id="tgt" class="cqr" min="1" max="200" step="1" value="30" aria-label="月产量">
     <div class="srow">
       <span class="qv" id="nv">30 条/月</span>
@@ -1047,6 +1047,7 @@ var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分�
 var PLANS = [{"plat": "libtv", "tier": "标准版", "label": "", "color": "#9CE6F3", "pc": {"y": 569.0, "q": 179.0, "m": 66.0}, "cp": {"y": 1.087, "q": 1.087, "m": 1.087}}, {"plat": "libtv", "tier": "进阶版", "label": "", "color": "#9CE6F3", "pc": {"y": 1199.0, "q": 499.0, "m": 199.0}, "cp": {"y": 3.3333, "q": 3.3333, "m": 3.3333}}, {"plat": "libtv", "tier": "高级版", "label": "11.7K 档", "color": "#9CE6F3", "pc": {"y": 2999.0, "q": 1159.0, "m": 469.0}, "cp": {"y": 8.4783, "q": 8.4783, "m": 8.4783}}, {"plat": "libtv", "tier": "高级版", "label": "16.3K 档", "color": "#9CE6F3", "pc": {"y": 3899.0, "q": 1599.0, "m": 649.0}, "cp": {"y": 11.8116, "q": 11.8116, "m": 11.8116}}, {"plat": "libtv", "tier": "豪华版", "label": "", "color": "#9CE6F3", "pc": {"y": 6699.0, "q": 2699.0, "m": 1199.0}, "cp": {"y": 23.7681, "q": 23.7681, "m": 23.7681}}, {"plat": "libtv", "tier": "至尊版", "label": "50.5K 档", "color": "#9CE6F3", "pc": {"y": 9599.0, "q": 3899.0, "m": 1799.0}, "cp": {"y": 36.5942, "q": 36.5942, "m": 36.5942}}, {"plat": "libtv", "tier": "至尊版", "label": "66K 档", "color": "#9CE6F3", "pc": {"y": 12499.0, "q": 4999.0, "m": 2299.0}, "cp": {"y": 47.8261, "q": 47.8261, "m": 47.8261}}, {"plat": "Neowow", "tier": "PLUS", "label": "", "color": "#00C65A", "pc": {"y": 599.0, "q": 189.0, "m": 60.0}, "cp": {"y": 1.2, "q": 1.2, "m": 1.2}}, {"plat": "Neowow", "tier": "Pro", "label": "32.8K 档", "color": "#00C65A", "pc": {"y": 1599.0, "q": 628.0, "m": 219.0}, "cp": {"y": 4.3733, "q": 4.3733, "m": 4.3733}}, {"plat": "Neowow", "tier": "Pro", "label": "52.8K 档", "color": "#00C65A", "pc": {"y": 2289.0, "q": 899.0, "m": 348.0}, "cp": {"y": 7.04, "q": 7.04, "m": 7.04}}, {"plat": "Neowow", "tier": "Pro", "label": "10.8W 档", "color": "#00C65A", "pc": {"y": 4666.0, "q": 1999.0, "m": 718.0}, "cp": {"y": 14.4, "q": 14.4, "m": 14.4}}, {"plat": "Neowow", "tier": "MAX", "label": "18.8W 档", "color": "#00C65A", "pc": {"y": 7299.0, "q": 2999.0, "m": 1199.0}, "cp": {"y": 25.0667, "q": 25.0667, "m": 25.0667}}, {"plat": "Neowow", "tier": "MAX", "label": "28.8W 档", "color": "#00C65A", "pc": {"y": 11059.0, "q": 4599.0, "m": 1827.0}, "cp": {"y": 38.4, "q": 38.4, "m": 38.4}}, {"plat": "Neowow", "tier": "ULTRA", "label": "", "color": "#00C65A", "pc": {"y": 11899.0, "q": 5520.0, "m": 2296.0}, "cp": {"y": 49.0667, "q": 49.0667, "m": 49.0667}}, {"plat": "即梦", "tier": "基础会员", "label": "", "color": "#3280FF", "pc": {"y": 659.0, "q": 188.0, "m": 69.0}, "cp": {"y": 1.2083, "q": 1.2083, "m": 1.2083}}, {"plat": "即梦", "tier": "标准会员", "label": "", "color": "#3280FF", "pc": {"y": 1899.0, "q": 568.0, "m": 199.0}, "cp": {"y": 3.6833, "q": 3.6833, "m": 6.6667}}, {"plat": "即梦", "tier": "高级会员", "label": "6.2K 档", "color": "#3280FF", "pc": {"y": 2599.0, "q": 1399.0, "m": 499.0}, "cp": {"y": 10.2667, "q": 10.2667, "m": 10.2667}}, {"plat": "即梦", "tier": "高级会员", "label": "12.3K 档", "color": "#3280FF", "pc": {"y": 5199.0, "q": 1959.0, "m": 998.0}, "cp": {"y": 20.5333, "q": 20.5333, "m": 20.5333}}, {"plat": "即梦", "tier": "高级会员", "label": "18.5K 档", "color": "#3280FF", "pc": {"y": 7799.0, "q": 2939.0, "m": 1498.0}, "cp": {"y": 30.8, "q": 30.8, "m": 30.8}}, {"plat": "即梦", "tier": "高级会员", "label": "27.7K 档", "color": "#3280FF", "pc": {"y": 11699.0, "q": 4409.0, "m": 2246.0}, "cp": {"y": 46.2, "q": 46.2, "m": 46.2}}, {"plat": "即梦", "tier": "超级会员", "label": "", "color": "#3280FF", "pc": {"y": 21840.0, "q": 8189.0, "m": 4299.0}, "cp": {"y": 91.0, "q": 91.0, "m": 91.0}}, {"plat": "小云雀", "tier": "基础会员", "label": "", "color": "#FABC00", "pc": {"y": 453.0, "q": 219.0, "m": 38.0}, "cp": {"y": 1.3833, "q": 1.3833, "m": 1.3833}}, {"plat": "小云雀", "tier": "标准会员", "label": "", "color": "#FABC00", "pc": {"y": 1199.0, "q": 589.0, "m": 100.0}, "cp": {"y": 3.8667, "q": 3.8667, "m": 3.8667}}, {"plat": "小云雀", "tier": "高级会员", "label": "6.3K 档", "color": "#FABC00", "pc": {"y": 2649.0, "q": 1488.0, "m": 273.0}, "cp": {"y": 10.5, "q": 10.5, "m": 10.5}}, {"plat": "小云雀", "tier": "高级会员", "label": "8.6K 档", "color": "#FABC00", "pc": {"y": 3599.0, "q": 1999.0, "m": 374.0}, "cp": {"y": 14.3333, "q": 14.3333, "m": 14.3333}}, {"plat": "小云雀", "tier": "高级会员", "label": "10.2K 档", "color": "#FABC00", "pc": {"y": 4199.0, "q": 2349.0, "m": 441.0}, "cp": {"y": 16.9167, "q": 16.9167, "m": 16.9167}}, {"plat": "小云雀", "tier": "高级会员", "label": "12K 档", "color": "#FABC00", "pc": {"y": 4999.0, "q": 1959.0, "m": 519.0}, "cp": {"y": 20.0, "q": 20.0, "m": 20.0}}, {"plat": "小云雀", "tier": "高级会员", "label": "18.5K 档", "color": "#FABC00", "pc": {"y": 7799.0, "q": 2939.0, "m": 779.0}, "cp": {"y": 30.8333, "q": 30.8333, "m": 30.8333}}, {"plat": "小云雀", "tier": "高级会员", "label": "27.7K 档", "color": "#FABC00", "pc": {"y": 10699.0, "q": 4408.0, "m": 1168.0}, "cp": {"y": 46.2, "q": 46.2, "m": 46.2}}, {"plat": "小云雀", "tier": "超级会员", "label": "", "color": "#FABC00", "pc": {"y": 21840.0, "q": 8189.0, "m": 2235.0}, "cp": {"y": 91.0, "q": 91.0, "m": 91.0}}, {"plat": "Higgsfield", "tier": "Starter", "label": "", "color": "#ED1572", "pc": {"y": 1214.77, "q": null, "m": 101.23}, "cp": {"y": 0.9524, "q": null, "m": 0.9524}}, {"plat": "Higgsfield", "tier": "Plus", "label": "", "color": "#ED1572", "pc": {"y": 3158.39, "q": null, "m": 330.69}, "cp": {"y": 4.7619, "q": null, "m": 4.7619}}, {"plat": "Higgsfield", "tier": "Ultra", "label": "3K 档", "color": "#ED1572", "pc": {"y": 8017.46, "q": null, "m": 870.58}, "cp": {"y": 14.2857, "q": null, "m": 14.2857}}, {"plat": "Higgsfield", "tier": "Ultra", "label": "6K 档", "color": "#ED1572", "pc": {"y": 15710.97, "q": null, "m": 1484.71}, "cp": {"y": 28.5714, "q": null, "m": 28.5714}}, {"plat": "Higgsfield", "tier": "Ultra", "label": "9K 档", "color": "#ED1572", "pc": {"y": 21865.79, "q": null, "m": 2092.1}, "cp": {"y": 42.8571, "q": null, "m": 42.8571}}, {"plat": "Tapnow", "tier": "BASIC", "label": "", "color": "#A78BFA", "pc": {"y": 607.38, "q": 182.21, "m": 101.23}, "cp": {"y": 1.25, "q": 1.25, "m": 1.25}}, {"plat": "Tapnow", "tier": "PRO", "label": "3.5K 档", "color": "#A78BFA", "pc": {"y": 2125.84, "q": 566.89, "m": 202.46}, "cp": {"y": 2.9167, "q": 2.9167, "m": 2.9167}}, {"plat": "Tapnow", "tier": "PRO", "label": "6K 档", "color": "#A78BFA", "pc": {"y": 3644.3, "q": 971.81, "m": 344.18}, "cp": {"y": 5.0, "q": 5.0, "m": 5.0}}, {"plat": "Tapnow", "tier": "PRO", "label": "9.5K 档", "color": "#A78BFA", "pc": {"y": 5770.14, "q": 1538.7, "m": 546.64}, "cp": {"y": 7.9167, "q": 7.9167, "m": 7.9167}}, {"plat": "Tapnow", "tier": "PRO", "label": "11.5K 档", "color": "#A78BFA", "pc": {"y": 6984.9, "q": 1862.64, "m": 661.37}, "cp": {"y": 9.5833, "q": 9.5833, "m": 9.5833}}, {"plat": "Tapnow", "tier": "PRO", "label": "20K 档", "color": "#A78BFA", "pc": {"y": 12147.66, "q": 3239.38, "m": 1147.28}, "cp": {"y": 16.6667, "q": 16.6667, "m": 16.6667}}, {"plat": "Tapnow", "tier": "ULTIMATE", "label": "", "color": "#A78BFA", "pc": {"y": 17492.63, "q": 5102.02, "m": 2065.1}, "cp": {"y": 30.0, "q": 30.0, "m": 30.0}}, {"plat": "Tapnow", "tier": "MAX", "label": "72K 档", "color": "#A78BFA", "pc": {"y": 34985.26, "q": 10204.03, "m": 4130.2}, "cp": {"y": 60.0, "q": 60.0, "m": 60.0}}, {"plat": "Tapnow", "tier": "MAX", "label": "10W 档", "color": "#A78BFA", "pc": {"y": 48590.64, "q": 14172.27, "m": 5736.4}, "cp": {"y": 83.3333, "q": 83.3333, "m": 83.3333}}, {"plat": "Seko", "tier": "标准会员", "label": "", "color": "#14D9C4", "pc": {"y": 576.0, "q": null, "m": 39.0}, "cp": {"y": 0.9259, "q": null, "m": 0.9259}}, {"plat": "Seko", "tier": "高级会员", "label": "", "color": "#14D9C4", "pc": {"y": 2880.0, "q": null, "m": 195.0}, "cp": {"y": 5.5556, "q": null, "m": 5.5556}}, {"plat": "Seko", "tier": "至尊会员", "label": "", "color": "#14D9C4", "pc": {"y": 8400.0, "q": null, "m": 569.0}, "cp": {"y": 18.5185, "q": null, "m": 18.5185}}];
 var PT_N = {"m": 47, "q": 39, "y": 47};         /* 每个周期各有几档可比 */
 var DEFK = 'm';      /* 默认周期：与 Python 侧 PERIODS[0] 同源 */
+var SECC = 30;     /* 单条时长（秒），与 Python 侧同源 */
 var MAX_STACK = 4;          /* 同档最多叠加份数 */
 var CQ_LOCK = false, CQ_LAST = null;
 var PK = 'm';               /* 当前周期：默认月付（顺序第一项） */
@@ -1121,6 +1122,7 @@ function applyCap(){
     var hint = seg.parentNode.querySelector('.sgchip');
     if(hint) hint.textContent = CAPU === 'p' ? '整个周期' : '每月';
   });
+  syncSlider(true);        /* 口径变了 → 单位与量程跟着变，并回写当前值 */
   renderRec(null, true);   /* 反查卡的产能格走它自己的渲染路径，强制重画 */
 }
 var CV = 'all';             /* 当前视图：all 全档位对比 / buy 我该买哪个 / period 周期对照 */
@@ -1141,7 +1143,7 @@ function updateMoSum(){
   }
   var on = document.querySelectorAll('#platFilter .pfb.on').length;
   var tot = document.querySelectorAll('#platFilter .pfb').length;
-  el.textContent = VIEW_LBL[CV] + ' · ' + PER_LBL[PK] + ' · ' + readN() + ' 条/月 · ' + on + '/' + tot + ' 平台';
+  el.textContent = VIEW_LBL[CV] + ' · ' + PER_LBL[PK] + ' · ' + (readN() * capMul(PK)) + ' ' + capUnit(PK) + ' · ' + on + '/' + tot + ' 平台';
 }
 
 /* ── 周期切换 ──
@@ -1225,12 +1227,62 @@ function applyPlatFilter(){
 /* 单滑块：左栏 #tgt 是唯一的产量来源，两个视图共用它 */
 function linkN(N, src){
   var a = document.getElementById('tgt');
-  if(a && a !== src) a.value = N;
+  if(a && a !== src) a.value = N * capMul(PK);   /* 另一根滑块也要按当前口径写 */
 }
 
-function readN(src){
-  var el = (src && src.value) ? src : document.getElementById('tgt');
-  return Math.max(1, Math.min(200, parseInt(el && el.value || '30', 10)));
+/* 规范量：目标【月产量】。全站比较逻辑一律以它为准 ——
+   无论滑块当前是什么单位，最终都折算回月产量，排名结果与口径无关。 */
+var NMON = 30;
+
+/* ⚠ readN() 必须是【纯读】。
+   早先它顺带把滑块值写回 NMON —— 切周期时 applyPeriod 的中间环节会用
+   「新周期的乘数」去读「旧周期的滑块值」，把规范量污染
+   （年付 360 条/年 被当成 360 条/季 读 → NMON 从 30 漂到 36）。
+   NMON 现在只由滑块的 input 事件更新一处。 */
+function readN(){ return NMON; }
+
+/* 滑块上的值 → 目标月产量。滑块单位随口径变：
+   整周期·年付 输入的 1680 条/年 即 140 条/月。 */
+function sliderToN(raw){
+  var m = capMul(PK);
+  return m > 1 ? Math.max(1, Math.round(raw / m)) : Math.max(1, Math.min(200, raw));
+}
+function nToSlider(N){ return N * capMul(PK); }
+
+/* 按当前口径刷新滑块的单位、量程与读数显示。
+   ⚠ 量程必须跟着变：年付周期口径要能滑到 200×12＝2400 条/年，
+     否则滑块物理上到不了用户想表达的量。 */
+function syncSlider(setValue){
+  var sl = document.getElementById('tgt');
+  if(!sl) return;
+  var m = capMul(PK), v = NMON * m;
+  sl.max = 200 * m;
+  /* 步长＝乘数：月产量必须是整数，若步长仍为 1，季付下拖到 140 会被
+     折成 47 条/月再显示成 141 条/季 —— 用户拖到哪就跳一格。
+     ⚠ min 必须同时设为 0：step 是【相对 min】的增量，
+       min=1 + step=12 的合法值是 1,13,25…，360 不合法会被吸附成 361。 */
+  sl.min = 0;
+  sl.step = m;
+  /* 拖动中只改量程与文字，不回写 value —— 否则取整会让滑块跳
+     （raw 430 / 乘数 12 → NMON 36 → 回写 432）。只在口径或周期切换时回写。 */
+  if(setValue) sl.value = v;
+  var nv = document.getElementById('nv');
+  if(nv) nv.textContent = v + ' ' + capUnit(PK);
+  var nd = document.getElementById('ndur');
+  if(nd){
+    var sec = v * SECC;   /* JS 侧的常量名是 SECC（Python 侧叫 SEC_PER_CLIP） */
+    nd.textContent = sec >= 3600
+      ? (sec / 3600).toFixed(1) + ' 小时素材'
+      : Math.round(sec) + ' 秒 \u2248 ' + Math.round(sec / 60) + ' 分钟素材';
+  }
+  var nl = document.getElementById('nLbl');
+  if(nl) nl.textContent = m > 1 ? '周期产量' : '月产量';
+  /* 预设按钮的值同样按口径换算，并标出当前选中项 */
+  Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp'), function(b){
+    var n = parseInt(b.dataset.n, 10);
+    b.textContent = String(n * m);
+    b.classList.toggle('on', n === NMON);
+  });
 }
 
 /* 单账号口径：1 个账号 = 1 个档位，产能不够就是做不到（不允许同档多份）。
@@ -1305,17 +1357,8 @@ function renderRec(src, force){
   if(CQ_LAST === N && !force) return;   /* 节流：拖动时高频触发，N 未变则跳过 */
   CQ_LAST = N;
 
-  var secs = N * 30, mins = secs / 60;
-  var nv = document.getElementById('nv');
-  if(nv) nv.textContent = N + ' 条/月';
-  var nd = document.getElementById('ndur');
-  if(nd) nd.textContent = '= ' + secs.toLocaleString() + ' 秒 \u2248 ' +
-    (mins >= 60 ? (mins/60).toFixed(1) + ' 小时' : mins.toFixed(0) + ' 分钟') + '素材';
-  var qv = document.getElementById('nv');
-  if(qv) qv.textContent = N + ' 条/月';
-  Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp'), function(b){
-    b.classList.toggle('on', parseInt(b.dataset.n, 10) === N);
-  });
+  /* 滑块的量程/读数/预设高亮统一由 syncSlider() 负责 ——
+     这里再写一遍会与它打架（早先两处都写，其中一处硬编码「条/月」）。 */
 
   /* 方案表 */
   var single = null;
@@ -1617,8 +1660,10 @@ document.addEventListener('DOMContentLoaded', function(){
   function onSlide(el){
     if(!el) return;
     el.addEventListener('input', function(){
+      NMON = sliderToN(parseInt(el.value, 10) || 1);   /* NMON 的唯一更新点 */
       CQ_LAST = null;
-      linkN(readN(el), el);
+      syncSlider(false);                                /* 量程/文字跟上，不回写 value */
+      linkN(NMON, el);
       updateMoSum();
       renderRec(el); rerank(el);
     });
@@ -1635,10 +1680,15 @@ document.addEventListener('DOMContentLoaded', function(){
 
   Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp'), function(b){
     b.addEventListener('click', function(){
-      var N = parseInt(b.dataset.n, 10);
+      /* data-n 是【月产量】的预设值（5/10/30/50/100）——
+         按钮上显示的数字会按口径换算（年付周期口径显示 60/120/360/600/1200），
+         但这里始终是月产量。 */
+      NMON = parseInt(b.dataset.n, 10);
       CQ_LAST = null;
-      linkN(N, null);
-      renderRec(); rerank();
+      syncSlider(true);
+      linkN(NMON, null);
+      updateMoSum();
+      renderRec(null, true); rerank();
     });
   });
 
