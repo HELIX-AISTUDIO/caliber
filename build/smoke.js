@@ -712,6 +712,31 @@ async function run(browser) {
       await p.click('#segA button[data-k="m"]'); await p.waitForTimeout(400);
     }
 
+    // 三个周期全都 0 可用时，画面完全相同，用户会误以为「切周期没刷新」。
+    // 必须把原因写在显眼处（实测 N=92 > 单账号上限 91）。
+    {
+      await p.click('#capSeg button[data-cap="p"]'); await p.waitForTimeout(400);
+      for (const k of ['m', 'q', 'y']) {
+        await p.click(`#segA button[data-k="${k}"]`); await p.waitForTimeout(350);
+        await p.evaluate(() => { const t2 = document.getElementById('tgt');
+          const m = { m: 1, q: 3, y: 12 }[document.querySelector('#segA button.on').dataset.k];
+          t2.value = 92 * m; t2.dispatchEvent(new Event('input', { bubbles: true })); });
+        await p.waitForTimeout(400);
+        const r = await p.evaluate(() => {
+          const cv = document.getElementById('coverN');
+          return { txt: cv.textContent, col: cv.style.color };
+        });
+        check(`${k} 全不可用时给出超限说明`, r.txt.indexOf('超出单账号上限') > 0 && r.col !== '', r.txt.slice(0, 34));
+      }
+      await p.click('#capSeg button[data-cap="m"]'); await p.waitForTimeout(300);
+      await p.evaluate(() => { const t2 = document.getElementById('tgt');
+        t2.value = 30; t2.dispatchEvent(new Event('input', { bubbles: true })); });
+      await p.waitForTimeout(400);
+      const back = await p.evaluate(() => document.getElementById('coverN').textContent);
+      check('恢复可达产量后提示消失', back.indexOf('超出单账号上限') < 0, back.slice(0, 24));
+      await p.click('#segA button[data-k="m"]'); await p.waitForTimeout(300);
+    }
+
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，
     // 没有 ✕ 的话用户找不到任何方式退出（用户实测被卡住）

@@ -1743,7 +1743,21 @@ function rerank(src){
   /* 覆盖率＝单账号口径：1 个平台 1 个账号就能覆盖月产量的档位数。
      月产 200 条时这个数是 0 —— 这正是用户要的诚实答案。 */
   var cv = document.getElementById('coverN');
-  if(cv) cv.textContent = okN + ' / ' + rs.length + ' 档（单账号口径）';
+  if(cv){
+    if(okN === 0){
+      /* 一个可用档位都没有时，切周期是看不出任何变化的（三个周期同样全灰），
+         用户会误以为「点了没刷新」。这里把原因直接说出来 ——
+         实测：N=92 条/月 超过单账号上限 91 条/月，三周期皆 0 可用。 */
+      var mx = 0;
+      rs.forEach(function(r){ var c = parseFloat(r.dataset.c) || 0; if(c > mx) mx = c; });
+      cv.textContent = '0 / ' + rs.length + ' 档可用 —— 目标 ' + NMON + ' 条/月 超出'
+        + '单账号上限 ' + mx.toFixed(1) + ' 条/月。请把产量降到该值以下，或用下方「组合订阅」多账号。';
+      cv.style.color = '#FF8A5B';
+    } else {
+      cv.textContent = okN + ' / ' + rs.length + ' 档（单账号口径）';
+      cv.style.color = '';
+    }
+  }
 
 }
 
