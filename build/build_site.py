@@ -3117,12 +3117,30 @@ PAGES = {
 }
 
 
+def _usable_dirs():
+    """能写的发布目录。
+
+    仓库外那份（../deploy）是给本机手动回滚包用的。在 CI 环境（Cloudflare
+    构建容器）里，它的父目录是文件系统根，通常不可写 —— 那里必须**跳过而不是
+    报错**，否则整次构建失败。仓库内那份才是 CI 真正需要的。
+    """
+    ok = []
+    for d in DEPLOY_DIRS:
+        try:
+            os.makedirs(d, exist_ok=True)
+            ok.append(d)
+        except OSError as e:
+            print("  · 跳过不可写的发布目录 %s（%s）" % (d, e.__class__.__name__))
+    return ok
+
+
 def write_all():
-    # ROOT 那份供本地双击打开；两个 DEPLOY 目录供发布（内容逐字节相同）
-    for d in (ROOT,) + DEPLOY_DIRS:
+    # ROOT 那份供本地双击打开；发布目录内容逐字节相同
+    dirs = _usable_dirs()
+    for d in (ROOT,) + tuple(dirs):
         os.makedirs(d, exist_ok=True)
     for name, html in PAGES.items():
-        for d in (ROOT,) + DEPLOY_DIRS:
+        for d in (ROOT,) + tuple(dirs):
             with io.open(os.path.join(d, name), "w", encoding="utf-8") as f:
                 f.write(html)
     # 公网附加文件：统一把作品指纹替换为当前值，并补上版本指纹
@@ -3141,7 +3159,7 @@ def write_all():
             txt = re.sub(r"版本指纹 \(Edition\): HX-CLB-[0-9A-Za-z-]+",
                          "版本指纹 (Edition): " + FP_EDITION, txt, count=1)
         io.open(src, "w", encoding="utf-8").write(txt)
-        for d in DEPLOY_DIRS:
+        for d in _usable_dirs():
             shutil.copy2(src, os.path.join(d, extra))
     print("  静态文件指纹已同步：%s / %s" % (FP_WORK, FP_EDITION))
 
