@@ -1765,10 +1765,15 @@ function rerank(src){
       /* 一个可用档位都没有时，切周期是看不出任何变化的（三个周期同样全灰），
          用户会误以为「点了没刷新」。这里把原因直接说出来 ——
          实测：N=92 条/月 超过单账号上限 91 条/月，三周期皆 0 可用。 */
+      /* ⚠ 单位必须跟着产能口径走。dataset.c 与 NMON 都是【月】口径，
+         直接输出会在整周期下写出「92 条/月」——而用户看到的滑块是「1104 条/年」。 */
       var mx = 0;
       rs.forEach(function(r){ var c = parseFloat(r.dataset.c) || 0; if(c > mx) mx = c; });
-      cv.textContent = '0 / ' + rs.length + ' 档可用 —— 目标 ' + NMON + ' 条/月 超出'
-        + '单账号上限 ' + mx.toFixed(1) + ' 条/月。请把产量降到该值以下，或用下方「组合订阅」多账号。';
+      var em = capMul(PK), u = capUnit(PK);
+      var f1 = function(v){ var x = v * em; return x >= 100 ? x.toFixed(0) : x.toFixed(1); };
+      cv.textContent = '0 / ' + rs.length + ' 档可用 —— 目标 ' + f1(NMON) + ' ' + u
+        + ' 超出单账号上限 ' + f1(mx) + ' ' + u
+        + '。请把产量降到该值以下，或用下方「组合订阅」多账号。';
       cv.style.color = '#FF8A5B';
     } else {
       cv.textContent = okN + ' / ' + rs.length + ' 档（单账号口径）';

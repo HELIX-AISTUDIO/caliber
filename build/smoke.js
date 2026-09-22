@@ -729,6 +729,10 @@ async function run(browser) {
           return { txt: cv.textContent, col: cv.style.color };
         });
         check(`${k} 全不可用时给出超限说明`, r.txt.indexOf('超出单账号上限') > 0 && r.col !== '', r.txt.slice(0, 34));
+        // 警示语的单位必须跟滑块一致 —— 曾写死「条/月」，
+        // 年付下滑块显示 1104 条/年、提示却说「92 条/月」，自相矛盾。
+        const unit = await p.evaluate(() => document.getElementById('nU').textContent);
+        check(`${k} 超限说明的单位与滑块一致`, r.txt.indexOf(unit) > 0, `${unit} ｜ ${r.txt.slice(0, 30)}`);
       }
       await p.click('#capSeg button[data-cap="m"]'); await p.waitForTimeout(300);
       await p.evaluate(() => { const t2 = document.getElementById('tgt');
