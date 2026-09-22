@@ -3,8 +3,9 @@ __pycache__/
 *.pyc
 *.pyo
 
-# 构建产物（deploy/ 是要上传的公网包，属产物不入库）
-deploy/
+# 构建产物
+# ⚠ 仓库内的 deploy/ 必须入库 —— Cloudflare Pages 连 Git 后要从这里发布。
+#   仓库外那份回滚包（../deploy）本就在仓库范围之外，无需忽略规则。
 dist/
 .astro/
 node_modules/

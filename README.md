@@ -76,9 +76,26 @@
 
 > `_headers` 在本托管上**由响应头实际下发**（非 `<meta>` 层面），因此 `frame-ancestors` 级别的防护也生效。
 
-### 重新部署
+### 部署方式：已接 Git 自动部署
 
-改动 `index.html` 后，把 `deploy/` 目录（9 个文件）重新拖到该项目的 Deployments 页即可，链接不变。
+该项目已连接 `HELIX-AISTUDIO/caliber`，**`git push` 即上线**，无需手动上传。
+
+| Cloudflare Pages 配置 | 值 |
+|---|---|
+| Production branch | `main` |
+| Build command | （留空） |
+| **Build output directory** | **`deploy`** |
+| Root directory | `/` |
+
+`deploy/` 是**仓库内**的发布包（9 个文件，不含 `data/` 与 `build/`），
+由生成器与站点源码一起产出并提交 —— 因此发布出去的只有成品，源码与数据不外露。
+
+> 生成器实际写两份：仓库内 `deploy/`（供 Cloudflare 发布）与仓库外 `../deploy/`
+> （手动回滚包，Direct Upload 拖拽用）。两份内容逐字节相同。
+
+### 手动部署（备用）
+
+若 Git 部署不可用，把 `deploy/` 目录（9 个文件）拖到该项目的 Deployments 页即可，链接不变。
 
 ---
 
@@ -175,6 +192,7 @@ _headers                   Cloudflare Pages 安全响应头
 ```
 
 `deploy/` 为公网发布包（9 个文件，不含 `data/` 与 `build/`），由生成器自动产出。
+**它在仓库内并已提交** —— Cloudflare Pages 连 Git 后从这里的产出发布，因此线上只有成品，源码与数据不外露。仓库外另有一份同名回滚包。
 
 ## 内容模型
 
@@ -370,8 +388,12 @@ python build/build_data.py
 
 ## 部署
 
-改完跑一次生成器，把 `deploy/` 里的 9 个文件重新拖到 Cloudflare Pages，链接不变。
-详见上方「线上地址」与「部署要求」。
+```bash
+python build/build_site.py     # 生成站点 + 刷新 deploy/
+git push                       # Cloudflare 自动拉取并发布
+```
+
+详见上方「线上地址」与「部署方式」。
 
 ---
 

@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="17 条口径与指标定义：口径、单条成本、承诺期、倒挂、组合订阅等。">
+<meta property="og:title" content="CALIBER · 术语表">
+<meta property="og:description" content="17 条口径与指标定义：口径、单条成本、承诺期、倒挂、组合订阅等。">
+<title>CALIBER · 术语表</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23D1FE17'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23D1FE17'/%3E%3C/svg%3E">
+<!-- ============================================================
+     HX-CLB-WORK-20260921-A215F0AB　|　HX-CLB-ED-20260921-DF53A565
+     © 2026 HELIX AI Studio. 保留所有权利 / All Rights Reserved.
+     数据采集时点：2026-09-21　作者：HELIX AI Studio
+     本页内容（含全部价格数据、归一化模型、边际成本与达标阶梯算法、结论文字及版面设计）为作者原创成果。未经书面许可，禁止：复制或转载全文/部分内容、二次发布或镜像托管、用于商业用途、用于任何 AI 模型的训练或微调、移除或篡改版权声明与溯源指纹。允许：转发原始链接、引用结论并注明出处。
+     ============================================================ -->
+<meta name="author" content="HELIX AI Studio">
+<meta name="copyright" content="© 2026 HELIX AI Studio. 保留所有权利 / All Rights Reserved.">
+<meta name="rights" content="本页内容（含全部价格数据、归一化模型、边际成本与达标阶梯算法、结论文字及版面设计）为作者原创成果。未经书面许可，禁止：复制或转载全文/部分内容、二次发布或镜像托管、用于商业用途、用于任何 AI 模型的训练或微调、移除或篡改版权声明与溯源指纹。允许：转发原始链接、引用结论并注明出处。">
+<meta name="dcterms.rights" content="© 2026 HELIX AI Studio. 保留所有权利 / All Rights Reserved.">
+<meta name="fingerprint" content="HX-CLB-WORK-20260921-A215F0AB">
+<meta name="edition" content="HX-CLB-ED-20260921-DF53A565">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate, noai, noimageai">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
+<style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{-webkit-text-size-adjust:100%;overflow-x:clip;scroll-behavior:smooth}:root{--navh:57px;--subh:50px;--gap:18px}/* ⚠️ 必须是 clip 而非 hidden：overflow-x:hidden 会让 html/body 变成滚动容器，
+   使子元素的 position:sticky 失效（实测导航会跟随内容滚走）。 */
+body{background:#000;color:#C9CDD2;font:14px/1.7 "Inter","Inter Display","SN Pro","Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;overflow-x:clip;
+  padding-bottom:calc(72px + env(safe-area-inset-bottom,0px));
+  -webkit-font-smoothing:antialiased;letter-spacing:-.005em;
+  -webkit-tap-highlight-color:transparent}[id]{scroll-margin-top:calc(var(--navh) + var(--subh) + var(--gap))}::selection{background:#D1FE17;color:#0B0B0B}/* ── 环境底光：纯黑底上叠模糊等于没效果，玻璃必须先有可折射的底光 ── */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  transform:translate3d(0,0,0);
+  background:
+    radial-gradient(1150px 640px at 6% -12%,rgba(209,254,23,.145),transparent 62%),
+    radial-gradient(860px 540px at 105% 3%,rgba(237,21,114,.105),transparent 64%),
+    radial-gradient(920px 580px at 44% 108%,rgba(156,230,243,.075),transparent 64%)}body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}.promo{background:#D1FE17;color:#0B0B0B;font-size:12.5px;font-weight:600;letter-spacing:-.01em;
+  display:flex;align-items:center;justify-content:center;gap:13px;flex-wrap:wrap;
+  padding:10px 22px;text-align:center;line-height:1.5;position:relative;z-index:3}.promo b{font-weight:800}.promo .tag2{border:1.5px solid #0B0B0B;border-radius:999px;padding:2px 11px;font-size:11px;font-weight:700}.nav{position:sticky;top:0;z-index:40;
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(0,0,0,.42));
+  -webkit-backdrop-filter:blur(34px) saturate(165%);backdrop-filter:blur(34px) saturate(165%);
+  border-bottom:1px solid rgba(255,255,255,.11);
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.04),0 10px 30px rgba(0,0,0,.45)}.nav .inner{max-width:1280px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:16px}.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex:0 0 auto}.brand i{width:24px;height:24px;border-radius:8px;background:#D1FE17;flex:0 0 24px;
+  transition:transform .35s cubic-bezier(.22,1,.36,1)}.brand:hover i{transform:rotate(45deg)}.brand .bw{display:flex;flex-direction:column;line-height:1.15}.brand .bw b{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:16px;font-weight:800;color:#fff;letter-spacing:.06em}.brand .bw s{text-decoration:none;font-size:9.5px;font-weight:600;color:#6E747D;letter-spacing:.05em}.menu{display:flex;align-items:center;gap:2px;overflow-x:auto;scrollbar-width:none;
+  flex:1 1 auto;min-width:0}.menu::-webkit-scrollbar{display:none}.menu a{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none;
+  color:#9AA0A8;font-size:13px;font-weight:600;padding:7px 12px;border-radius:999px;flex:0 0 auto;
+  transition:color .22s,background .22s}.menu a:hover{color:#fff;background:rgba(255,255,255,.065)}.menu a.active{color:#D1FE17}.menu .nb{background:#D1FE17;color:#0B0B0B;font-size:9.5px;font-weight:800;padding:1.5px 7px;
+  border-radius:999px}.nav .spec{margin-left:auto;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;font-weight:500;color:#D1FE17;
+  border:1px solid rgba(209,254,23,.35);border-radius:999px;padding:6px 13px;flex:0 0 auto}.wrap{max-width:1280px;margin:0 auto;padding:0 24px;position:relative;z-index:1}/* ── Hero 光场：lime 从「涂料」变「光源」── */
+.hero{max-width:1280px;margin:0 auto;padding:58px 24px 6px;position:relative;z-index:1}.hero::before{content:"";position:absolute;left:50%;top:-14%;z-index:-1;pointer-events:none;
+  width:min(1180px,140vw);height:150%;transform:translateX(-50%);
+  background:
+    radial-gradient(42% 34% at 50% 30%,rgba(209,254,23,.26),rgba(209,254,23,.09) 48%,transparent 74%),
+    radial-gradient(76% 62% at 50% 2%,rgba(209,254,23,.085),transparent 72%);
+  -webkit-filter:blur(4px);filter:blur(4px)}.hero::after{content:"";position:absolute;left:-12%;right:-12%;bottom:-4%;height:46%;
+  z-index:-1;pointer-events:none;opacity:.42;
+  background-image:
+    linear-gradient(rgba(209,254,23,.13) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(209,254,23,.13) 1px,transparent 1px);
+  background-size:58px 58px,58px 58px;
+  transform:perspective(400px) rotateX(63deg);transform-origin:50% 100%;
+  -webkit-mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%);
+  mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%)}.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:#D1FE17;margin-bottom:15px;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}h1{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:clamp(31px,5.3vw,60px);font-weight:800;color:#fff;
+  letter-spacing:-.038em;line-height:1.07}h1 em{font-style:normal;color:#D1FE17}.hero .lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75}.meta{display:flex;gap:20px;flex-wrap:wrap;margin-top:22px;font-size:12.5px;color:#767C85}.meta span{display:inline-flex;align-items:center;gap:7px}.meta i{width:5px;height:5px;border-radius:50%;background:#D1FE17;flex:0 0 5px}.meta b{color:#C9CDD2;font-weight:600;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
+  text-decoration:none;white-space:nowrap;
+  transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s}.btn-white{background:#fff;color:#0B0B0B}.btn-white:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,255,255,.2)}.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}.btn-ghost:hover{border-color:rgba(255,255,255,.45);transform:translateY(-2px)}h2{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:20px;font-weight:750;color:#fff;letter-spacing:-.025em;line-height:1.3}h2 .ey{display:inline-block;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:600;color:#D1FE17;
+  margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.card,.kpi,.note,.entry,.legal,details{
+  background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 46%,rgba(0,0,0,.30));
+  -webkit-backdrop-filter:blur(28px) saturate(150%);backdrop-filter:blur(28px) saturate(150%);
+  border:1px solid rgba(255,255,255,.12);border-radius:18px;
+  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.07),inset 0 1px 0 rgba(255,255,255,.05),
+             0 1px 2px rgba(0,0,0,.45),0 10px 24px rgba(0,0,0,.4),0 30px 60px rgba(0,0,0,.48)}
+@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){.card,.kpi,.note,.entry,.legal,details,.nav{
+    background:linear-gradient(158deg,#161B18,#0D110F)}
+}.card{padding:20px 22px}.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}.g5{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}.kpi{padding:18px 20px}.kpi .t{font-size:9.5px;color:#767C85;font-weight:700;letter-spacing:.13em;text-transform:uppercase}.kpi .v{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(30px,3.2vw,46px);font-weight:700;color:#fff;
+  margin:12px 0 6px;letter-spacing:-.032em;line-height:1.15}.kpi.good .v,.kpi.hi .v{color:#D1FE17}.kpi.hi{border-color:rgba(209,254,23,.45)}.kpi .d{font-size:12px;color:#8A9099;line-height:1.65}.kpi .d b{color:#C9CDD2}.entry{display:block;text-decoration:none;padding:26px;position:relative;
+  transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .3s}.entry:hover{transform:translateY(-4px);border-color:rgba(209,254,23,.42);
+  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.09),0 26px 60px rgba(0,0,0,.62),0 0 42px rgba(209,254,23,.09)}.entry .et{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#767C85;
+  font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin-bottom:12px}.entry h3{margin:0 0 9px;font-size:18px;font-weight:750;color:#fff}.entry p{color:#8A9099;font-size:13px;line-height:1.65;margin-bottom:16px}.entry .nums{display:flex;gap:22px;flex-wrap:wrap;padding-top:16px;
+  border-top:1px solid rgba(255,255,255,.07)}.entry .nums div{display:flex;flex-direction:column;gap:3px}.entry .nums s{text-decoration:none;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:18px;font-weight:700;
+  color:#D1FE17;letter-spacing:-.03em}.entry .nums em{font-style:normal;font-size:10.5px;color:#767C85;letter-spacing:.06em;text-transform:uppercase}.entry .arrow{position:absolute;top:24px;right:24px;color:#D1FE17;font-size:17px;
+  transition:transform .3s cubic-bezier(.22,1,.36,1)}.entry:hover .arrow{transform:translateX(4px)}table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
+  background:linear-gradient(158deg,rgba(22,27,24,.86),rgba(10,13,11,.92));
+  border:1px solid rgba(255,255,255,.12);border-radius:18px;overflow:hidden;
+  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.5),
+             0 8px 20px rgba(0,0,0,.42),0 26px 56px rgba(0,0,0,.46)}th{background:transparent;color:#767C85;font-weight:700;font-size:10.5px;text-align:left;
+  padding:10px 14px;white-space:nowrap;letter-spacing:.095em;text-transform:uppercase;
+  border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer;user-select:none;transition:color .2s}th:hover{color:#D1FE17}th.ctr,td.ctr{text-align:center}td{padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap;
+  vertical-align:middle}tbody tr{transition:background .18s}tbody tr:last-child td{border-bottom:none}tbody tr:hover{background:rgba(255,255,255,.032)}tbody tr.top{background:rgba(209,254,23,.055)}tbody tr.top td:first-child{box-shadow:inset 3px 0 0 #D1FE17}.num{text-align:right;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:500;
+  letter-spacing:-.022em}.strong{color:#D1FE17;font-weight:600}.neg{color:#FF6B6B;font-weight:600}.nm{color:#E4E7EA;font-weight:600}.rk b{display:block;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;color:#fff;font-weight:700}.rk s{text-decoration:none;font-size:10px;color:#5A6069;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.cell2{line-height:1.25}.cell2>*{display:block}.cell2 s{text-decoration:none;font-size:10.5px;color:#6E747D;display:block}.cell2 b{font-weight:600;color:#E4E7EA}.dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;vertical-align:middle}.vlabel{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;font-size:10px;
+  font-weight:600;color:#9AA0A8;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.14);white-space:nowrap}.tagu{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:999px;font-size:9.5px;
+  font-weight:700;color:#FF4D8D;border:1px solid rgba(255,77,141,.45)}.mini{height:5px;border-radius:999px;background:rgba(255,255,255,.07);margin-top:6px;overflow:hidden}.mini i{display:block;height:100%;border-radius:999px;background:rgba(255,255,255,.20);
+  transition:width .9s cubic-bezier(.22,1,.36,1)}.js .reveal .mini i{width:0!important}.js .reveal.in .mini i{width:var(--w)!important}.mini.m2 i{background:rgba(255,255,255,.13)}.mini.m3 i{background:rgba(255,255,255,.09)}/* lime 只标最重要的一件事 —— 强调色一旦满地都是，就等于没有强调 */
+tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;border-radius:999px;font-size:10.5px;font-weight:700}.v-good{background:#D1FE17;color:#0B0B0B}.v-warn{background:transparent;color:#C9CDD2;border:1px solid rgba(255,255,255,.18)}.v-bad{background:transparent;color:#FF6B6B;border:1px solid rgba(255,107,107,.32)}.note{padding:18px 22px;font-size:13px;line-height:1.78}.note.warn{border-left:2px solid rgba(255,201,60,.55)}.note.good{border-left:2px solid rgba(209,254,23,.5)}ul{margin:8px 0 0 19px}li{margin:7px 0;font-size:13px;line-height:1.72}li::marker{color:#D1FE17}code{background:rgba(209,254,23,.09);border:1px solid rgba(209,254,23,.2);padding:2px 7px;
+  border-radius:6px;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:#D1FE17;font-weight:500}details{margin-bottom:12px;overflow:hidden;border-radius:16px;transition:border-color .25s}details:hover{border-color:rgba(209,254,23,.28)}summary{cursor:pointer;padding:16px 22px;font-size:13.5px;font-weight:650;color:#E4E7EA;
+  list-style:none;display:flex;align-items:center;gap:11px}summary::-webkit-details-marker{display:none}summary:hover{color:#fff}summary .chev{margin-left:auto;color:#767C85;font-size:12px;
+  transition:transform .3s cubic-bezier(.22,1,.36,1)}details[open] summary .chev{transform:rotate(90deg);color:#D1FE17}.dbody{padding:0 22px 22px;font-size:13px;line-height:1.78}.dbody>*+*{margin-top:12px}.dbody h3{margin:18px 0 10px}.tw{overflow-x:auto;border-radius:18px}.tw table{min-width:760px}/* 内层滚动容器【不能】用 overscroll-behavior:contain：
+   手指/滚轮停在容器上时，Chrome 会把手势吃掉而不传给页面，
+   表现为「滑到这里就划不动了」（手机上尤其致命）。 */
+.tw.scroll-y{max-height:440px;overflow-y:auto}.tw.tw-main{max-height:min(72vh,640px)}.tw.scroll-y::-webkit-scrollbar{width:10px;height:10px}.tw.scroll-y::-webkit-scrollbar-track{background:rgba(255,255,255,.03);border-radius:6px}.tw.scroll-y::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:6px;
+  border:2px solid transparent;background-clip:content-box}.tw.scroll-y::-webkit-scrollbar-thumb:hover{background:rgba(209,254,23,.45);
+  background-clip:content-box;border:2px solid transparent}.tw.scroll-y{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}.tw.scroll-y thead th{position:sticky;top:0;z-index:2;
+  background:linear-gradient(180deg,rgba(22,27,24,.98),rgba(16,20,18,.96))}input[type=range]{-webkit-appearance:none;appearance:none;width:min(320px,62vw);height:4px;
+  border-radius:999px;outline:none;background:rgba(255,255,255,.12);cursor:pointer}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;
+  border-radius:50%;background:#D1FE17;border:3px solid #000;cursor:pointer}input[type=number]{width:110px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.14);border-radius:9px;color:#fff;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:14px;font-weight:600;padding:7px 10px;outline:none;letter-spacing:-.02em}input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.presets{display:inline-flex;gap:5px}.cqr{-webkit-appearance:none;appearance:none;width:190px;height:4px;border-radius:999px;
+  outline:none;background:rgba(255,255,255,.12);cursor:pointer}.cqr::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:#D1FE17;border:3px solid #000;cursor:pointer;
+  transition:transform .2s cubic-bezier(.22,1,.36,1)}.cqr::-webkit-slider-thumb:hover{transform:scale(1.12)}.cqr::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#D1FE17;
+  border:3px solid #000;cursor:pointer}.qv{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:700;color:#D1FE17;letter-spacing:-.03em;
+  min-width:78px}.cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
+  font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;
+  cursor:pointer;transition:color .2s,border-color .2s,background .2s}.cqp:hover{color:#fff;border-color:rgba(255,255,255,.36)}.cqp.on{color:#0B0B0B;background:#D1FE17;border-color:#D1FE17;font-weight:700}/* ══ 应用式布局：左栏选项 + 右主区（参照 arena.ai 的结构）══
+   目的是「一进来就是控件与数据」，不再用长文档铺陈。 */
+.app{display:flex;gap:26px;align-items:flex-start;
+  max-width:1420px;margin:0 auto;padding:26px 26px 0}.side{flex:0 0 236px;position:sticky;top:calc(var(--navh) + 14px);
+  display:flex;flex-direction:column;gap:20px;padding-right:2px;
+  max-height:calc(100vh - var(--navh) - 30px);overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.16) transparent}.side::-webkit-scrollbar{width:6px}.side::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:6px}.sgroup{display:flex;flex-direction:column;gap:9px}.sgt{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:#6E747C}.sgchip{margin-left:auto;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0;
+  text-transform:none;color:#8A9098;padding:2px 7px;border-radius:999px;
+  background:rgba(255,255,255,.05);white-space:nowrap}.segv{display:flex;flex-direction:column;gap:3px}.segv button{-webkit-appearance:none;appearance:none;border:1px solid transparent;
+  background:transparent;color:#9AA0A8;font-family:inherit;font-size:13px;font-weight:600;
+  text-align:left;padding:9px 12px;border-radius:10px;cursor:pointer;line-height:1.25;
+  transition:background .16s,color .16s,border-color .16s}.segv button s{display:block;font-size:10.5px;font-weight:400;text-decoration:none;
+  color:#6E747C;margin-top:2px}.segv button:hover{background:rgba(255,255,255,.045);color:#D7DBDF}.segv button.on{background:rgba(209,254,23,.10);border-color:rgba(209,254,23,.34);color:#D1FE17}.segv button.on s{color:#9AA85E}.segv.segk{flex-direction:row;gap:3px}.segv.segk button{flex:1;text-align:center;padding:9px 5px;font-size:12px}.side .cqr{width:100%}.srow{display:flex;align-items:baseline;gap:9px;margin-top:7px}.pf{display:flex;flex-wrap:wrap;gap:5px}.pfb{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:9px;
+  border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03);
+  color:#8A9098;font-family:inherit;font-size:11.5px;font-weight:600;cursor:pointer;
+  transition:color .16s,border-color .16s,background .16s}.pfb i{width:6px;height:6px;border-radius:50%;opacity:.4;flex:0 0 auto}.pfb.on{color:#E4E7EA;border-color:rgba(255,255,255,.24);background:rgba(255,255,255,.06)}.pfb.on i{opacity:1}.mainv{flex:1;min-width:0;display:flex;flex-direction:column;gap:18px}
+/* ⚠ flex 子项默认 min-width:auto —— 里面的表格有 min-width:760px，
+   会把整个主区撑到 760px，导致窄屏横向溢出（#all 视图侥幸没事，
+   因为它的 .tw-main 恰好带了 min-width:0）。这条兜住所有视图。 */
+.mainv>*{min-width:0}
+.tw{min-width:0}.vhead h1{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:clamp(20px,2.4vw,29px);font-weight:700;
+  letter-spacing:-.03em;line-height:1.22;color:#fff;margin:0}.vhead h1 em{font-style:normal;color:#D1FE17}.vmeta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:11px;font-size:11.5px;
+  line-height:1.75;color:#7A8088}
+.vsub{font-size:12.5px;line-height:1.75;color:#8A9098;margin-top:9px;max-width:720px}
+
+/* ── 术语提示 ──
+   术语用词一字不改，只给一个出口。虚线提示「这里可以点」。
+   桌面：悬停出浮层（data-s 由 JS 从词典注入，避免 HTML 里重复塞长文案）
+   手机：点击就地展开（没有 hover，必须单独做） */
+.tm{border-bottom:1px dashed rgba(255,255,255,.34);cursor:help;position:relative;
+  transition:color .16s,border-color .16s}
+.tm:hover{color:#D1FE17;border-bottom-color:rgba(209,254,23,.7)}
+/* ⚠ 悬浮提示用 position:fixed 的独立浮层，不用 ::after。
+   绝对定位的提示框即使 visibility:hidden 也会撑大可滚动区域 ——
+   实测窄屏下把 body.scrollWidth 顶到 467（视口 390）。
+   fixed 元素不参与滚动区域计算，绕开这个问题。 */
+.tip{position:fixed;z-index:60;max-width:min(300px,74vw);pointer-events:none;
+  padding:9px 11px;border-radius:10px;font-size:11.5px;line-height:1.7;
+  color:#C9CDD2;background:#14161A;border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 10px 28px rgba(0,0,0,.6);opacity:0;transition:opacity .16s}
+.tip.on{opacity:1}
+/* 手机端展开块：整行铺满，不跟着文字换行跑 */
+/* ⚠ 硬约束到视口宽度：展开块可能被插在表格单元格等很宽的容器里，
+   只用 max-width:100% 会跟着父容器一起超出屏幕（实测 467px / 视口 390）。 */
+.tmx{display:none;box-sizing:border-box;max-width:calc(100vw - 30px);
+  overflow-wrap:anywhere;margin:10px 0 4px;padding:12px 13px;border-radius:12px;
+  background:rgba(209,254,23,.05);border:1px solid rgba(209,254,23,.22);
+  font-size:12px;line-height:1.8;color:#B9BEC4;white-space:normal}
+.tmx.on{display:block}
+.tmx b{color:#D1FE17;font-weight:600}
+/* ── 新人引导弹窗 ── */
+.ibody{overflow:hidden}
+#intro{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;
+  padding:22px;background:rgba(4,5,6,.76)}
+#intro.on{display:flex}
+.icard{width:100%;max-width:466px;background:#101215;border-radius:20px;
+  border:1px solid rgba(255,255,255,.13);box-shadow:0 24px 70px rgba(0,0,0,.7);
+  padding:26px 26px 20px;position:relative;max-height:86vh;overflow-y:auto}
+.ix{position:absolute;right:16px;top:16px;width:32px;height:32px;border-radius:9px;
+  border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.05);
+  color:#C9CDD2;font-size:13px;line-height:1;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center}
+.ix:hover{background:rgba(255,255,255,.11)}
+.ieyebrow{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px;letter-spacing:.14em;color:#6E747C}
+.is{display:none}
+.is.on{display:block}
+.is h3{font-size:19px;line-height:1.5;color:#fff;font-weight:600;margin:12px 0 0;
+  letter-spacing:-.01em}
+.is p{font-size:13px;line-height:1.85;color:#A8AEB5;margin:13px 0 0}
+.is ul{margin:14px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:11px}
+.is li{font-size:13px;line-height:1.8;color:#A8AEB5;padding-left:19px;position:relative}
+.is li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;
+  border-radius:2px;background:#D1FE17}
+.is li b{color:#E4E7EA;font-weight:600}
+.ifoot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:24px;
+  padding-top:17px;border-top:1px solid rgba(255,255,255,.09)}
+.idots{display:flex;gap:6px}
+.idot{width:6px;height:6px;border-radius:4px;background:rgba(255,255,255,.2);
+  transition:background .2s,width .2s}
+.idot.on{background:#D1FE17;width:16px}
+.ibtns{display:flex;gap:9px;margin-left:auto}
+.ibtn{-webkit-appearance:none;appearance:none;cursor:pointer;font-family:inherit;
+  font-size:13px;padding:9px 17px;border-radius:10px;line-height:1;
+  border:1px solid rgba(255,255,255,.14);background:transparent;color:#C9CDD2}
+.ibtn:hover{background:rgba(255,255,255,.07)}
+.ibtn.pri{background:#D1FE17;color:#0B0B0D;border-color:#D1FE17;font-weight:600}
+.ibtn.pri:hover{background:#c7f000}
+@media (max-width:520px){
+  #intro{padding:14px;align-items:flex-end}
+  .icard{max-width:none;border-radius:20px 20px 16px 16px;padding:22px 18px 16px}
+  .is h3{font-size:17px}
+}
+.glist{display:flex;flex-direction:column;gap:0;border-top:1px solid rgba(255,255,255,.08)}
+.gterm{padding:20px 2px;border-bottom:1px solid rgba(255,255,255,.08);scroll-margin-top:76px}
+.gterm:target{background:rgba(209,254,23,.05)}
+.gt b{font-size:15px;color:#fff;font-weight:600}
+.gs{font-size:13px;color:#C9CDD2;line-height:1.75;margin-top:6px}
+.gl{font-size:12.5px;color:#8A9098;line-height:1.85;margin-top:9px;max-width:860px}
+.tmx a{color:#D1FE17}.vmeta b{color:#C9CDD2;font-weight:600}/* KPI 条三套（年/季/月），同一时刻只显示当前周期那套 */
+/* ── 首访阅读路径条：常驻、可关 ──
+   弹窗是「主动讲一次」，这条是「一直在那儿」—— 互不替代。 */
+.guide{display:flex;flex-wrap:wrap;align-items:center;gap:9px 20px;
+  margin:0 0 16px;padding:12px 15px;border-radius:14px;
+  background:rgba(209,254,23,.045);border:1px solid rgba(209,254,23,.2);
+  font-size:12.5px;line-height:1.7;color:#A8AEB5}
+.guide .g-lead{color:#D1FE17;font-weight:600}
+.guide .g-step{white-space:nowrap}
+.guide .g-link{color:#A8AEB5;border-bottom:1px dashed rgba(255,255,255,.3);text-decoration:none}
+.guide .g-link:hover{color:#D1FE17}
+.guide .g-x{margin-left:auto;-webkit-appearance:none;appearance:none;cursor:pointer;
+  font-family:inherit;font-size:11.5px;padding:5px 11px;border-radius:8px;
+  border:1px solid rgba(255,255,255,.16);background:transparent;color:#8A9098;white-space:nowrap}
+.guide .g-x:hover{background:rgba(255,255,255,.07);color:#C9CDD2}
+.kbar{display:none;gap:10px;grid-template-columns:repeat(auto-fit,minmax(148px,1fr))}
+.kbar.on{display:grid}.kb{padding:9px 11px;border-radius:13px;background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.085)}.kb.hi{border-color:rgba(209,254,23,.3);background:rgba(209,254,23,.055)}/* ⚠ 必须用 > 限定直接子元素 —— 否则 .kb b 会命中说明文字里嵌的 <b>，
+   把它变成 display:block + 22px，说明被顶成三行、超出卡片。 */
+.kb>s{display:block;font-size:9.5px;line-height:1.25;font-weight:700;letter-spacing:.075em;text-transform:uppercase;
+  color:#6E747C;text-decoration:none}.kb>b{display:block;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:17px;line-height:1.15;font-weight:700;
+  letter-spacing:-.03em;color:#EDEFF2;margin-top:3px}.kb.hi>b{color:#D1FE17}.kb em b{font-weight:600}.kb>em{display:block;font-style:normal;font-size:10px;line-height:1.4;color:#8A9098;margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kb b .u{font-family:"Inter","Inter Display","SN Pro","Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;font-size:11px;font-weight:600;font-style:normal;
+  color:#8A9098;margin-left:2px;letter-spacing:0}.vnote{font-size:11px;line-height:1.75;color:#6E747C;padding:11px 14px;border-radius:12px;
+  background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.06)}.vnote b{color:#9AA0A8}/* ── 动态排名条（三周期全清单页）──
+   条长＝「离该指标最优值的接近程度」，不是原始数值大小 —— 越长越好，无需读数字。
+   颜色同向：越接近最优越亮（lime 热力）。 */
+/* 44 档一次性铺开会把页面拉到十几屏 —— 改为区域内滚动。
+   ⚠ 只在桌面端启用：手机上套一层滚动容器会吃掉手势（已踩过）。 */
+.chart{display:flex;flex-direction:column;gap:5px;
+  max-height:min(66vh,640px);overflow-y:auto;overscroll-behavior:auto;
+  padding-right:6px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
+.chart::-webkit-scrollbar{width:8px}
+.chart::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:8px}
+.chart::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:8px}
+.crow{display:grid;grid-template-columns:30px 30px minmax(110px,1fr) minmax(90px,1.5fr) 100px;
+  align-items:center;gap:10px;padding:7px 12px;border-radius:11px;
+  background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.055)}
+.crow:hover{background:rgba(255,255,255,.05)}
+/* 产能不足：降饱和 + 降透明度，一眼可分辨；鼠标悬停恢复以便查看细节 */
+.pt tbody tr.out,.crow.out{opacity:.38;filter:grayscale(.75)}
+.pt tbody tr.out:hover,.crow.out:hover{opacity:.72;filter:grayscale(.35)}
+/* ── 帕累托散点：横轴＝该周期实付（对数）、纵轴＝每月可生成 ──
+   用途是回答「花多少钱买到多少产能」——这是本站在「单价」之外唯一有意义的权衡轴。
+   对角线上的点＝不被任何其他档位支配（更便宜且更能做）的档位，即帕累托前沿。 */
+/* ⚠ hero 的内容（meta 行）在 1440 视口下会撑到 1514px，导致整页横向溢出 ——
+   这是首页原有缺陷，加散点后被冒烟测试抓出来。overflow-x:clip 不产生滚动容器，
+   只裁掉溢出，不影响 sticky；配合 meta 允许换行双保险。 */
+.hero{overflow-x:clip}
+.hero .meta{flex-wrap:wrap}
+.hero .pareto,.wrap>.pareto{margin-top:34px}
+.pareto{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:18px;
+  background:rgba(255,255,255,.024);border:1px solid rgba(255,255,255,.075)}
+.phd b{display:block;font-size:14px;color:#E4E7EA}
+.phd span{display:block;font-size:11.5px;color:#7A8088;line-height:1.7;margin-top:5px}
+.phd i{font-style:normal;color:#D1FE17}
+.pplot{position:relative;height:340px;border-radius:12px;
+  background:
+    repeating-linear-gradient(to right,rgba(255,255,255,.05) 0 1px,transparent 1px 10%),
+    repeating-linear-gradient(to bottom,rgba(255,255,255,.05) 0 1px,transparent 1px 25%),
+    rgba(0,0,0,.25)}
+/* .pline 已移除（连线机制取消）—— 散点只靠点本身表达 */
+/* 右上角标：轴已反转成「右上最好」，这里再明确钉一句，免得读者自己推断 */
+.pcorner{position:absolute;right:9px;top:8px;z-index:1;font-size:10.5px;letter-spacing:.04em;
+  color:rgba(209,254,23,.55);pointer-events:none;user-select:none}
+.pp{position:absolute;transform:translate(-50%,50%);cursor:default;z-index:2}
+.pp:hover{z-index:9}
+.pp i{width:19px;height:19px;border-radius:5px;opacity:.85;display:block;
+  background-size:cover;background-position:center;background-color:#111;
+  border:1px solid rgba(0,0,0,.55);box-shadow:0 0 0 1.5px rgba(255,255,255,.10)}
+/* 用户裁定：点不做高亮 —— 点本来就不可点，给 lime 环会让用户以为能点。
+   信息全部交给连线表达。 */
+/* 排名行悬停 → 散点对应点放大；散点悬停 → 排名行高亮。双向联动。 */
+.pp.hl i{outline:2px solid #D1FE17;outline-offset:2px;opacity:1}
+.crow.hl{background:rgba(209,254,23,.07);border-color:rgba(209,254,23,.3)}
+.pp.rk1 i{border-width:2px;border-color:rgba(209,254,23,.55)}
+.pp:hover i{opacity:1}
+.pp.rk1 i{border-color:rgba(209,254,23,.6)}
+/* 连线要足够醒目：它是这张图唯一的信息载体 */
+.pline path{stroke-width:2}
+.pp b{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);white-space:nowrap;
+  display:none;padding:5px 9px;border-radius:8px;font-size:11px;font-weight:600;
+  background:rgba(10,11,13,.97);border:1px solid rgba(255,255,255,.16);color:#EDEFF2;
+  box-shadow:0 8px 22px rgba(0,0,0,.6);z-index:9}
+.pp b s{display:block;text-decoration:none;font-weight:400;color:#8A9098;margin-top:2px}
+.pp:hover b{display:block}
+.pfoot{display:flex;justify-content:space-between;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px;color:#6E747C}
+.crk{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:700;color:#6E747C;text-align:right}
+.crk.top3{color:#D1FE17}
+/* 字母标：品牌色底 + 深色首字母。字号按三种壳尺寸分别给 */
+.lg-mono{display:flex;align-items:center;justify-content:center;font-style:normal;
+  font-weight:800;color:#0B0B0D;background-size:auto}
+.clogo.lg-mono{font-size:13px}
+.pfbi.lg-mono{font-size:9px}
+.plgo.lg-mono{font-size:9px}
+/* ⚠ 要压过 .clogo,.pfbi,.plgo{background:#111} —— 同权重时后写的赢，
+   所以这里把选择器写成两段以提高权重 */
+.lg-seko{background-image:url("data:image/png;base64,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")}
+.lg-libtv{background-image:url("data:image/png;base64,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")}
+.lg-neowow{background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAABgFBMVEX////+/v/+/v79/f79/f39/fz8/P38/Pz7+/z7+/v7+/r6+vv6+vr5+fr5+fn5+Pn4+Pn4+Pj39/f09PTz8/Py8vLx8fHw8PHw8PDv7+/u7u7q6urm5ubi4uLh4eHf39/b29va2trZ2dnY2NjX19fW1tbU1NTS0tLQ0NDNzc3KysrJycnIyMjHx8fFxcW/v7+9vb26urq2traysrKtra2pqamlpaWhoaGfn6Cenp2cnJyampqXl5eVlZWTk5OSkpKPj4+NjY2Li4uKioqJiYmHh4eFhYWCg4OAgIB9fX18fHx4eHh1dXV0dHRycnJxcXFubm5ra2tmZmZhYWFfX19bW1tWVlZSUlJOTk5ISUhFRUVDQ0NCQkI+Pj47Ozs5OTk1NTU0NDQvLy8sLCwpKSkoKCgkJCQgICAfHx8eHh8dHR0cHBwaGhoZGRkYGBkXFxcSEhIPDw8ODg4NDQ0LCwsKCgoJCQkHBwcGBgYFBQUEBAQEAwMDAwMCAgIBAQEAAAA7iml9AAADw0lEQVR42u2X+1cTRxTHr+u047TbrUGlKY/yUFAoIm8DgoAiRVAEY8SgiDaAKA8fVNxsZ+b+694hOcV9kvTwi+dkftlk9+Qz33u/d+7eAJ7SghqoBqqBTgck1f8DSR26pU5HUX4zkRQNIjXPD/BIk5ImJoXb1/vWk0iRIC1xomsZpcGUo9LrC29697SuDiRx9s7uPboQZic7mpeuh8/mMXsXZVUghYU+/DCmSNjbiQaAR3TPm1rTX4Y+oK4G5OH0E1SZDYVPG8ESrfvPJvvaByTdXovPUhRI6+FtxNxdfATgCKuzGwDYa3T1/IpXrAKk8ePwoXLdiWlggjEGYKfqV1BKfe8lxmYpGjTyma5LYHPiMC5seIweiRnoWdzBGOciky1H3+8u9loljkGxy1lSslsP0LgQQ4pSpHC8u5HScrw4QPdfS73gOACZf4ueFz5AEBGZN+mYLH8DYkJQwoEU8hQsR55FCOspDgH7L6pjlFNCC97ycO7Byt6JiiTeghRLWkbbpaaZoj9XEOLkwEnkCOh8UdxfbZvwVwIEa/FjsyWSONxqOvg0e6013SZ95wWCp2PxBEEcmpabTXQ9SaFp/aUjLIjzYI4ckYI7tGssSOK68ZgJ+xvbxFmwfVx6xnkq0DAhENl9Exk30o9jYXUQrAYjSCbYr7CfdhfQnn1wkfGySb2vt26BCDjXc6h0PEij2wqCs/pNpBZil0xKv6MnnT4SZ3/uBd9OAdB+A3AbBvFQbv1KPUTQwR9Az8Vpv5fOsouYoEjhVgq4A7dVEXd+ozSRPzCqpKfmAkUBbY8DJPCb9upHTqCbpOhvfqX5THsXg34sujgSAJEdQ//o2IJUesDk2mqhvjYL82tQGAdxoYC43WAFfBN1MOXzDXyCVktVBIOrCzZLd1vXOH1peZLrgFCVpmAkAZSxnLJwsJjJkVUuqlBX+RnSG1pFg8j8K+WdyS2qXsFKHci2w6cGfn8eW9kl81klS1gdW4FXnA+0m64QxHnjK5UA+twC5yoCMRu6vPiCVDhoOazCxQvxp1/iU3Aqi8wWkABC5d2AupM5limIm/E5MrHtdMBPdmzCfxAO9QZ2/sKlqw9l0qEl0vth2s12bBGk0QTgmC5rnbeuvnnrnfTKJrn5obSRbnHbOV62OIrn+ujlXwBmooZeCM1GiO9yk31/OOBf55r752iqcTfyL7VSuoIhotT6DjZf5JbmpsbHMpmx2zML2XzhU8nYqmZIKaMmF2VmEE0PqxrYzQ88Gl+OlvmgdO1vVg1UA9VA3wfoKy1N1tY01xhTAAAAAElFTkSuQmCC")}
+.lg-jimeng{background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAABgFBMVEXx/v/6/rvU/v7F/P24/f6r/v+g/v6Z/f3S9vj794Gr9/ub9/vd03342gqh3N6M/f+N9/x5+f139v199f1u9vxo9v1g9v5U9v1I9/5u9Ptq7fdO8/1K6vM89v028v448f4o9/8r8v0s8f4w8P0o8P0k7/0m6/4j7P4k6fsi7P0h6vwk5f0h5vwk4/0k4fwi4Psl3fgi3vsk2/sk2Pwh2fkj1vgh1/kq0fQjz/Yi0vgmzPkmyPohyPQkw+8kwPbjnCOYn3d2mpx3hFors+0spuQqmb0xg68ksO0jofEjl/gkmdAhivkfjeEfffkifbhsWDk8Tk0gYaQqQEUaYJoYTGAYQW4WPksrLisjHx0SMFgNHiocFxULExYHExwNCw0GCg0FBgkEBQcEBAQEBAICBgcDBAQCBAMFAwMDAwMCAwMBAwQCAgQCAgICAgABAgMBAgIAAgIBAgEDAQIBAQMBAQEBAQAAAQIAAQEAAQADAAUDAAABAAIBAAAAAAMAAAEAAADtKFzNAAADaUlEQVR42u3X3VfaaBAH4BRiUDx8CH6uVRShgBAoKq1ogY0bKJRFqAZwEVDDYgGjVHhZIqbMv943292bnuM5ScMlc8nFc36ZGSZAwISKmEJTaApNoZ9qIE0GGoEkTQJ6Hte/DEXt0GB8mcj3BEkzhOAikchDQ/uj9XsJU+JChfQS1IC8yZSod++1QvdQNmHpqXGPtEEDqGPIlIcbQeMePfYTprm5uRNodrVBzW/5OYIgXv0OwA80QZB/Reh0BMHUgUcaoBaUCUJP6mcJ8xkOJfwyJGBIR1JGo1GvZy4xzDdbwnCIEBJaLaQKupjVU1a71Wo1kGamLP1qoi6GSMPi8tKizW63UPPMSeGiet3g65flQoEHpAqasS6tr66vYGxtwUJR82a5ZuUBjHk1PSLnbSub284dx8bqiqwtWCwGipohjXpzX3miNpyRONC2z+Nxu5ybGJOjrdlw0wwzBbh9Vr5HBdK2vOHyBQJer8fndm07N39gC/YCdEUVC8lQS+s7vkAoFKT9Ae8bnMzt2nE4Vl+X4Iuo4vjfmC1yIDq8txcOBYM0Tft3vV7XVqoKt6Ly8bfRmQG32uMN7kWi794dyFooTG+95/BuSir2qA0MDuT00OFI9BBXNII1/9tUVbrBeSTFUBdV5Nn7AvRe5PADLmztB5MlGPE9pGazcastv606d+nQAXbisVjsaJ/lnqB6PX7hdUe8tETU4orDHQjKgWKxj/FjlqvCM8f1eqKoHBKgarbg2Xv84YPoYRwXe14DqZJM/n2Hht8UQ0i4ZWZsyw73Lm714YejY7ZYk+CqyB6XoCMqh5AADGldW3fiQJHo/lGSw8w19ykeT911+jBWCiH0zOjm7csb7t0A7X+fLF0BXHGn6XT6jyJ0hsrvUZdnCCP+uu64XW9i5xX8SaX4KZ3JpNNsRepLiiH5xJJyoK23Sa4OUOVSbDydyWYymdPWYAySUgihy1kdtfD63840Sin26PhjGkPZbOZ81FFzah+hfFIo48aMmvxNtVLiPrP4wbLZXBa3SBRV3Owfb9Z2s43++31U404z2Zx6CAS+3f1/OsOvna94asU/c7mcaujnGjZHUDmVoTvQBMHgn6ZU+5z7Cx40QrjuRte1p5EkaobQw6P0eC9OAJL6DwhNAJr+O5pCU2gKvVDfAf9WRwpR8cqOAAAAAElFTkSuQmCC")}
+.lg-xiaoyunque{background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAABQVBMVEX////+/v79/f38/Pz7+/v6+vr5+fn4+Pj39/f19fXz8/Pw8PDv7+/u7u7p6enn5+fm5ubk5OTj4+Pi4uLh4eHg4ODf39/e3t7d3d3X19fU1NTT09PQ0NDMzMzKysq8vLy5ubm2traurq6tra2rq6uqqqqnp6empqakpKSgoKCfn5+dnZ2ZmZmXl5eWlpaVlZWTk5OQkJCOjo6IiIiDg4N+fn59fX18fHx7e3t6enp5eXl4eHh1dXVzc3Nvb29ubm5sbGxqampoaGhnZ2dhYWFgYGBcXFxZWVlYWFhXV1dWVlZPT09OTk5NTU1KSkpJSUlGRkZFRUVDQ0NAQEA8PDw7Ozs3Nzc0NDQyMjIjIyMYGBgTExMODg4MDAwLCwsKCgoJCQkICAgHBwcGBgYFBQUEBAQDAwMCAgMCAgIBAQEAAAAnvg7lAAAB/ElEQVR42u3X+1MTMRAH8E0uByrWF6Ioaq3gW8D3E0EB5aEo4BvhqrQXk+///we4d70Zp6U3Q3L3i8zttJ20M/uZ3TRJU0JJQRVUQRV0sCDbL5whE5syKrKaX3ajZk9Ev6KmE8QN/HhWP3OyN4aHj32C3j9k0X54hPrGPMz+K7J2u06kAtkdIggOv+/n5ELaNmhA7K1G0iraDpOtMU9hlqo4ZOYoutHfyYGs3Tkl0mQRZJzICvpitAOksUYdh2j07qvX98fSIT9rP2EdoBgPhEoTw5dR8kH7TS2RJI38doI0rvN0cF/hGqtp5rcad+cBXSGenIAeo6Xx/dpb28Yyv/WAxjlN0IkdwxvlA1GjaXCRpCek6CaPNDbUIS4NT0h5Q89tzON1CuVYnPTmDb3IICVGmlgqAN1KW1unQaoDj7xbE3Q8SiZ7g9fmpsEl74r48RStGB9pdBVY4S/fFxIyfMcLcmtzG/h61G9BphAJEcykW2R3cchzi3SgJPns1OzcvfOdTesP9RwjBaDug60Q1H3QVtD/CJ0uCzqnS4EC0YBBCZCiWf7NKw4JObSV05kbNMAFaRSGZEgTuU4udFUNqu7gc+R2y1hX6PLexi4sA9bxVmuwcGd68l9MTU7PfNbIr8ft5q997tk67g1tq39HHvHHlgTZarIr6MBDfwGWlxz1MHo2pgAAAABJRU5ErkJggg==")}
+.lg-higgsfield{background-image:url("data:image/png;base64,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")}
+.lg-tapnow{background-image:url("data:image/png;base64,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")}
+/* 三个尺寸的 logo 壳：背景图由 .lg-* 提供 */
+.clogo,.pfbi,.plgo{display:inline-block;flex:0 0 auto;background-color:#111;
+  background-size:cover;background-position:center;background-repeat:no-repeat}
+.clogo{width:26px;height:26px;border-radius:8px;border:1px solid rgba(255,255,255,.1)}
+.pfbi{width:15px;height:15px;border-radius:4px}
+.plgo{width:15px;height:15px;border-radius:4px;vertical-align:-2px;margin-right:7px}
+.plc{display:inline-flex}
+.cname{font-size:13px;font-weight:600;color:#E4E7EA;min-width:0;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.cname s{text-decoration:none;font-size:10.5px;font-weight:400;color:#7A8088;margin-left:6px}
+.cbar{height:9px;border-radius:5px;background:rgba(255,255,255,.085);overflow:hidden}
+.cbar i{display:block;height:100%;border-radius:5px;transition:width .35s cubic-bezier(.22,1,.36,1)}
+.cval{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;font-weight:700;color:#EDEFF2;text-align:right;
+  white-space:nowrap}
+.cval s{display:block;text-decoration:none;font-size:10px;font-weight:500;color:#7A8088}
+.combo-note{display:block;margin-top:4px;font-size:10.5px;color:#8A9098}
+.reco{display:flex;flex-direction:column;gap:10px;padding:14px 15px;border-radius:16px;
+  background:rgba(209,254,23,.045);border:1px solid rgba(209,254,23,.2)}
+.recot{font-size:13px;font-weight:700;color:#D1FE17}
+.recot span{display:block;font-size:11px;font-weight:400;color:#8A9098;margin-top:4px}
+/* 顶部 tab 条：手机端常驻可见（PC 端用侧栏，故隐藏）—— 学 arena.ai */
+.tabs{display:none}
+/* ⚠ 不要给 .vmeta span 加 display:inline-flex —— flex 容器会裁掉纯文本节点
+   首尾的空白，导致「数据时点」与「2026-09-21」直接贴在一起（用户报的重叠感）。
+   图标对齐用 vertical-align 处理即可。 */
+.vmeta svg{vertical-align:-2px;margin-right:5px;color:#5A6069;flex:0 0 auto}
+.vpanel{display:none;flex-direction:column;gap:14px}.vpanel.on{display:flex}.vptitle{font-size:14px;font-weight:700;color:#E4E7EA}.vptitle span{display:block;font-size:11.5px;font-weight:400;color:#7A8088;margin-top:4px}/* 周期三选一：整块预渲染，只切可见性 */
+.pt{display:none}.pt.on{display:block}/* ── 结论芯片行（替代三张大卡，降低文字密度）── */
+.chips{display:flex;gap:10px;flex-wrap:wrap}.chip{display:inline-flex;align-items:baseline;gap:9px;padding:10px 15px;border-radius:12px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+  font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:700;color:#EDEFF2;letter-spacing:-.02em}.chip b{font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.09em;color:#D1FE17}.chip s{font-family:"Inter","Inter Display","SN Pro","Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;font-size:11.5px;font-weight:400;text-decoration:none;color:#8A9098}/* 计算器里的极简折叠块：不占视觉重量，只承载口径说明 */
+details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}details.tiny summary{padding:6px 0;font-size:11.5px;font-weight:600;color:#6E747C}details.tiny summary:hover{color:#C9CDD2}details.tiny .dbody{padding:8px 0 0;font-size:12px;color:#8A9098}.combo-plus{color:#5A6069;margin:0 5px;font-weight:700}.sub{color:#767C85;font-size:12px;line-height:1.7}.mono{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.foot{margin-top:44px;color:#5A6069;font-size:11.5px;text-align:center;
+  border-top:1px solid rgba(255,255,255,.08);padding-top:20px}.legal{margin-top:22px;padding:26px 28px;background:#D1FE17 !important;border-color:#D1FE17;
+  border-radius:20px;color:#0B0B0B;font-size:12px;line-height:1.8;backdrop-filter:none;
+  -webkit-backdrop-filter:none}.legal-t{font-size:16px;font-weight:800;letter-spacing:-.025em;margin-bottom:9px}.legal-b{color:#1F2A00;max-width:1000px}.legal-f{margin-top:14px;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;color:#1F2A00}.legal-f .fp{background:#0B0B0B;color:#D1FE17;padding:2.5px 9px;border-radius:6px;font-weight:600}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}.reveal{opacity:0;transform:translateY(16px);
+  transition:opacity .62s cubic-bezier(.22,1,.36,1),transform .62s cubic-bezier(.22,1,.36,1)}.reveal.in{opacity:1;transform:none}.hero>*{animation:fadeUp .7s cubic-bezier(.22,1,.36,1) both}.hero>*:nth-child(2){animation-delay:.06s}.hero>*:nth-child(3){animation-delay:.12s}.hero>*:nth-child(4){animation-delay:.18s}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal,.hero>*{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}
+}
+@media print{body{background:#fff!important;color:#000!important;padding:0}body::before,body::after,.hero::before,.hero::after{display:none!important}.card,.kpi,.note,.entry,.legal,details,.nav,table{
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    box-shadow:none!important;background:#fff!important}.nav{position:static!important}.promo{background:#D1FE17!important;color:#000!important}.brand .bw b,.menu a,h1,h2,h3,td,th,li,.kpi .v,.lead,.meta{color:#000!important}.legal{background:#F2FFB8!important}.legal-t,.legal-b,.legal-f{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
+}
+@media (max-width:820px){.promo{font-size:11.5px;padding:9px 14px;gap:9px}.nav .inner{padding:10px 15px;gap:11px}.nav .spec{display:none}.hero{padding:36px 15px 4px}.wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}.kpi .v{font-size:26px}.entry{padding:20px}.card,.kpi,.note,.legal,table,details,.entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g5,.g2{grid-template-columns:1fr 1fr}
+  /* ── KPI：竖排五张卡会吃掉 1.5 屏，用户滚到反查与表格之前就以为「页面到头了」。
+     改成横向滑动的一行，高度固定，下方内容自然进入首屏。 */
+  .grid.g5{display:flex;overflow-x:auto;overscroll-behavior-x:auto;gap:10px;
+    scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;
+    margin:0 -15px;padding:2px 15px 6px;scrollbar-width:none}
+  .grid.g5::-webkit-scrollbar{display:none}
+  .grid.g5>.kpi{flex:0 0 64%;min-width:0;scroll-snap-align:start}
+  .grid.g5>.kpi .v{font-size:24px}
+  /* ── 反查表：套用与「全部档位排名」同一套卡片节奏 ──
+     5 列在手机上必然横滑；上一版做成「标签在上、值在下」的纵向大卡，占太高、看着散。
+     用户要求跟排名卡一样大小，故复用同一套：1fr + auto 两列、11px 内边距、圆角 13。 */
+  .tw-rec{padding:2px 0 0}
+  .tw-rec table,.tw-rec tbody{display:block;width:auto;min-width:0}
+  .tw-rec thead{display:none}
+  /* ── 反查卡：与「全部档位排名」用【完全一致】的网格（auto 1fr auto × 2 行）──
+     上一版排成 3 行，手机上 123px vs 排名卡 85px，高出 45%，看着散。
+     排名卡的信息量并不比它少，差别只在排版：2 行就够。 */
+  .tw-rec tbody tr{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;
+    gap:3px 9px;margin-bottom:8px;padding:11px 13px;border-radius:13px;
+    border:1px solid rgba(255,255,255,.1);
+    background:linear-gradient(158deg,rgba(255,255,255,.05),rgba(0,0,0,.28))}
+  .tw-rec tbody td{border:0;padding:0;white-space:normal;background:none!important;
+    display:block;text-align:left!important;min-width:0}
+  .tw-rec tbody td::before{display:none}
+  /* 第 1 行：方案类型 | 档位组合 | 该周期支出（大字，右） */
+  .tw-rec tbody td:nth-child(1){grid-area:1/1;font-size:13px;font-weight:600;color:#fff;
+    white-space:nowrap}
+  .tw-rec tbody td:nth-child(1) .sub{display:inline;margin-left:6px;font-size:10px;
+    color:#6E747C;font-weight:400}
+  /* ⚠ 两个把卡片顶高的元凶：
+     ① 方案类型里有个 <br> —— 强制两行，把第 1 行从 22px 撑到 44px
+     ② 「合计产能」的 .sub 被全局 .sub{display:block} 变成块级，产能格也变两行 */
+  .tw-rec tbody td br{display:none}
+  .tw-rec tbody td .sub{display:inline;margin-left:5px}
+  /* 手机端宽度紧张：「档位组合」标签占约 48px，会让方案名被截成「● 即梦...」——
+     而方案名正是这一行最该读到的信息（买哪个）。故手机端去掉该标签，
+     名称本身自带圆点标识，不需要额外前缀。 */
+  .tw-rec tbody td:nth-child(2)::before{content:none}
+  /* 手机端让方案类型那一格可换行 —— 它原为 nowrap，把「单一账号最省 1个平台·1个账号」
+     整条撑到 169px，挤得方案名（1fr）只剩 101px，被截成「即梦 高级会员…」。
+     允许换行后该格回落到约 80px，方案名有 200px 可用。 */
+  /* ⚠ 光设 white-space:normal 没用 —— 首列是 auto 轨道，会取 max-content。
+     必须给单元格本身加上限，轨道才会跟着收（169px → 104px），
+     把腾出的宽度让给方案名（1fr）。 */
+  .tw-rec tbody td:nth-child(1){white-space:normal;max-width:118px}
+  /* 让副行独立成行 —— 否则会在大约「1 个」处断开成「1 个 / 平台」，很难看 */
+  .tw-rec tbody td:nth-child(1) .sub{display:block;margin-left:0;line-height:1.5}
+  /* 组合订阅那行的档位组合要列 2-3 个平台名，硬截断会丢掉「买了什么」——
+     用户明确要求「第二张可以做多一些保证内容」。故第二张允许换行、卡片随之变高；
+     第一张仍保持单行，两张高度不同是刻意的。 */
+  .tw-rec tbody tr:nth-child(2) td:nth-child(2){white-space:normal;line-height:1.55}
+  .tw-rec tbody td:nth-child(2){grid-area:1/2;font-size:10.5px;color:#9AA0A8;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tw-rec tbody td:nth-child(2)::before{content:"档位组合 ";color:#5A6069;display:inline}
+  .tw-rec tbody td:nth-child(3){grid-area:1/3;text-align:right!important;white-space:nowrap;
+    font-size:15px;color:#fff}
+  /* 第 2 行：产能 | 单条成本 */
+  .tw-rec tbody td:nth-child(4){grid-area:2/1/2/3;font-size:10.5px;color:#7A8088;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tw-rec tbody td:nth-child(4)::before{content:"产能 ";color:#5A6069;display:inline}
+  .tw-rec tbody td:nth-child(5){grid-area:2/3;text-align:right!important;font-size:10.5px;
+    color:#7A8088;white-space:nowrap}
+  .tw-rec tbody td:nth-child(5)::before{content:"单条 ";color:#5A6069;display:inline}
+  .tw-rec tbody td .combo-note{display:inline;margin-left:6px;font-size:10px;color:#6E747C}input[type=range]{width:100%}/* ── 主表改卡片形态（竖屏）──────────────────────────────────
+     44 行 x 7 列在 390px 宽下要横向拖很远才能读完一行，这是数据密度决定的，
+     压缩列宽解决不了。改为每档一张竖排卡片：首行「名次 平台 档位」，
+     下面四行「标签 — 数值」，上下滑即可。 */
+  /* 特异性必须 ≥ .tw.scroll-y(0,2,0)，否则 overflow-y:auto 赢，
+   卡片形态下容器仍被当作滚动容器 → 手势被它吃掉、整页滑不动。 */
+  .tw.scroll-y.tw-main{max-height:none;overflow:visible}.tw-main table{min-width:0!important}.tw-main{min-width:0;background:transparent;border:0;box-shadow:none;border-radius:0;
+    overflow:visible}.tw-main thead{display:none}
+  /* ── 手机端卡片：压成「两行 + 一条刻度」，对齐 arena.ai 的手机行高（约 110px）──
+     上一版每张卡 7 行、约 270px，44 张就是 11,900px（16 屏），滑到崩溃。
+     现在：第 1 行＝名次 / 平台 / 档位 / 单条成本，第 2 行＝实付 · 产能 · 元每秒。 */
+  .tw-main tbody tr{display:grid;grid-template-columns:auto auto 1fr auto;
+    align-items:baseline;gap:3px 8px;
+    margin-bottom:8px;padding:11px 13px;border-radius:13px;
+    border:1px solid rgba(255,255,255,.1);
+    background:linear-gradient(158deg,rgba(255,255,255,.05),rgba(0,0,0,.28))}
+  .tw-main tbody tr.top{border-color:rgba(209,254,23,.42);box-shadow:inset 3px 0 0 #D1FE17}
+  .tw-main tbody td{border:0;padding:0;white-space:normal;background:none!important;
+    position:static;display:block}
+  .tw-main tbody td::before{display:none}
+  /* 第 1 行 */
+  .tw-main tbody td:nth-child(1){grid-area:1/1;font-size:12px;text-align:left}
+  .tw-main tbody td:nth-child(1) b{font-size:12.5px}
+  .tw-main tbody td:nth-child(1) s{font-size:9.5px;margin-left:3px}
+  .tw-main tbody td:nth-child(2){grid-area:1/2;font-weight:600;color:#fff;font-size:13px;
+    white-space:nowrap}
+  .tw-main tbody td:nth-child(3){grid-area:1/3;color:#9AA0A8;font-size:12px;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tw-main tbody td:nth-child(6){grid-area:1/4;text-align:right;white-space:nowrap}
+  .tw-main tbody td:nth-child(6) .nm,.tw-main tbody td:nth-child(6) .strong{font-size:14px}
+  .tw-main tbody td:nth-child(6) s{display:block;font-size:9.5px;color:#6E747C;margin-top:1px;
+    white-space:nowrap}
+  .tw-main tbody td:nth-child(6) .mini{display:none}
+  /* 第 2 行：三项小字并排，各自带极简前缀 */
+  .tw-main tbody td:nth-child(4){grid-area:2/1/2/3;color:#7A8088;font-size:10.5px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tw-main tbody td:nth-child(5){grid-area:2/3;color:#7A8088;font-size:10.5px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .tw-main tbody td:nth-child(7){grid-area:2/4;color:#7A8088;font-size:10.5px;text-align:right;
+    white-space:nowrap}
+  .tw-main tbody td:nth-child(4)::before{content:"实付 ";color:#5A6069;display:inline}
+  .tw-main tbody td:nth-child(5)::before{content:"产能 ";color:#5A6069;display:inline}
+  .tw-main tbody td:nth-child(7)::before{content:"元/秒 ";color:#5A6069;display:inline}
+  .tw-main tbody td:nth-child(4) b,.tw-main tbody td:nth-child(5) b,
+  .tw-main tbody td:nth-child(7) b{display:inline;font-size:11.5px;font-weight:600;color:#B9BEC4}
+  .tw-main tbody td:nth-child(4) s,.tw-main tbody td:nth-child(5) s,
+  .tw-main tbody td:nth-child(7) s{display:none}
+
+}
+@media (max-width:520px){.g5,.g2{grid-template-columns:1fr} }/* ── 窄屏：左栏改为【底部抽屉】+ 底部摘要条 ──
+   上一版把侧栏做成「吸顶横向滚动条」，实测失败：吸顶块挡住内容，
+   月产量与平台筛选被挤出视野、用户根本找不到。
+   移动端的正确形态是「底部条 + 弹层」：不占首屏、信息一个不少、可发现。 */
+.mobar,.scrim,.nburger,.ndrop,.sheet-hd{display:none}
+@media (max-width:1020px){
+  /* ⚠ 必须显式 stretch：桌面端 .app 是 flex-start，窄屏转纵向后
+     align-items:flex-start 会让交叉轴（横向）按内容宽度定尺寸，
+     主区被里面的 760px 表格撑到 760px → 整页横向溢出。 */
+  .app{flex-direction:column;align-items:stretch;gap:15px;padding:16px 15px 0}
+  .side{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:60;width:auto;
+    max-height:78vh;overflow-y:auto;flex-direction:column;flex-wrap:nowrap;gap:17px;
+    will-change:max-height,transform;
+    padding:18px 18px calc(20px + env(safe-area-inset-bottom,0px));
+    border-radius:20px 20px 0 0;background:#0A0B0D;
+    border:1px solid rgba(255,255,255,.12);border-bottom:0;
+    box-shadow:0 -18px 44px rgba(0,0,0,.62);
+    transform:translateY(103%);visibility:hidden;
+    transition:transform .34s cubic-bezier(.22,1,.36,1),max-height .34s cubic-bezier(.22,1,.36,1),
+      visibility .34s}
+  /* 半开（默认）与全开：只差一个 max-height，内容超出时组件内滚动，不会有够不着的内容 */
+  .side.open{transform:none;visibility:visible;max-height:78vh}
+  .side.peek{max-height:42vh}
+  /* 拖动中关掉过渡 —— 有过渡就会「追手指」，手感发飘 */
+  .side.dragging{transition:none!important}
+  /* 抽屉头：把手给「可下滑」的暗示，✕ 给明确的关闭出口 */
+  .sheet-hd{display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:3;background:#0A0B0D;
+    padding:16px 2px 12px;border-bottom:1px solid rgba(255,255,255,.09);
+    cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+  .sheet-hd:active{cursor:grabbing}
+  .sheet-hd .grab{position:absolute;left:50%;top:7px;transform:translateX(-50%);
+    width:38px;height:4px;border-radius:2px;background:rgba(255,255,255,.26)}
+  .sheet-hd b{font-size:14px;color:#E4E7EA}
+  .sheet-x{-webkit-appearance:none;appearance:none;cursor:pointer;
+    width:34px;height:34px;border-radius:10px;font-size:14px;line-height:1;
+    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);
+    color:#C9CDD2;font-family:inherit;
+    display:flex;align-items:center;justify-content:center}
+  .sheet-x:active{background:rgba(255,255,255,.12)}
+  .sgroup{flex:1 0 auto}
+  .segv{flex-direction:row;gap:3px}
+  .segv button{flex:1;text-align:center;padding:9px 5px;font-size:12px}
+  .segv button s{display:block;font-size:10px}
+  .side .cqr{width:100%}
+  .mobar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;
+    align-items:center;gap:12px;
+    padding:11px 15px calc(11px + env(safe-area-inset-bottom,0px));
+    background:rgba(10,11,13,.93);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+    border-top:1px solid rgba(255,255,255,.1)}
+  .mosum{flex:1;min-width:0;font-size:11.5px;color:#9AA0A8;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* 用户反馈「调整」不显眼、不知道里面藏着控件 —— 改成实心亮色 + 图标 + 动效 */
+  .mobar{padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));
+    background:rgba(16,17,20,.97);border-top:1px solid rgba(209,254,23,.22);
+    box-shadow:0 -10px 26px rgba(0,0,0,.5)}
+  .mobar button{-webkit-appearance:none;appearance:none;flex:0 0 auto;cursor:pointer;
+    display:flex;align-items:center;gap:7px;
+    border:0;background:#D1FE17;color:#0B0B0B;
+    font-family:inherit;font-size:13.5px;font-weight:800;letter-spacing:-.01em;
+    padding:11px 18px;border-radius:12px;
+    box-shadow:0 0 0 0 rgba(209,254,23,.55);animation:mopulse 2.4s ease-out 1.2s 2}
+  @keyframes mopulse{
+    0%{box-shadow:0 0 0 0 rgba(209,254,23,.5)}
+    70%{box-shadow:0 0 0 10px rgba(209,254,23,0)}
+    100%{box-shadow:0 0 0 0 rgba(209,254,23,0)}}
+  .mobar button svg{flex:0 0 auto}
+  .mosum{color:#C9CDD2}
+  .mosum em{font-style:normal;color:#8A9098}
+  .scrim{display:block;position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.55);
+    opacity:0;visibility:hidden;transition:opacity .28s,visibility .28s}
+  .scrim.open{opacity:1;visibility:visible}
+  /* 顶部横滚 tab：导航常驻可见，比藏进抽屉好找（对齐 arena.ai 的手机结构） */
+  .tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;
+    margin:-4px 0 0;padding-bottom:2px}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{-webkit-appearance:none;appearance:none;flex:0 0 auto;cursor:pointer;
+    border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.035);
+    color:#9AA0A8;font-family:inherit;font-size:13px;font-weight:600;
+    padding:9px 15px;border-radius:11px;white-space:nowrap;text-align:left}
+  .tabs button s{display:block;font-size:10px;font-weight:400;text-decoration:none;
+    color:#6E747C;margin-top:2px}
+  .tabs button.on{background:#D1FE17;border-color:#D1FE17;color:#0B0B0B}
+  .tabs button.on s{color:rgba(11,11,11,.62)}
+  #sgView{display:none}
+  /* 排名条窄屏：名称一行，条子通栏第二行 */
+  .crow{grid-template-columns:24px 24px 1fr auto;gap:4px 9px;padding:9px 11px}
+  .crk{grid-area:1/1}
+  .clogo{grid-area:1/2;width:23px;height:23px;border-radius:7px}
+  .cname{grid-area:1/3}
+  .cval{grid-area:1/4;font-size:12.5px}
+  .cbar{grid-area:2/1/2/5;height:7px}
+  /* 手机端保持「随页面滚动」—— 嵌套滚动容器会吃掉手势 */
+  .chart{max-height:none;overflow:visible;padding-right:0}
+  .pplot{height:260px}
+  .pp i{width:15px;height:15px;border-radius:4px}
+  .pf{max-width:none}
+  /* promo 在手机端压到一行：长句与日期 chip 都隐去（日期在下方 vmeta 里已有） */
+  .pmore,.promo .tag2{display:none}
+  .promo{padding:9px 15px;font-size:11px;gap:0}
+  /* 窄屏导航：横向菜单改汉堡 —— 硬裁/横滚都不是好体验 */
+  .nav .menu{display:none}
+  .nburger{display:flex;flex-direction:column;justify-content:center;gap:4px;
+    width:38px;height:38px;padding:0 9px;margin-left:auto;cursor:pointer;
+    border:1px solid rgba(255,255,255,.14);border-radius:11px;
+    background:rgba(255,255,255,.045)}
+  .nburger i{display:block;height:1.5px;border-radius:2px;background:#D7DBDF}
+  .ndrop{position:absolute;left:12px;right:12px;top:calc(100% + 6px);z-index:45;
+    padding:8px;border-radius:15px;background:rgba(10,11,13,.97);
+    border:1px solid rgba(255,255,255,.13);box-shadow:0 18px 42px rgba(0,0,0,.6);
+    -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+  .nav.open .ndrop{display:block}
+  .ndrop nav{display:flex;flex-direction:column}
+  .ndrop a{display:flex;align-items:center;gap:8px;padding:13px;border-radius:10px;
+    text-decoration:none;color:#C9CDD2;font-size:14px;font-weight:600}
+  .ndrop a+a{box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+  .ndrop a.active{color:#D1FE17;background:rgba(209,254,23,.09)}
+}
+@media (max-width:612px){
+  /* ── KPI 条：成本页与全清单页的顶部结论卡。
+     竖排两列会吃掉 1.5 屏，用户滚到反查与表格之前就以为「页面到头了」，
+     反馈「点进去不知道下面还有表格」。改成横向滑动的一行，高度固定。 */
+  .kbar.on{display:flex;overflow-x:auto;overscroll-behavior-x:auto;gap:10px;
+    scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;
+    margin:0 -15px;padding:2px 15px 6px;scrollbar-width:none}
+  .kbar.on::-webkit-scrollbar{display:none}
+  .kbar.on>.kb{flex:0 0 62%;min-width:0;scroll-snap-align:start}
+  .kb>b{font-size:18px}
+  .side{gap:14px}
+}
+</style></head><body>
+
+<div class="promo"><span><b>价格说明：</b>统一口径基准数据采集于 2026-09-21<i class="pmore">，各平台价格取决于当期活动与限时优惠力度，不代表最终价格</i></span><span class="tag2">数据时点 2026-09-21</span></div>
+<div class="nav"><div class="inner"><a class="brand" href="index.html"><i></i><span class="bw"><b>CALIBER</b><s>HELIX AI Studio</s></span></a><nav class="menu"><a href="index.html">首页</a><a href="cost.html">平台成本对比</a><a href="cycles.html">三周期全清单</a><a href="glossary.html" class="active">术语表</a><a href="leaderboard-vlm.html">视觉理解模型排行榜<i class="nb">即将上线</i></a></nav><span class="spec">Seedance 2.5 · 720p · 16:9 · 30s · 全能参考</span><button type="button" class="nburger" id="nBurger" aria-label="导航菜单" aria-expanded="false" aria-controls="nDrop"><i></i><i></i><i></i></button></div><div class="ndrop" id="nDrop"><nav><a href="index.html">首页</a><a href="cost.html">平台成本对比</a><a href="cycles.html">三周期全清单</a><a href="glossary.html" class="active">术语表</a><a href="leaderboard-vlm.html">视觉理解模型排行榜<i class="nb">即将上线</i></a></nav></div></div>
+
+<div class="wrap">
+<section class="reveal" style="margin-top:34px">
+  <div class="sechead">
+    <h2><span class="ey">术语</span>术语表</h2>
+    <div class="sd">本表集中解释页面里出现的口径与指标。判断结论是否可信，先看这里的定义，再看数据。</div>
+  </div>
+  <div class="glist"><div class="gterm" id="koujing"><div class="gt"><b>口径</b></div><div class="gs">把各平台互不相通的积分币值，压平到同一标准的规则。</div><div class="gl">各平台用自己的积分计价，币值互不相同：同一条 30 秒视频，即梦扣 600 分、libtv 扣 1,380 分、Neowow 扣 7,500 分、Tapnow 扣 1,200 分。直接比较积分消耗没有意义。本站的压平方式是：本币每积分 ＝ 该周期实付总额 ÷（该周期月积分 × 周期月数），再乘以每条视频消耗的积分，折算为人民币。</div></div><div class="gterm" id="danTiaoChengBen"><div class="gt"><b>单条成本</b></div><div class="gs">一条 30 秒视频要花的现金，全场唯一可跨平台比较的价格。</div><div class="gl">＝ 该周期实付 ÷（月积分 × 周期月数）× 单条消耗积分 × 汇率。表格上行的数字按「用满该档全部产能」计，是这一档的固有单价；下行按你设定的月产量计，是你实际会付到的单价。</div></div><div class="gterm" id="yuanMiao"><div class="gt"><b>元/秒</b></div><div class="gs">把单条成本摊到每一秒素材上。</div><div class="gl">＝ 单条成本 ÷ 30。用于和其他时长规格横向比较：若你要做 60 秒的成片，把元/秒乘以 60 即得该规格下的单条成本。</div></div><div class="gterm" id="jifenDang"><div class="gt"><b>积分档</b></div><div class="gs">同一会员档位下的不同「积分 / 价格」选项。</div><div class="gl">例如 libtv 至尊版提供 50.5K 与 66K 两个积分档，即梦高级会员提供 6.2K 至 27.7K 共六个。会员档名称相同，但买到的积分不同、价格也不同，必须逐档比较。</div></div><div class="gterm" id="huiyuanDang"><div class="gt"><b>会员档</b></div><div class="gs">平台划分的会员等级，如基础 / 标准 / 高级 / 超级。</div><div class="gl">同一平台内通常档位越高、单条成本越低。但并非总是如此：低档位常是「高价试用装」，例如 Higgsfield Starter 的单条成本是全场最差的 5.51 倍。</div></div><div class="gterm" id="chengnuoQi"><div class="gt"><b>承诺期</b></div><div class="gs">年付 / 季付 / 月付，即你锁定会员的时长。</div><div class="gl">承诺越久单价通常越低，但全场有 12 处例外。另一个容易忽略的点：积分可能随承诺期变化 —— 即梦标准会员月付给 4,000 积分，年付只给 2,210，于是年付的单条成本反而更贵。</div></div><div class="gterm" id="danTiaoJiFen"><div class="gt"><b>单条积分消耗</b></div><div class="gs">在该规格下生成一条视频要扣多少积分。</div><div class="gl">全部平台均按「Seedance 2.5 · 720p · 16:9 · 30s · 全能参考」测得：libtv 1,380、Neowow 7,500、即梦 600、小云雀 600、Higgsfield 210、Tapnow 1,200。规格不同则数字不可比 —— 这是本次对比成立的前提。</div></div><div class="gterm" id="yueChanNeng"><div class="gt"><b>每月可生成</b></div><div class="gs">该档位每月最多能出几条 ＝ 该周期的月积分 ÷ 单条积分消耗。</div><div class="gl">注意用的是「该周期自己的月积分」：年付用年付方案的月积分，月付用月付方案的。单档月产能上限为 91.00 条（即梦 / 小云雀 超级会员，54,600 积分 ÷ 600 积分）。超过这个产量，单账号做不到，只能走组合订阅。</div></div><div class="gterm" id="daBiaoJieTi"><div class="gt"><b>达标总支出阶梯</b></div><div class="gs">按目标月产量反查「覆盖该产能的最低支出」。</div><div class="gl">与「单条成本最省」不是一回事：单条成本最低的档位，为了覆盖某个产量可能要买下大量用不完的产能，总支出反而更高。阶梯表给的是「花最少的总钱，够用」。</div></div><div class="gterm" id="bianJiChengBen"><div class="gt"><b>边际成本</b></div><div class="gs">从下一档升到上一档时，每多买一条产能实际多花多少钱。</div><div class="gl">用于判断「升档值不值」。若某档的边际成本明显高于全场最优单条成本，说明为这多出来的产能付的价钱不划算 —— 不如把钱花在别的平台上。</div></div><div class="gterm" id="daoGua"><div class="gt"><b>周期倒挂</b></div><div class="gs">承诺期更久、单条成本反而更高的情况。</div><div class="gl">成因两类：① 积分随承诺期缩水（平台把长周期的积分调低了）；② 短周期的让利力度更深。全场共 12 处，最严重的一处是季付比月付贵 96.3%。</div></div><div class="gterm" id="zuHeDingYue"><div class="gt"><b>组合订阅</b></div><div class="gs">跨平台、或同平台多账号叠加，用于覆盖单账号做不到的产量。</div><div class="gl">本站按无界背包求解，同一档位最多叠加 4 份。需要说明的是：多账号意味着多套素材库、多个登录、可能违反平台的服务条款 —— 这些运营与合规成本未计入测算。</div></div><div class="gterm" id="danZhangHao"><div class="gt"><b>单账号单平台</b></div><div class="gs">1 个平台 + 1 个账号能做完你设定的月产量，才计入排名。</div><div class="gl">做不到的整行置灰，并在「单条成本」列标出该账号的产能上限。这条口径是刻意从严的：把同一档位买 3 份、4 份也算作「一个方案」，会得出「200 条也有 4 个选择」这种在实际操作中不成立的结论。</div></div><div class="gterm" id="xiangDuiZuiYou"><div class="gt"><b>相对最优</b></div><div class="gs">该数值相对全场最优值的倍数。</div><div class="gl">成本类读作「贵 N 倍」：¥19.30 与 ¥106.29 相差 5.51×。产能类读作「只有最优的百分之几」：0.01× 即只有 1%。两个方向都在右侧以「本行数值 ÷ 最优数值」计算。</div></div><div class="gterm" id="shiFu"><div class="gt"><b>该周期实付</b></div><div class="gs">这个承诺期实际要付出去的总额。</div><div class="gl">年付为年费、季付为季费、月付为月费。USD 计价平台（Higgsfield、Tapnow）已按当日中国外汇交易中心人民币对美元中间价折算为人民币。</div></div><div class="gterm" id="haiBaoJia"><div class="gt"><b>海报价</b></div><div class="gs">平台自己宣传的「低至 X 元/秒」。</div><div class="gl">多按非全能参考档位、且按最大产能计算，与本站统一口径不可混用。表中同时列出「全能参考实算」，即同一档位在同一口径下的真实单价，以及两者的倍差。</div></div><div class="gterm" id="suYuanZhiWen"><div class="gt"><b>溯源指纹</b></div><div class="gs">数据版本校验串，用于确认你看到的是哪一版。</div><div class="gl">作品指纹固定不变（标识这是同一个基准体系）；版本指纹随数据采集时点变化。两者均写在页面源码注释与每页页脚，可用于核对缓存副本是否过期。</div></div></div>
+  <div class="sub" style="margin-top:22px">
+    点击页面中带虚线的术语，可就地展开该词的简要解释；每条都锚定到本页对应条目。
+  </div>
+</section>
+</div>
+<div class="foot">CALIBER · 统一口径基准　|　HELIX AI Studio 出品　|　术语 17 条　|　<a href="#" id="introAgain" style="color:#8A9098;border-bottom:1px dashed rgba(255,255,255,.3)">新手引导</a></div>
+
+<div class="wrap"><div class="legal"><div class="legal-t">© 2026 HELIX AI Studio. 保留所有权利 / All Rights Reserved.</div><div class="legal-b">本页内容（含全部价格数据、归一化模型、边际成本与达标阶梯算法、结论文字及版面设计）为作者原创成果。未经书面许可，禁止：复制或转载全文/部分内容、二次发布或镜像托管、用于商业用途、用于任何 AI 模型的训练或微调、移除或篡改版权声明与溯源指纹。允许：转发原始链接、引用结论并注明出处。</div><div class="legal-f">溯源指纹 <span class="fp">HX-CLB-WORK-20260921-A215F0AB</span>　·　版本 <span class="fp">HX-CLB-ED-20260921-DF53A565</span>　·　CALIBER · 统一口径基准　·　HELIX AI Studio 出品　·　数据采集 2026-09-21</div></div></div>
+
+
+<div id="intro" role="dialog" aria-modal="true" aria-label="新手引导">
+  <div class="icard">
+    <button type="button" class="ix" aria-label="跳过引导">✕</button>
+
+    <div class="is on">
+      <div class="ieyebrow">01 / 这是什么</div>
+      <h3>把各平台的积分，<br>换算成同一种钱</h3>
+      <p>各平台用自己的积分计价，币值互不相同 —— 同一条 30 秒视频，即梦扣 600 分、
+      Neowow 扣 7,500 分。直接比积分没有意义。</p>
+      <p>本站在把它们压平到同一口径之后，再折算成人民币。
+      <b style="color:#D1FE17">不采信宣传数字，只给可复核的结果。</b></p>
+    </div>
+
+    <div class="is">
+      <div class="ieyebrow">02 / 怎么看</div>
+      <h3>三步拿到你要的答案</h3>
+      <ul>
+        <li><b>先看结论</b> —— 数据页顶部有结论条，不必自己算</li>
+        <li><b>看你的场景</b> —— 拖动「月产量」，表格与排名即时重算</li>
+        <li><b>看不懂某个词</b> —— 带虚线的词点一下就有解释，也可去「术语表」</li>
+      </ul>
+    </div>
+
+    <div class="is">
+      <div class="ieyebrow">03 / 看之前请知道</div>
+      <h3>三个前提</h3>
+      <ul>
+        <li>价格是采集当日的<b>限时活动价</b>，活动退坡后排名会变</li>
+        <li>排名按<b>单账号单平台</b>口径；需要多账号时归入「组合订阅」另算</li>
+        <li>数据来源、算法与风险说明<b>全部公开</b>，页面底部可查</li>
+      </ul>
+    </div>
+
+    <div class="ifoot">
+      <div class="idots"><i class="idot on"></i><i class="idot"></i><i class="idot"></i></div>
+      <div class="ibtns">
+        <button type="button" class="ibtn iprev" style="visibility:hidden">上一步</button>
+        <button type="button" class="ibtn pri inext">下一步</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* 标记脚本可用：纯 CSS 的渐进增强据此启用（无 JS 时不会降级成空条） */
+document.documentElement.classList.add('js');
+
+/* ── 吸顶偏移实测：导航高度随视口/文案换行变化，写死会错位 ── */
+(function(){
+  function sync(){
+    var n = document.querySelector('.nav'), s = document.querySelector('.subnav');
+    var st = document.documentElement.style;
+    if(n) st.setProperty('--navh', n.offsetHeight + 'px');
+    if(s) st.setProperty('--subh', s.offsetHeight + 'px');
+  }
+  sync();
+  window.addEventListener('resize', sync, {passive:true});
+  window.addEventListener('orientationchange', sync, {passive:true});
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(sync);
+})();
+
+/* ── 滚动入场 ── */
+(function(){
+  var els = document.querySelectorAll('.reveal');
+  if(!('IntersectionObserver' in window)){ els.forEach(function(e){e.classList.add('in');}); return; }
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {rootMargin:'0px 0px -8% 0px', threshold:.06});
+  els.forEach(function(e){ io.observe(e); });
+})();
+
+/* ── 子导航高亮 ──
+   判定必须用【视口坐标】(getBoundingClientRect)，不能混用 offsetTop 与 scrollY：
+   offsetTop 相对 offsetParent（.wrap 位于 hero 之下），与 scrollY 不同坐标系，
+   混用会把判定整体推后一个 hero 的高度，表现为「点 A 却高亮 A 的下一个」。 */
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.subnav a[href^="#"]'));
+  if(!links.length) return;
+  var map = links.map(function(a){ return {a:a, el:document.querySelector(a.getAttribute('href'))}; })
+                 .filter(function(x){ return x.el; })
+                 .sort(function(p,q){ return p.el.offsetTop - q.el.offsetTop; });  /* 仅定序 */
+  var last = -1;
+  function stickPx(){
+    var cs = getComputedStyle(document.documentElement);
+    return (parseFloat(cs.getPropertyValue('--navh')) || 57)
+         + (parseFloat(cs.getPropertyValue('--subh')) || 50) + 24;
+  }
+  function upd(){
+    var off = stickPx(), idx = 0;
+    for(var i=0;i<map.length;i++){
+      if(map[i].el.getBoundingClientRect().top - off <= 0) idx = i;
+    }
+    if(window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) idx = map.length - 1;
+    if(idx === last) return;
+    last = idx;
+    links.forEach(function(a){ a.classList.remove('active'); });
+    if(map[idx]) map[idx].a.classList.add('active');
+  }
+  var t = null;
+  window.addEventListener('scroll', function(){
+    if(t) return; t = requestAnimationFrame(function(){ upd(); t = null; });
+  }, {passive:true});
+  upd();
+})();
+
+/* ── 子导航点击即时高亮 ── */
+document.addEventListener('DOMContentLoaded', function(){
+  Array.prototype.forEach.call(document.querySelectorAll('.subnav a[href^="#"]'), function(a){
+    a.addEventListener('click', function(){
+      Array.prototype.forEach.call(document.querySelectorAll('.subnav a'), function(x){
+        x.classList.remove('active');
+      });
+      a.classList.add('active');
+    });
+  });
+});
+
+/* ══════════ 阅读路径条：可关闭，记住选择 ══════════ */
+(function(){
+  var el = document.getElementById('guide');
+  if(!el) return;
+  var KEY = 'caliber.guide.v1';
+  function hide(){ el.style.display = 'none'; }
+  var off = false;
+  try{ off = localStorage.getItem(KEY) === '0'; }catch(e){ off = false; }
+  if(off){ hide(); return; }
+  var x = document.getElementById('guideX');
+  if(x) x.addEventListener('click', function(){
+    hide();
+    try{ localStorage.setItem(KEY, '0'); }catch(e){}
+  });
+  /* 页脚「新手引导」同时恢复路径条 —— 与弹窗共用一个入口，行为更一致 */
+  var again = document.getElementById('introAgain');
+  if(again) again.addEventListener('click', function(){
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    el.style.display = '';
+  });
+})();
+
+/* ══════════ 全站通用：新人引导弹窗 ══════════
+   只在首次访问出现；第 1 步就有 ✕，不强迫看完；页脚有入口可随时重看。 */
+(function(){
+  var el = document.getElementById('intro');
+  if(!el) return;
+  var KEY = 'caliber.intro.v1';
+  var slides = el.querySelectorAll('.is');
+  var dots = el.querySelectorAll('.idot');
+  var prev = el.querySelector('.iprev');
+  var next = el.querySelector('.inext');
+  var x = el.querySelector('.ix');
+  var i = 0;
+
+  function show(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    Array.prototype.forEach.call(slides, function(s2, k){ s2.classList.toggle('on', k === i); });
+    Array.prototype.forEach.call(dots, function(d, k){ d.classList.toggle('on', k <= i); });
+    prev.style.visibility = i ? 'visible' : 'hidden';
+    next.textContent = (i === slides.length - 1) ? '开始看' : '下一步';
+  }
+  function close(){
+    el.classList.remove('on');
+    document.body.classList.remove('ibody');
+    try{ localStorage.setItem(KEY, '1'); }catch(e){}
+  }
+  function open(){
+    el.classList.add('on');
+    /* ⚠ 只在弹窗打开期间锁滚动，关闭立刻解除 —— 本项目有过「忘了解锁、页面滑不动」的事故 */
+    document.body.classList.add('ibody');
+    show(0);
+  }
+
+  prev.addEventListener('click', function(){ show(i - 1); });
+  next.addEventListener('click', function(){
+    if(i === slides.length - 1){ close(); } else { show(i + 1); }
+  });
+  x.addEventListener('click', close);
+  el.addEventListener('click', function(e){ if(e.target === el) close(); });
+  document.addEventListener('keydown', function(e){
+    if(!el.classList.contains('on')) return;
+    if(e.key === 'Escape') close();
+    if(e.key === 'ArrowRight') next.click();
+    if(e.key === 'ArrowLeft' && i) prev.click();
+  });
+
+  var again = document.getElementById('introAgain');
+  if(again) again.addEventListener('click', function(e){ e.preventDefault(); open(); });
+
+  var seen = false;
+  try{ seen = !!localStorage.getItem(KEY); }catch(e){ seen = true; }  /* 存不了就别弹，别每次都打扰 */
+  if(!seen) setTimeout(open, 700);   /* 让首屏先渲染完再弹，避免闪一下 */
+})();
+
+/* ══════════ 全站通用：术语提示 ══════════
+   词典只注入一次，提示内容由 JS 填进 data-s（避免每个术语在 HTML 里重复一遍长文案）。 */
+var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分币值，压平到同一标准的规则。", "l": "各平台用自己的积分计价，币值互不相同：同一条 30 秒视频，即梦扣 600 分、libtv 扣 1,380 分、Neowow 扣 7,500 分、Tapnow 扣 1,200 分。直接比较积分消耗没有意义。本站的压平方式是：本币每积分 ＝ 该周期实付总额 ÷（该周期月积分 × 周期月数），再乘以每条视频消耗的积分，折算为人民币。"}, "danTiaoChengBen": {"t": "单条成本", "s": "一条 30 秒视频要花的现金，全场唯一可跨平台比较的价格。", "l": "＝ 该周期实付 ÷（月积分 × 周期月数）× 单条消耗积分 × 汇率。表格上行的数字按「用满该档全部产能」计，是这一档的固有单价；下行按你设定的月产量计，是你实际会付到的单价。"}, "yuanMiao": {"t": "元/秒", "s": "把单条成本摊到每一秒素材上。", "l": "＝ 单条成本 ÷ 30。用于和其他时长规格横向比较：若你要做 60 秒的成片，把元/秒乘以 60 即得该规格下的单条成本。"}, "jifenDang": {"t": "积分档", "s": "同一会员档位下的不同「积分 / 价格」选项。", "l": "例如 libtv 至尊版提供 50.5K 与 66K 两个积分档，即梦高级会员提供 6.2K 至 27.7K 共六个。会员档名称相同，但买到的积分不同、价格也不同，必须逐档比较。"}, "huiyuanDang": {"t": "会员档", "s": "平台划分的会员等级，如基础 / 标准 / 高级 / 超级。", "l": "同一平台内通常档位越高、单条成本越低。但并非总是如此：低档位常是「高价试用装」，例如 Higgsfield Starter 的单条成本是全场最差的 5.51 倍。"}, "chengnuoQi": {"t": "承诺期", "s": "年付 / 季付 / 月付，即你锁定会员的时长。", "l": "承诺越久单价通常越低，但全场有 12 处例外。另一个容易忽略的点：积分可能随承诺期变化 —— 即梦标准会员月付给 4,000 积分，年付只给 2,210，于是年付的单条成本反而更贵。"}, "danTiaoJiFen": {"t": "单条积分消耗", "s": "在该规格下生成一条视频要扣多少积分。", "l": "全部平台均按「Seedance 2.5 · 720p · 16:9 · 30s · 全能参考」测得：libtv 1,380、Neowow 7,500、即梦 600、小云雀 600、Higgsfield 210、Tapnow 1,200。规格不同则数字不可比 —— 这是本次对比成立的前提。"}, "yueChanNeng": {"t": "每月可生成", "s": "该档位每月最多能出几条 ＝ 该周期的月积分 ÷ 单条积分消耗。", "l": "注意用的是「该周期自己的月积分」：年付用年付方案的月积分，月付用月付方案的。单档月产能上限为 91.00 条（即梦 / 小云雀 超级会员，54,600 积分 ÷ 600 积分）。超过这个产量，单账号做不到，只能走组合订阅。"}, "daBiaoJieTi": {"t": "达标总支出阶梯", "s": "按目标月产量反查「覆盖该产能的最低支出」。", "l": "与「单条成本最省」不是一回事：单条成本最低的档位，为了覆盖某个产量可能要买下大量用不完的产能，总支出反而更高。阶梯表给的是「花最少的总钱，够用」。"}, "bianJiChengBen": {"t": "边际成本", "s": "从下一档升到上一档时，每多买一条产能实际多花多少钱。", "l": "用于判断「升档值不值」。若某档的边际成本明显高于全场最优单条成本，说明为这多出来的产能付的价钱不划算 —— 不如把钱花在别的平台上。"}, "daoGua": {"t": "周期倒挂", "s": "承诺期更久、单条成本反而更高的情况。", "l": "成因两类：① 积分随承诺期缩水（平台把长周期的积分调低了）；② 短周期的让利力度更深。全场共 12 处，最严重的一处是季付比月付贵 96.3%。"}, "zuHeDingYue": {"t": "组合订阅", "s": "跨平台、或同平台多账号叠加，用于覆盖单账号做不到的产量。", "l": "本站按无界背包求解，同一档位最多叠加 4 份。需要说明的是：多账号意味着多套素材库、多个登录、可能违反平台的服务条款 —— 这些运营与合规成本未计入测算。"}, "danZhangHao": {"t": "单账号单平台", "s": "1 个平台 + 1 个账号能做完你设定的月产量，才计入排名。", "l": "做不到的整行置灰，并在「单条成本」列标出该账号的产能上限。这条口径是刻意从严的：把同一档位买 3 份、4 份也算作「一个方案」，会得出「200 条也有 4 个选择」这种在实际操作中不成立的结论。"}, "xiangDuiZuiYou": {"t": "相对最优", "s": "该数值相对全场最优值的倍数。", "l": "成本类读作「贵 N 倍」：¥19.30 与 ¥106.29 相差 5.51×。产能类读作「只有最优的百分之几」：0.01× 即只有 1%。两个方向都在右侧以「本行数值 ÷ 最优数值」计算。"}, "shiFu": {"t": "该周期实付", "s": "这个承诺期实际要付出去的总额。", "l": "年付为年费、季付为季费、月付为月费。USD 计价平台（Higgsfield、Tapnow）已按当日中国外汇交易中心人民币对美元中间价折算为人民币。"}, "haiBaoJia": {"t": "海报价", "s": "平台自己宣传的「低至 X 元/秒」。", "l": "多按非全能参考档位、且按最大产能计算，与本站统一口径不可混用。表中同时列出「全能参考实算」，即同一档位在同一口径下的真实单价，以及两者的倍差。"}, "suYuanZhiWen": {"t": "溯源指纹", "s": "数据版本校验串，用于确认你看到的是哪一版。", "l": "作品指纹固定不变（标识这是同一个基准体系）；版本指纹随数据采集时点变化。两者均写在页面源码注释与每页页脚，可用于核对缓存副本是否过期。"}};
+(function(){
+  var els = document.querySelectorAll('.tm');
+  if(!els.length) return;
+  var tip = document.createElement('div');
+  tip.className = 'tip';
+  document.body.appendChild(tip);
+  Array.prototype.forEach.call(els, function(el){
+    var x = GLOS[el.dataset.t];
+    if(!x) return;
+    /* 桌面：悬停出 fixed 浮层。位置按术语的视口坐标算，靠近右／下边缘时自动翻转。 */
+    el.addEventListener('mouseenter', function(){
+      var r = el.getBoundingClientRect();
+      tip.textContent = x.s;
+      tip.classList.add('on');
+      var tw = tip.offsetWidth, th = tip.offsetHeight, vw = window.innerWidth, vh = window.innerHeight;
+      var left = Math.min(Math.max(8, r.left), vw - tw - 8);
+      var top = r.bottom + 7;
+      if(top + th > vh - 8) top = r.top - th - 7;
+      tip.style.left = left + 'px';
+      tip.style.top = Math.max(8, top) + 'px';
+    });
+    el.addEventListener('mouseleave', function(){ tip.classList.remove('on'); });
+    el.addEventListener('click', function(e){
+      e.preventDefault();
+      /* 手机端点开——就地展开全文，不跳页。同时只保留一个展开块，避免页面被撑乱 */
+      var box = el.nextElementSibling;
+      var mine = box && box.classList.contains('tmx');
+      Array.prototype.forEach.call(document.querySelectorAll('.tmx.on'), function(b){
+        b.classList.remove('on');
+        if(b.previousElementSibling) b.previousElementSibling.classList.remove('on');
+      });
+      if(mine){ return; }
+      var d = document.createElement('div');
+      d.className = 'tmx on';
+      d.innerHTML = '<b>' + x.t + '</b>　' + x.l
+        + '<br><a href="glossary.html#' + el.dataset.t + '">术语表里还有 ' + Object.keys(GLOS).length + ' 条 ›</a>';
+      el.parentNode.insertBefore(d, el.nextSibling);
+    });
+  });
+})();
+
+/* ── 窄屏汉堡菜单：点开 / 点外收起 ──
+   ⚠ 必须留在【基础 JS】里，且全站只能有一份。
+   按钮由共享的 nav() 组件渲染，四页都有；此前这段写在 COST_JS 内，而 cost_js=False 的
+   首页与排行榜页根本不注入该块 → 这两页「有按钮、没监听」，手机上点了完全不动。
+   又因按钮只在窄屏显示（桌面 display:none），桌面端测试连按钮都看不见，
+   两个因素叠加，使这个缺口在所有桌面断言里都是隐形的。
+   注：重复绑定同样致命 —— 两份监听各 toggle 一次＝互相抵消，表现仍是「点了没反应」。 */
+(function(){
+  var nv = document.querySelector('.nav'), nbg = document.getElementById('nBurger');
+  if(!nv || !nbg) return;
+  nbg.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = nv.classList.toggle('open');
+    nbg.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', function(e){
+    if(nv.classList.contains('open') && !nv.contains(e.target)){
+      nv.classList.remove('open');
+      nbg.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+
+</script>
+</body></html>

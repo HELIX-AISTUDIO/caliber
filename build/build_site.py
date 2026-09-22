@@ -22,7 +22,12 @@ import subprocess
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # site/
 DATA = os.path.join(ROOT, "data")
+# 两个发布目录，产物完全一致：
+#   DEPLOY    仓库外 —— 手动回滚包（Cloudflare Direct Upload 拖拽用）
+#   DEPLOY_IN 仓库内 —— Cloudflare Pages 连 Git 后的发布目录（必须可被 git 跟踪）
 DEPLOY = os.path.join(os.path.dirname(ROOT), "deploy")
+DEPLOY_IN = os.path.join(ROOT, "deploy")
+DEPLOY_DIRS = (DEPLOY, DEPLOY_IN)
 NODE = r"C:\Users\admin\.workbuddy\binaries\node\versions\22.22.2-3\node.EXE"
 
 # ═══════════════════════════════════════════════════════════════════
@@ -3113,10 +3118,11 @@ PAGES = {
 
 
 def write_all():
-    for d in (ROOT, DEPLOY):
+    # ROOT 那份供本地双击打开；两个 DEPLOY 目录供发布（内容逐字节相同）
+    for d in (ROOT,) + DEPLOY_DIRS:
         os.makedirs(d, exist_ok=True)
     for name, html in PAGES.items():
-        for d in (ROOT, DEPLOY):
+        for d in (ROOT,) + DEPLOY_DIRS:
             with io.open(os.path.join(d, name), "w", encoding="utf-8") as f:
                 f.write(html)
     # 公网附加文件：统一把作品指纹替换为当前值，并补上版本指纹
@@ -3135,7 +3141,8 @@ def write_all():
             txt = re.sub(r"版本指纹 \(Edition\): HX-CLB-[0-9A-Za-z-]+",
                          "版本指纹 (Edition): " + FP_EDITION, txt, count=1)
         io.open(src, "w", encoding="utf-8").write(txt)
-        shutil.copy2(src, os.path.join(DEPLOY, extra))
+        for d in DEPLOY_DIRS:
+            shutil.copy2(src, os.path.join(d, extra))
     print("  静态文件指纹已同步：%s / %s" % (FP_WORK, FP_EDITION))
 
 
