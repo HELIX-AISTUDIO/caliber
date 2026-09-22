@@ -34,7 +34,6 @@ SITE = {
         {"key": "home", "label": "首页", "href": "index.html"},
         {"key": "cost", "label": "平台成本对比", "href": "cost.html"},
         {"key": "cycles", "label": "三周期全清单", "href": "cycles.html"},
-        {"key": "leaderboard-vlm", "label": "视觉理解模型排行榜", "href": "leaderboard-vlm.html"},
     ],
 }
 

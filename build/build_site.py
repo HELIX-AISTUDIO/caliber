@@ -41,7 +41,6 @@ def load(name):
 SITE = load("site.json")
 PLATFORMS = load("platforms.json")
 COST = load("cost-seedance25.json")
-VLM = load("leaderboard-vlm.json")
 GLOSSARY = load("glossary.json")
 GLOS_MAP = {x["k"]: x for x in GLOSSARY["terms"]}
 
@@ -547,8 +546,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   transition:transform .35s cubic-bezier(.22,1,.36,1)}.brand:hover i{transform:rotate(45deg)}.brand .bw{display:flex;flex-direction:column;line-height:1.15}.brand .bw b{font-family:__DISP__;font-size:16px;font-weight:800;color:#fff;letter-spacing:.06em}.brand .bw s{text-decoration:none;font-size:9.5px;font-weight:600;color:#6E747D;letter-spacing:.05em}.menu{display:flex;align-items:center;gap:2px;overflow-x:auto;scrollbar-width:none;
   flex:1 1 auto;min-width:0}.menu::-webkit-scrollbar{display:none}.menu a{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none;
   color:#9AA0A8;font-size:13px;font-weight:600;padding:7px 12px;border-radius:999px;flex:0 0 auto;
-  transition:color .22s,background .22s}.menu a:hover{color:#fff;background:rgba(255,255,255,.065)}.menu a.active{color:#D1FE17}.menu .nb{background:#D1FE17;color:#0B0B0B;font-size:9.5px;font-weight:800;padding:1.5px 7px;
-  border-radius:999px}.nav .spec{margin-left:auto;font-family:__MONO__;font-size:11.5px;font-weight:500;color:#D1FE17;
+  transition:color .22s,background .22s}.menu a:hover{color:#fff;background:rgba(255,255,255,.065)}.menu a.active{color:#D1FE17}.nav .spec{margin-left:auto;font-family:__MONO__;font-size:11.5px;font-weight:500;color:#D1FE17;
   border:1px solid rgba(209,254,23,.35);border-radius:999px;padding:6px 13px;flex:0 0 auto}.wrap{max-width:1280px;margin:0 auto;padding:0 24px;position:relative;z-index:1}/* ── Hero 光场：lime 从「涂料」变「光源」── */
 .hero{max-width:1280px;margin:0 auto;padding:58px 24px 6px;position:relative;z-index:1}.hero::before{content:"";position:absolute;left:50%;top:-14%;z-index:-1;pointer-events:none;
   width:min(1180px,140vw);height:150%;transform:translateX(-50%);
@@ -565,18 +563,18 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   -webkit-mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%);
   mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%)}.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
   color:#D1FE17;margin-bottom:15px;font-family:__MONO__}h1{font-family:__DISP__;font-size:clamp(31px,5.3vw,60px);font-weight:800;color:#fff;
-  letter-spacing:-.038em;line-height:1.07}h1 em{font-style:normal;color:#D1FE17}.hero .lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75}.meta{display:flex;gap:20px;flex-wrap:wrap;margin-top:22px;font-size:12.5px;color:#767C85}.meta span{display:inline-flex;align-items:center;gap:7px}.meta i{width:5px;height:5px;border-radius:50%;background:#D1FE17;flex:0 0 5px}.meta b{color:#C9CDD2;font-weight:600;font-family:__MONO__}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
+  letter-spacing:-.038em;line-height:1.07}h1 em{font-style:normal;color:#D1FE17}.hero .lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
   text-decoration:none;white-space:nowrap;
   transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s}.btn-white{background:#fff;color:#0B0B0B}.btn-white:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,255,255,.2)}.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}.btn-ghost:hover{border-color:rgba(255,255,255,.45);transform:translateY(-2px)}h2{font-family:__DISP__;font-size:20px;font-weight:750;color:#fff;letter-spacing:-.025em;line-height:1.3}h2 .ey{display:inline-block;font-family:__MONO__;font-size:12px;font-weight:600;color:#D1FE17;
-  margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:__DISP__;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.card, .note, .entry, .legal, details{
+  margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:__DISP__;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.note, .entry, .legal, details{
   background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 46%,rgba(0,0,0,.30));
   -webkit-backdrop-filter:blur(28px) saturate(150%);backdrop-filter:blur(28px) saturate(150%);
   border:1px solid rgba(255,255,255,.12);border-radius:18px;
   box-shadow:inset 0 0 0 .61px rgba(255,255,255,.07),inset 0 1px 0 rgba(255,255,255,.05),
              0 1px 2px rgba(0,0,0,.45),0 10px 24px rgba(0,0,0,.4),0 30px 60px rgba(0,0,0,.48)}
-@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){.card, .note, .entry, .legal, details, .nav{
+@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){.note, .entry, .legal, details, .nav{
     background:linear-gradient(158deg,#161B18,#0D110F)}
-}.card{padding:20px 22px}.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}.entry{display:block;text-decoration:none;padding:26px;position:relative;
+}.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}.entry{display:block;text-decoration:none;padding:26px;position:relative;
   transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .3s}.entry:hover{transform:translateY(-4px);border-color:rgba(209,254,23,.42);
   box-shadow:inset 0 0 0 .61px rgba(255,255,255,.09),0 26px 60px rgba(0,0,0,.62),0 0 42px rgba(209,254,23,.09)}.entry .et{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#767C85;
   font-family:__MONO__;margin-bottom:12px}.entry h3{margin:0 0 9px;font-size:18px;font-weight:750;color:#fff}.entry p{color:#8A9099;font-size:13px;line-height:1.65;margin-bottom:16px}.entry .nums{display:flex;gap:22px;flex-wrap:wrap;padding-top:16px;
@@ -821,7 +819,6 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
    这是首页原有缺陷，加散点后被冒烟测试抓出来。overflow-x:clip 不产生滚动容器，
    只裁掉溢出，不影响 sticky；配合 meta 允许换行双保险。 */
 .hero{overflow-x:clip}
-.hero .meta{flex-wrap:wrap}
 .hero .pareto,.wrap>.pareto{margin-top:34px}
 .pareto{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:18px;
   background:rgba(255,255,255,.024);border:1px solid rgba(255,255,255,.075)}
@@ -916,9 +913,9 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   transition:opacity .62s cubic-bezier(.22,1,.36,1),transform .62s cubic-bezier(.22,1,.36,1)}.reveal.in{opacity:1;transform:none}.hero>*{animation:fadeUp .7s cubic-bezier(.22,1,.36,1) both}.hero>*:nth-child(2){animation-delay:.06s}.hero>*:nth-child(3){animation-delay:.12s}.hero>*:nth-child(4){animation-delay:.18s}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal,.hero>*{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}
 }
-@media print{body{background:#fff!important;color:#000!important;padding:0}body::before,body::after,.hero::before,.hero::after{display:none!important}.card, .note, .entry, .legal, details, .nav, table{
+@media print{body{background:#fff!important;color:#000!important;padding:0}body::before,body::after,.hero::before,.hero::after{display:none!important}.note, .entry, .legal, details, .nav, table{
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
-    box-shadow:none!important;background:#fff!important}.nav{position:static!important}.promo{background:#D1FE17!important;color:#000!important}.brand .bw b, .menu a, h1, h2, h3, td, th, li, .lead, .meta{color:#000!important}.legal{background:#F2FFB8!important}.legal-t,.legal-b,.legal-f{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
+    box-shadow:none!important;background:#fff!important}.nav{position:static!important}.promo{background:#D1FE17!important;color:#000!important}.brand .bw b, .menu a, h1, h2, h3, td, th, li, .lead{color:#000!important}.legal{background:#F2FFB8!important}.legal-t,.legal-b,.legal-f{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
 }
 @media (max-width:820px){.promo{font-size:11.5px;padding:9px 14px;gap:9px}.nav .inner{padding:10px 15px;gap:11px;flex-wrap:wrap}
   /* ⚠ 原先这里是 .nav .spec{display:none} —— 手机端把「测试口径」整个藏掉，
@@ -926,7 +923,7 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
      该口径「是本次对比成立的唯一前提」—— 它不是补充信息，是结论的一部分。
      改为换行独占一行，始终可见；不做引导/弹窗（那是把关键前提延迟交付）。 */
   .nav .spec{margin-left:0;flex:1 1 100%;order:9;font-size:11px;line-height:1.5;
-    padding-top:7px;margin-top:2px;border-top:1px solid rgba(255,255,255,.08)}.hero{padding:36px 15px 4px}.wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}.entry{padding:20px}.card, .note, .legal, table, details, .entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g2{grid-template-columns:1fr 1fr}
+    padding-top:7px;margin-top:2px;border-top:1px solid rgba(255,255,255,.08)}.hero{padding:36px 15px 4px}.wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}.entry{padding:20px}.note, .legal, table, details, .entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g2{grid-template-columns:1fr 1fr}
   /* ── KPI：竖排五张卡会吃掉 1.5 屏，用户滚到反查与表格之前就以为「页面到头了」。
      改成横向滑动的一行，高度固定，下方内容自然进入首屏。 */
   .grid.g5{display:flex;overflow-x:auto;overscroll-behavior-x:auto;gap:10px;
@@ -1753,8 +1750,9 @@ function applyMo(){
   });
 }
 
-/* 首页的预算反查有自己的周期状态（首页没有全局周期切换） */
-var HPK = 'y';
+/* 首页的预算反查有自己的周期状态（首页没有全局周期切换）。
+   ⚠ 默认必须与主站 DEFK 一致（月付）—— 曾有用户从首页点进来发现是年付开头。 */
+var HPK = DEFK;
 
 /* 通用：把预算结果算进指定元素。成本页与首页各一份实例。 */
 function budgetCalc(inp, out, unitEl, k){
@@ -1780,7 +1778,12 @@ function budgetCalc(inp, out, unitEl, k){
   }
   var best = afford.reduce(function(a, c){ return (c.cp[k] * mo > a.cp[k] * mo) ? c : a; });
   var cap = best.cp[k] * mo;
-  var html = '最多能做到 <b>' + cap.toFixed(0) + ' ' + u + '</b> ｜ ¥'
+  /* ⚠ 只给「91 条/月」用户不知道是多久 —— 补上总时长，与三周期页同一算法 */
+  var _sec = cap * SECC;
+  var _dur = _sec >= 3600 ? (_sec / 3600).toFixed(1) + ' 小时'
+                          : Math.round(_sec / 60) + ' 分钟';
+  var html = '最多能做到 <b>' + cap.toFixed(0) + ' ' + u + '</b>'
+    + ' ｜ 合计 <b>' + _dur + '</b> ｜ ¥'
     + Math.round(best.pc[k]).toLocaleString() + ' 买 ' + best.plat + ' ' + best.tier
     + (best.label ? ' · ' + best.label : '') + ' ｜ 折合 <b>¥' + (best.pc[k] / cap).toFixed(2) + '/条</b>';
   var higher = priced.filter(function(p){ return p.cp[k] * mo > cap + 1e-9; })
@@ -2404,10 +2407,8 @@ def promo():
 def nav(active):
     items = ""
     for it in NAV:
-        soon = it["key"] == "leaderboard-vlm" and VLM["status"] == "coming-soon"
-        badge = '<i class="nb">即将上线</i>' if soon else ""
         cls = ' class="active"' if it["key"] == active else ""
-        items += f'<a href="{it["href"]}"{cls}>{it["label"]}{badge}</a>'
+        items += f'<a href="{it["href"]}"{cls}>{it["label"]}</a>'
     # 窄屏下横向菜单必然放不下（「视觉理解模型排行榜」一个字就是 14px），
     # 与其硬裁或让它横向滚动，不如收进汉堡菜单 —— 三项导航的标准做法。
     return (f'<div class="nav"><div class="inner">'
@@ -3362,9 +3363,9 @@ home_body = f"""
       <span class="nval">¥<input type="number" id="hbud" class="nvi budn" min="0" step="100"
         inputmode="numeric" value="3000" aria-label="预算金额"></span>
       <span class="segv segk budseg" id="hbudSeg" role="tablist" aria-label="会员周期">
-        <button type="button" data-k="m" role="tab">月付</button>
+        <button type="button" class="on" data-k="m" role="tab">月付</button>
         <button type="button" data-k="q" role="tab">季付</button>
-        <button type="button" class="on" data-k="y" role="tab">年付</button>
+        <button type="button" data-k="y" role="tab">年付</button>
       </span>
     </div>
     <div class="budout budbig" id="hbudOut">—</div>
@@ -3436,57 +3437,11 @@ glossary_body = f"""
 """
 
 
-# ── 排行榜页 ──────────────────────────────────────────────────────
-DIMS = VLM["methodology"]["dimensions"]
-dim_rows = "".join(
-    f'<tr><td><span class="mono" style="color:#D1FE17">{d["key"]}</span></td>'
-    f'<td>{d["label"]}</td><td class="num">{(d["weight"]*100):.0f}%</td>'
-    f'<td style="white-space:normal">{d["desc"]}</td></tr>' for d in DIMS)
-schema_rows = "".join(f'<tr><td><span class="mono" style="color:#D1FE17">{k}</span></td>'
-                      f'<td style="white-space:normal">{v}</td></tr>'
-                      for k, v in VLM["fieldSchema"]["entries[]"].items())
-
-lb_body = f"""
-<div class="hero">
-  <div class="eyebrow">{VLM["eyebrow"]}</div>
-  <h1>视觉理解模型<br><em>统一口径排行榜</em></h1>
-  <p class="lead">{VLM["intro"]}</p>
-  <div class="meta">
-    <span><i></i>状态 <b>评测中</b></span>
-    <span><i></i>维度 <b>{len(DIMS)}</b></span>
-    <span><i></i>模型 <b>—</b></span>
-    <span><i></i>数据时点 <b>待回填</b></span>
-  </div>
-</div>
-
-<div class="wrap">
-<section class="reveal" style="margin-top:42px">
-  {sec_head("01", "榜单", VLM["methodology"]["scoring"])}
-  <div class="card" style="text-align:center;padding:52px 26px">
-    <div class="eyebrow" style="margin-bottom:13px">{VLM["emptyState"]["title"]}</div>
-    <div style="color:#8A9099;font-size:13px;line-height:1.75;max-width:540px;margin:0 auto">{VLM["emptyState"]["body"]}</div>
-  </div>
-</section>
-<section class="reveal">
-  {sec_head("02", "评测维度与权重", "权重定死后再开始跑分，避免「先看结果再调权重」。")}
-  {table([("key", None), ("维度", None), ("权重", None), ("说明", None)], dim_rows, "tw")}
-</section>
-<section class="reveal">
-  {sec_head("03", "数据字段说明", '字段已锁定。回填时只需向 <code>data/leaderboard-vlm.json</code> 的 <code>entries</code> 追加记录，页面自动出榜。')}
-  <details open>
-    <summary>entries[] 单条记录结构<span class="chev">›</span></summary>
-    <div class="dbody">{table([("字段", None), ("说明", None)], schema_rows, "tw")}</div>
-  </details>
-</section>
-{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　{VLM["title"]}评测中')}
-</div>
-"""
-
 # ═══════════════════════════════════════════════════════════════════
 # 6. 输出 + 自检
 # ═══════════════════════════════════════════════════════════════════
 PAGES = {
-    "index.html": page("首页", f"{BRAND} — {SITE['tagline']}。AI 平台成本对比与模型能力排行榜，统一口径折算，只给可复核的结果。",
+    "index.html": page("首页", f"{BRAND} — {SITE['tagline']}。AI 视频生成平台的成本对比，统一口径折算，只给可复核的结果。",
                        nav("home"), home_body, cost_js=True),
     "cost.html": page("平台成本对比", f"{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本，含达标阶梯、边际成本与跨平台组合最省。",
                       nav("cost"), cost_body, cost_js=True),
@@ -3494,7 +3449,6 @@ PAGES = {
                         nav("cycles"), cycles_body, cost_js=True),
     "glossary.html": page("术语表", f"{len(GLOSSARY['terms'])} 条口径与指标定义：口径、单条成本、承诺期、倒挂、组合订阅等。",
                           nav("glossary"), glossary_body),
-    "leaderboard-vlm.html": page(VLM["title"], VLM["intro"], nav("leaderboard-vlm"), lb_body),
 }
 
 
