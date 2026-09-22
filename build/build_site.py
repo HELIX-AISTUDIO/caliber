@@ -3482,6 +3482,25 @@ glossary_body = f"""
 """
 
 
+# ── 404 页 ────────────────────────────────────────────────────────
+NOTFOUND_BODY = f"""
+<div class="wrap">
+<section class="reveal" style="margin-top:56px">
+  <div class="eyebrow">{BRAND}</div>
+  <h1>这个页面<br><em>不存在</em></h1>
+  <p class="lead">地址可能输错了，或者这个页面已经下线。<br>
+     本站现在只有四页：首页、平台成本对比、三周期全清单、术语表。</p>
+  <div class="btns">
+    <a class="btn btn-white" href="index.html">回到首页</a>
+    <a class="btn btn-ghost" href="cost.html">平台成本对比</a>
+    <a class="btn btn-ghost" href="cycles.html">三周期全清单</a>
+  </div>
+</section>
+</div>
+{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品')}
+"""
+
+
 # ═══════════════════════════════════════════════════════════════════
 # 6. 输出 + 自检
 # ═══════════════════════════════════════════════════════════════════
@@ -3492,6 +3511,10 @@ PAGES = {
                       nav("cost"), cost_body, cost_js=True),
     "cycles.html": page("三周期全清单", f"{len(ROWS)} 个可选积分档 × 年付/季付/月付三周期，按指标动态排名，附全部原始数据与计算方法。",
                         nav("cycles"), cycles_body, cost_js=True),
+    # ⚠ Cloudflare Pages 的 SPA 回落：输出目录里【有 404.html 就用它】，
+    #   没有才回落到 index.html 并返回 200。`_redirects` 那条实测没拦住，
+    #   404.html 是更可靠的开关。不挂进 nav，也不参与任何导航高亮。
+    "404.html": page("页面不存在", "你要找的页面不存在。", nav(""), NOTFOUND_BODY),
     "glossary.html": page("术语表", f"{len(GLOSSARY['terms'])} 条口径与指标定义：口径、单条成本、承诺期、倒挂、组合订阅等。",
                           nav("glossary"), glossary_body),
 }
