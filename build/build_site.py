@@ -719,6 +719,47 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
   font-family:inherit;font-size:11.5px;padding:5px 11px;border-radius:8px;
   border:1px solid rgba(255,255,255,.16);background:transparent;color:#8A9098;white-space:nowrap}
 .guide .g-x:hover{background:rgba(255,255,255,.07);color:#C9CDD2}
+/* ── 三周期结论条 ── */
+.conc{margin:0 0 16px;padding:16px 18px;border-radius:15px;
+  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.11)}
+.conc-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px;margin-bottom:13px}
+.conc-h b{font-size:13.5px;color:#fff;letter-spacing:.01em}
+.conc-h span{font-size:11.5px;color:#7A8088}
+.conc-g{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.conc-c{padding:13px 14px;border-radius:12px;background:rgba(209,254,23,.05);
+  border:1px solid rgba(209,254,23,.22)}
+.conc-c.dim{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.1)}
+.conc-c .ch{font-size:10.5px;letter-spacing:.1em;color:#8A9098;margin-bottom:7px;
+  display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.conc-c .ch i{font-style:normal;font-size:10px;color:#5A6069;letter-spacing:0}
+.conc-c .cw{font-family:__MONO__;font-size:22px;font-weight:700;color:#D1FE17;
+  line-height:1.15;white-space:nowrap}
+.conc-c.dim .cw{font-size:17px;color:#C9CDD2}
+.conc-c .cw s{font-size:11px;font-weight:400;color:#7A8088;text-decoration:none;margin-left:4px}
+.conc-c .cn{font-size:11.5px;line-height:1.75;color:#8A9098;margin-top:7px}
+.conc-c .cn b{color:#D1FE17;font-weight:600}
+.conc-f{margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,.08);
+  font-size:11.5px;line-height:1.8;color:#8A9098}
+.conc-f b{color:#E4E7EA;font-weight:600}
+@media (max-width:820px){
+  /* 手机端不堆三张卡（会占掉 0.6 屏）—— 改成三行「标签 | 数值」，
+     每行两行高，总高压掉约 250px，让下方的反查与排名表不被推太远。 */
+  .conc{padding:13px 15px}
+  .conc-h{margin-bottom:9px}
+  .conc-h span{display:none}
+  .conc-g{grid-template-columns:1fr;gap:0}
+  .conc-c{padding:10px 0;border:0;background:none;border-radius:0;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:baseline}
+  .conc-c:last-child{border-bottom:0}
+  .conc-c .ch{grid-area:1/1;margin:0;white-space:nowrap}
+  .conc-c .ch i{display:none}
+  .conc-c .cw{grid-area:1/2;text-align:right;font-size:18px}
+  .conc-c.dim .cw{font-size:14px}
+  .conc-c .cn{grid-area:2/2;margin-top:1px;font-size:11px;line-height:1.65}
+  .conc-c .cn br{display:none}
+  .conc-f{margin-top:9px;padding-top:9px}
+}
 .kbar{display:none;gap:10px;grid-template-columns:repeat(auto-fit,minmax(148px,1fr))}
 .kbar.on{display:grid}.kb{padding:12px 14px;border-radius:13px;background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.085)}.kb.hi{border-color:rgba(209,254,23,.3);background:rgba(209,254,23,.055)}.kb s{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
@@ -1356,7 +1397,7 @@ function applyPeriod(K){
   CQ_LAST = null;
   applyPlatFilter();      /* 换表后重新套用平台筛选 */
   updateMoSum();
-  renderRec(); rerank();
+  renderRec(); rerank(); renderConc();
 }
 
 /* ── 查看方式切换：三块面板互斥显示 ──
@@ -1523,6 +1564,26 @@ function renderRec(src){
 }
 
 /* ── 全档位对比：按该产量的支出重排（只作用于当前可见的那张周期表）── */
+/* 三周期结论条的最后一行：按【当前月产量】算各周期最省的是哪个档位。
+   单条冠军不随产量变，但「你该买哪个」会变 —— 所以这行必须跟着滑块走。 */
+function renderConc(){
+  var box = document.getElementById('concF');
+  if(!box) return;
+  var N = readN();   /* 无参 → 读 #tgt，与 renderRec / rerank 同源 */
+  var out = [];
+  ["y", "q", "m"].forEach(function(k){
+    var cand = CDATA.filter(function(d){ return d.v[k] && d.v[k][1] >= N; });
+    if(!cand.length){ return; }
+    var b = cand.reduce(function(a, c){ return c.v[k][3] < a.v[k][3] ? c : a; });
+    out.push({ k: k, n: b.p + ' ' + b.t + (b.l ? ' · ' + b.l : ''), pay: b.v[k][3], per: b.v[k][0] });
+  });
+  if(!out.length){ box.innerHTML = '当前月产量下，没有任何单一账号档位能覆盖 —— 需要多账号，见下方「组合订阅」。'; return; }
+  var lbl = { y: '年付', q: '季付', m: '月付' };
+  box.innerHTML = '<b>按你的月产量 ' + N + ' 条</b> —— ' + out.map(function(o){
+    return lbl[o.k] + '最省：<b>' + o.n + '</b>　' + money(o.pay) + '（¥' + o.per.toFixed(2) + '/条）';
+  }).join('　｜　');
+}
+
 function rerank(src){
   var tb = activeTb();
   if(!tb) return;
@@ -1785,7 +1846,7 @@ document.addEventListener('DOMContentLoaded', function(){
       CQ_LAST = null;
       linkN(readN(el), el);
       updateMoSum();
-      renderRec(el); rerank(el);
+      renderRec(el); rerank(el); renderConc();
     });
   }
   onSlide(document.getElementById('tgt'));
@@ -1795,7 +1856,7 @@ document.addEventListener('DOMContentLoaded', function(){
       var N = parseInt(b.dataset.n, 10);
       CQ_LAST = null;
       linkN(N, null);
-      renderRec(); rerank();
+      renderRec(); rerank(); renderConc();
     });
   });
 
@@ -2196,6 +2257,60 @@ def kpis_for(key):
 
 
 KPI_SETS = {k: kpis_for(k) for k, _l, _m, _f in PERIODS}
+def _period_wins():
+    """逐档位比三周期，统计各周期「最便宜」的胜出次数。
+
+    两个必须的额外口径：
+    - 只统计该档位真实提供的周期（Seko 无季付、Higgsfield 无季付）
+    - 月付积分可能与年付不同（即梦标准会员），故分开取 cr
+    """
+    win = {"y": 0, "q": 0, "m": 0}
+    q_total = q_lose_m = 0
+    for p in COST["plans"]:
+        k = RATE if PLATFORMS[p["platform"]]["currency"] == "USD" else 1.0
+        for c in p["credits"]:
+            m = c["credits"]; mcr = c.get("mCr", m); qcr = c.get("qCr", m)
+            v = {}
+            for key, pay, mo, cr in (("y", c["price"], 12, m), ("q", c.get("q"), 3, qcr),
+                                     ("m", c.get("m"), 1, mcr)):
+                if pay is not None:
+                    v[key] = pay * k / (cr * mo) * CPV[p["platform"]]
+            if len(v) < 2:
+                continue
+            win[min(v, key=v.get)] += 1
+            if "q" in v and "m" in v:
+                q_total += 1
+                if v["m"] < v["q"]:
+                    q_lose_m += 1
+    return win, q_total, q_lose_m
+
+
+PWIN, Q_TOTAL, Q_LOSE_M = _period_wins()
+
+
+def _champ(key):
+    pool = [r for r in ROWS if key in r["byP"]]
+    return min(pool, key=lambda r: r["byP"][key]["perVideo"])
+
+
+CHAMP = {k: _champ(k) for k in "yqm"}
+
+CONC_BAR = ""
+for _k, _lbl, _note in (("y", "年付", "锁 12 个月"), ("m", "月付", "随时可停"), ("q", "季付", "锁 3 个月")):
+    _r = CHAMP[_k]; _b = _r["byP"][_k]
+    _nm = _r["plat"] + " " + _r["tier"] + (" · " + _r["label"] if _r["label"] else "")
+    _payu = {"y": "/年", "q": "/季", "m": "/月"}[_k]
+    if _k == "q":
+        _body = (f'<div class="cw">不建议</div>'
+                 f'<div class="cn">季付在全部 {Q_TOTAL} 个可比档位里，<b>一次都没赢过</b>' 
+                 f'<br>其中 {Q_LOSE_M} 个档位「买 3 个月比按月买还贵」</div>')
+    else:
+        _body = (f'<div class="cw">¥{_b["perVideo"]:,.2f}<s>每条</s></div>'
+                 f'<div class="cn">{_nm}<br>'
+                 f'该周期实付 ¥{_b["payCNY"]:,.0f}{_payu}　·　月产能 {_b["cap"]:.1f} 条</div>')
+    _cls = "conc-c dim" if _k == "q" else "conc-c"
+    CONC_BAR += (f'<div class="{_cls}"><div class="ch">{_lbl}<i>{_note}</i></div>{_body}</div>')
+
 KPI_BARS = ""
 for _k, _lbl, _mo, _f in PERIODS:
     _cells = "".join(
@@ -2692,6 +2807,13 @@ cost_body = f"""
   </div>
 
   {GUIDE}
+
+  <div class="conc" id="conc">
+    <div class="conc-h"><b>三周期结论</b><span>逐档位比过三个周期后的结果 —— 年付买谁、月付买谁、季付要不要考虑</span></div>
+    <div class="conc-g">{CONC_BAR}</div>
+    <div class="conc-f" id="concF">—</div>
+  </div>
+
   {KPI_BARS}
 
   <div class="vnote"><b>价格锚定</b>·本表价格锚定各平台官网【当前实时显示价】，该显示价已是活动价 / 优惠价 / 限时价的最终成交价。<details class="tiny"><summary>完整声明<span class="chev">›</span></summary><div class="dbody">{COST["liveNote"]}</div></details></div>

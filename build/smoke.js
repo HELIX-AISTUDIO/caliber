@@ -508,7 +508,16 @@ async function run(browser) {
                vh: innerHeight };
     });
     check('KPI 条改为横滑一行（高度受控）', kbf.flex && kbf.scrollable && kbf.h < 200, `高 ${kbf.h}px`);
-    check('反查卡进入首屏附近（≤1.2 屏）', kbf.recTop < kbf.vh * 1.2, `${kbf.recTop}px / 视口 ${kbf.vh}`);
+    // 原断言是「反查卡 ≤1.2 屏」，意图是「用户看不到下面还有内容」。
+    // 现在首屏由【三周期结论条】回答「买哪个」，反查退为第二层工具 ——
+    // 故改为断言「首屏能看到结论条的答案」+ 反查不被推到 3 屏外。
+    const ans = await p.evaluate(() => {
+      const c = document.querySelector('.conc-c .cw');
+      const r = c.getBoundingClientRect();
+      return { txt: c.innerText.replace(/\s+/g, ' ').trim(), top: Math.round(r.top + window.scrollY), vh: innerHeight };
+    });
+    check('首屏内可见「年付买谁」的答案', ans.top < ans.vh, `${ans.txt} @ ${ans.top}px / 视口 ${ans.vh}`);
+    check('反查卡未被推到 2.4 屏外', kbf.recTop < kbf.vh * 2.4, `${kbf.recTop}px`);
 
     // ② 反查表改卡片式，不再横滑
     const recf = await p.evaluate(() => {
@@ -538,6 +547,21 @@ async function run(browser) {
     });
     check('反查卡高度与排名卡同级（≤150px）', rh.same && rh.max <= 150,
       `反查 ${rh.rec.join('/')}px ｜ 排名 ${rh.main.join('/')}px`);
+
+    // 三周期结论条：一条讲清年付/月付买谁、季付要不要考虑
+    const cc = await p.evaluate(() => {
+      const cols = [...document.querySelectorAll('.conc-c')];
+      const foot = document.getElementById('concF');
+      return { n: cols.length,
+               y: cols[0] ? cols[0].innerText.replace(/\s+/g, ' ') : '',
+               q: cols[2] ? cols[2].innerText.replace(/\s+/g, ' ') : '',
+               foot: foot ? foot.innerText.replace(/\s+/g, ' ') : '',
+               h: Math.round(document.querySelector('.conc').getBoundingClientRect().height) };
+    });
+    check('结论条三列且年付给出冠军', cc.n === 3 && cc.y.indexOf('19.30') > 0, cc.y.slice(0, 30));
+    check('季付列明确写出「不建议」的根据', cc.q.indexOf('不建议') > 0 && cc.q.indexOf('没赢过') > 0);
+    check('结论条动态行含当前月产量', cc.foot.indexOf('月产量') > 0 && cc.foot.indexOf('最省') > 0, cc.foot.slice(0, 40));
+    check('结论条手机端高度受控（≤420px）', cc.h <= 420, `${cc.h}px`);
 
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，

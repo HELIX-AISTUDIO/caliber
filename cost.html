@@ -232,6 +232,47 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
   font-family:inherit;font-size:11.5px;padding:5px 11px;border-radius:8px;
   border:1px solid rgba(255,255,255,.16);background:transparent;color:#8A9098;white-space:nowrap}
 .guide .g-x:hover{background:rgba(255,255,255,.07);color:#C9CDD2}
+/* ── 三周期结论条 ── */
+.conc{margin:0 0 16px;padding:16px 18px;border-radius:15px;
+  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.11)}
+.conc-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px;margin-bottom:13px}
+.conc-h b{font-size:13.5px;color:#fff;letter-spacing:.01em}
+.conc-h span{font-size:11.5px;color:#7A8088}
+.conc-g{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.conc-c{padding:13px 14px;border-radius:12px;background:rgba(209,254,23,.05);
+  border:1px solid rgba(209,254,23,.22)}
+.conc-c.dim{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.1)}
+.conc-c .ch{font-size:10.5px;letter-spacing:.1em;color:#8A9098;margin-bottom:7px;
+  display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.conc-c .ch i{font-style:normal;font-size:10px;color:#5A6069;letter-spacing:0}
+.conc-c .cw{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:22px;font-weight:700;color:#D1FE17;
+  line-height:1.15;white-space:nowrap}
+.conc-c.dim .cw{font-size:17px;color:#C9CDD2}
+.conc-c .cw s{font-size:11px;font-weight:400;color:#7A8088;text-decoration:none;margin-left:4px}
+.conc-c .cn{font-size:11.5px;line-height:1.75;color:#8A9098;margin-top:7px}
+.conc-c .cn b{color:#D1FE17;font-weight:600}
+.conc-f{margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,.08);
+  font-size:11.5px;line-height:1.8;color:#8A9098}
+.conc-f b{color:#E4E7EA;font-weight:600}
+@media (max-width:820px){
+  /* 手机端不堆三张卡（会占掉 0.6 屏）—— 改成三行「标签 | 数值」，
+     每行两行高，总高压掉约 250px，让下方的反查与排名表不被推太远。 */
+  .conc{padding:13px 15px}
+  .conc-h{margin-bottom:9px}
+  .conc-h span{display:none}
+  .conc-g{grid-template-columns:1fr;gap:0}
+  .conc-c{padding:10px 0;border:0;background:none;border-radius:0;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:baseline}
+  .conc-c:last-child{border-bottom:0}
+  .conc-c .ch{grid-area:1/1;margin:0;white-space:nowrap}
+  .conc-c .ch i{display:none}
+  .conc-c .cw{grid-area:1/2;text-align:right;font-size:18px}
+  .conc-c.dim .cw{font-size:14px}
+  .conc-c .cn{grid-area:2/2;margin-top:1px;font-size:11px;line-height:1.65}
+  .conc-c .cn br{display:none}
+  .conc-f{margin-top:9px;padding-top:9px}
+}
 .kbar{display:none;gap:10px;grid-template-columns:repeat(auto-fit,minmax(148px,1fr))}
 .kbar.on{display:grid}.kb{padding:12px 14px;border-radius:13px;background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.085)}.kb.hi{border-color:rgba(209,254,23,.3);background:rgba(209,254,23,.055)}.kb s{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
@@ -651,6 +692,13 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   <button type="button" class="g-x" id="guideX">不再提示</button>
 </div>
 
+
+  <div class="conc" id="conc">
+    <div class="conc-h"><b>三周期结论</b><span>逐档位比过三个周期后的结果 —— 年付买谁、月付买谁、季付要不要考虑</span></div>
+    <div class="conc-g"><div class="conc-c"><div class="ch">年付<i>锁 12 个月</i></div><div class="cw">¥19.30<s>每条</s></div><div class="cn">小云雀 高级会员 · 27.7K 档<br>该周期实付 ¥10,699/年　·　月产能 46.2 条</div></div><div class="conc-c"><div class="ch">月付<i>随时可停</i></div><div class="cw">¥24.56<s>每条</s></div><div class="cn">小云雀 超级会员<br>该周期实付 ¥2,235/月　·　月产能 91.0 条</div></div><div class="conc-c dim"><div class="ch">季付<i>锁 3 个月</i></div><div class="cw">不建议</div><div class="cn">季付在全部 39 个可比档位里，<b>一次都没赢过</b><br>其中 11 个档位「买 3 个月比按月买还贵」</div></div></div>
+    <div class="conc-f" id="concF">—</div>
+  </div>
+
   <div class="kbar on" data-kbar="y"><div class="kb hi"><s>单条成本最优</s><b>¥19.30</b><em>小云雀 高级会员 · 27.7K 档</em></div><div class="kb"><s>30 条/月 · 最省</s><b>¥7,797<i class="u">/年</i></b><em>即梦 高级会员 · 6.2K 档 × 3</em></div><div class="kb"><s>90 条/月 · 最省</s><b>¥21,398<i class="u">/年</i></b><em>小云雀 高级会员 · 27.7K 档 × 2</em></div><div class="kb"><s>海外平台溢价</s><b>2.20×</b><em>Higgsfield Ultra</em></div><div class="kb"><s>最差 ÷ 最省</s><b>5.51×</b><em>Higgsfield Starter</em></div></div>
 <div class="kbar" data-kbar="q"><div class="kb hi"><s>单条成本最优</s><b>¥30.00</b><em>即梦 超级会员</em></div><div class="kb"><s>30 条/月 · 最省</s><b>¥2,939<i class="u">/季</i></b><em>即梦 高级会员 · 18.5K 档</em></div><div class="kb"><s>90 条/月 · 最省</s><b>¥8,189<i class="u">/季</i></b><em>即梦 超级会员</em></div><div class="kb"><s>最差 ÷ 最省</s><b>2.16×</b><em>Tapnow PRO · 3.5K 档</em></div></div>
 <div class="kbar" data-kbar="m"><div class="kb hi"><s>单条成本最优</s><b>¥24.56</b><em>小云雀 超级会员</em></div><div class="kb"><s>30 条/月 · 最省</s><b>¥779<i class="u">/月</i></b><em>小云雀 高级会员 · 18.5K 档</em></div><div class="kb"><s>90 条/月 · 最省</s><b>¥2,235<i class="u">/月</i></b><em>小云雀 超级会员</em></div><div class="kb"><s>海外平台溢价</s><b>1.99×</b><em>Higgsfield Ultra</em></div><div class="kb"><s>最差 ÷ 最省</s><b>4.33×</b><em>Higgsfield Starter</em></div></div>
@@ -1069,7 +1117,7 @@ function applyPeriod(K){
   CQ_LAST = null;
   applyPlatFilter();      /* 换表后重新套用平台筛选 */
   updateMoSum();
-  renderRec(); rerank();
+  renderRec(); rerank(); renderConc();
 }
 
 /* ── 查看方式切换：三块面板互斥显示 ──
@@ -1236,6 +1284,26 @@ function renderRec(src){
 }
 
 /* ── 全档位对比：按该产量的支出重排（只作用于当前可见的那张周期表）── */
+/* 三周期结论条的最后一行：按【当前月产量】算各周期最省的是哪个档位。
+   单条冠军不随产量变，但「你该买哪个」会变 —— 所以这行必须跟着滑块走。 */
+function renderConc(){
+  var box = document.getElementById('concF');
+  if(!box) return;
+  var N = readN();   /* 无参 → 读 #tgt，与 renderRec / rerank 同源 */
+  var out = [];
+  ["y", "q", "m"].forEach(function(k){
+    var cand = CDATA.filter(function(d){ return d.v[k] && d.v[k][1] >= N; });
+    if(!cand.length){ return; }
+    var b = cand.reduce(function(a, c){ return c.v[k][3] < a.v[k][3] ? c : a; });
+    out.push({ k: k, n: b.p + ' ' + b.t + (b.l ? ' · ' + b.l : ''), pay: b.v[k][3], per: b.v[k][0] });
+  });
+  if(!out.length){ box.innerHTML = '当前月产量下，没有任何单一账号档位能覆盖 —— 需要多账号，见下方「组合订阅」。'; return; }
+  var lbl = { y: '年付', q: '季付', m: '月付' };
+  box.innerHTML = '<b>按你的月产量 ' + N + ' 条</b> —— ' + out.map(function(o){
+    return lbl[o.k] + '最省：<b>' + o.n + '</b>　' + money(o.pay) + '（¥' + o.per.toFixed(2) + '/条）';
+  }).join('　｜　');
+}
+
 function rerank(src){
   var tb = activeTb();
   if(!tb) return;
@@ -1498,7 +1566,7 @@ document.addEventListener('DOMContentLoaded', function(){
       CQ_LAST = null;
       linkN(readN(el), el);
       updateMoSum();
-      renderRec(el); rerank(el);
+      renderRec(el); rerank(el); renderConc();
     });
   }
   onSlide(document.getElementById('tgt'));
@@ -1508,7 +1576,7 @@ document.addEventListener('DOMContentLoaded', function(){
       var N = parseInt(b.dataset.n, 10);
       CQ_LAST = null;
       linkN(N, null);
-      renderRec(); rerank();
+      renderRec(); rerank(); renderConc();
     });
   });
 
