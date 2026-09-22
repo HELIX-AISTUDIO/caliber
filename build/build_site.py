@@ -869,7 +869,13 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
     box-shadow:none!important;background:#fff!important}.nav{position:static!important}.promo{background:#D1FE17!important;color:#000!important}.brand .bw b,.menu a,h1,h2,h3,td,th,li,.kpi .v,.lead,.meta{color:#000!important}.legal{background:#F2FFB8!important}.legal-t,.legal-b,.legal-f{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
 }
-@media (max-width:820px){.promo{font-size:11.5px;padding:9px 14px;gap:9px}.nav .inner{padding:10px 15px;gap:11px}.nav .spec{display:none}.hero{padding:36px 15px 4px}.wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}.kpi .v{font-size:26px}.entry{padding:20px}.card,.kpi,.note,.legal,table,details,.entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g5,.g2{grid-template-columns:1fr 1fr}
+@media (max-width:820px){.promo{font-size:11.5px;padding:9px 14px;gap:9px}.nav .inner{padding:10px 15px;gap:11px;flex-wrap:wrap}
+  /* ⚠ 原先这里是 .nav .spec{display:none} —— 手机端把「测试口径」整个藏掉，
+     用户因此不知道数字是在什么条件下测的。而数据里写明：
+     该口径「是本次对比成立的唯一前提」—— 它不是补充信息，是结论的一部分。
+     改为换行独占一行，始终可见；不做引导/弹窗（那是把关键前提延迟交付）。 */
+  .nav .spec{margin-left:0;flex:1 1 100%;order:9;font-size:11px;line-height:1.5;
+    padding-top:7px;margin-top:2px;border-top:1px solid rgba(255,255,255,.08)}.hero{padding:36px 15px 4px}.wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}.kpi .v{font-size:26px}.entry{padding:20px}.card,.kpi,.note,.legal,table,details,.entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g5,.g2{grid-template-columns:1fr 1fr}
   /* ── KPI：竖排五张卡会吃掉 1.5 屏，用户滚到反查与表格之前就以为「页面到头了」。
      改成横向滑动的一行，高度固定，下方内容自然进入首屏。 */
   .grid.g5{display:flex;overflow-x:auto;overscroll-behavior-x:auto;gap:10px;
@@ -3050,7 +3056,7 @@ cost_body = f"""
       </div>
     </details>
   </div>
-    <div class="vptitle">全部档位 · 按「该周期支出」排名<span>名次＝<b style="color:#D1FE17">该周期总支出</b>由低到高（你实际要掏的钱），不是单条成本 —— 所以单价更低但档位更贵的会排在后面。<br>条形越长＝越省；上行＝用满产能的固有单价，下行＝按你当前产量的实际每条 · <b id="coverN" style="color:#D1FE17">—</b><br><b style="color:#D1FE17">{T("koujing", "口径")}＝{T("danZhangHao", "单账号单平台")}</b>：1 个平台 + 1 个账号能做出你设定的月产量才算可用；做不到的<b>整行置灰</b>，但<b>名次照常给出</b> —— 名次只反映该周期实付（档位固有属性，与产量无关），否则月产量一旦越过单账号上限，全表零名次、只剩一片灰。需要多账号时请用下方组合订阅。想看<b>按单价</b>排名请到「三周期全清单 · 动态排名」。</span></div>
+    <div class="vptitle">全部档位 · 按「该周期支出」排名<span>名次＝<b style="color:#D1FE17">该周期总支出</b>由低到高（你实际要掏的钱），不是单条成本 —— 所以单价更低但档位更贵的会排在后面。<br>条形越长＝越省；上行＝用满产能的固有单价，下行＝按你当前产量的实际每条 · <b id="coverN" style="color:#D1FE17">—</b><br><b style="color:#D1FE17">测试口径</b>：{SPEC}<br><b style="color:#D1FE17">{T("koujing", "口径")}＝{T("danZhangHao", "单账号单平台")}</b>：1 个平台 + 1 个账号能做出你设定的月产量才算可用；做不到的<b>整行置灰</b>，但<b>名次照常给出</b> —— 名次只反映该周期实付（档位固有属性，与产量无关），否则月产量一旦越过单账号上限，全表零名次、只剩一片灰。需要多账号时请用下方组合订阅。想看<b>按单价</b>排名请到「三周期全清单 · 动态排名」。</span></div>
   {PT_TABLES}
 </div>
 </main>

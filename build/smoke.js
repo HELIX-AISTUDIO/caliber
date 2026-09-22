@@ -739,6 +739,22 @@ async function run(browser) {
       await p.click('#segA button[data-k="m"]'); await p.waitForTimeout(300);
     }
 
+    // 测试口径是「结论成立的前提」，不是补充信息 ——
+    // 手机端曾用 .nav .spec{display:none} 把它整个藏掉，用户无从判断数字适用性。
+    {
+      const sp = await p.evaluate(() => {
+        const el = document.querySelector('.nav .spec');
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { txt: el.textContent.trim(), disp: getComputedStyle(el).display,
+                 inView: r.top >= 0 && r.bottom <= innerHeight };
+      });
+      check('测试口径在移动端首屏可见',
+        sp && sp.disp !== 'none' && sp.inView && /Seedance|720p/.test(sp.txt), sp ? sp.txt : '（元素缺失）');
+      const tbl = await p.evaluate(() => document.body.innerText.indexOf('测试口径') >= 0);
+      check('表格区也出现测试口径（直达链接的用户也能看到）', tbl === true);
+    }
+
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，
     // 没有 ✕ 的话用户找不到任何方式退出（用户实测被卡住）
