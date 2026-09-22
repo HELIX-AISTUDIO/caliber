@@ -176,7 +176,9 @@ async function run(browser) {
     }));
     const a = await snap();
     check(`排名图 ${ROWS_EXP} 行 + 标识`, a.rows === Number(ROWS_EXP) && a.logos === Number(ROWS_EXP));
-    check('首行＝最优档', a.first.indexOf('小云雀') >= 0 && a.first.indexOf('19.30') >= 0, a.first);
+    // ⚠ 不写死金额 —— 默认周期已由年付改为月付，冠军从 ¥19.30 变为 ¥24.56。
+    // 改为与周期无关的判据：首行的倍率必须是 1.00×（即该周期最优）。
+    check('首行＝该周期最优档（1.00×）', a.first.indexOf('1.00') >= 0, a.first);
     // 第 2、3 名数值可能相同（此处都是 ¥20.00），故只要求「不是全部等长」
     check('条形长度可分辨（非全部等长）', new Set(a.bars).size >= 2, a.bars.join(' / '));
     check('桌面无横向溢出', a.sw === a.vw, `(${a.sw}/${a.vw})`);
