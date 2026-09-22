@@ -140,6 +140,18 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
 .pj{margin-top:10px;padding:11px 12px;border-radius:11px;
   border:1px dashed rgba(209,254,23,.22);background:rgba(209,254,23,.035)}
 .pjh{font-size:12px;font-weight:700;color:#C9CDD2}
+/* ── 手机端触控目标 ──
+   实测（390×844）本站有 7 个可点元素低于 28px，最小的滑块本体只有 4px 高。
+   Apple 建议 44、Google 48；本站控件密集，30px 是收益与不破版的平衡点。 */
+@media (max-width:1020px){
+  .cqp{min-height:30px;min-width:40px;padding:6px 11px}
+  .foot a,.scopenote a,.budtip a{display:inline-block;padding:6px 1px;margin:-6px 0}
+  /* 滑块：不改盒高（基础规则 height:4px 在我之后声明，同权重会被它盖掉；
+     要改得连轨道伪元素一起重写，风险大于收益）。改为放大拇指 ——
+     4px 轨道 + 22px 拇指，抓取面积翻倍，且不动轨道外观。 */
+  .cqr::-webkit-slider-thumb{width:22px;height:22px}
+  .cqr::-moz-range-thumb{width:22px;height:22px}
+}
 .sgroup.hide{display:none}
 .pjh span{font-size:10.5px;font-weight:500;color:#7A8088;margin-left:6px}
 .prow{display:flex;align-items:baseline;gap:7px;margin-top:9px;flex-wrap:wrap}
