@@ -2431,7 +2431,11 @@ def legal():
 
 def foot(text):
     # 误关之后要有路回来 —— 引导弹窗只在首次自动出现
+    # 反馈入口指向 GitHub Issues：仓库已存在，零成本、可追踪、不需要后端
     return (f'<div class="foot">{text}'
+            f'\u3000|\u3000<a href="{SITE.get("issues", "#")}" target="_blank" rel="noopener" '
+            f'style="color:#9AA85E;border-bottom:1px dashed rgba(209,254,23,.35)">'
+            f'\u95ee\u9898\u53cd\u9988</a>'
             f'\u3000|\u3000<a href="#" id="introAgain" style="color:#8A9098;'
             f'border-bottom:1px dashed rgba(255,255,255,.3)">\u65b0\u624b\u5f15\u5bfc</a></div>')
 
@@ -3012,10 +3016,10 @@ cycles_body = f"""
     </div>
   </div>
   <div class="sgroup">
-    <div class="sgt">产能口径<span class="sgchip">每月</span></div>
+    <div class="sgt">产能显示单位<span class="sgchip">每月</span></div>
     <div class="segv" id="capSeg2" role="tablist" aria-label="产能口径">
-      <button type="button" class="on" data-cap="m" role="tab">每月<s>91 条/月</s></button>
-      <button type="button" data-cap="p" role="tab">整个周期<s>季＝3 个月，年＝12 个月</s></button>
+      <button type="button" class="on" data-cap="m" role="tab">每月<s>按 91 条/月显示</s></button>
+      <button type="button" data-cap="p" role="tab">整个周期<s>按 ×3 / ×12 显示</s></button>
     </div>
     <div class="srow" style="margin-top:8px">
       <span style="font-size:11px;line-height:1.6;color:#7A8088">只影响「能做多少」的显示单位，不改变排名与结论。</span>
@@ -3183,10 +3187,10 @@ cost_body = f"""
     </div>
   </div>
   <div class="sgroup" data-mo="both">
-    <div class="sgt">产能口径<span class="sgchip">每月</span></div>
+    <div class="sgt">产能显示单位<span class="sgchip">每月</span></div>
     <div class="segv" id="capSeg" role="tablist" aria-label="产能口径">
-      <button type="button" class="on" data-cap="m" role="tab">每月<s>91 条/月</s></button>
-      <button type="button" data-cap="p" role="tab">整个周期<s>季＝3 个月，年＝12 个月</s></button>
+      <button type="button" class="on" data-cap="m" role="tab">每月<s>按 91 条/月显示</s></button>
+      <button type="button" data-cap="p" role="tab">整个周期<s>按 ×3 / ×12 显示</s></button>
     </div>
     <div class="srow" style="margin-top:8px">
       <span style="font-size:11px;line-height:1.6;color:#7A8088">只影响「能做多少」的显示单位，不改变排名与结论。</span>
@@ -3490,7 +3494,7 @@ def write_all():
                 f.write(html)
     # 公网附加文件：统一把作品指纹替换为当前值，并补上版本指纹
     import shutil
-    for extra in ("_headers", "robots.txt", "LICENSE", "SECURITY.md"):
+    for extra in ("_headers", "_redirects", "robots.txt", "LICENSE", "SECURITY.md"):
         src = os.path.join(ROOT, extra)
         if not os.path.exists(src):
             continue
@@ -3525,7 +3529,11 @@ def selfcheck():
         for tok in ("__PLANS__", "__PTN__", "__CDATA__", "__COST__", "__SANS__", "__DISP__", "__MONO__", "{f2(", "None"):
             if tok in html:
                 errs.append(f"{name}: 残留占位符 {tok}")
-        if re.search(r"(?:src|href)=\"https?://", html):
+        # ⚠ 只拦【资源加载】：src= 与 <link href=>。
+        #   <a href="https://…"> 是导航链接（点了才走），不是资源请求 ——
+        #   页脚的「问题反馈」外链就是它，早先判据过宽会把外链误判成外部依赖。
+        _ext = re.search(r'src="https?://', html) or re.search(r'<link[^>]+href="https?://', html)
+        if _ext:
             errs.append(f"{name}: 存在外部资源请求（应保持零外部依赖）")
 
     cost = PAGES["cost.html"]

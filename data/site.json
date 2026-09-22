@@ -4,7 +4,7 @@
   "studio": "HELIX AI Studio",
   "owner": "HELIX AI Studio",
   "year": "2026",
-  "tagline": "AI 平台与模型 · 用同一把尺子横量",
+  "tagline": "AI 视频生成平台 · 用同一把尺子横量",
   "positions": "把 AI 平台放在同一把尺子上",
   "intro": "各平台用自己的积分币计价，币值互不相同。CALIBER 先把它们压平到同一口径，再折算成可比较的现金成本与能力得分 —— 不采信宣传数字，只给可复核的结果。",
   "nav": [
@@ -28,5 +28,6 @@
       "label": "术语表",
       "href": "glossary.html"
     }
-  ]
+  ],
+  "issues": "https://github.com/HELIX-AISTUDIO/caliber/issues/new"
 }
