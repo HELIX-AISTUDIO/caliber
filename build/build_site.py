@@ -3264,7 +3264,7 @@ cost_body = f"""
 home_body = f"""
 <div class="hero">
   <div class="eyebrow">{BRAND} · Unified Benchmark</div>
-  <h1>把 AI 平台<br>放在<em>同一把尺子</em>上</h1>
+  <h1>把 AI 视频生成平台<br>放在<em>同一把尺子</em>上</h1>
   <p class="lead">各平台用自己的积分币计价，币值互不相同。{BRAND} 先把它们压平到同一口径，再折算成可比较的现金成本与能力得分 —— 不采信宣传数字，只给可复核的结果。</p>
   <div class="btns">
     <a class="btn btn-white" href="#cost">进入平台成本对比</a>
