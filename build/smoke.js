@@ -653,6 +653,37 @@ async function run(browser) {
       await p.click('#segA button[data-k="m"]'); await p.waitForTimeout(400);
     }
 
+    // 名次必须覆盖全部档位：月产量越过单账号上限时（92 > 91），
+    // 早先会把所有行的名次抹成「—」并整表置灰，用户什么都读不到。
+    {
+      await p.evaluate(() => { const t2 = document.getElementById('tgt');
+        t2.value = 92; t2.dispatchEvent(new Event('input', { bubbles: true })); });
+      await p.waitForTimeout(500);
+      await p.click('#segA button[data-k="q"]'); await p.waitForTimeout(500);
+      const rk = await p.evaluate(() => {
+        const pt = document.querySelector('.pt.on');
+        const trs = [...pt.querySelectorAll('tbody tr')];
+        const nums = trs.map(tr => parseInt(tr.querySelector('.rk b').textContent, 10));
+        return { total: trs.length, ranked: nums.filter(n => !isNaN(n)).length,
+                 seq: nums.every((n, i) => n === i + 1),
+                 dead: trs.filter(tr => tr.classList.contains('out')).length };
+      });
+      check('全部做不到时名次仍给出且连续', rk.ranked === rk.total && rk.seq === true,
+        `${rk.ranked}/${rk.total} 有名次，置灰 ${rk.dead}`);
+      // 有可用方案时，名次 1 必须落在可用方案上
+      await p.evaluate(() => { const t2 = document.getElementById('tgt');
+        t2.value = 30; t2.dispatchEvent(new Event('input', { bubbles: true })); });
+      await p.waitForTimeout(500);
+      const first = await p.evaluate(() => {
+        const tr = document.querySelector('.pt.on tbody tr');
+        return { rk: tr.querySelector('.rk b').textContent, out: tr.classList.contains('out') };
+      });
+      check('有可用方案时名次 1 落在可用档位', first.rk === '1' && first.out === false, first.rk);
+      await p.evaluate(() => { const t2 = document.getElementById('tgt');
+        t2.value = 30; t2.dispatchEvent(new Event('input', { bubbles: true })); });
+      await p.click('#segA button[data-k="m"]'); await p.waitForTimeout(400);
+    }
+
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，
     // 没有 ✕ 的话用户找不到任何方式退出（用户实测被卡住）

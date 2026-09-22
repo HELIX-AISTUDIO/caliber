@@ -1646,11 +1646,19 @@ function rerank(src){
     r.__n = x ? x.n : null;
     r.__t = x ? x.total : null;
   });
+  /* 排序：可做到的在前（按该产量下的总支出），做不到的在后（按该周期实付）。
+     这样「该买哪个」的答案永远是最上面那批 —— 若改成全部按实付平铺，
+     第一名会落在低档位上（便宜但做不出目标产量），反而失去指导意义。
+
+     但名次要【连续发放给全部档位】：实付是档位固有属性、与产量无关，
+     不能因为「一个账号做不出这么多」就把名次抹成「—」。
+     否则月产量越过单账号上限（如 92 > 91）时全表零名次、只剩一片灰，
+     用户什么都读不到 —— 这正是用户报的问题。 */
   rs.sort(function(x, y){
-    if(x.__t == null && y.__t == null) return 0;
-    if(x.__t == null) return 1;
-    if(y.__t == null) return -1;
-    return x.__t - y.__t;
+    var xd = (x.__t == null), yd = (y.__t == null);
+    if(xd !== yd) return xd ? 1 : -1;                                  /* 可做到的在前 */
+    if(xd) return parseFloat(x.dataset.p) - parseFloat(y.dataset.p);   /* 都做不到：按实付 */
+    return x.__t - y.__t;                                              /* 都可做到：按总支出 */
   });
   var okN = 0;
   rs.forEach(function(r, i){
@@ -1658,18 +1666,18 @@ function rerank(src){
     /* 产能不足以覆盖目标产量的行：整行置灰（用户要求「月产量拉高后，
        哪些会员积分根本不够用要能一眼看出来，而不是混在列表里」） */
     var dead = (r.__t == null);
-    r.classList.toggle('out', dead);
-    if(dead) i--; else okN++;
+    r.classList.toggle('out', dead);       /* 做不到：置灰，但仍然有名次 */
+    if(!dead) okN++;
     var rk = r.querySelector('.rk');
     if(rk){
       var b = rk.querySelector('b'), ss = rk.querySelector('s');
-      if(r.__t == null){
-        if(b) b.textContent = '\u2014';
-        if(ss) ss.textContent = '产能过低';
-      } else {
-        if(b) b.textContent = i + 1;
-        if(ss) ss.textContent = money(r.__t) + ({y: '/\u5e74', q: '/\u5b63', m: '/\u6708'}[PK] || '')
-          + (r.__n > 1 ? ' \u00b7 \u4e70 ' + r.__n + ' \u4efd' : '');
+      if(b) b.textContent = i + 1;         /* 名次＝该周期实付的名次，与产量无关 */
+      if(ss){
+        /* 副行＝该周期实付（排名依据），做不到的额外标出来 */
+        ss.textContent = money(parseFloat(r.dataset.p))
+          + ({y: '/\u5e74', q: '/\u5b63', m: '/\u6708'}[PK] || '')
+          + (dead ? ' \u00b7 \u4e00\u4e2a\u8d26\u53f7\u505a\u4e0d\u5230'
+                  : (r.__n > 1 ? ' \u00b7 \u4e70 ' + r.__n + ' \u4efd' : ''));
       }
     }
     var c2 = r.querySelector('td[data-rated] s');
@@ -1864,7 +1872,7 @@ function renderPareto(){
 /* 指标元信息：标题、副标、轴方向 —— 用户要求「切指标时标题要变成解释标题」 */
 var METAM = {
   cost: ['单条成本', '同样 30 秒 Seedance 2.5 视频，这个档位要花多少钱 —— 越低越好。'],
-  cap:  ['每月可生成', '这一个档位每月最多能出多少条 —— 越高越好。做不到你设定的月产量就整行置灰。'],
+  cap:  ['每月可生成', '这一个档位每月最多能出多少条 —— 越高越好。做不到你设定的月产量就整行置灰，但名次仍会给出（名次只反映该周期实付）。'],
   sec:  ['元每秒', '把单价摊到每一秒素材上 —— 越低越好，用来和其他规格横向比较。'],
   pay:  ['该周期实付', '这个周期实际要付出去的总额（年费 / 季费 / 月费）—— 越低越好。']
 };
@@ -2950,7 +2958,7 @@ cost_body = f"""
       </div>
     </details>
   </div>
-    <div class="vptitle">全部档位 · 按「该周期支出」排名<span>名次＝<b style="color:#D1FE17">该周期总支出</b>由低到高（你实际要掏的钱），不是单条成本 —— 所以单价更低但档位更贵的会排在后面。<br>条形越长＝越省；上行＝用满产能的固有单价，下行＝按你当前产量的实际每条 · <b id="coverN" style="color:#D1FE17">—</b><br><b style="color:#D1FE17">{T("koujing", "口径")}＝{T("danZhangHao", "单账号单平台")}</b>：1 个平台 + 1 个账号能做出你设定的月产量才计入排名；做不到的整行置灰。需要多账号时请用下方组合订阅。想看<b>按单价</b>排名请到「三周期全清单 · 动态排名」。</span></div>
+    <div class="vptitle">全部档位 · 按「该周期支出」排名<span>名次＝<b style="color:#D1FE17">该周期总支出</b>由低到高（你实际要掏的钱），不是单条成本 —— 所以单价更低但档位更贵的会排在后面。<br>条形越长＝越省；上行＝用满产能的固有单价，下行＝按你当前产量的实际每条 · <b id="coverN" style="color:#D1FE17">—</b><br><b style="color:#D1FE17">{T("koujing", "口径")}＝{T("danZhangHao", "单账号单平台")}</b>：1 个平台 + 1 个账号能做出你设定的月产量才算可用；做不到的<b>整行置灰</b>，但<b>名次照常给出</b> —— 名次只反映该周期实付（档位固有属性，与产量无关），否则月产量一旦越过单账号上限，全表零名次、只剩一片灰。需要多账号时请用下方组合订阅。想看<b>按单价</b>排名请到「三周期全清单 · 动态排名」。</span></div>
   {PT_TABLES}
 </div>
 </main>
