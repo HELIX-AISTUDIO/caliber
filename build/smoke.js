@@ -511,8 +511,9 @@ async function run(browser) {
     // 原断言是「反查卡 ≤1.2 屏」，意图是「用户看不到下面还有内容」。
     // 现在首屏由【三周期结论条】回答「买哪个」，反查退为第二层工具 ——
     // 故改为断言「首屏能看到结论条的答案」+ 反查不被推到 3 屏外。
+    // 首卡即「单条成本最优」——「买哪个」的答案现在由 KPI 首卡承载
     const ans = await p.evaluate(() => {
-      const c = document.querySelector('.conc-c .cw');
+      const c = document.querySelector('.kbar.on .kb');
       const r = c.getBoundingClientRect();
       return { txt: c.innerText.replace(/\s+/g, ' ').trim(), top: Math.round(r.top + window.scrollY), vh: innerHeight };
     });
@@ -548,20 +549,26 @@ async function run(browser) {
     check('反查卡高度与排名卡同级（≤150px）', rh.same && rh.max <= 150,
       `反查 ${rh.rec.join('/')}px ｜ 排名 ${rh.main.join('/')}px`);
 
-    // 三周期结论条：一条讲清年付/月付买谁、季付要不要考虑
+    // 三周期结论已并入 KPI 条（独立区块删除）：
+    // 「单条成本最优」原本就与 KPI 首卡重复，动态行也与「30 条/月·最省」重复，
+    // 真正的新信息只有「月付冠军」与「季付结论」两条，做成跨周期卡并进 KPI。
     const cc = await p.evaluate(() => {
-      const cols = [...document.querySelectorAll('.conc-c')];
-      const foot = document.getElementById('concF');
-      return { n: cols.length,
-               y: cols[0] ? cols[0].innerText.replace(/\s+/g, ' ') : '',
-               q: cols[2] ? cols[2].innerText.replace(/\s+/g, ' ') : '',
-               foot: foot ? foot.innerText.replace(/\s+/g, ' ') : '',
-               h: Math.round(document.querySelector('.conc').getBoundingClientRect().height) };
+      const bar = document.querySelector('.kbar.on');
+      const cards = [...bar.querySelectorAll('.kb')];
+      const txt = c => c.innerText.replace(/\s+/g, ' ');
+      return { n: cards.length,
+               conc: document.querySelectorAll('.conc').length,
+               all: cards.map(txt),
+               h: Math.round(bar.getBoundingClientRect().height),
+               overflow: cards.filter(c => { const e = c.querySelector('em');
+                 return e && e.scrollWidth > e.clientWidth + 1; }).length };
     });
-    check('结论条三列且年付给出冠军', cc.n === 3 && cc.y.indexOf('19.30') > 0, cc.y.slice(0, 30));
-    check('季付列明确写出「不建议」的根据', cc.q.indexOf('不建议') > 0 && cc.q.indexOf('没赢过') > 0);
-    check('结论条动态行含当前月产量', cc.foot.indexOf('月产量') > 0 && cc.foot.indexOf('最省') > 0, cc.foot.slice(0, 40));
-    check('结论条手机端高度受控（≤420px）', cc.h <= 420, `${cc.h}px`);
+    check('独立结论条已移除', cc.conc === 0);
+    check('KPI 含「月付最优」且值正确', cc.all.some(x => x.indexOf('月付最优') >= 0 && x.indexOf('24.56') >= 0));
+    check('KPI 含「季付值得吗」并写明依据', cc.all.some(x => x.indexOf('季付值得吗') >= 0 && x.indexOf('从未赢过') >= 0));
+    check('原「单条成本最优」卡片保留（未丢信息）', cc.all.some(x => x.indexOf('单条成本最优') >= 0 && x.indexOf('19.30') >= 0));
+    check('KPI 卡说明文字均未被截断', cc.overflow === 0, `截断 ${cc.overflow} 张`);
+    check('合并后 KPI 条更矮（≤150px）', cc.h <= 150, `${cc.h}px`);
 
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，
