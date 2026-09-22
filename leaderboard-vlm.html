@@ -414,6 +414,10 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   .tw-rec tbody td:nth-child(1){white-space:normal;max-width:118px}
   /* 让副行独立成行 —— 否则会在大约「1 个」处断开成「1 个 / 平台」，很难看 */
   .tw-rec tbody td:nth-child(1) .sub{display:block;margin-left:0;line-height:1.5}
+  /* 组合订阅那行的档位组合要列 2-3 个平台名，硬截断会丢掉「买了什么」——
+     用户明确要求「第二张可以做多一些保证内容」。故第二张允许换行、卡片随之变高；
+     第一张仍保持单行，两张高度不同是刻意的。 */
+  .tw-rec tbody tr:nth-child(2) td:nth-child(2){white-space:normal;line-height:1.55}
   .tw-rec tbody td:nth-child(2){grid-area:1/2;font-size:10.5px;color:#9AA0A8;min-width:0;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tw-rec tbody td:nth-child(2)::before{content:"档位组合 ";color:#5A6069;display:inline}

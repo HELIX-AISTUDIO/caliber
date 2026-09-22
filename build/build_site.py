@@ -135,7 +135,10 @@ for i, r in enumerate(sorted(ROWS, key=lambda x: x["perVideo"]), 1):
 #  单条成本 = 本币/积分 × 单条消耗积分 × 汇率
 #  月产能   = 该周期月积分 ÷ 单条消耗积分
 # 注意月付用 mCr —— 即梦标准会员月付给 4,000 积分，年/季付只给 2,210。
-PERIODS = [("y", "年付", 12, "payY"), ("q", "季付", 3, "payQ"), ("m", "月付", 1, "payM")]
+# 顺序＝用户的观看习惯：月付 → 季付 → 年付（由短到长，先看门槛低的）。
+# 默认落在第一项（月付）—— 首屏 narrative 与 KPI 都跟着走。
+PERIODS = [("m", "月付", 1, "payM"), ("q", "季付", 3, "payQ"), ("y", "年付", 12, "payY")]
+_DEFAULT_K = PERIODS[0][0]          # 默认周期＝顺序第一项。全站唯一来源。
 for r in ROWS:
     r["byP"] = {}
     for key, _lbl, months, field in PERIODS:
@@ -478,13 +481,13 @@ def main_rows_for(key):
             f'<td><span class="plc">{plogo(r["plat"], "plgo")}</span>{r["plat"]}{usd}</td>'
             f'<td>{r["tier"]}{vl}</td>'
             f'<td class="num cell2" data-l="{PT_HEAD[key][0]}"><b>{price_disp}</b><s>{sub}</s></td>'
-            f'<td class="num cell2" data-l="每月可生成">'
+            f'<td class="num cell2" data-l="每月可生成" data-cap="{p["cap"]:.4f}">'
             f'<b>{p["cap"]:.2f} 条</b>'
             f'<s>{p["cr"]:,} 积分 · {p["cap"]*SEC_PER_CLIP:,.0f} 秒</s></td>'
             f'<td class="num cell2" data-l="单条成本" data-rated="{p["perVideo"]:.2f}" '
             f'style="background:rgba(209,254,23,{ca:.3f})">'
             f'<span class="{"strong" if p["rank"]==1 else "nm"}">¥{f2(p["perVideo"])}</span>'
-            f'<s>{_sub_deliver(r, key)}</s>'
+            f'<s data-capmax="{p["cap"]:.4f}">{_sub_deliver(r, key)}</s>'
             f'<div class="mini{mc}"><i style="--w:{w:.1f}%;width:{w:.1f}%"></i></div></td>'
             f'<td class="num cell2" data-l="元/秒"><b>{p["perVideo"]/SEC_PER_CLIP:.3f}</b><s>元/秒</s></td></tr>')
     return rows
@@ -901,6 +904,10 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   .tw-rec tbody td:nth-child(1){white-space:normal;max-width:118px}
   /* 让副行独立成行 —— 否则会在大约「1 个」处断开成「1 个 / 平台」，很难看 */
   .tw-rec tbody td:nth-child(1) .sub{display:block;margin-left:0;line-height:1.5}
+  /* 组合订阅那行的档位组合要列 2-3 个平台名，硬截断会丢掉「买了什么」——
+     用户明确要求「第二张可以做多一些保证内容」。故第二张允许换行、卡片随之变高；
+     第一张仍保持单行，两张高度不同是刻意的。 */
+  .tw-rec tbody tr:nth-child(2) td:nth-child(2){white-space:normal;line-height:1.55}
   .tw-rec tbody td:nth-child(2){grid-area:1/2;font-size:10.5px;color:#9AA0A8;min-width:0;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tw-rec tbody td:nth-child(2)::before{content:"档位组合 ";color:#5A6069;display:inline}
@@ -1319,9 +1326,63 @@ COST_JS = r"""
    ══════════════════════════════════════════════════════════════ */
 var PLANS = __PLANS__;
 var PT_N = __PTN__;         /* 每个周期各有几档可比 */
+var DEFK = '__DEFK__';      /* 默认周期：与 Python 侧 PERIODS[0] 同源 */
 var MAX_STACK = 4;          /* 同档最多叠加份数 */
 var CQ_LOCK = false, CQ_LAST = null;
-var PK = 'y';               /* 当前周期：y 年付 / q 季付 / m 月付 */
+var PK = 'm';               /* 当前周期：默认月付（顺序第一项） */
+
+/* ── 产能口径：'m' 每月 ｜ 'p' 整个周期 ──
+   只是【显示口径】，比较逻辑不变：年付「每年 360 条」就是「每月 30 条」。
+   用户要的是「买了季付，这 3 个月一共能做多少」，但必须保留按每月看的选项。 */
+var CAPU = 'm';
+var CAPMONTHS = {m: 1, q: 3, y: 12};
+var CAPWORD = {m: '月', q: '季', y: '年'};
+function capMul(k){ return CAPU === 'p' ? CAPMONTHS[k] : 1; }
+function capUnit(k){ return CAPU === 'p' ? '条/' + CAPWORD[k] : '条/月'; }
+function capShow(k, v, d){ return (v * capMul(k)).toFixed(d === undefined ? 1 : d) + ' ' + capUnit(k); }
+function capLab(k){ return CAPU === 'p' ? '每' + CAPWORD[k] + '可生成' : '每月可生成'; }
+/* 需求值也要换到同一口径，否则「最多 554 条」与「不够 30」没法对读 */
+function reqShow(k, N){ return CAPU === 'p' ? (N * CAPMONTHS[k]) + ' ' + capUnit(k) : N + ' 条/月'; }
+
+/* 把页面上所有「产能」显示切到当前口径。
+   改的是显示，不动任何排序/结论 —— 两种口径下排名完全一致。 */
+function applyCap(){
+  var k = PK;
+  /* 主表：产能格数值 + 该列标签 */
+  Array.prototype.forEach.call(document.querySelectorAll('.pt.on td[data-cap]'), function(td){
+    var v = parseFloat(td.getAttribute('data-cap'));
+    td.setAttribute('data-l', capLab(k));
+    var b = td.querySelector('b');
+    if(b) b.textContent = (v * capMul(k)).toFixed(2) + ' 条';
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.pt.on th [data-caph]'), function(el){
+    el.textContent = capLab(k);
+  });
+  /* 主表「单账号最多 X 条·不够 N」也必须同口径，否则与产能列对不上 */
+  /* ⚠ 这个属性挂在 <s> 上，不是 <td> 上 —— 写 td[data-capmax] 一个都选不到 */
+  Array.prototype.forEach.call(document.querySelectorAll('.pt.on [data-capmax]'), function(el){
+    var v = parseFloat(el.getAttribute('data-capmax'));
+    var t = el.textContent;
+    if(/单账号最多/.test(t)){
+      el.textContent = t.replace(/单账号最多 [\d.]+ 条/,
+        '单账号最多 ' + (v * capMul(k)).toFixed(v * capMul(k) >= 100 ? 0 : 1) + ' ' + capUnit(k).replace('条/', '条'));
+    }
+  });
+  /* KPI：「30 条/月 · 最省」这类标签 */
+  Array.prototype.forEach.call(document.querySelectorAll('.kbar.on .kb>s'), function(el){
+    el.textContent = el.textContent.replace(/^(\d+) 条\/月 · 最省$/,
+      function(_m, n){ return '本周期 ' + (n * capMul(k)) + ' ' + capUnit(k) + ' · 最省'; });
+  });
+  /* 侧栏开关的高亮与提示 */
+  Array.prototype.forEach.call(document.querySelectorAll('#capSeg button, #capSeg2 button'), function(b){
+    b.classList.toggle('on', b.getAttribute('data-cap') === CAPU);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#capSeg, #capSeg2'), function(seg){
+    var hint = seg.parentNode.querySelector('.sgchip');
+    if(hint) hint.textContent = CAPU === 'p' ? '整个周期' : '每月';
+  });
+  renderRec(null, true);   /* 反查卡的产能格走它自己的渲染路径，强制重画 */
+}
 var CV = 'all';             /* 当前视图：all 全档位对比 / buy 我该买哪个 / period 周期对照 */
 
 /* ── 移动端底部摘要条：让用户不打开抽屉也知道当前看的是哪一套 ── */
@@ -1378,6 +1439,9 @@ function applyPeriod(K){
   });
   CQ_LAST = null;
   applyPlatFilter();      /* 换表后重新套用平台筛选 */
+  /* ⚠ 换周期后必须重刷产能口径 —— 否则主表仍按月付的单位显示，
+     而反查卡走自己的渲染路径已经换了单位，两处会不一致。 */
+  applyCap();
   updateMoSum();
   renderRec(); rerank();
 }
@@ -1496,9 +1560,9 @@ function comboLabel(b){
 function money(v, cur){ return (cur === 'USD' ? '$' : '\u00a5') + Math.round(v).toLocaleString(); }
 
 /* ── 主渲染 ── */
-function renderRec(src){
+function renderRec(src, force){
   var N = readN(src);
-  if(CQ_LAST === N) return;   /* 节流：拖动时 input 高频触发，N 未变则跳过 */
+  if(CQ_LAST === N && !force) return;   /* 节流：拖动时高频触发，N 未变则跳过 */
   CQ_LAST = N;
 
   var secs = N * 30, mins = secs / 60;
@@ -1526,7 +1590,7 @@ function renderRec(src){
       +  '<td data-l="档位组合"><span class="dot" style="background:' + single.p.color + '"></span>' + single.p.plat + ' ' +
          single.p.tier + (single.n > 1 ? ' \u00d7 ' + single.n : '') + '</td>'
       +  '<td class="num strong" data-l="该周期支出">' + money(single.total) + '</td>'
-      +  '<td class="num" data-l="实际产能">' + single.cap.toFixed(1) + ' 条/月</td>'
+      +  '<td class="num" data-l="实际产能">' + capShow(PK, single.cap) + '</td>'
       +  '<td class="num" data-l="单条成本">' + money(single.total / N) + '</td></tr>';
   } else {
     h += '<tr><td>单一账号最省</td><td colspan="4" class="sub">'
@@ -1536,8 +1600,8 @@ function renderRec(src){
     h += '<tr><td>组合订阅最省<br><span class="sub">可跨平台 + 同平台多账号</span></td>'
       +  '<td data-l="档位组合">' + comboLabel(combo) + '</td>'
       +  '<td class="num strong" data-l="该周期支出">' + money(combo.total) + '</td>'
-      +  '<td class="num" data-l="实际产能">' + combo.cap.toFixed(1)
-      +  ' 条/月<br><span class="sub">合计产能</span></td>'
+      +  '<td class="num" data-l="实际产能">' + capShow(PK, combo.cap)
+      +  ' <span class="sub">合计产能</span></td>'
       +  '<td class="num" data-l="单条成本">' + money(combo.total / N) + '</td></tr>';
   }
   var rec = document.getElementById('rec');
@@ -1813,6 +1877,14 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   onSlide(document.getElementById('tgt'));
 
+  /* 产能口径开关：两页各有一组（成本页 capSeg / 全清单页 capSeg2），任一页点了全站同步 */
+  Array.prototype.forEach.call(document.querySelectorAll('#capSeg button, #capSeg2 button'), function(b){
+    b.addEventListener('click', function(){
+      CAPU = b.getAttribute('data-cap');
+      applyCap();
+    });
+  });
+
   Array.prototype.forEach.call(document.querySelectorAll('#presets .cqp'), function(b){
     b.addEventListener('click', function(){
       var N = parseInt(b.dataset.n, 10);
@@ -1926,7 +1998,7 @@ document.addEventListener('DOMContentLoaded', function(){
     b.addEventListener('click', function(){ CP[b.dataset.p] = b.classList.toggle('on'); cycSync(); renderChart(); renderPareto(); linkHover(); });
   });
 
-  if(document.getElementById('viewSeg')){ applyView('all'); applyPeriod('y'); }
+  if(document.getElementById('viewSeg')){ applyView('all'); applyPeriod(DEFK); }
   /* 排名行 ↔ 散点 双向联动：悬停任一侧，另一侧对应项高亮。
      这是这张图真正的「交互」—— 之前只有 tooltip，用户感觉点了没反应。 */
   function linkHover(){
@@ -2037,12 +2109,13 @@ main_rows = MAIN_TB["y"]      # 兼容旧引用（自检里用到）
 # 三张周期表整块预渲染，切周期只切可见性（不做单元格级 JS 重写）
 PT_TABLES = ""
 for _k, _lbl, _mo, _f in PERIODS:
-    _on = " on" if _k == "y" else ""
+    _on = " on" if _k == _DEFAULT_K else ""
     _tid = "main" if _k == "y" else "main-" + _k
     PT_TABLES += (
         f'<div class="pt{_on}" data-pt="{_k}">'
         + table([("#", "v"), ("平台", None), (T("jifenDang", "档位"), None), (PT_HEAD[_k][0], "p"),
-                 (T("yueChanNeng") + "<br><span class=hm>该周期积分 ÷ 单条消耗</span>", "v"),
+                 ('<span data-caph="1">' + T("yueChanNeng") + '</span><br>'
+                 '<span class=hm>该周期积分 ÷ 单条消耗</span>', "v"),
                  (T("danTiaoChengBen") + "<br><span class=hm>用满产能 / 该产量</span>", "v"),
                  (T("yuanMiao"), None)],
                 MAIN_TB[_k], "tw scroll-y tw-main", _tid)
@@ -2274,7 +2347,7 @@ for _k, _lbl, _mo, _f in PERIODS:
     _cells = "".join(
         f'<div class="kb{" hi" if _hi else ""}"><s>{_t}</s><b>{_v}</b><em>{_sub}</em></div>'
         for _t, _v, _sub, _hi in KPI_SETS[_k]) + EXTRA_KPI
-    KPI_BARS += f'<div class="kbar{" on" if _k == "y" else ""}" data-kbar="{_k}">{_cells}</div>\n'
+    KPI_BARS += f'<div class="kbar{" on" if _k == _DEFAULT_K else ""}" data-kbar="{_k}">{_cells}</div>\n'
 
 # ═══════════ 反查结果的服务端初始态（N=30）═══════════
 _init_s = best_single(30)
@@ -2370,7 +2443,7 @@ GUIDE = """
 
 def page(title, desc, nav_html, body, cost_js=False):
     js = JS.replace("__COST__", COST_JS) if cost_js else JS.replace("__COST__", "")
-    js = js.replace("__GLOS__", GLOS_JSON)
+    js = js.replace("__GLOS__", GLOS_JSON).replace("__DEFK__", _DEFAULT_K)
     if cost_js:
         js = js.replace("__PLANS__", json.dumps(
             [{"plat": r["plat"], "tier": r["tier"], "label": r["label"], "color": r["color"],
@@ -2569,9 +2642,19 @@ cycles_body = f"""
   <div class="sgroup" id="sgPeriod">
     <div class="sgt">{T("chengnuoQi", "会员周期")}<span class="sgchip" id="cycChip">44 档</span></div>
     <div class="segv segk" id="cycSeg" role="tablist" aria-label="会员周期">
-      <button type="button" class="on" data-k="y" role="tab">年付<s>锁 12 个月</s></button>
+      <button type="button" class="on" data-k="m" role="tab">月付<s>随时可停</s></button>
       <button type="button" data-k="q" role="tab">季付<s>锁 3 个月</s></button>
-      <button type="button" data-k="m" role="tab">月付<s>随时可停</s></button>
+      <button type="button" data-k="y" role="tab">年付<s>锁 12 个月</s></button>
+    </div>
+  </div>
+  <div class="sgroup">
+    <div class="sgt">产能口径<span class="sgchip">每月</span></div>
+    <div class="segv" id="capSeg2" role="tablist" aria-label="产能口径">
+      <button type="button" class="on" data-cap="m" role="tab">每月<s>91 条/月</s></button>
+      <button type="button" data-cap="p" role="tab">整个周期<s>季＝3 个月，年＝12 个月</s></button>
+    </div>
+    <div class="srow" style="margin-top:8px">
+      <span style="font-size:11px;line-height:1.6;color:#7A8088">只影响「能做多少」的显示单位，不改变排名与结论。</span>
     </div>
   </div>
   <div class="sgroup" id="sgOrder">
@@ -2723,9 +2806,19 @@ cost_body = f"""
   <div class="sgroup">
     <div class="sgt">{T("chengnuoQi", "会员周期")}<span class="sgchip" id="segchipA">{len(ROWS)} 档</span></div>
     <div class="segv segk" id="segA" role="tablist" aria-label="会员周期">
-      <button type="button" class="on" data-k="y" role="tab">年付<s>锁 12 个月</s></button>
+      <button type="button" class="on" data-k="m" role="tab">月付<s>随时可停</s></button>
       <button type="button" data-k="q" role="tab">季付<s>锁 3 个月</s></button>
-      <button type="button" data-k="m" role="tab">月付<s>随时可停</s></button>
+      <button type="button" data-k="y" role="tab">年付<s>锁 12 个月</s></button>
+    </div>
+  </div>
+  <div class="sgroup">
+    <div class="sgt">产能口径<span class="sgchip">每月</span></div>
+    <div class="segv" id="capSeg" role="tablist" aria-label="产能口径">
+      <button type="button" class="on" data-cap="m" role="tab">每月<s>91 条/月</s></button>
+      <button type="button" data-cap="p" role="tab">整个周期<s>季＝3 个月，年＝12 个月</s></button>
+    </div>
+    <div class="srow" style="margin-top:8px">
+      <span style="font-size:11px;line-height:1.6;color:#7A8088">只影响「能做多少」的显示单位，不改变排名与结论。</span>
     </div>
   </div>
   <div class="sgroup">

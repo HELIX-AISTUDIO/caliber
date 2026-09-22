@@ -71,10 +71,12 @@ async function run(browser) {
       vw: document.documentElement.clientWidth,
       recRows: document.querySelectorAll('#rec tr').length,
     }));
-    check('默认周期＝年付且按钮高亮同步', d.period === 'y' && d.segOn.join() === 'y');
+    // 默认周期＝PERIODS 顺序第一项（现为月付）—— 不再写死某个周期名
+  /* 默认周期＝PERIODS 第一项，现为月付。改顺序时这里跟着改，别写死成某个周期名。 */
+  check('默认周期＝顺序第一项且按钮高亮同步', d.period === 'm' && d.segOn.join() === 'm');
     check('默认视图＝全档位对比', d.viewOn.join() === 'all' && d.panel === 'all');
-    check('KPI 条与周期一致', d.kbar === 'y');
-    check(`年付表 ${ROWS_EXP} 行`, d.rows === Number(ROWS_EXP), `${d.rows} 行`);
+    check('KPI 条与当前周期一致', d.kbar === d.period, `${d.kbar} vs ${d.period}`);
+    check(`当前周期表 ${ROWS_EXP} 行`, d.rows === Number(ROWS_EXP), `${d.rows} 行`);
     check('计算器有结果行', d.recRows > 0);
     check('桌面无横向溢出', d.scrollW === d.vw, `(${d.scrollW}/${d.vw})`);
     check('桌面不显示顶部 tab / 汉堡，横向菜单可见',
@@ -568,7 +570,9 @@ async function run(browser) {
     check('独立结论条已移除', cc.conc === 0);
     check('KPI 含「月付最优」且值正确', cc.all.some(x => x.indexOf('月付最优') >= 0 && x.indexOf('24.56') >= 0));
     check('KPI 含「季付值得吗」并写明依据', cc.all.some(x => x.indexOf('季付值得吗') >= 0 && x.indexOf('从未赢过') >= 0));
-    check('原「单条成本最优」卡片保留（未丢信息）', cc.all.some(x => x.indexOf('单条成本最优') >= 0 && x.indexOf('19.30') >= 0));
+    // 不绑具体金额 —— 默认周期已改为月付，最优值随之不同（月付 ¥24.56 / 年付 ¥19.30）
+    check('原「单条成本最优」卡片保留（未丢信息）',
+      cc.all.some(x => x.indexOf('单条成本最优') >= 0 && /¥[\d,.]+/.test(x)), cc.all[0]);
     check('KPI 卡说明文字均未被截断', cc.overflow === 0, `截断 ${cc.overflow} 张`);
     // 结论卡同样收紧到排名卡量级（曾 106px，排名卡 65px）
     check('结论卡与排名卡同级（≤90px）', cc.h <= 90, `${cc.h}px`);
