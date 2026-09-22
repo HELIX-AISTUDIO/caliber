@@ -3472,6 +3472,16 @@ def _usable_dirs():
 def write_all():
     # ROOT 那份供本地双击打开；发布目录内容逐字节相同
     dirs = _usable_dirs()
+    # ⚠ 发布目录要【先清掉陈旧产物】再写 —— 生成器只覆盖不删除，
+    #   删掉一个页面后旧 HTML 会一直留在发布包里（今天删排行榜页时踩到：
+    #   仓库内那份删了，仓库外那份残留，打包时又冒出来）。
+    #   只清已知的页面产物（PAGES 的键名 + .html），不碰 _headers 等附加文件。
+    import glob
+    for d in dirs:
+        for f in glob.glob(os.path.join(d, "*.html")):
+            if os.path.basename(f) not in PAGES:
+                os.remove(f)
+                print("  · 清掉陈旧产物 %s" % os.path.relpath(f, os.path.dirname(ROOT)))
     for d in (ROOT,) + tuple(dirs):
         os.makedirs(d, exist_ok=True)
     for name, html in PAGES.items():
