@@ -1212,6 +1212,9 @@ function applyCap(){
     if(hint) hint.textContent = CAPU === 'p' ? '整个周期' : '每月';
   });
   syncSlider(true);        /* 口径变了 → 单位与量程跟着变，并回写当前值 */
+  /* 三周期页的产能指标名也要随口径变（此前恒为「每月可生成」）。
+     ⚠ 跟【三周期页自己的周期】CT.k，不是成本页的 PK。 */
+  CM.cap.lb = capLab(CT.k);
   renderBudget();          /* 预算反查按周期算，换周期必须重算 */
   renderRec(null, true);   /* 反查卡的产能格走它自己的渲染路径，强制重画 */
 }
@@ -1702,7 +1705,9 @@ var MLOW = {cost: true, cap: false, sec: true, pay: true};
    不用「实付」当横轴 —— 它与产能强正相关，右上角会是空的。 */
 var PAXES = {cost: ['cap', 'cost'], cap: ['cap', 'cost'],
              sec: ['cap', 'sec'], pay: ['cap', 'pay']};
-var CT = {m: 'cost', k: 'y', o: 'best'};
+/* ⚠ 默认周期跟随主站 DEFK（成本页已改为月付）——
+   两处默认值不一致会让用户在两页看到不同的初始排名。 */
+var CT = {m: 'cost', k: DEFK, o: 'best'};
 var CP = {};
 
 function renderChart(){
@@ -1855,8 +1860,12 @@ function cycSync(){
   var e1 = document.getElementById('cycPlatN'); if(e1) e1.textContent = n + '/' + tot;
   var e2 = document.getElementById('cycNow');
   if(e2) e2.textContent = CM[CT.m].lb + ' \u00b7 ' + PERLB[CT.k] + ' \u00b7 ' + (CT.o === 'best' ? '最优在前' : '最差在前');
+  CM.cap.lb = capLab(CT.k);      /* 换周期后指标名跟着变 */
   var e3 = document.getElementById('cycChip');
-  if(e3) e3.textContent = (CT.k === 'y' ? 44 : CT.k === 'q' ? 39 : 44) + ' \u6863';
+  /* ⚠ 曾写死 (k==='y'?44:k==='q'?39:44) —— 那是【加 Seko 之前】的档位数，
+     数据一更新就再也对不上（实际是年付 47 / 季付 39 / 月付 47）。
+     改为直接取各周期的真实档位数 PT_N。 */
+  if(e3) e3.textContent = (PT_N[CT.k] || 0) + ' \u6863';
   var e4 = document.getElementById('cycTitle');
   if(e4) e4.innerHTML = METAM[CT.m][0] + '<span style="color:#D1FE17"> \u00b7 </span>\u52a8\u6001\u6392\u540d';
   var e5 = document.getElementById('cycSub');
