@@ -610,6 +610,24 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
   border-radius:50%;background:#D1FE17;border:3px solid #000;cursor:pointer}input[type=number]{width:110px;background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.14);border-radius:9px;color:#fff;font-family:__MONO__;
   font-size:14px;font-weight:600;padding:7px 10px;outline:none;letter-spacing:-.02em}input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.presets{display:inline-flex;gap:5px}
+/* 按预算反查 —— 与「按产量反查」互为反向：那个问「要 N 条花多少钱」，
+   这个问「有多少钱能做多少条」。 */
+.bud{margin-top:13px;padding:13px 15px;border-radius:13px;
+  border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.028)}
+.budh{font-size:13px;font-weight:700;color:#D7DBDF}
+.budh span{font-size:11.5px;font-weight:500;color:#7A8088;margin-left:7px}
+.budrow{display:flex;align-items:center;gap:9px;margin-top:10px;flex-wrap:wrap}
+.budlbl{font-size:11.5px;color:#8A9098}
+.budn{width:6.4em}
+.budunit{font-size:11px;color:#6E747C}
+.budout{margin-top:10px;font-size:12.5px;line-height:1.8;color:#A8AEB6}
+.budout b{color:#D1FE17;font-weight:700}
+.budout .up{color:#8A9098;font-size:12px}
+.budout .no{color:#FF8A5B}
+.scopenote{margin-top:12px;font-size:11.5px;line-height:1.7;color:#767C85}
+.scopenote b{color:#A8AEB6;font-weight:600}
+.scopenote a{color:#9AA85E;text-decoration:none;border-bottom:1px dashed rgba(209,254,23,.35)}
+.scopenote a:hover{color:#D1FE17}
 /* 产量数值可直接输入 —— 预设只留三个，其余靠手输，避免按钮堆一排 */
 .nval{display:inline-flex;align-items:baseline;gap:3px}
 .nval i{font-style:normal;font-size:11px;color:#7A8088}
@@ -637,7 +655,11 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
   background:transparent;color:#9AA0A8;font-family:inherit;font-size:13px;font-weight:600;
   text-align:left;padding:9px 12px;border-radius:10px;cursor:pointer;line-height:1.25;
   transition:background .16s,color .16s,border-color .16s}.segv button s{display:block;font-size:10.5px;font-weight:400;text-decoration:none;
-  color:#6E747C;margin-top:2px}.segv button:hover{background:rgba(255,255,255,.045);color:#D7DBDF}.segv button.on{background:rgba(209,254,23,.10);border-color:rgba(209,254,23,.34);color:#D1FE17}.segv button.on s{color:#9AA85E}.segv.segk{flex-direction:row;gap:3px}.segv.segk button{flex:1;text-align:center;padding:9px 5px;font-size:12px}.side .cqr{width:100%}.srow{display:flex;align-items:baseline;gap:9px;margin-top:7px}.pf{display:flex;flex-wrap:wrap;gap:5px}.pfb{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:9px;
+  color:#6E747C;margin-top:2px}.segv button:hover{background:rgba(255,255,255,.045);color:#D7DBDF}.segv button.on{background:rgba(209,254,23,.10);border-color:rgba(209,254,23,.34);color:#D1FE17}.segv button.on s{color:#9AA85E}.segv.segk{flex-direction:row;gap:3px}.segv.segk button{flex:1;text-align:center;padding:9px 5px;font-size:12px}.side .cqr{width:100%}.srow{display:flex;align-items:baseline;gap:9px;margin-top:7px;flex-wrap:wrap}
+/* ⚠ 侧栏很窄：产量输入框 + 单位 + 时长挤一行会断开（「条/」与「月」分两行）。
+   允许换行并锁住各自不断行，时长整体落到第二行。 */
+.nval,.budunit{white-space:nowrap}
+.srow>#ndur,#ndur{white-space:nowrap}.pf{display:flex;flex-wrap:wrap;gap:5px}.pfb{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:9px;
   border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03);
   color:#8A9098;font-family:inherit;font-size:11.5px;font-weight:600;cursor:pointer;
   transition:color .16s,border-color .16s,background .16s}.pfb i{width:6px;height:6px;border-radius:50%;opacity:.4;flex:0 0 auto}.pfb.on{color:#E4E7EA;border-color:rgba(255,255,255,.24);background:rgba(255,255,255,.06)}.pfb.on i{opacity:1}.mainv{flex:1;min-width:0;display:flex;flex-direction:column;gap:18px}
@@ -1425,6 +1447,7 @@ function applyCap(){
     if(hint) hint.textContent = CAPU === 'p' ? '整个周期' : '每月';
   });
   syncSlider(true);        /* 口径变了 → 单位与量程跟着变，并回写当前值 */
+  renderBudget();          /* 预算反查按周期算，换周期必须重算 */
   renderRec(null, true);   /* 反查卡的产能格走它自己的渲染路径，强制重画 */
 }
 var CV = 'all';             /* 当前视图：all 全档位对比 / buy 我该买哪个 / period 周期对照 */
@@ -1657,6 +1680,51 @@ function comboLabel(b){
 function money(v, cur){ return (cur === 'USD' ? '$' : '\u00a5') + Math.round(v).toLocaleString(); }
 
 /* ── 主渲染 ── */
+/* ── 按预算反查 ──
+   与 renderRec（月产量 → 最省）互为反向：给定预算，找该周期内能买到的最大产能。
+   附带「再加多少钱能跳档」—— 实测预算曲线非单调（¥500 与 ¥1,000 买到同样产能），
+   跨不过门槛就白花钱，这件事用户自己看不出来。 */
+function renderBudget(){
+  var out = document.getElementById('budOut'), inp = document.getElementById('bud');
+  if(!out || !inp) return;
+  var k = PK, mo = CAPMONTHS[k], kz = {y:'年付',q:'季付',m:'月付'}[k];
+  /* ⚠ 预算反查的单位跟【周期】走，不跟产能口径走 ——
+     capUnit() 在「每月」口径下对季付/年付也返回「条/月」，会把 273 条/季
+     写成「273 条/月」，差 3 倍。预算天然是按周期算的。 */
+  var u = '条/' + CAPWORD[k];
+  var bu = document.getElementById('budUnit');
+  if(bu) bu.textContent = '（按' + kz + '计算）';
+  var b = parseInt(inp.value, 10);
+  if(isNaN(b) || b < 0) b = 0;
+
+  var priced = PLANS.filter(function(p){ return p.pc[k] != null && p.cp[k] > 0; });
+  var afford = priced.filter(function(p){ return p.pc[k] <= b; });
+  if(!afford.length){
+    var floor = priced.reduce(function(a, c){ return a.pc[k] < c.pc[k] ? a : c; });
+    out.innerHTML = '<span class="no">¥' + b.toLocaleString() + ' 买不到任何档位</span>'
+      + ' —— ' + kz + '最低要 <b>¥' + Math.round(floor.pc[k]).toLocaleString() + '</b>（'
+      + floor.plat + ' ' + floor.tier + (floor.label ? ' · ' + floor.label : '')
+      + '，' + (floor.cp[k] * mo).toFixed(0) + ' ' + u + '）';
+    return;
+  }
+  var best = afford.reduce(function(a, c){ return (c.cp[k] * mo > a.cp[k] * mo) ? c : a; });
+  var cap = best.cp[k] * mo;
+  var html = '最多能做到 <b>' + cap.toFixed(0) + ' ' + u + '</b> ｜ ¥'
+    + Math.round(best.pc[k]).toLocaleString() + ' 买 ' + best.plat + ' ' + best.tier
+    + (best.label ? ' · ' + best.label : '') + ' ｜ 折合 <b>¥' + (best.pc[k] / cap).toFixed(2) + '/条</b>';
+  var higher = priced.filter(function(p){ return p.cp[k] * mo > cap + 1e-9; })
+                     .sort(function(x, y){ return x.pc[k] - y.pc[k]; })[0];
+  if(higher){
+    html += '<br><span class="up">再加 <b>¥' + Math.round(higher.pc[k] - b).toLocaleString()
+      + '</b> 可升到 ' + (higher.cp[k] * mo).toFixed(0) + ' ' + u + '（'
+      + higher.plat + ' ' + higher.tier + (higher.label ? ' · ' + higher.label : '')
+      + '，合计 ¥' + Math.round(higher.pc[k]).toLocaleString() + '）</span>';
+  } else {
+    html += '<br><span class="up">已是该周期内产能最高的档位</span>';
+  }
+  out.innerHTML = html;
+}
+
 function renderRec(src, force){
   var N = readN(src);
   if(CQ_LAST === N && !force) return;   /* 节流：拖动时高频触发，N 未变则跳过 */
@@ -2011,6 +2079,14 @@ document.addEventListener('DOMContentLoaded', function(){
     };
     nIn.addEventListener('change', applyN);
     nIn.addEventListener('keydown', function(ev){ if(ev.key === 'Enter'){ ev.preventDefault(); applyN(); } });
+  }
+
+  /* 预算反查：输入即算 */
+  var bIn = document.getElementById('bud');
+  if(bIn){
+    bIn.addEventListener('input', renderBudget);
+    bIn.addEventListener('change', renderBudget);
+    renderBudget();
   }
 
   /* 产能口径开关：两页各有一组（成本页 capSeg / 全清单页 capSeg2），任一页点了全站同步 */
@@ -3057,6 +3133,21 @@ cost_body = f"""
       <th>方案类型</th><th>档位组合</th><th class="ctr">该周期支出</th>
       <th class="ctr">实际产能</th><th class="ctr">单条成本</th></tr></thead>
       <tbody id="rec">{_init_combo_html}</tbody></table></div>
+
+    <div class="bud" id="budBox">
+      <div class="budh">按预算反查<span>—— 我有多少钱，最多能做多少条 · 换个方向问同一个问题</span></div>
+      <div class="budrow">
+        <span class="budlbl">预算</span>
+        <span class="nval">¥<input type="number" id="bud" class="nvi budn" min="0" step="100"
+          inputmode="numeric" value="3000" aria-label="预算金额"></span>
+        <span class="budunit" id="budUnit">（按年付计算）</span>
+      </div>
+      <div class="budout" id="budOut">—</div>
+    </div>
+
+    <div class="scopenote">本站只算<b>产出量的成本性价比</b> —— 不含有效出片率、ROI、其他模型与画质。
+      <a href="glossary.html#scope">算什么 · 不算什么 ›</a></div>
+
     <details class="tiny">
       <summary>组合订阅怎么算的<span class="chev">›</span></summary>
       <div class="dbody">
@@ -3399,12 +3490,20 @@ def selfcheck():
     #   ③ 注释与 URL 里也含「.xxx」—— 须剔除注释，且点号前不能是字母（否则 www.w3.org 会抽出 .w3）
     css_block = re.sub(r"/\*.*?\*/", "", css_block, flags=re.S)
     _all = "\n".join(PAGES.values())
+    _all_src = _all                       # 保留含 <script> 的版本，供运行时类扫描
     _all = re.sub(r"<style>.*?</style>", "", _all, flags=re.S)
     _all = re.sub(r"<script>.*?</script>", "", _all, flags=re.S)
     _used_cls = set()
     for _m in re.findall(r'class="([^"]*)"', _all):
         _used_cls.update(_m.split())
-    # 运行时由 JS 或浏览器加上的类，静态 HTML 里必然找不到
+    # ⚠ 运行时注入的类也纳入「已用」集合。
+    #   JS 里用 innerHTML 拼的 class 在静态 HTML 中必然搜不到，
+    #   而这类写法会越来越多 —— 若只靠白名单，每新增一处就要手工登记，
+    #   迟早漏掉，检查也就废了。改为直接扫 JS 字符串里的 class="…" 字面量。
+    for _jsm in re.findall(r'class="([^"]*)"', "\n".join(
+            re.findall(r"<script>(.*?)</script>", _all_src, flags=re.S))):
+        _used_cls.update(_jsm.split())
+    # 剩余白名单：只保留纯动态拼接、JS 里查不到字面量的类
     _RUNTIME_CLS = {"js", "in", "on", "top", "active", "pp", "pline", "combo-note", "tmx", "tip", "lg-mono", "ibody"}
     for cls in sorted(set(re.findall(r"(?<![\w./-])\.([A-Za-z][\w-]*)", css_block))):
         if cls not in _used_cls and cls not in _RUNTIME_CLS:
