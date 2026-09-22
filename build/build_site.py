@@ -58,6 +58,10 @@ def T(key, label=None):
 BRAND, BRAND_CN = SITE["brand"], SITE["brandCn"]
 STUDIO, OWNER, YEAR = SITE["studio"], SITE["owner"], SITE["year"]
 NAV = SITE["nav"]
+# 站点公开地址 —— 只用于 og:url / og:image 这类【同源绝对地址】。
+# ⚠ og 规范要求绝对 URL（部分抓取器不解析相对路径），但这**不算外部依赖**：
+#   它指向本站自己的资源，不产生任何跨域请求。自检里另有断言锁死这一点。
+SITE_URL = SITE["url"].rstrip("/")
 COPY = f"© {YEAR} {OWNER}. 保留所有权利 / All Rights Reserved."
 TERMS = ("本页内容（含全部价格数据、归一化模型、边际成本与达标阶梯算法、结论文字及版面设计）"
          "为作者原创成果。未经书面许可，禁止：复制或转载全文/部分内容、二次发布或镜像托管、"
@@ -563,7 +567,24 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   -webkit-mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%);
   mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%)}.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
   color:#D1FE17;margin-bottom:15px;font-family:__MONO__}h1{font-family:__DISP__;font-size:clamp(31px,5.3vw,60px);font-weight:800;color:#fff;
-  letter-spacing:-.038em;line-height:1.07}h1 em{font-style:normal;color:#D1FE17}.hero .lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
+  letter-spacing:-.038em;line-height:1.07}h1 em{font-style:normal;color:#D1FE17}
+/* ⚠ 用 .lead 而不是 .hero .lead：说明文字现在住在 .heromore 里（手机端要排到滑块之后），
+   写成 .hero .lead 会失配，max-width:720px 静默丢失，段落拉成 1232px 的长行。
+   .lead 全站只有首页一处，直接按类选中即可。 */
+.lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+/* 首页首屏顺序 —— .homeopen 用 flex order 控制「标题 / 反查滑块 / 说明文字」的先后。
+   源序写成 hero → wrap(#budget) → heromore，桌面端 order 复原成
+   hero → heromore → wrap（与改造前一致，桌面观感零变化）。
+   ⚠ 这里必须是 order 而不是改 DOM 顺序：桌面端要「标题带说明+按钮」成组，
+   手机端要「标题之后立刻是滑块」。同一份 DOM 靠 order 分叉，避免维护两份首页。
+   ⚠ 子元素必须显式 width:100% —— flex 规范里「交叉轴 margin 为 auto」的项
+   【不会被 stretch】，而 .hero/.wrap 都带 margin:0 auto 做居中。
+   不写 width:100% 的话它们会收缩成内容宽度并居中：标题和预算框都变窄，桌面端明显回退。
+   （这个坑量 top/height 抓不到，只有量宽度或看截图才发现。） */
+.homeopen{display:flex;flex-direction:column}
+.homeopen>.hero{order:1;width:100%}.homeopen>.heromore{order:2;width:100%}
+.homeopen>.wrap{order:3;width:100%}
+.heromore{max-width:1280px;margin:0 auto;padding:0 24px}.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
   text-decoration:none;white-space:nowrap;
   transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s}.btn-white{background:#fff;color:#0B0B0B}.btn-white:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,255,255,.2)}.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}.btn-ghost:hover{border-color:rgba(255,255,255,.45);transform:translateY(-2px)}h2{font-family:__DISP__;font-size:20px;font-weight:750;color:#fff;letter-spacing:-.025em;line-height:1.3}h2 .ey{display:inline-block;font-family:__MONO__;font-size:12px;font-weight:600;color:#D1FE17;
   margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:__DISP__;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.note, .entry, .legal, details{
@@ -602,9 +623,14 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
 .tw.scroll-y{max-height:440px;overflow-y:auto}.tw.tw-main{max-height:min(72vh,640px)}.tw.scroll-y::-webkit-scrollbar{width:10px;height:10px}.tw.scroll-y::-webkit-scrollbar-track{background:rgba(255,255,255,.03);border-radius:6px}.tw.scroll-y::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:6px;
   border:2px solid transparent;background-clip:content-box}.tw.scroll-y::-webkit-scrollbar-thumb:hover{background:rgba(209,254,23,.45);
   background-clip:content-box;border:2px solid transparent}.tw.scroll-y{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}.tw.scroll-y thead th{position:sticky;top:0;z-index:2;
-  background:linear-gradient(180deg,rgba(22,27,24,.98),rgba(16,20,18,.96))}input[type=range]{-webkit-appearance:none;appearance:none;width:min(320px,62vw);height:4px;
-  border-radius:999px;outline:none;background:rgba(255,255,255,.12);cursor:pointer}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;
-  border-radius:50%;background:#D1FE17;border:3px solid #000;cursor:pointer}input[type=number]{width:110px;background:rgba(255,255,255,.06);
+  background:linear-gradient(180deg,rgba(22,27,24,.98),rgba(16,20,18,.96))}
+/* ⚠ 这里原有 input[type=range]{…} 与 input[type=range]::-webkit-slider-thumb{…} 两套规则，
+   与 .cqr 完全重复。而属性选择器 input[type=range] 特异性是 (0,1,1)，
+   高于类选择器 .cqr 的 (0,1,0) —— 于是 .cqr 里的 width/height/background/拇指尺寸
+   被【静默压制】，改了没有任何反应（调手机端滑块时才暴露：改完 height 与 background，
+   量出来还是旧值）。滑块现已统一到 .cqr 一套（全站 2 个 range 输入框都带这个类），
+   原来的 width:min(320px,62vw) 已并入 .cqr。新增/调整滑块请只改 .cqr。 */
+input[type=number]{width:110px;background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.14);border-radius:9px;color:#fff;font-family:__MONO__;
   font-size:14px;font-weight:600;padding:7px 10px;outline:none;letter-spacing:-.02em}input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.presets{display:inline-flex;gap:5px}
 /* 按预算反查 —— 与「按产量反查」互为反向：那个问「要 N 条花多少钱」，
@@ -628,7 +654,7 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
 .budseg button{padding:7px 13px;font-size:12px}
 .budr{width:100%;margin-top:13px;display:block}
 .budbig{margin-top:15px;font-size:15px;line-height:1.85;color:#D7DBDF}
-.budbig b{font-size:19px;color:#D1FE17;font-weight:800;font-family:__MONO__}
+.budbig b{font-size:19px;color:#D1FE17;font-weight:800;font-family:__MONO__;white-space:nowrap}
 .budbig .up{font-size:12.5px;color:#8A9098}
 .budbig .up b{font-size:14px;font-family:inherit}
 .budtip{margin-top:11px;font-size:11.5px;line-height:1.7;color:#767C85}
@@ -644,11 +670,10 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
 @media (max-width:1020px){
   .cqp{min-height:30px;min-width:40px;padding:6px 11px}
   .foot a,.scopenote a,.budtip a{display:inline-block;padding:6px 1px;margin:-6px 0}
-  /* 滑块：不改盒高（基础规则 height:4px 在我之后声明，同权重会被它盖掉；
-     要改得连轨道伪元素一起重写，风险大于收益）。改为放大拇指 ——
-     4px 轨道 + 22px 拇指，抓取面积翻倍，且不动轨道外观。 */
-  .cqr::-webkit-slider-thumb{width:22px;height:22px}
-  .cqr::-moz-range-thumb{width:22px;height:22px}
+  /* 滑块触控目标已改：不再「只放大拇指」，而是把盒子撑到 32px
+     （轨道视觉仍是 4px，靠 background-clip:content-box 保持细线）。
+     ⚠ 拇指的放大规则必须写在基础 .cqr 规则【之后】才生效 —— 本块位于基础规则之前，
+     放这里等于死代码（曾放过一条 22px，白写）。现统一挪到 ≤820px 块。 */
 }
 .sgroup.hide{display:none}
 .pjh span{font-size:10.5px;font-weight:500;color:#7A8088;margin-left:6px}
@@ -674,10 +699,15 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
   font:inherit;font-size:13px;font-weight:700;padding:2px 6px;
   font-variant-numeric:tabular-nums;-moz-appearance:textfield}
 .nvi::-webkit-outer-spin-button,.nvi::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-.nvi:focus{outline:none;border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.cqr{-webkit-appearance:none;appearance:none;width:190px;height:4px;border-radius:999px;
-  outline:none;background:rgba(255,255,255,.12);cursor:pointer}.cqr::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+.nvi:focus{outline:none;border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.cqr{-webkit-appearance:none;appearance:none;width:min(320px,62vw);height:32px;padding:14px 0;border-radius:999px;
+  /* ⚠ 原先是 height:4px + 12% 白。深色底上那条轨道几乎看不见、也几乎拖不到：
+     元素盒只有 4px，手指能命中的只有那 4px，而拇指却有 28px 悬在上面 ——
+     看着是个按钮，实际是个针尖。改成：盒子撑到 32px（合格触控目标），
+     背景用 background-clip:content-box 只画中间那 4px 内容盒（视觉仍是细线），
+     轨道提到 22% 白让它在黑底上真的看得见。background-clip 必须写在 background 之后。 */
+  outline:none;background:rgba(255,255,255,.22);background-clip:content-box;cursor:pointer}.cqr::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;border-radius:50%;
   background:#D1FE17;border:3px solid #000;cursor:pointer;
-  transition:transform .2s cubic-bezier(.22,1,.36,1)}.cqr::-webkit-slider-thumb:hover{transform:scale(1.12)}.cqr::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#D1FE17;
+  transition:transform .2s cubic-bezier(.22,1,.36,1)}.cqr::-webkit-slider-thumb:hover{transform:scale(1.12)}.cqr::-moz-range-thumb{width:19px;height:19px;border-radius:50%;background:#D1FE17;
   border:3px solid #000;cursor:pointer}.cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
   font-family:__MONO__;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;
   cursor:pointer;transition:color .2s,border-color .2s,background .2s}.cqp:hover{color:#fff;border-color:rgba(255,255,255,.36)}.cqp.on{color:#0B0B0B;background:#D1FE17;border-color:#D1FE17;font-weight:700}/* ══ 应用式布局：左栏选项 + 右主区（参照 arena.ai 的结构）══
@@ -936,7 +966,20 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
      该口径「是本次对比成立的唯一前提」—— 它不是补充信息，是结论的一部分。
      改为换行独占一行，始终可见；不做引导/弹窗（那是把关键前提延迟交付）。 */
   .nav .spec{margin-left:0;flex:1 1 100%;order:9;font-size:11px;line-height:1.5;
-    padding-top:7px;margin-top:2px;border-top:1px solid rgba(255,255,255,.08)}.hero{padding:36px 15px 4px}.wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}.entry{padding:20px}.note, .legal, table, details, .entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g2{grid-template-columns:1fr 1fr}
+    padding-top:7px;margin-top:2px;border-top:1px solid rgba(255,255,255,.08)}
+  /* ── 手机端首页首屏：滑块优先 ──
+     实测（390×844）：原布局 hero 一口气吃掉 334px（40% 屏高），滑块被推到 y=686，
+     用户点进来先读到一屏方法论说明，才看到唯一能互动的东西。
+     改法：标题块只留 eyebrow + h1（padding 36→18），说明文字与按钮用 order 移到最后，
+     #budget 提到标题正下方。实测滑块 686 → 约 430，整块反查含结果都在首屏内。 */
+  .hero{padding:18px 15px 0}.homeopen>.wrap{order:2}
+  .homeopen>.heromore{order:3;margin-top:32px}.heromore{padding:0 15px}
+  .wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}
+  /* 滑块拇指放大到 24px（+3px 黑边 = 30px 触控目标）。
+     ⚠ 必须落在这里：本块在基础 .cqr 规则之后，同权重靠顺序决胜；
+       放到前面的媒体查询里会被基础规则盖掉，等于没写。 */
+  .cqr::-webkit-slider-thumb{width:24px;height:24px}
+  .cqr::-moz-range-thumb{width:24px;height:24px}.entry{padding:20px}.note, .legal, table, details, .entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g2{grid-template-columns:1fr 1fr}
   /* ── KPI：竖排五张卡会吃掉 1.5 屏，用户滚到反查与表格之前就以为「页面到头了」。
      改成横向滑动的一行，高度固定，下方内容自然进入首屏。 */
   .grid.g5{display:flex;overflow-x:auto;overscroll-behavior-x:auto;gap:10px;
@@ -998,7 +1041,7 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   .tw-rec tbody td:nth-child(5){grid-area:2/3;text-align:right!important;font-size:10.5px;
     color:#7A8088;white-space:nowrap}
   .tw-rec tbody td:nth-child(5)::before{content:"单条 ";color:#5A6069;display:inline}
-  .tw-rec tbody td .combo-note{display:inline;margin-left:6px;font-size:10px;color:#6E747C}input[type=range]{width:100%}/* ── 主表改卡片形态（竖屏）──────────────────────────────────
+  .tw-rec tbody td .combo-note{display:inline;margin-left:6px;font-size:10px;color:#6E747C}.cqr{width:100%}/* ── 主表改卡片形态（竖屏）──────────────────────────────────
      44 行 x 7 列在 390px 宽下要横向拖很远才能读完一行，这是数据密度决定的，
      压缩列宽解决不了。改为每档一张竖排卡片：首行「名次 平台 档位」，
      下面四行「标签 — 数值」，上下滑即可。 */
@@ -1768,10 +1811,16 @@ function applyMo(){
    而主力预算区间 ¥500–3,000 只占 6% 行程（约 24px），根本拖不准。
    对数下同一区间占到约 30%，且高价段仍然够得着。 */
 var BUD_MIN = 300, BUD_MAX = 50000;
-function budFromSlider(v){ return Math.max(BUD_MIN, Math.round(BUD_MIN * Math.pow(BUD_MAX / BUD_MIN, v / 1000) / 100) * 100); }
+/* 滑块最左一格 = ¥0（彩蛋档），其余 1..1000 走对数映射到 ¥300–¥50,000。
+   为什么让 0 独占一格：对数映射里 log(0) 无定义，而原实现把滑块下界钳到 ¥300 ——
+   那样「0 元」只能用键盘敲出来，这个彩蛋基本没人会发现。 */
+function budFromSlider(v){ v = +v; if(!(v > 0)) return 0;
+  return Math.max(BUD_MIN, Math.round(BUD_MIN * Math.pow(BUD_MAX / BUD_MIN, v / 1000) / 100) * 100); }
 function sliderFromBud(b){
-  b = Math.min(BUD_MAX, Math.max(BUD_MIN, b || BUD_MIN));
-  return Math.round(1000 * Math.log(b / BUD_MIN) / Math.log(BUD_MAX / BUD_MIN));
+  /* 返回 0 只代表「¥0 那一格」；真实预算一律落在 1..1000，否则会跟彩蛋档撞位 */
+  b = +b; if(!(b > 0)) return 0;
+  b = Math.min(BUD_MAX, Math.max(BUD_MIN, b));
+  return Math.max(1, Math.round(1000 * Math.log(b / BUD_MIN) / Math.log(BUD_MAX / BUD_MIN)));
 }
 
 /* 首页的预算反查有自己的周期状态（首页没有全局周期切换）。
@@ -1790,6 +1839,16 @@ function budgetCalc(inp, out, unitEl, k){
   var b = parseInt(inp.value, 10);
   if(isNaN(b) || b < 0) b = 0;
 
+  /* ── ¥0 彩蛋档 ──
+     全站唯一一个不按公式说话的出口。0 元档在任何平台都买不到东西，算下去只会
+     得到「买不到任何档位」这句正确的废话；改成一句自嘲，比第十次强调口径更容易被记住。
+     后面那句不是凑数 —— 免费试用额度确实不在这张表里，那才是 0 预算的真实解。 */
+  if(b === 0){
+    out.innerHTML = '最多能做到 <b>0 条</b>　——　能做个蛋。'
+      + '<br><span class="up">这是本站唯一不需要计算的一档：¥0 买不到任何平台的任何积分档。'
+      + '顺带一提，各家都有免费试用额度，那个不花钱 —— 只是也不在这张表里。</span>';
+    return;
+  }
 
   var priced = PLANS.filter(function(p){ return p.pc[k] != null && p.cp[k] > 0; });
   var afford = priced.filter(function(p){ return p.pc[k] <= b; });
@@ -1808,9 +1867,16 @@ function budgetCalc(inp, out, unitEl, k){
   var _dur = _sec >= 3600 ? (_sec / 3600).toFixed(1) + ' 小时'
                           : Math.round(_sec / 60) + ' 分钟';
   var html = '最多能做到 <b>' + cap.toFixed(0) + ' ' + u + '</b>'
-    + ' ｜ 合计 <b>' + _dur + '</b> ｜ ¥'
+    + ' ｜ 合计 <b>' + _dur + '</b>'
+    /* ⚠ 结果固定拆成三段：能产多少 / 买什么 / 折合多少。
+       原因是窄屏（390px）下这一行放不下，浏览器会在「折合」后面断，
+       留下「¥2,235 买 小云雀 超级会员 ｜ 折合」+「¥24.56/条」这种断法 ——
+       行尾挂一个孤零零的「｜」，金额单独掉下去。显式换行后宽窄屏都是干净的。
+       原本想写成不换行绑定，但那样只把孤立的「｜」挪到行首，更难看。 */
+    + '<br>¥'
     + Math.round(best.pc[k]).toLocaleString() + ' 买 ' + best.plat + ' ' + best.tier
-    + (best.label ? ' · ' + best.label : '') + ' ｜ 折合 <b>¥' + (best.pc[k] / cap).toFixed(2) + '/条</b>';
+    + (best.label ? ' · ' + best.label : '')
+    + '<br>折合 <b>¥' + (best.pc[k] / cap).toFixed(2) + '/条</b>';
   var higher = priced.filter(function(p){ return p.cp[k] * mo > cap + 1e-9; })
                      .sort(function(x, y){ return x.pc[k] - y.pc[k]; })[0];
   if(higher){
@@ -1830,7 +1896,8 @@ function renderBudget(){
      两者都写同一个 renderBudget，故不会互相触发成环。 */
   if(inp && rng){
     var v = parseInt(inp.value, 10);
-    if(!isNaN(v) && v > 0) rng.value = sliderFromBud(v);
+    /* v >= 0：0 也要同步滑块（¥0 是滑块最左一格），否则手打 0 时滑块停在旧位置 */
+    if(!isNaN(v) && v >= 0) rng.value = sliderFromBud(v);
   }
   budgetCalc(document.getElementById('hbud'), document.getElementById('hbudOut'), null, HPK);
   var seg = document.getElementById('hbudSeg');
@@ -2848,7 +2915,7 @@ GUIDE = """
 """
 
 
-def page(title, desc, nav_html, body, cost_js=False):
+def page(title, desc, nav_html, body, cost_js=False, canon=None):
     js = JS.replace("__COST__", COST_JS) if cost_js else JS.replace("__COST__", "")
     js = js.replace("__GLOS__", GLOS_JSON).replace("__DEFK__", _DEFAULT_K).replace("__SECCLIP__", str(SEC_PER_CLIP))
     if cost_js:
@@ -2868,6 +2935,29 @@ def page(title, desc, nav_html, body, cost_js=False):
                          round(r["byP"][k]["payCNY"], 2)] if k in r["byP"] else None)
                     for k in "yqm"}}
              for r in ROWS], ensure_ascii=False))
+    # ── 分享卡片 ──
+    # 站点的定位是「定向分享文档」（全站 noindex + robots Disallow），
+    # 所以**链接被贴出去是唯一入口**，缩略图直接决定点开率。
+    # og:image 用【同源绝对地址】：og 规范要求绝对 URL（微信等抓取器不解析相对路径），
+    # 但 /og.png 仍是本站自己的资源，不产生跨域请求 —— 与「零外部请求」原则不冲突。
+    # canon = 该页的**干净 URL**（CF Pages 会把 /cost.html 308 跳到 /cost，
+    # canonical 必须取后者）；为 None 的页面（404）不发卡片：不给错误页做分享预览。
+    og_extra = ""
+    if canon is not None:
+        og_extra = f"""<meta property="og:type" content="website">
+<meta property="og:site_name" content="{BRAND}">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:url" content="{SITE_URL}/{canon}">
+<meta property="og:image" content="{SITE_URL}/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{BRAND} — {SITE['tagline']}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{BRAND} · {title}">
+<meta name="twitter:description" content="{desc}">
+<meta name="twitter:image" content="{SITE_URL}/og.png">
+"""
     return f"""<!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -2877,7 +2967,7 @@ def page(title, desc, nav_html, body, cost_js=False):
 <meta name="description" content="{desc}">
 <meta property="og:title" content="{BRAND} · {title}">
 <meta property="og:description" content="{desc}">
-<title>{BRAND} · {title}</title>
+{og_extra}<title>{BRAND} · {title}</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23D1FE17'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23D1FE17'/%3E%3C/svg%3E">
 <!-- ============================================================
@@ -3383,18 +3473,14 @@ cost_body = f"""
 
 # ── 首页 ──────────────────────────────────────────────────────────
 home_body = f"""
+<div class="homeopen">
 <div class="hero">
   <div class="eyebrow">{BRAND} · Unified Benchmark</div>
   <h1>把 AI 视频生成平台<br>放在<em>同一把尺子</em>上</h1>
-  <p class="lead">各平台用自己的积分币计价，币值互不相同。{BRAND} 先把它们压平到同一口径，再折算成可比较的现金成本与能力得分 —— 不采信宣传数字，只给可复核的结果。</p>
-  <div class="btns">
-    <a class="btn btn-white" href="#cost">进入平台成本对比</a>
-    <a class="btn btn-ghost" href="cycles.html">三周期全清单 · 动态排名</a>
-  </div>
 </div>
 
 <div class="wrap">
-<section id="budget" class="reveal" style="margin-top:40px">
+<section id="budget" class="reveal" style="margin-top:36px">
   <div class="sechead">
     <h2><span class="ey">先用一下</span>我有多少钱，最多能做多少条？</h2>
     <div class="sd">本站最常见的问法其实是反过来的 —— 不是「要 N 条花多少钱」，
@@ -3419,7 +3505,20 @@ home_body = f"""
       <a href="cost.html">平台成本对比 ›</a></div>
   </div>
 </section>
+</div>
 
+<!-- 说明文字与按钮：桌面端 order:2 紧跟标题成组，手机端 order:3 落到反查块之后。
+     拆出来的理由见上方 .homeopen 的注释 —— 手机端首屏必须留给能互动的东西。 -->
+<div class="heromore">
+  <p class="lead">各平台用自己的积分币计价，币值互不相同。{BRAND} 先把它们压平到同一口径，再折算成可比较的现金成本与能力得分 —— 不采信宣传数字，只给可复核的结果。</p>
+  <div class="btns">
+    <a class="btn btn-white" href="#cost">进入平台成本对比</a>
+    <a class="btn btn-ghost" href="cycles.html">三周期全清单 · 动态排名</a>
+  </div>
+</div>
+</div>
+
+<div class="wrap">
 <section id="cost" class="reveal" style="margin-top:44px">
   <div class="sechead">
     <h2><span class="ey">板块</span>两条对比线</h2>
@@ -3506,17 +3605,18 @@ NOTFOUND_BODY = f"""
 # ═══════════════════════════════════════════════════════════════════
 PAGES = {
     "index.html": page("首页", f"{BRAND} — {SITE['tagline']}。AI 视频生成平台的成本对比，统一口径折算，只给可复核的结果。",
-                       nav("home"), home_body, cost_js=True),
+                       nav("home"), home_body, cost_js=True, canon=""),
     "cost.html": page("平台成本对比", f"{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本，含达标阶梯、边际成本与跨平台组合最省。",
-                      nav("cost"), cost_body, cost_js=True),
+                      nav("cost"), cost_body, cost_js=True, canon="cost"),
     "cycles.html": page("三周期全清单", f"{len(ROWS)} 个可选积分档 × 年付/季付/月付三周期，按指标动态排名，附全部原始数据与计算方法。",
-                        nav("cycles"), cycles_body, cost_js=True),
+                        nav("cycles"), cycles_body, cost_js=True, canon="cycles"),
     # ⚠ Cloudflare Pages 的 SPA 回落：输出目录里【有 404.html 就用它】，
     #   没有才回落到 index.html 并返回 200。`_redirects` 那条实测没拦住，
     #   404.html 是更可靠的开关。不挂进 nav，也不参与任何导航高亮。
+    #   canon=None —— 不发分享卡片，不给错误页做分享预览。
     "404.html": page("页面不存在", "你要找的页面不存在。", nav(""), NOTFOUND_BODY),
     "glossary.html": page("术语表", f"{len(GLOSSARY['terms'])} 条口径与指标定义：口径、单条成本、承诺期、倒挂、组合订阅等。",
-                          nav("glossary"), glossary_body),
+                          nav("glossary"), glossary_body, canon="glossary"),
 }
 
 
@@ -3574,6 +3674,15 @@ def write_all():
         io.open(src, "w", encoding="utf-8").write(txt)
         for d in _usable_dirs():
             shutil.copy2(src, os.path.join(d, extra))
+    # 二进制附加文件：**不能走上面那条路** —— 那一段会按 utf-8 读文件做指纹替换，
+    # 碰到 PNG 会直接 UnicodeDecodeError。单独用 copy2 原样拷贝。
+    for extra_bin in ("og.png",):
+        src = os.path.join(ROOT, extra_bin)
+        if not os.path.exists(src):
+            print("  · 缺少 %s，跳过（跑 python build/make_og.py 生成）" % extra_bin)
+            continue
+        for d in _usable_dirs():
+            shutil.copy2(src, os.path.join(d, extra_bin))
     print("  静态文件指纹已同步：%s / %s" % (FP_WORK, FP_EDITION))
 
 
@@ -3599,6 +3708,26 @@ def selfcheck():
         _ext = re.search(r'src="https?://', html) or re.search(r'<link[^>]+href="https?://', html)
         if _ext:
             errs.append(f"{name}: 存在外部资源请求（应保持零外部依赖）")
+
+        # ── 分享卡片 ──
+        # 例外规则：og:image 允许出现绝对 URL，但**只允许指向本站自己**。
+        # 卡片是本站唯一的流量入口（全站 noindex），一旦有人把外域图片塞进来，
+        # 就等于在页面里挂了第三方请求 —— 这里把它锁死。
+        if name == "404.html":
+            if "og:image" in html:
+                errs.append("404.html: 不该有分享卡片（不给错误页做预览）")
+        else:
+            for _k in ('property="og:image"', 'name="twitter:image"'):
+                _m = re.search(_k + r'\s+content="([^"]+)"', html)
+                if not _m:
+                    errs.append(f"{name}: 缺少 {_k}（分享卡片）")
+                elif _m.group(1) != SITE_URL + "/og.png":
+                    errs.append(f"{name}: {_k} 不是本站地址 -> {_m.group(1)}")
+            if 'name="twitter:card" content="summary_large_image"' not in html:
+                errs.append(f"{name}: twitter:card 应为 summary_large_image")
+            if 'property="og:image:width" content="1200"' not in html or \
+               'property="og:image:height" content="630"' not in html:
+                errs.append(f"{name}: og:image 尺寸声明缺失（部分平台据此决定是否出大图）")
 
     cost = PAGES["cost.html"]
     # 全站并集：JS/CSS/声明类检查必须在所有页面上找 —— 内容会随重构在页面间迁移，
@@ -3749,5 +3878,6 @@ if errs:
     for e in errs:
         print("   -", e)
     raise SystemExit(1)
-print("自检通过（12 项）：div 配对 / 文档完整 / style+script 标签 / 无残留占位符 / 零外部请求 / "
-      "锚点有效 / 表头列数一致 / 三周期全清单列序 / JS 语法 / JS 引用的元素存在 / CSS 类页面存在 / 无死函数")
+print("自检通过（13 项）：div 配对 / 文档完整 / style+script 标签 / 无残留占位符 / 零外部请求 / "
+      "分享卡片 / 锚点有效 / 表头列数一致 / 三周期全清单列序 / JS 语法 / JS 引用的元素存在 / "
+      "CSS 类页面存在 / 无死函数")

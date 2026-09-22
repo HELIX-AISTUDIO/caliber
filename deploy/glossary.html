@@ -7,6 +7,19 @@
 <meta name="description" content="18 条口径与指标定义：口径、单条成本、承诺期、倒挂、组合订阅等。">
 <meta property="og:title" content="CALIBER · 术语表">
 <meta property="og:description" content="18 条口径与指标定义：口径、单条成本、承诺期、倒挂、组合订阅等。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CALIBER">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:url" content="https://seedance-cost-benchmark.pages.dev/glossary">
+<meta property="og:image" content="https://seedance-cost-benchmark.pages.dev/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="CALIBER — AI 视频生成平台 · 用同一把尺子横量">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CALIBER · 术语表">
+<meta name="twitter:description" content="18 条口径与指标定义：口径、单条成本、承诺期、倒挂、组合订阅等。">
+<meta name="twitter:image" content="https://seedance-cost-benchmark.pages.dev/og.png">
 <title>CALIBER · 术语表</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23D1FE17'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23D1FE17'/%3E%3C/svg%3E">
@@ -66,7 +79,24 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   -webkit-mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%);
   mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%)}.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
   color:#D1FE17;margin-bottom:15px;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}h1{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:clamp(31px,5.3vw,60px);font-weight:800;color:#fff;
-  letter-spacing:-.038em;line-height:1.07}h1 em{font-style:normal;color:#D1FE17}.hero .lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
+  letter-spacing:-.038em;line-height:1.07}h1 em{font-style:normal;color:#D1FE17}
+/* ⚠ 用 .lead 而不是 .hero .lead：说明文字现在住在 .heromore 里（手机端要排到滑块之后），
+   写成 .hero .lead 会失配，max-width:720px 静默丢失，段落拉成 1232px 的长行。
+   .lead 全站只有首页一处，直接按类选中即可。 */
+.lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+/* 首页首屏顺序 —— .homeopen 用 flex order 控制「标题 / 反查滑块 / 说明文字」的先后。
+   源序写成 hero → wrap(#budget) → heromore，桌面端 order 复原成
+   hero → heromore → wrap（与改造前一致，桌面观感零变化）。
+   ⚠ 这里必须是 order 而不是改 DOM 顺序：桌面端要「标题带说明+按钮」成组，
+   手机端要「标题之后立刻是滑块」。同一份 DOM 靠 order 分叉，避免维护两份首页。
+   ⚠ 子元素必须显式 width:100% —— flex 规范里「交叉轴 margin 为 auto」的项
+   【不会被 stretch】，而 .hero/.wrap 都带 margin:0 auto 做居中。
+   不写 width:100% 的话它们会收缩成内容宽度并居中：标题和预算框都变窄，桌面端明显回退。
+   （这个坑量 top/height 抓不到，只有量宽度或看截图才发现。） */
+.homeopen{display:flex;flex-direction:column}
+.homeopen>.hero{order:1;width:100%}.homeopen>.heromore{order:2;width:100%}
+.homeopen>.wrap{order:3;width:100%}
+.heromore{max-width:1280px;margin:0 auto;padding:0 24px}.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
   text-decoration:none;white-space:nowrap;
   transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s}.btn-white{background:#fff;color:#0B0B0B}.btn-white:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,255,255,.2)}.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}.btn-ghost:hover{border-color:rgba(255,255,255,.45);transform:translateY(-2px)}h2{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:20px;font-weight:750;color:#fff;letter-spacing:-.025em;line-height:1.3}h2 .ey{display:inline-block;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:600;color:#D1FE17;
   margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.note, .entry, .legal, details{
@@ -105,9 +135,14 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
 .tw.scroll-y{max-height:440px;overflow-y:auto}.tw.tw-main{max-height:min(72vh,640px)}.tw.scroll-y::-webkit-scrollbar{width:10px;height:10px}.tw.scroll-y::-webkit-scrollbar-track{background:rgba(255,255,255,.03);border-radius:6px}.tw.scroll-y::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:6px;
   border:2px solid transparent;background-clip:content-box}.tw.scroll-y::-webkit-scrollbar-thumb:hover{background:rgba(209,254,23,.45);
   background-clip:content-box;border:2px solid transparent}.tw.scroll-y{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}.tw.scroll-y thead th{position:sticky;top:0;z-index:2;
-  background:linear-gradient(180deg,rgba(22,27,24,.98),rgba(16,20,18,.96))}input[type=range]{-webkit-appearance:none;appearance:none;width:min(320px,62vw);height:4px;
-  border-radius:999px;outline:none;background:rgba(255,255,255,.12);cursor:pointer}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;
-  border-radius:50%;background:#D1FE17;border:3px solid #000;cursor:pointer}input[type=number]{width:110px;background:rgba(255,255,255,.06);
+  background:linear-gradient(180deg,rgba(22,27,24,.98),rgba(16,20,18,.96))}
+/* ⚠ 这里原有 input[type=range]{…} 与 input[type=range]::-webkit-slider-thumb{…} 两套规则，
+   与 .cqr 完全重复。而属性选择器 input[type=range] 特异性是 (0,1,1)，
+   高于类选择器 .cqr 的 (0,1,0) —— 于是 .cqr 里的 width/height/background/拇指尺寸
+   被【静默压制】，改了没有任何反应（调手机端滑块时才暴露：改完 height 与 background，
+   量出来还是旧值）。滑块现已统一到 .cqr 一套（全站 2 个 range 输入框都带这个类），
+   原来的 width:min(320px,62vw) 已并入 .cqr。新增/调整滑块请只改 .cqr。 */
+input[type=number]{width:110px;background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.14);border-radius:9px;color:#fff;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   font-size:14px;font-weight:600;padding:7px 10px;outline:none;letter-spacing:-.02em}input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.presets{display:inline-flex;gap:5px}
 /* 按预算反查 —— 与「按产量反查」互为反向：那个问「要 N 条花多少钱」，
@@ -131,7 +166,7 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
 .budseg button{padding:7px 13px;font-size:12px}
 .budr{width:100%;margin-top:13px;display:block}
 .budbig{margin-top:15px;font-size:15px;line-height:1.85;color:#D7DBDF}
-.budbig b{font-size:19px;color:#D1FE17;font-weight:800;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.budbig b{font-size:19px;color:#D1FE17;font-weight:800;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:nowrap}
 .budbig .up{font-size:12.5px;color:#8A9098}
 .budbig .up b{font-size:14px;font-family:inherit}
 .budtip{margin-top:11px;font-size:11.5px;line-height:1.7;color:#767C85}
@@ -147,11 +182,10 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
 @media (max-width:1020px){
   .cqp{min-height:30px;min-width:40px;padding:6px 11px}
   .foot a,.scopenote a,.budtip a{display:inline-block;padding:6px 1px;margin:-6px 0}
-  /* 滑块：不改盒高（基础规则 height:4px 在我之后声明，同权重会被它盖掉；
-     要改得连轨道伪元素一起重写，风险大于收益）。改为放大拇指 ——
-     4px 轨道 + 22px 拇指，抓取面积翻倍，且不动轨道外观。 */
-  .cqr::-webkit-slider-thumb{width:22px;height:22px}
-  .cqr::-moz-range-thumb{width:22px;height:22px}
+  /* 滑块触控目标已改：不再「只放大拇指」，而是把盒子撑到 32px
+     （轨道视觉仍是 4px，靠 background-clip:content-box 保持细线）。
+     ⚠ 拇指的放大规则必须写在基础 .cqr 规则【之后】才生效 —— 本块位于基础规则之前，
+     放这里等于死代码（曾放过一条 22px，白写）。现统一挪到 ≤820px 块。 */
 }
 .sgroup.hide{display:none}
 .pjh span{font-size:10.5px;font-weight:500;color:#7A8088;margin-left:6px}
@@ -177,10 +211,15 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
   font:inherit;font-size:13px;font-weight:700;padding:2px 6px;
   font-variant-numeric:tabular-nums;-moz-appearance:textfield}
 .nvi::-webkit-outer-spin-button,.nvi::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-.nvi:focus{outline:none;border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.cqr{-webkit-appearance:none;appearance:none;width:190px;height:4px;border-radius:999px;
-  outline:none;background:rgba(255,255,255,.12);cursor:pointer}.cqr::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+.nvi:focus{outline:none;border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.cqr{-webkit-appearance:none;appearance:none;width:min(320px,62vw);height:32px;padding:14px 0;border-radius:999px;
+  /* ⚠ 原先是 height:4px + 12% 白。深色底上那条轨道几乎看不见、也几乎拖不到：
+     元素盒只有 4px，手指能命中的只有那 4px，而拇指却有 28px 悬在上面 ——
+     看着是个按钮，实际是个针尖。改成：盒子撑到 32px（合格触控目标），
+     背景用 background-clip:content-box 只画中间那 4px 内容盒（视觉仍是细线），
+     轨道提到 22% 白让它在黑底上真的看得见。background-clip 必须写在 background 之后。 */
+  outline:none;background:rgba(255,255,255,.22);background-clip:content-box;cursor:pointer}.cqr::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;border-radius:50%;
   background:#D1FE17;border:3px solid #000;cursor:pointer;
-  transition:transform .2s cubic-bezier(.22,1,.36,1)}.cqr::-webkit-slider-thumb:hover{transform:scale(1.12)}.cqr::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#D1FE17;
+  transition:transform .2s cubic-bezier(.22,1,.36,1)}.cqr::-webkit-slider-thumb:hover{transform:scale(1.12)}.cqr::-moz-range-thumb{width:19px;height:19px;border-radius:50%;background:#D1FE17;
   border:3px solid #000;cursor:pointer}.cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
   font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;
   cursor:pointer;transition:color .2s,border-color .2s,background .2s}.cqp:hover{color:#fff;border-color:rgba(255,255,255,.36)}.cqp.on{color:#0B0B0B;background:#D1FE17;border-color:#D1FE17;font-weight:700}/* ══ 应用式布局：左栏选项 + 右主区（参照 arena.ai 的结构）══
@@ -439,7 +478,20 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
      该口径「是本次对比成立的唯一前提」—— 它不是补充信息，是结论的一部分。
      改为换行独占一行，始终可见；不做引导/弹窗（那是把关键前提延迟交付）。 */
   .nav .spec{margin-left:0;flex:1 1 100%;order:9;font-size:11px;line-height:1.5;
-    padding-top:7px;margin-top:2px;border-top:1px solid rgba(255,255,255,.08)}.hero{padding:36px 15px 4px}.wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}.entry{padding:20px}.note, .legal, table, details, .entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g2{grid-template-columns:1fr 1fr}
+    padding-top:7px;margin-top:2px;border-top:1px solid rgba(255,255,255,.08)}
+  /* ── 手机端首页首屏：滑块优先 ──
+     实测（390×844）：原布局 hero 一口气吃掉 334px（40% 屏高），滑块被推到 y=686，
+     用户点进来先读到一屏方法论说明，才看到唯一能互动的东西。
+     改法：标题块只留 eyebrow + h1（padding 36→18），说明文字与按钮用 order 移到最后，
+     #budget 提到标题正下方。实测滑块 686 → 约 430，整块反查含结果都在首屏内。 */
+  .hero{padding:18px 15px 0}.homeopen>.wrap{order:2}
+  .homeopen>.heromore{order:3;margin-top:32px}.heromore{padding:0 15px}
+  .wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}
+  /* 滑块拇指放大到 24px（+3px 黑边 = 30px 触控目标）。
+     ⚠ 必须落在这里：本块在基础 .cqr 规则之后，同权重靠顺序决胜；
+       放到前面的媒体查询里会被基础规则盖掉，等于没写。 */
+  .cqr::-webkit-slider-thumb{width:24px;height:24px}
+  .cqr::-moz-range-thumb{width:24px;height:24px}.entry{padding:20px}.note, .legal, table, details, .entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g2{grid-template-columns:1fr 1fr}
   /* ── KPI：竖排五张卡会吃掉 1.5 屏，用户滚到反查与表格之前就以为「页面到头了」。
      改成横向滑动的一行，高度固定，下方内容自然进入首屏。 */
   .grid.g5{display:flex;overflow-x:auto;overscroll-behavior-x:auto;gap:10px;
@@ -501,7 +553,7 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   .tw-rec tbody td:nth-child(5){grid-area:2/3;text-align:right!important;font-size:10.5px;
     color:#7A8088;white-space:nowrap}
   .tw-rec tbody td:nth-child(5)::before{content:"单条 ";color:#5A6069;display:inline}
-  .tw-rec tbody td .combo-note{display:inline;margin-left:6px;font-size:10px;color:#6E747C}input[type=range]{width:100%}/* ── 主表改卡片形态（竖屏）──────────────────────────────────
+  .tw-rec tbody td .combo-note{display:inline;margin-left:6px;font-size:10px;color:#6E747C}.cqr{width:100%}/* ── 主表改卡片形态（竖屏）──────────────────────────────────
      44 行 x 7 列在 390px 宽下要横向拖很远才能读完一行，这是数据密度决定的，
      压缩列宽解决不了。改为每档一张竖排卡片：首行「名次 平台 档位」，
      下面四行「标签 — 数值」，上下滑即可。 */

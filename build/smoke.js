@@ -28,6 +28,21 @@ const SHOTS = process.argv.includes('--shots');
 const OUT = path.join(ROOT, 'harvest');
 const ROWS_EXP = '47', QROWS_EXP = '39', PLATS_EXP = '7', LIBTV_Q_EXP = '7';
 
+/* 站点页面清单 —— 必须与 build_site.py 的 PAGES 键一一对应。
+ * ⚠ 为什么单独立出来并做预检：2026-09-22 删掉排行榜空壳页后，本文件里还留着
+ *   leaderboard-vlm.html，脚本在汉堡菜单那一段 FATAL 中止 ——
+ *   而它【后面的断言一条都没跑】，输出却只显示到出错前，看起来像是"测过了"。
+ *   静默漏测比测不过更危险，所以这里改成：清单与实际产物不符就立刻退出并喊出来。 */
+const PAGES = ['index.html', 'cost.html', 'cycles.html', 'glossary.html'];
+for (const _f of PAGES) {
+  if (!fs.existsSync(path.join(ROOT, 'site', _f))) {
+    console.error('FATAL 页面清单与实际产物不符：缺少 ' + _f +
+      '\n  → 请把 build/smoke.js 的 PAGES 与 build_site.py 的 PAGES 对齐。' +
+      '\n  （继续跑下去只会在中途崩掉，后面的断言全部静默漏测）');
+    process.exit(2);
+  }
+}
+
 /* ⚠ newPage 必须定义在模块级 —— desktop()/mobile() 是顶层函数，
    IIFE 里的 const 它们看不见（第一次改就踩了这个）。 */
 let browser = null;
@@ -345,7 +360,7 @@ async function run(browser) {
 
   /* ══════════ 汉堡菜单：四页必须都能用 ══════════ */
   log('\n── 汉堡菜单（四页）──');
-  for (const pg of ['index.html', 'cost.html', 'cycles.html', 'leaderboard-vlm.html']) {
+  for (const pg of PAGES) {
     const q = await newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     const e2 = []; q.on('pageerror', e => e2.push(e.message));
     await q.goto(URL.replace('cost.html', pg), { waitUntil: 'load' });
@@ -877,11 +892,14 @@ async function run(browser) {
 
   /* ══════════ 四页手机端导航（汉堡菜单） ══════════
      这条断言的存在理由：汉堡按钮由共享 nav() 渲染在四页，但它的监听曾经只写在
-     COST_JS 里（仅 cost/cycles 注入）。首页与排行榜页因此「有按钮、没监听」，
+     COST_JS 里（仅 cost/cycles 注入）。首页与术语表页因此「有按钮、没监听」，
      手机上点了完全不动 —— 而旧断言只查了「按钮可见」（且按钮在桌面 display:none），
-     于是测试全绿、线上照坏。教训：可见 ≠ 可用，交互必须真点一次。 */
+     于是测试全绿、线上照坏。教训：可见 ≠ 可用，交互必须真点一次。
+     ⚠ 这里必须与 build_site.py 的 PAGES 键保持同步：2026-09-22 删掉排行榜空壳页后
+       本文件仍写 leaderboard-vlm.html，导致脚本在此处 FATAL 中止 ——
+       它后面的断言其实一条都没跑，却「看起来还在测」。 */
   log('\n── 四页汉堡菜单（手机 390×844）──');
-  for (const f of ['index.html', 'cost.html', 'cycles.html', 'leaderboard-vlm.html']) {
+  for (const f of PAGES) {
     const p = await newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
     const errs = [];
     p.on('pageerror', e => errs.push('pageerror: ' + e.message));
@@ -911,6 +929,47 @@ async function run(browser) {
     check(`${f}：点空白处收起且 aria 复位`, c.open === false && c.aria === 'false');
 
     check(`${f}：无 JS 报错`, errs.length === 0, errs.slice(0, 2).join(' | '));
+    await p.close();
+  }
+
+  /* ══════════ 滑块的触控目标与样式归属 ══════════
+     为什么单独守这条：滑块曾有【两套竞争样式】——
+     `input[type=range]{…}`（特异性 0,1,1）与 `.cqr{…}`（0,1,0）。
+     前者单纯靠属性选择器胜出，把 .cqr 里的 height/background/拇指尺寸全部静默压制：
+     改 .cqr 量出来还是旧值，而页面照常渲染 —— 肉眼看不出「改没生效」。
+     表现是元素盒只有 4px 高：手指能命中的只有那 4px，拇指却悬在上面 28px。
+     现在样式已统一到 .cqr；这条断言就是防止有人再引入一条更高特异性的规则。 */
+  {
+    const p = await newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    await p.goto(URL.replace('cost.html', 'index.html'), { waitUntil: 'load' });
+    await p.waitForTimeout(350);
+    const o = await p.evaluate(() => {
+      const el = document.getElementById('hbudR');
+      if (!el) return null;
+      const cs = getComputedStyle(el);
+      // ⚠ 只看盒高不够：注入回归实测过，height:4px + padding 28px 时盒高仍是 28px
+      //   会「通过」，但内容区已被压成 0 —— 轨道整条消失。必须连内容盒一起量。
+      const H = parseFloat(cs.height);
+      const contentH = H - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      // 逐条匹配，找出所有给滑块上背景/高度的规则（样式表顺序）
+      const list = document.styleSheets[0].cssRules;
+      const src = [];
+      for (let i = 0; i < list.length; i++) {
+        const rule = list[i]; if (!rule.selectorText) continue;
+        let m = false; try { m = el.matches(rule.selectorText); } catch (e) { }
+        if (m && (rule.style.background || rule.style.height)) src.push(rule.selectorText);
+      }
+      return { h: H, contentH, bg: cs.backgroundColor, clip: cs.backgroundClip, src };
+    });
+    if (!o) {
+      check('滑块存在', false, '找不到 #hbudR');
+    } else {
+      check('滑块触控盒 ≥24px', o.h >= 24, o.h + 'px');
+      check('轨道本体仍有可见高度（触控盒不全是 padding）', o.contentH >= 3, o.contentH + 'px');
+      check('滑块样式只由 .cqr 提供（无更高特异性规则压制）',
+        o.src.length === 1 && o.src[0] === '.cqr', o.src.join(' , ') || '（无来源）');
+      check('滑块轨道用 content-box 裁切保持细线外观', o.clip === 'content-box', o.clip);
+    }
     await p.close();
   }
 }
