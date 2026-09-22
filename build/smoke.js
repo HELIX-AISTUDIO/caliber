@@ -546,7 +546,9 @@ async function run(browser) {
       const main = [...document.querySelectorAll('.tw-main.on tbody tr')].slice(0, 3).map(t => Math.round(t.getBoundingClientRect().height));
       return { rec, main, max: Math.max.apply(null, rec), same: rec.length > 0 };
     });
-    check('反查卡高度与排名卡同级（≤150px）', rh.same && rh.max <= 150,
+    // 标准收紧：曾实测手机上反查卡 123px vs 排名卡 85px（高 45%）。
+    // 排名卡的信息量并不比它少，差距纯粹来自排版（3 行 vs 2 行）。
+    check('反查卡与排名卡同级（手机 ≤100px）', rh.same && rh.max <= 100,
       `反查 ${rh.rec.join('/')}px ｜ 排名 ${rh.main.join('/')}px`);
 
     // 三周期结论已并入 KPI 条（独立区块删除）：
@@ -568,7 +570,8 @@ async function run(browser) {
     check('KPI 含「季付值得吗」并写明依据', cc.all.some(x => x.indexOf('季付值得吗') >= 0 && x.indexOf('从未赢过') >= 0));
     check('原「单条成本最优」卡片保留（未丢信息）', cc.all.some(x => x.indexOf('单条成本最优') >= 0 && x.indexOf('19.30') >= 0));
     check('KPI 卡说明文字均未被截断', cc.overflow === 0, `截断 ${cc.overflow} 张`);
-    check('合并后 KPI 条更矮（≤150px）', cc.h <= 150, `${cc.h}px`);
+    // 结论卡同样收紧到排名卡量级（曾 106px，排名卡 65px）
+    check('结论卡与排名卡同级（≤90px）', cc.h <= 90, `${cc.h}px`);
 
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，

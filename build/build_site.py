@@ -720,12 +720,12 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
   border:1px solid rgba(255,255,255,.16);background:transparent;color:#8A9098;white-space:nowrap}
 .guide .g-x:hover{background:rgba(255,255,255,.07);color:#C9CDD2}
 .kbar{display:none;gap:10px;grid-template-columns:repeat(auto-fit,minmax(148px,1fr))}
-.kbar.on{display:grid}.kb{padding:12px 10px;border-radius:13px;background:rgba(255,255,255,.035);
+.kbar.on{display:grid}.kb{padding:9px 11px;border-radius:13px;background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.085)}.kb.hi{border-color:rgba(209,254,23,.3);background:rgba(209,254,23,.055)}/* ⚠ 必须用 > 限定直接子元素 —— 否则 .kb b 会命中说明文字里嵌的 <b>，
    把它变成 display:block + 22px，说明被顶成三行、超出卡片。 */
-.kb>s{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
-  color:#6E747C;text-decoration:none}.kb>b{display:block;font-family:__MONO__;font-size:22px;font-weight:700;
-  letter-spacing:-.035em;color:#EDEFF2;margin-top:5px}.kb.hi>b{color:#D1FE17}.kb em b{font-weight:600}.kb>em{display:block;font-style:normal;font-size:10.5px;color:#8A9098;margin-top:3px;
+.kb>s{display:block;font-size:9.5px;line-height:1.25;font-weight:700;letter-spacing:.075em;text-transform:uppercase;
+  color:#6E747C;text-decoration:none}.kb>b{display:block;font-family:__MONO__;font-size:17px;line-height:1.15;font-weight:700;
+  letter-spacing:-.03em;color:#EDEFF2;margin-top:3px}.kb.hi>b{color:#D1FE17}.kb em b{font-weight:600}.kb>em{display:block;font-style:normal;font-size:10px;line-height:1.4;color:#8A9098;margin-top:2px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kb b .u{font-family:__SANS__;font-size:11px;font-weight:600;font-style:normal;
   color:#8A9098;margin-left:2px;letter-spacing:0}.vnote{font-size:11px;line-height:1.75;color:#6E747C;padding:11px 14px;border-radius:12px;
@@ -868,31 +868,52 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   .tw-rec{padding:2px 0 0}
   .tw-rec table,.tw-rec tbody{display:block;width:auto;min-width:0}
   .tw-rec thead{display:none}
-  .tw-rec tbody tr{display:grid;grid-template-columns:1fr auto;align-items:baseline;
-    gap:4px 10px;margin-bottom:8px;padding:11px 13px;border-radius:13px;
+  /* ── 反查卡：与「全部档位排名」用【完全一致】的网格（auto 1fr auto × 2 行）──
+     上一版排成 3 行，手机上 123px vs 排名卡 85px，高出 45%，看着散。
+     排名卡的信息量并不比它少，差别只在排版：2 行就够。 */
+  .tw-rec tbody tr{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;
+    gap:3px 9px;margin-bottom:8px;padding:11px 13px;border-radius:13px;
     border:1px solid rgba(255,255,255,.1);
     background:linear-gradient(158deg,rgba(255,255,255,.05),rgba(0,0,0,.28))}
   .tw-rec tbody td{border:0;padding:0;white-space:normal;background:none!important;
     display:block;text-align:left!important;min-width:0}
   .tw-rec tbody td::before{display:none}
-  /* 第 1 行：方案类型 + 周期支出（大字，右） */
-  .tw-rec tbody td:nth-child(1){grid-area:1/1;font-size:13px;font-weight:600;color:#fff}
-  .tw-rec tbody td:nth-child(1) .sub{display:inline;margin-left:7px;font-size:10.5px;
-    color:#7A8088;font-weight:400}
-  .tw-rec tbody td:nth-child(3){grid-area:1/2;text-align:right!important;white-space:nowrap;
+  /* 第 1 行：方案类型 | 档位组合 | 该周期支出（大字，右） */
+  .tw-rec tbody td:nth-child(1){grid-area:1/1;font-size:13px;font-weight:600;color:#fff;
+    white-space:nowrap}
+  .tw-rec tbody td:nth-child(1) .sub{display:inline;margin-left:6px;font-size:10px;
+    color:#6E747C;font-weight:400}
+  /* ⚠ 两个把卡片顶高的元凶：
+     ① 方案类型里有个 <br> —— 强制两行，把第 1 行从 22px 撑到 44px
+     ② 「合计产能」的 .sub 被全局 .sub{display:block} 变成块级，产能格也变两行 */
+  .tw-rec tbody td br{display:none}
+  .tw-rec tbody td .sub{display:inline;margin-left:5px}
+  /* 手机端宽度紧张：「档位组合」标签占约 48px，会让方案名被截成「● 即梦...」——
+     而方案名正是这一行最该读到的信息（买哪个）。故手机端去掉该标签，
+     名称本身自带圆点标识，不需要额外前缀。 */
+  .tw-rec tbody td:nth-child(2)::before{content:none}
+  /* 手机端让方案类型那一格可换行 —— 它原为 nowrap，把「单一账号最省 1个平台·1个账号」
+     整条撑到 169px，挤得方案名（1fr）只剩 101px，被截成「即梦 高级会员…」。
+     允许换行后该格回落到约 80px，方案名有 200px 可用。 */
+  /* ⚠ 光设 white-space:normal 没用 —— 首列是 auto 轨道，会取 max-content。
+     必须给单元格本身加上限，轨道才会跟着收（169px → 104px），
+     把腾出的宽度让给方案名（1fr）。 */
+  .tw-rec tbody td:nth-child(1){white-space:normal;max-width:118px}
+  /* 让副行独立成行 —— 否则会在大约「1 个」处断开成「1 个 / 平台」，很难看 */
+  .tw-rec tbody td:nth-child(1) .sub{display:block;margin-left:0;line-height:1.5}
+  .tw-rec tbody td:nth-child(2){grid-area:1/2;font-size:10.5px;color:#9AA0A8;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tw-rec tbody td:nth-child(2)::before{content:"档位组合 ";color:#5A6069;display:inline}
+  .tw-rec tbody td:nth-child(3){grid-area:1/3;text-align:right!important;white-space:nowrap;
     font-size:15px;color:#fff}
-  .tw-rec tbody td:nth-child(3) .strong{font-size:15px}
-  /* 第 2 行：档位组合（可换行） */
-  .tw-rec tbody td:nth-child(2){grid-area:2/1/3/3;font-size:10.5px;color:#7A8088;
-    line-height:1.7;overflow-wrap:anywhere}
-  .tw-rec tbody td:nth-child(2)::before{content:"档位组合 ";color:#5A6069}
-  /* 第 3 行：产能 + 单条 */
-  .tw-rec tbody td:nth-child(4){grid-area:3/1;font-size:10.5px;color:#7A8088;white-space:nowrap}
-  .tw-rec tbody td:nth-child(4)::before{content:"产能 ";color:#5A6069}
-  .tw-rec tbody td:nth-child(5){grid-area:3/2;text-align:right!important;font-size:10.5px;
+  /* 第 2 行：产能 | 单条成本 */
+  .tw-rec tbody td:nth-child(4){grid-area:2/1/2/3;font-size:10.5px;color:#7A8088;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tw-rec tbody td:nth-child(4)::before{content:"产能 ";color:#5A6069;display:inline}
+  .tw-rec tbody td:nth-child(5){grid-area:2/3;text-align:right!important;font-size:10.5px;
     color:#7A8088;white-space:nowrap}
-  .tw-rec tbody td:nth-child(5)::before{content:"单条 ";color:#5A6069}
-  .tw-rec tbody td .combo-note{display:inline;margin-left:7px;font-size:10.5px;color:#6E747C}input[type=range]{width:100%}/* ── 主表改卡片形态（竖屏）──────────────────────────────────
+  .tw-rec tbody td:nth-child(5)::before{content:"单条 ";color:#5A6069;display:inline}
+  .tw-rec tbody td .combo-note{display:inline;margin-left:6px;font-size:10px;color:#6E747C}input[type=range]{width:100%}/* ── 主表改卡片形态（竖屏）──────────────────────────────────
      44 行 x 7 列在 390px 宽下要横向拖很远才能读完一行，这是数据密度决定的，
      压缩列宽解决不了。改为每档一张竖排卡片：首行「名次 平台 档位」，
      下面四行「标签 — 数值」，上下滑即可。 */
@@ -1068,7 +1089,7 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
     margin:0 -15px;padding:2px 15px 6px;scrollbar-width:none}
   .kbar.on::-webkit-scrollbar{display:none}
   .kbar.on>.kb{flex:0 0 62%;min-width:0;scroll-snap-align:start}
-  .kb b{font-size:19px}
+  .kb>b{font-size:18px}
   .side{gap:14px}
 }
 """
