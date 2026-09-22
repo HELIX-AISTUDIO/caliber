@@ -1359,19 +1359,24 @@ function applyCap(){
     el.textContent = capLab(k);
   });
   /* 主表「单账号最多 X 条·不够 N」也必须同口径，否则与产能列对不上 */
-  /* ⚠ 这个属性挂在 <s> 上，不是 <td> 上 —— 写 td[data-capmax] 一个都选不到 */
+  /* ⚠ 属性挂在 <s> 上，不是 <td> 上 —— 写 td[data-capmax] 一个都选不到。
+     ⚠⚠ 必须【整句重建】而不是原地 replace：
+        早先的写法是 t.replace(/单账号最多 [\d.]+ 条/, '单账号最多 X ' + capUnit(k))，
+        正则没吃掉旧单位后缀、新值又带上单位 —— 每切一次追加一次，
+        变成「单账号最多 30.8 条月月月月 · 不够 100」，文本只增不减，
+        表格被撑宽（用户报的「无限放大放宽」）。
+        现在从 data-capmax 的原始数值 + 当前 N 重新造句，天然幂等。 */
+  var _n = readN();
   Array.prototype.forEach.call(document.querySelectorAll('.pt.on [data-capmax]'), function(el){
-    var v = parseFloat(el.getAttribute('data-capmax'));
-    var t = el.textContent;
-    if(/单账号最多/.test(t)){
-      el.textContent = t.replace(/单账号最多 [\d.]+ 条/,
-        '单账号最多 ' + (v * capMul(k)).toFixed(v * capMul(k) >= 100 ? 0 : 1) + ' ' + capUnit(k).replace('条/', '条'));
-    }
+    if(el.textContent.indexOf('单账号最多') < 0) return;   /* 「该产量」行与此口径无关 */
+    var v = parseFloat(el.getAttribute('data-capmax')) * capMul(k);
+    el.textContent = '单账号最多 ' + (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + ' ' + capUnit(k)
+                   + ' · 不够 ' + reqShow(k, _n);
   });
   /* KPI：「30 条/月 · 最省」这类标签 */
-  Array.prototype.forEach.call(document.querySelectorAll('.kbar.on .kb>s'), function(el){
-    el.textContent = el.textContent.replace(/^(\d+) 条\/月 · 最省$/,
-      function(_m, n){ return '本周期 ' + (n * capMul(k)) + ' ' + capUnit(k) + ' · 最省'; });
+  Array.prototype.forEach.call(document.querySelectorAll('.kbar [data-n]'), function(el){
+    var n = el.getAttribute('data-n');
+    el.textContent = (CAPU === 'p' ? '本周期 ' : '') + (n * capMul(k)) + ' ' + capUnit(k) + ' · 最省';
   });
   /* 侧栏开关的高亮与提示 */
   Array.prototype.forEach.call(document.querySelectorAll('#capSeg button, #capSeg2 button'), function(b){
@@ -2286,7 +2291,9 @@ def kpis_for(key):
     for n, lbl in ((30, "30 条/月 · 最省"), (90, "90 条/月 · 最省")):
         c = cheapest_for(n)
         if c:
-            out.append((lbl, f'¥{c["total"]:,.0f}<i class="u">{_u}</i>',
+            # data-n 供前端按产能口径幂等重建标签 —— 没有它就只能单向替换，
+            # 切回「每月」时标签再也回不去
+            out.append((f'<span data-n="{n}">{lbl}</span>', f'¥{c["total"]:,.0f}<i class="u">{_u}</i>',
                         f'{c["row"]["plat"]} {tname(c["row"])}'
                         + (f' × {c["cnt"]}' if c["cnt"] > 1 else ''), False))
     hg = [r for r in cand if r["plat"] == "Higgsfield"]

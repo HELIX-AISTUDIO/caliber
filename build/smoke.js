@@ -580,6 +580,34 @@ async function run(browser) {
     // 结论卡同样收紧到排名卡量级（曾 106px，排名卡 65px）
     check('结论卡与排名卡同级（≤90px）', cc.h <= 90, `${cc.h}px`);
 
+    // 产能口径反复切换必须幂等 —— 曾因 replace 的正则没吃掉旧单位后缀，
+    // 每切一次就往「单账号最多 X 条」后面追加一个单位，
+    // 变成「条月月月月…」，文本只增不减，把表格撑宽。
+    {
+      const tgt = await p.$('#tgt');
+      await p.evaluate(() => { const t0 = document.getElementById('tgt');
+        t0.value = 100; t0.dispatchEvent(new Event('input', { bubbles: true })); });
+      await p.waitForTimeout(400);
+      const grab = () => p.evaluate(() => {
+        const el = [...document.querySelectorAll('.pt.on [data-capmax]')]
+          .find(e => /单账号最多/.test(e.textContent));
+        return el ? el.textContent : '-';
+      });
+      const seen = [];
+      for (let i = 0; i < 3; i++) {
+        await p.click('#capSeg button[data-cap="p"]'); await p.waitForTimeout(240);
+        seen.push(await grab());
+        await p.click('#capSeg button[data-cap="m"]'); await p.waitForTimeout(240);
+        seen.push(await grab());
+      }
+      check('产能口径反复切换幂等（文本不累加）',
+        seen[2] === seen[4] && seen[4] === seen[5] && seen[5].indexOf('月月') < 0,
+        seen[5]);
+      await p.evaluate(() => { const t0 = document.getElementById('tgt');
+        t0.value = 30; t0.dispatchEvent(new Event('input', { bubbles: true })); });
+      await p.waitForTimeout(300);
+    }
+
     check('点「调整」抽屉弹出', sh.open === true && sh.scrim === true);
     // 抽屉必须自带关闭出口 —— 它会盖住底部「调整」按钮，遮罩只剩顶部一条，
     // 没有 ✕ 的话用户找不到任何方式退出（用户实测被卡住）
