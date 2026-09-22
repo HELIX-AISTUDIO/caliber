@@ -111,12 +111,20 @@ tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;bor
   border-radius:999px;outline:none;background:rgba(255,255,255,.12);cursor:pointer}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;
   border-radius:50%;background:#D1FE17;border:3px solid #000;cursor:pointer}input[type=number]{width:110px;background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.14);border-radius:9px;color:#fff;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  font-size:14px;font-weight:600;padding:7px 10px;outline:none;letter-spacing:-.02em}input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.presets{display:inline-flex;gap:5px}.cqr{-webkit-appearance:none;appearance:none;width:190px;height:4px;border-radius:999px;
+  font-size:14px;font-weight:600;padding:7px 10px;outline:none;letter-spacing:-.02em}input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.presets{display:inline-flex;gap:5px}
+/* 产量数值可直接输入 —— 预设只留三个，其余靠手输，避免按钮堆一排 */
+.nval{display:inline-flex;align-items:baseline;gap:3px}
+.nval i{font-style:normal;font-size:11px;color:#7A8088}
+.nvi{width:5.4em;text-align:right;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.16);border-radius:6px;color:#D1FE17;
+  font:inherit;font-size:13px;font-weight:700;padding:2px 6px;
+  font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.nvi::-webkit-outer-spin-button,.nvi::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.nvi:focus{outline:none;border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.cqr{-webkit-appearance:none;appearance:none;width:190px;height:4px;border-radius:999px;
   outline:none;background:rgba(255,255,255,.12);cursor:pointer}.cqr::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
   background:#D1FE17;border:3px solid #000;cursor:pointer;
   transition:transform .2s cubic-bezier(.22,1,.36,1)}.cqr::-webkit-slider-thumb:hover{transform:scale(1.12)}.cqr::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#D1FE17;
-  border:3px solid #000;cursor:pointer}.qv{font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:700;color:#D1FE17;letter-spacing:-.03em;
-  min-width:78px}.cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
+  border:3px solid #000;cursor:pointer}.cqp{background:transparent;border:1px solid rgba(255,255,255,.16);color:#9AA0A8;
   font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;
   cursor:pointer;transition:color .2s,border-color .2s,background .2s}.cqp:hover{color:#fff;border-color:rgba(255,255,255,.36)}.cqp.on{color:#0B0B0B;background:#D1FE17;border-color:#D1FE17;font-weight:700}/* ══ 应用式布局：左栏选项 + 右主区（参照 arena.ai 的结构）══
    目的是「一进来就是控件与数据」，不再用长文档铺陈。 */
@@ -1266,7 +1274,10 @@ function syncSlider(setValue){
      （raw 430 / 乘数 12 → NMON 36 → 回写 432）。只在口径或周期切换时回写。 */
   if(setValue) sl.value = v;
   var nv = document.getElementById('nv');
-  if(nv) nv.textContent = v + ' ' + capUnit(PK);
+  if(nv && document.activeElement !== nv) nv.value = v;   /* 正在输入时不要抢焦点改值 */
+  var nu = document.getElementById('nU');
+  if(nu) nu.textContent = capUnit(PK);
+  if(nv) nv.max = 200 * m;
   var nd = document.getElementById('ndur');
   if(nd){
     var sec = v * SECC;   /* JS 侧的常量名是 SECC（Python 侧叫 SEC_PER_CLIP） */
@@ -1682,6 +1693,24 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   }
   onSlide(document.getElementById('tgt'));
+
+  /* 可直接输入产量。输入框与滑块同一刻度（条/月 或 条/季、条/年），
+     故换算复用 sliderToN()。 */
+  var nIn = document.getElementById('nv');
+  if(nIn){
+    var applyN = function(){
+      var raw = parseInt(nIn.value, 10);
+      if(isNaN(raw)) { syncSlider(false); return; }
+      NMON = sliderToN(Math.max(0, Math.min(200 * capMul(PK), raw)));
+      CQ_LAST = null;
+      syncSlider(true);
+      linkN(NMON, null);
+      updateMoSum();
+      renderRec(null, true); rerank();
+    };
+    nIn.addEventListener('change', applyN);
+    nIn.addEventListener('keydown', function(ev){ if(ev.key === 'Enter'){ ev.preventDefault(); applyN(); } });
+  }
 
   /* 产能口径开关：两页各有一组（成本页 capSeg / 全清单页 capSeg2），任一页点了全站同步 */
   Array.prototype.forEach.call(document.querySelectorAll('#capSeg button, #capSeg2 button'), function(b){
