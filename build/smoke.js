@@ -885,6 +885,110 @@ async function run(browser) {
     const sh2 = await p.evaluate(() => document.querySelector('.side').classList.contains('open'));
     check('点遮罩可关抽屉', sh2 === false);
 
+    /* ── 抽屉「穿模」回归：内容不得画到面板之外 / 底部条必须退场 ──
+       用户报的「穿模」：抽屉内的「功能」行副标签跑到面板顶边之外，
+       连「调整筛选」标题都被压在下面。机制是
+       will-change:max-height（layout 属性）把面板提升为合成层，
+       叠加 overflow-y:auto + border-radius → 合成层上裁剪失效。
+       这里锁三件事：①面板有 contain:paint 硬保证 ②底部条在抽屉打开时已退场
+       ③抽屉内没有任何元素的顶边超出面板顶边。 */
+    await p.evaluate(() => {
+      const b = [...document.querySelectorAll('.mobar button')].find(x => /调整/.test(x.textContent || ''));
+      if (b) b.click();
+    });
+    await p.waitForTimeout(600);
+    const leak = await p.evaluate(() => {
+      const side = document.querySelector('.side'), mobar = document.querySelector('.mobar');
+      const sr = side.getBoundingClientRect();
+      const out = [];
+      side.querySelectorAll('*').forEach(el => {
+        const r = el.getBoundingClientRect();
+        if (r.height < 2 || r.width < 2) return;
+        if (r.top < sr.top - 0.5) out.push((el.className || el.tagName) + '@' + Math.round(r.top));
+      });
+      const mcs = getComputedStyle(mobar), mr = mobar.getBoundingClientRect();
+      let hit = 0;
+      for (let y = 700; y <= 843; y += 8) {
+        const el = document.elementFromPoint(195, y);
+        if (el && (el === mobar || mobar.contains(el))) hit++;
+      }
+      return {
+        contain: getComputedStyle(side).contain,
+        willChange: getComputedStyle(side).willChange,
+        bodyOn: document.body.classList.contains('sheet-on'),
+        mobarTop: Math.round(mr.top), vh: window.innerHeight,
+        mobarOpacity: mcs.opacity, hit, leaks: out.slice(0, 3),
+      };
+    });
+    check('抽屉面板有 contain:paint 硬裁剪', leak.contain === 'paint', leak.contain);
+    check('抽屉不再用 will-change:max-height（合成层诱因）',
+      leak.willChange.indexOf('max-height') < 0, leak.willChange);
+    check('抽屉内无元素画到面板顶边之外', leak.leaks.length === 0,
+      leak.leaks.join(' , ') || '0 处');
+    check('抽屉打开时底部条已退场', leak.bodyOn === true && leak.mobarTop >= leak.vh && leak.hit === 0,
+      `body.sheet-on=${leak.bodyOn} mobarTop=${leak.mobarTop}/${leak.vh} 命中=${leak.hit}`);
+
+    /* ── 抽屉表头必须盖住面板顶边（用户报的「划上去就穿模」）──
+       复现条件：小视口 + 上拉展开 + 滚到底。
+       根因：.side 有 18px 顶部内边距，而 .sheet-hd 是 sticky top:0 ——
+       sticky 钉在【内容盒】顶部，容器顶部那段内边距会把滚上来的内容露出来，
+       于是组标题画到面板顶边之上，连把手与「调整筛选」都被压到下面。
+       ⚠ 只量布局坐标（元素 top < 面板 top）抓不到这个 —— 上一版那条断言
+       「抽屉内无元素画到面板顶边之外」在 bug 存在时依然全绿（0 处）。
+       必须用 elementFromPoint 在【表头覆盖带】上逐点问「实际画的是谁」。 */
+    {
+      const sp = await newPage({ viewport: { width: 360, height: 640 }, isMobile: true, hasTouch: true });
+      await sp.goto(URL, { waitUntil: 'load' });
+      await sp.evaluate(() => { try {
+        localStorage.setItem('caliber.guide.v1', '1');
+        localStorage.setItem('caliber.intro.v1', '1');
+      } catch (e) {} });
+      await sp.reload({ waitUntil: 'load' });
+      await sp.waitForTimeout(400);
+      await sp.evaluate(() => {
+        const b = [...document.querySelectorAll('.mobar button')].find(x => /调整/.test(x.textContent || ''));
+        if (b) b.click();
+      });
+      await sp.waitForTimeout(500);
+      await sp.evaluate(async () => {
+        const s = document.querySelector('.side'), hd = document.querySelector('.sheet-hd');
+        const r = hd.getBoundingClientRect(); const cy = r.top + r.height / 2;
+        const ev = (t, y) => hd.dispatchEvent(new PointerEvent(t, {
+          clientY: y, bubbles: true, pointerId: 1, isPrimary: true,
+        }));
+        ev('pointerdown', cy);
+        for (let i = 1; i <= 12; i++) ev('pointermove', cy - i * 34);
+        ev('pointerup', cy - 400);
+        await new Promise(res => setTimeout(res, 450));
+        s.scrollTop = 999;                       // 滚到底 —— 这是复现的必要条件
+        await new Promise(res => setTimeout(res, 400));
+      });
+      const t = await sp.evaluate(() => {
+        const side = document.querySelector('.side'), hd = document.querySelector('.sheet-hd');
+        const sr = side.getBoundingClientRect(), hr = hd.getBoundingClientRect();
+        let leakPts = 0; const why = [];
+        for (let y = Math.ceil(sr.top) + 2; y < Math.floor(hr.bottom) - 2; y += 5) {
+          const el = document.elementFromPoint(180, y);
+          if (el && side.contains(el) && !hd.contains(el)) {
+            leakPts++;
+            if (why.length < 2) why.push(y + ':' + (el.className || el.tagName));
+          }
+        }
+        return {
+          sideTop: Math.round(sr.top), hdTop: Math.round(hr.top),
+          hdW: Math.round(hr.width), sideW: Math.round(sr.width),
+          scrollTop: Math.round(side.scrollTop), leakPts, why,
+        };
+      });
+      check('小视口展开+滚到底：表头仍贴住面板顶边',
+        Math.abs(t.hdTop - t.sideTop) <= 3, `面板顶=${t.sideTop} 表头顶=${t.hdTop}`);
+      check('表头铺满面板宽度（否则左右内边距带会露内容）',
+        t.hdW >= t.sideW - 3, `${t.hdW}/${t.sideW}`);
+      check('表头覆盖带内没有非表头内容（真·穿模回归）',
+        t.leakPts === 0, `采样点 ${t.leakPts} 处` + (t.why.length ? ' → ' + t.why.join(' ') : ''));
+      await sp.close();
+    }
+
     check('手机无 JS 报错', errs.length === 0, errs.slice(0, 2).join(' | '));
     if (SHOTS) await p.screenshot({ path: path.join(OUT, 'smoke-mobile.png') });
     await p.close();

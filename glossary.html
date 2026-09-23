@@ -614,8 +614,15 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   .app{flex-direction:column;align-items:stretch;gap:15px;padding:16px 15px 0}
   .side{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:60;width:auto;
     max-height:78vh;overflow-y:auto;flex-direction:column;flex-wrap:nowrap;gap:17px;
-    will-change:max-height,transform;
-    padding:18px 18px calc(20px + env(safe-area-inset-bottom,0px));
+    /* ⚠ will-change 里【去掉 max-height】：它是个会触发 layout 的属性，
+       强行提升为合成层后，再叠加 overflow-y:auto + border-radius，
+       浏览器会在合成层上做裁剪 —— 实测过「抽屉内容画到面板顶边之外」
+       （用户手机端截图：抽屉内的「功能」行副标签跑到抽屉外侧，
+       连「调整筛选」标题都被压在下面）。只保留 transform。
+       另外 contain:paint 是【硬保证】：无论合成层怎么切，后代一律不出框。 */
+    contain:paint;will-change:transform;
+    /* ⚠ 顶部内边距必须为 0，顶部留白改由 .sheet-hd 自己吃 —— 原因见 .sheet-hd 的注释 */
+    padding:0 18px calc(20px + env(safe-area-inset-bottom,0px));
     border-radius:20px 20px 0 0;background:#0A0B0D;
     border:1px solid rgba(255,255,255,.12);border-bottom:0;
     box-shadow:0 -18px 44px rgba(0,0,0,.62);
@@ -627,10 +634,20 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   .side.peek{max-height:42vh}
   /* 拖动中关掉过渡 —— 有过渡就会「追手指」，手感发飘 */
   .side.dragging{transition:none!important}
-  /* 抽屉头：把手给「可下滑」的暗示，✕ 给明确的关闭出口 */
+  /* 抽屉头：把手给「可下滑」的暗示，✕ 给明确的关闭出口。
+     ⚠ 这里同时承担【覆盖滚动内容】的职责，两个细节缺一不可：
+       ① .side 的顶部内边距必须为 0，顶部留白移到本元素上；
+          否则 sticky 的 top:0 会钉在【内容盒】顶部，容器顶部那段内边距
+          会把滚上来的内容露出来 —— 实测 360×640 展开+滚到底时，
+          「会员周期」组标题会画到面板顶边之上，连把手和「调整筛选」都被压下去
+          （用户报的「划上去就穿模」就是这个）。顶部内边距归零后，
+          本元素的盒顶 = 面板顶边 = 滚动视口顶边，top:0 才真正贴到面板边。
+       ② 负左右外边距 + 自带顶部圆角，让不透明底色铺满整个面板宽度，
+          否则左右各 18px 的内边距带上仍会露出滚上来的内容。 */
   .sheet-hd{display:flex;align-items:center;justify-content:space-between;
     position:sticky;top:0;z-index:3;background:#0A0B0D;
-    padding:16px 2px 12px;border-bottom:1px solid rgba(255,255,255,.09);
+    margin:0 -18px;border-radius:20px 20px 0 0;
+    padding:20px 20px 12px;border-bottom:1px solid rgba(255,255,255,.09);
     cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
   .sheet-hd:active{cursor:grabbing}
   .sheet-hd .grab{position:absolute;left:50%;top:7px;transform:translateX(-50%);
@@ -651,7 +668,13 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
     align-items:center;gap:12px;
     padding:11px 15px calc(11px + env(safe-area-inset-bottom,0px));
     background:rgba(10,11,13,.93);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
-    border-top:1px solid rgba(255,255,255,.1)}
+    border-top:1px solid rgba(255,255,255,.1);
+    /* 抽屉打开时把底部条推走。为什么必须动它：底部条 z=50 在抽屉(60)之下，
+       抽屉滑上来时顶边会从 y=864 一路扫过底部条所在的 782–844 区间，
+       两层的边缘会实时相撞（用户报的「穿模」有一半来自这里）。
+       打开后它本来就被抽屉完全盖住、点不到，推走是纯收益。 */
+    transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .3s}
+  body.sheet-on .mobar{transform:translateY(115%);opacity:0;pointer-events:none}
   .mosum{flex:1;min-width:0;font-size:11.5px;color:#9AA0A8;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   /* 用户反馈「调整」不显眼、不知道里面藏着控件 —— 改成实心亮色 + 图标 + 动效 */
