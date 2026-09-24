@@ -2942,7 +2942,7 @@ GUIDE = """
 """
 
 
-def page(title, desc, nav_html, body, cost_js=False, canon=None, extra_css="", extra_js=""):
+def page(title, desc, nav_html, body, cost_js=False, canon=None, extra_css="", extra_js="", self_imgs=False):
     js = JS.replace("__COST__", COST_JS) if cost_js else JS.replace("__COST__", "")
     js = js.replace("__GLOS__", GLOS_JSON).replace("__DEFK__", _DEFAULT_K).replace("__SECCLIP__", str(SEC_PER_CLIP))
     if cost_js:
@@ -2969,6 +2969,7 @@ def page(title, desc, nav_html, body, cost_js=False, canon=None, extra_css="", e
     # 但 /og.png 仍是本站自己的资源，不产生跨域请求 —— 与「零外部请求」原则不冲突。
     # canon = 该页的**干净 URL**（CF Pages 会把 /cost.html 308 跳到 /cost，
     # canonical 必须取后者）；为 None 的页面（404）不发卡片：不给错误页做分享预览。
+    imgsrc = " 'self'" if self_imgs else ""
     og_extra = ""
     if canon is not None:
         og_extra = f"""<meta property="og:type" content="website">
@@ -3011,7 +3012,7 @@ def page(title, desc, nav_html, body, cost_js=False, canon=None, extra_css="", e
 <meta name="edition" content="{FP_EDITION}">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate, noai, noimageai">
 <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:{imgsrc}; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
 <style>{sub_css(CSS)}{extra_css}</style></head><body>
@@ -3675,6 +3676,7 @@ CINE_CSS = r"""
 .pcard{background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:18px;
   padding:20px 22px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .pcard:hover{border-color:rgba(255,255,255,.17)}
+.pcimg{width:100%;height:auto;display:block;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#070707}
 .pchead{display:flex;align-items:baseline;gap:9px;min-width:0}
 .pcnum{font-family:__MONO__;font-size:11px;color:#5A6069;flex:0 0 auto}
 .pctitle{font-family:__DISP__;font-size:16.5px;font-weight:750;color:#fff;letter-spacing:-.02em;min-width:0}
@@ -3791,6 +3793,7 @@ CINE_JS = r"""
     for (var i=0;i<n;i++){
       var r = cur[i];
       h += '<article class="pcard" data-id="' + esc(r.i) + '">'
+         + (r.im ? '<img class="pcimg" src="' + esc(r.im) + '" alt="' + esc(r.t) + '" loading="lazy" decoding="async" onerror="this.remove()">' : '')
          + '<div class="pchead"><span class="pcnum">' + esc(r.n) + '</span>'
          + '<span class="pctitle">' + esc(r.t) + '</span></div>'
          + '<div class="pccat">' + esc(r.c) + '</div>'
@@ -3907,7 +3910,16 @@ CINE_JS = r"""
 
 CINE_N = len(CINEMATIQUE["entries"])
 CINE_CATS = len(set(e["c"] for e in CINEMATIQUE["entries"]))
-CINE_JSON = json.dumps(CINEMATIQUE, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+_cine_entries = []
+for _e in CINEMATIQUE["entries"]:
+    _e2 = dict(_e)
+    _rel = "img/cine/" + _e["i"] + ".webp"
+    if os.path.exists(os.path.join(ROOT, _rel.replace("/", os.sep))):
+        _e2["im"] = _rel          # 本地压缩图存在才输出；缺图自动退化为纯文字卡
+    _cine_entries.append(_e2)
+CINE_JSON = json.dumps({"source": CINEMATIQUE["source"], "sourceUrl": CINEMATIQUE["sourceUrl"],
+                        "capturedAt": CINEMATIQUE["capturedAt"], "entries": _cine_entries},
+                       ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
 
 cine_body = f"""
 <div class="wrap">
@@ -3981,7 +3993,7 @@ PAGES = {
     "prompts.html": page("提示词库", f"{CINE_N} 条电影技法与提示词模板：摄影机运动、灯光、构图、剪辑、胶片、镜头与大师肖像，可直接复制投喂 AI 生成器。",
                          nav("prompts"), cine_body, canon="prompts",
                          extra_css=sub_css(CINE_CSS),
-                         extra_js=CINE_JS.replace("__CINE__", CINE_JSON)),
+                         extra_js=CINE_JS.replace("__CINE__", CINE_JSON), self_imgs=True),
 }
 
 
@@ -4048,6 +4060,18 @@ def write_all():
             continue
         for d in _usable_dirs():
             shutil.copy2(src, os.path.join(d, extra_bin))
+    # 提示词库配图：目录级同步（增量，按字节数判断是否需要重拷）
+    _img_src = os.path.join(ROOT, "img", "cine")
+    if os.path.isdir(_img_src):
+        _n = 0
+        for _d in _usable_dirs():
+            _dst = os.path.join(_d, "img", "cine")
+            os.makedirs(_dst, exist_ok=True)
+            for _f in os.listdir(_img_src):
+                _s, _t = os.path.join(_img_src, _f), os.path.join(_dst, _f)
+                if not os.path.exists(_t) or os.path.getsize(_t) != os.path.getsize(_s):
+                    shutil.copy2(_s, _t); _n += 1
+        print("  配图同步：%d 个文件" % _n)
     print("  静态文件指纹已同步：%s / %s" % (FP_WORK, FP_EDITION))
 
 
