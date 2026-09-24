@@ -42,6 +42,7 @@ SITE = load("site.json")
 PLATFORMS = load("platforms.json")
 COST = load("cost-seedance25.json")
 GLOSSARY = load("glossary.json")
+CINEMATIQUE = load("cinematique.json")
 GLOS_MAP = {x["k"]: x for x in GLOSSARY["terms"]}
 
 
@@ -2941,7 +2942,7 @@ GUIDE = """
 """
 
 
-def page(title, desc, nav_html, body, cost_js=False, canon=None):
+def page(title, desc, nav_html, body, cost_js=False, canon=None, extra_css="", extra_js=""):
     js = JS.replace("__COST__", COST_JS) if cost_js else JS.replace("__COST__", "")
     js = js.replace("__GLOS__", GLOS_JSON).replace("__DEFK__", _DEFAULT_K).replace("__SECCLIP__", str(SEC_PER_CLIP))
     if cost_js:
@@ -3013,7 +3014,7 @@ def page(title, desc, nav_html, body, cost_js=False, canon=None):
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
-<style>{sub_css(CSS)}</style></head><body>
+<style>{sub_css(CSS)}{extra_css}</style></head><body>
 
 {promo()}
 {nav_html}
@@ -3021,7 +3022,7 @@ def page(title, desc, nav_html, body, cost_js=False, canon=None):
 <div class="wrap">{legal()}</div>
 
 {INTRO}
-<script>{js}</script>
+<script>{js}{extra_js}</script>
 </body></html>"""
 
 
@@ -3614,7 +3615,7 @@ NOTFOUND_BODY = f"""
   <div class="eyebrow">{BRAND}</div>
   <h1>这个页面<br><em>不存在</em></h1>
   <p class="lead">地址可能输错了，或者这个页面已经下线。<br>
-     本站现在只有四页：首页、平台成本对比、三周期全清单、术语表。</p>
+     本站现在只有五页：首页、平台成本对比、三周期全清单、术语表、提示词库。</p>
   <div class="btns">
     <a class="btn btn-white" href="index.html">回到首页</a>
     <a class="btn btn-ghost" href="cost.html">平台成本对比</a>
@@ -3626,6 +3627,340 @@ NOTFOUND_BODY = f"""
 """
 
 
+# ═══════════════════════════════════════════════════════════════════
+# 5b. 提示词库（Cinematique）
+#
+# 设计与其余页面同一套 token：lime 只做「当前分类 + 主行动 + 计数强调」三件事，
+# 卡片用实心 #0B0B0B 而非玻璃面 —— 2309 张卡片若都带 backdrop-filter，
+# 移动端滚动会直接卡死（首页只有 6 张卡片，玻璃面在那里才成立）。
+# ═══════════════════════════════════════════════════════════════════
+CINE_CSS = r"""
+.libkpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:14px;margin-top:20px}
+.libkpi{background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px 20px}
+.libkpi .t{font-size:10.5px;font-weight:700;letter-spacing:.095em;text-transform:uppercase;color:#767C85}
+.libkpi .v{font-family:__MONO__;font-size:26px;font-weight:700;letter-spacing:-.032em;color:#fff;margin-top:5px}
+.libkpi.hi{border-color:rgba(209,254,23,.45)}
+.libkpi.hi .v{color:#D1FE17}
+.libguide{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:12px;margin-top:16px}
+.libgcard{background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:15px 17px}
+.libgcard strong{display:block;font-family:__MONO__;font-size:11px;font-weight:700;letter-spacing:.15em;color:#D1FE17;margin-bottom:7px}
+.libgcard span{font-size:12.5px;color:#767C85;line-height:1.7}
+.libbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:20px}
+.libbar input{background:#0B0B0B;border:1px solid rgba(255,255,255,.14);border-radius:999px;
+  padding:11px 17px;color:#fff;font:inherit;font-size:13.5px;outline:none;width:100%}
+.libbar input:focus{border-color:rgba(209,254,23,.55)}
+.libbar input::placeholder{color:#5A6069}
+.libq{flex:1 1 300px;min-width:220px}
+.libsb{flex:1 1 240px;min-width:200px}
+.libcnt{font-family:__MONO__;font-size:12px;color:#8A9099;white-space:nowrap}
+.libbtn{background:transparent;border:1px solid rgba(255,255,255,.2);color:#C9CDD2;
+  border-radius:999px;padding:10px 17px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.libbtn:hover{border-color:rgba(255,255,255,.42);color:#fff}
+.libbtn.on{background:#D1FE17;border-color:#D1FE17;color:#0B0B0B}
+.libwrap2{display:grid;grid-template-columns:238px 1fr;gap:20px;align-items:start;margin-top:18px}
+.libside{position:sticky;top:calc(var(--navh) + 16px);background:#0B0B0B;
+  border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:13px;
+  max-height:calc(100vh - var(--navh) - 46px);overflow-y:auto}
+.libside .st{font-size:10.5px;font-weight:700;letter-spacing:.095em;text-transform:uppercase;
+  color:#767C85;padding:6px 9px 10px}
+.libcat{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;
+  background:transparent;border:0;color:#8A9099;font:inherit;font-size:13px;
+  padding:8px 10px;border-radius:10px;cursor:pointer;text-align:left}
+.libcat:hover{background:rgba(255,255,255,.06);color:#fff}
+.libcat.on{background:rgba(209,254,23,.1);color:#D1FE17;font-weight:700}
+.libcat .n{font-family:__MONO__;font-size:11px;color:#5A6069;flex:0 0 auto}
+.libcat.on .n{color:rgba(209,254,23,.75)}
+.libmain{min-width:0}
+.libcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.pcard{background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:18px;
+  padding:20px 22px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.pcard:hover{border-color:rgba(255,255,255,.17)}
+.pchead{display:flex;align-items:baseline;gap:9px;min-width:0}
+.pcnum{font-family:__MONO__;font-size:11px;color:#5A6069;flex:0 0 auto}
+.pctitle{font-family:__DISP__;font-size:16.5px;font-weight:750;color:#fff;letter-spacing:-.02em;min-width:0}
+.pccat{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:#767C85}
+.pcdesc{font-size:13px;line-height:1.7;color:#8A9099}
+.pcp{font-family:__MONO__;font-size:12.5px;line-height:1.75;color:#C9CDD2;
+  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);border-radius:12px;
+  padding:12px 14px;white-space:pre-wrap;word-break:break-word;max-height:168px;overflow:auto}
+.pcp .sb{color:#D1FE17;font-weight:700}
+.pcact{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+.pcbtn{background:transparent;border:1px solid rgba(255,255,255,.18);color:#C9CDD2;
+  border-radius:999px;padding:7px 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.pcbtn:hover{border-color:rgba(255,255,255,.42);color:#fff}
+.pcbtn.pri{background:#D1FE17;border-color:#D1FE17;color:#0B0B0B}
+.pcbtn.pri:hover{background:#DCFF4A;border-color:#DCFF4A;color:#0B0B0B}
+.pcbtn.fv.on{color:#D1FE17;border-color:rgba(209,254,23,.5)}
+.libmore{display:flex;justify-content:center;margin-top:20px}
+.libempty{color:#767C85;font-size:13px;text-align:center;padding:40px 0}
+.libsrc{margin-top:28px;border-left:2px solid rgba(255,201,60,.55);background:#0B0B0B;
+  border-top:1px solid rgba(255,255,255,.08);border-right:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 20px;
+  font-size:12.5px;line-height:1.8;color:#8A9099}
+.libsrc b{color:#C9CDD2}
+.libsrc a{color:#A8AEB5;border-bottom:1px dashed rgba(255,255,255,.3);text-decoration:none}
+@media(max-width:900px){
+  .libwrap2{grid-template-columns:1fr}
+  .libside{position:static;max-height:none}
+  .libcards{grid-template-columns:1fr}
+}
+"""
+
+CINE_JS = r"""
+(function(){
+  var DATA = __CINE__;
+  var ALL = DATA.entries;
+  var STEP = 48, shown = STEP;
+  var SKEY = 'hx-cine-fav-v1';
+  var fav = {};
+  try { fav = JSON.parse(localStorage.getItem(SKEY) || '{}'); } catch(e) { fav = {}; }
+  function saveFav(){ try { localStorage.setItem(SKEY, JSON.stringify(fav)); } catch(e){} }
+
+  var order = [], cnt = {};
+  for (var i=0;i<ALL.length;i++){
+    var c = ALL[i].c;
+    if (cnt[c] === undefined){ cnt[c] = 0; order.push(c); }
+    cnt[c]++;
+  }
+  var state = { cat: '', q: '', sub: '', favOnly: false };
+
+  var $ = function(id){ return document.getElementById(id); };
+  var sideEl = $('libSide'), cardsEl = $('libCards'), cntEl = $('libCnt'),
+      moreEl = $('libMore'), qEl = $('libQ'), sEl = $('libS'), favBtn = $('libFav'), clrBtn = $('libClr');
+
+  /* 分类按钮 */
+  var html = '<div class="st">板块 · ' + ALL.length + ' 条目</div>';
+  html += '<button type="button" class="libcat on" data-c="">全部<span class="n">' + ALL.length + '</span></button>';
+  for (var i=0;i<order.length;i++){
+    html += '<button type="button" class="libcat" data-c="' + esc(order[i]) + '">' + esc(order[i])
+          + '<span class="n">' + cnt[order[i]] + '</span></button>';
+  }
+  sideEl.innerHTML = html;
+
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function hay(r){
+    return (r.t + ' ' + r.d + ' ' + r.p + ' ' + r.i + ' ' + r.c + ' ' + r.k).toLowerCase();
+  }
+  var HAY = [];
+  for (var i=0;i<ALL.length;i++) HAY.push(hay(ALL[i]));
+
+  function match(){
+    var words = state.q.toLowerCase().split(/\s+/);
+    for (var w=0;w<words.length;w++) if (words[w] === '') { words.splice(w,1); w--; }
+    var out = [];
+    for (var i=0;i<ALL.length;i++){
+      var r = ALL[i];
+      if (state.cat && r.c !== state.cat) continue;
+      if (state.favOnly && !fav[r.i]) continue;
+      if (words.length){
+        var h = HAY[i], ok = true;
+        for (var w=0;w<words.length;w++){ if (h.indexOf(words[w]) < 0){ ok = false; break; } }
+        if (!ok) continue;
+      }
+      out.push(r);
+    }
+    return out;
+  }
+
+  function applyPrompt(p){
+    if (!state.sub) return p;
+    var s = state.sub;
+    return p.split('[Subject]').join(s);
+  }
+  function core(p){
+    var s = p.split('\n')[0].trim();
+    var m = s.search(/[。！？!?]/);
+    if (m > 0) s = s.slice(0, m + 1);
+    if (s.length > 170) s = s.slice(0, 170);
+    return s;
+  }
+  function hl(p){
+    return esc(p).replace(/\[Subject\]/g, '<span class="sb">[Subject]</span>');
+  }
+
+  var cur = [];
+  function render(reset){
+    if (reset) shown = STEP;
+    cur = match();
+    cntEl.textContent = cur.length + ' / ' + ALL.length + ' 条目';
+    var n = Math.min(shown, cur.length);
+    var h = '';
+    for (var i=0;i<n;i++){
+      var r = cur[i];
+      h += '<article class="pcard" data-id="' + esc(r.i) + '">'
+         + '<div class="pchead"><span class="pcnum">' + esc(r.n) + '</span>'
+         + '<span class="pctitle">' + esc(r.t) + '</span></div>'
+         + '<div class="pccat">' + esc(r.c) + '</div>'
+         + '<div class="pcdesc">' + esc(r.d) + '</div>'
+         + '<div class="pcp">' + hl(r.p) + '</div>'
+         + '<div class="pcact">'
+         + '<button type="button" class="pcbtn pri" data-a="copy">复制提示词</button>'
+         + '<button type="button" class="pcbtn" data-a="core">复制核心</button>'
+         + '<button type="button" class="pcbtn fv' + (fav[r.i] ? ' on' : '') + '" data-a="fav">'
+         + (fav[r.i] ? '★ 已收藏' : '☆ 收藏') + '</button>'
+         + '</div></article>';
+    }
+    cardsEl.innerHTML = h || '<div class="libempty">没有匹配的条目，换个词或清空筛选。</div>';
+    moreEl.style.display = cur.length > n ? 'flex' : 'none';
+    moreEl.innerHTML = cur.length > n
+      ? '<button type="button" class="libbtn" id="libMoreBtn">继续加载（剩余 ' + (cur.length - n) + '）</button>' : '';
+    var mb = $('libMoreBtn');
+    if (mb) mb.onclick = function(){ shown += STEP; render(false); };
+  }
+
+  /* 事件 */
+  sideEl.addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('.libcat') : null;
+    if (!b) return;
+    var all = sideEl.querySelectorAll('.libcat');
+    for (var i=0;i<all.length;i++) all[i].classList.remove('on');
+    b.classList.add('on');
+    state.cat = b.getAttribute('data-c');
+    try { location.hash = state.cat ? 'cat=' + encodeURIComponent(state.cat) : ''; } catch(err){}
+    render(true);
+  });
+  cardsEl.addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('.pcbtn') : null;
+    if (!b) return;
+    var card = b.closest('.pcard'), id = card.getAttribute('data-id'), r = null;
+    for (var i=0;i<ALL.length;i++) if (ALL[i].i === id) { r = ALL[i]; break; }
+    if (!r) return;
+    var a = b.getAttribute('data-a');
+    if (a === 'copy') copy(applyPrompt(r.p), b, '已复制');
+    else if (a === 'core') copy(applyPrompt(core(r.p)), b, '已复制核心');
+    else {
+      if (fav[id]) delete fav[id]; else fav[id] = 1;
+      saveFav();
+      b.classList.toggle('on', !!fav[id]);
+      b.textContent = fav[id] ? '★ 已收藏' : '☆ 收藏';
+      if (state.favOnly) render(false);
+    }
+  });
+  function copy(text, btn, msg){
+    var done = function(){
+      var old = btn.textContent;
+      btn.textContent = msg;
+      setTimeout(function(){ btn.textContent = old; }, 1100);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, function(){ fallback(text); done(); });
+      return;
+    }
+    fallback(text); done();
+  }
+  function fallback(text){
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly','');
+    ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  var timer = null;
+  qEl.addEventListener('input', function(){
+    clearTimeout(timer);
+    var v = this.value;
+    timer = setTimeout(function(){ state.q = v.trim(); render(true); }, 140);
+  });
+  sEl.addEventListener('input', function(){ state.sub = this.value.trim(); });
+  favBtn.addEventListener('click', function(){
+    state.favOnly = !state.favOnly;
+    favBtn.classList.toggle('on', state.favOnly);
+    render(true);
+  });
+  clrBtn.addEventListener('click', function(){
+    qEl.value = ''; state.q = ''; state.cat = ''; state.favOnly = false;
+    favBtn.classList.remove('on');
+    var all = sideEl.querySelectorAll('.libcat');
+    for (var i=0;i<all.length;i++) all[i].classList.remove('on');
+    all[0].classList.add('on');
+    try { location.hash = ''; } catch(e){}
+    render(true);
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === '/' && document.activeElement !== qEl && document.activeElement !== sEl){
+      e.preventDefault(); qEl.focus();
+    }
+  });
+
+  /* 深链：#cat=摄影机运动 */
+  (function(){
+    var m = (location.hash || '').match(/cat=([^&]+)/);
+    if (!m) return;
+    var c = decodeURIComponent(m[1]);
+    var all = sideEl.querySelectorAll('.libcat');
+    for (var i=0;i<all.length;i++){
+      if (all[i].getAttribute('data-c') === c){
+        for (var j=0;j<all.length;j++) all[j].classList.remove('on');
+        all[i].classList.add('on'); state.cat = c; return;
+      }
+    }
+  })();
+
+  render(true);
+})();
+"""
+
+CINE_N = len(CINEMATIQUE["entries"])
+CINE_CATS = len(set(e["c"] for e in CINEMATIQUE["entries"]))
+CINE_JSON = json.dumps(CINEMATIQUE, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+
+cine_body = f"""
+<div class="wrap">
+<section class="reveal" style="margin-top:34px">
+  <div class="sechead">
+    <h2><span class="ey">提示词</span>电影技法与提示词库</h2>
+    <div class="sd">{CINE_N} 条可直接复制的提示词模板：摄影机运动、灯光、构图、剪辑、胶片、镜头、类型风格与大师肖像。
+      检索、按板块筛选、把 [Subject] 换成你的角色或场景，复制后直接投喂图像 / 视频生成器。</div>
+  </div>
+
+  <div class="libkpis">
+    <div class="libkpi hi"><div class="t">Entries</div><div class="v">{CINE_N}</div></div>
+    <div class="libkpi"><div class="t">Sections</div><div class="v">{CINE_CATS}</div></div>
+    <div class="libkpi"><div class="t">Copy-ready</div><div class="v">100%</div></div>
+  </div>
+
+  <div class="libguide">
+    <div class="libgcard"><strong>01 / SEARCH</strong><span>按技法名、描述、提示词关键词检索，支持多词与中英混搜。</span></div>
+    <div class="libgcard"><strong>02 / FILTER</strong><span>左侧按板块筛选；点分类即写入地址栏，可直接分享筛选结果。</span></div>
+    <div class="libgcard"><strong>03 / SUBJECT</strong><span>模板保留 [Subject] 占位。填入主体后才替换，不填则原样复制。</span></div>
+    <div class="libgcard"><strong>04 / COPY</strong><span>「复制提示词」取整条，「复制核心」只取首句主干。按 / 聚焦搜索。</span></div>
+  </div>
+
+  <div class="libbar">
+    <div class="libq"><input type="search" id="libQ" placeholder="搜索词条：close-up / lighting / noir / dolly..." aria-label="搜索提示词"></div>
+    <div class="libsb"><input type="text" id="libS" placeholder="输入角色或场景（可选）" aria-label="替换 Subject"></div>
+    <button type="button" class="libbtn" id="libFav">☆ 只看收藏</button>
+    <button type="button" class="libbtn" id="libClr">清空条件</button>
+    <span class="libcnt" id="libCnt">{CINE_N} / {CINE_N} 条目</span>
+  </div>
+
+  <div class="libwrap2">
+    <aside class="libside" id="libSide" aria-label="板块筛选"></aside>
+    <div class="libmain">
+      <div class="libcards" id="libCards"></div>
+      <div class="libmore" id="libMore" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="libsrc">
+    <b>来源与版权：</b>本页条目为 MOKE AIGC「Cinematique 电影技法与胶片词典」提示词库的<b>整理转载</b>，
+    原文与提示词文本的著作权归原作者 / 原站点所有，本站不主张原创署名。
+    采集时点 {CINEMATIQUE["capturedAt"]}，来源：<a href="{CINEMATIQUE["sourceUrl"]}" target="_blank" rel="noopener">{CINEMATIQUE["sourceUrl"]}</a>。
+    本站仅作个人检索与索引用途；收藏与最近使用只存于当前浏览器。若原站调整内容或提出下架要求，请以原站为准。
+  </div>
+</section>
+</div>
+{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　提示词 {CINE_N} 条 / {CINE_CATS} 个板块')}
+"""
+
+# ═══════════════════════════════════════════════════════════════════
+# 6. 输出 + 自检
+# ═══════════════════════════════════════════════════════════════════
 # ═══════════════════════════════════════════════════════════════════
 # 6. 输出 + 自检
 # ═══════════════════════════════════════════════════════════════════
@@ -3643,6 +3978,10 @@ PAGES = {
     "404.html": page("页面不存在", "你要找的页面不存在。", nav(""), NOTFOUND_BODY),
     "glossary.html": page("术语表", f"{len(GLOSSARY['terms'])} 条口径与指标定义：口径、单条成本、承诺期、倒挂、组合订阅等。",
                           nav("glossary"), glossary_body, canon="glossary"),
+    "prompts.html": page("提示词库", f"{CINE_N} 条电影技法与提示词模板：摄影机运动、灯光、构图、剪辑、胶片、镜头与大师肖像，可直接复制投喂 AI 生成器。",
+                         nav("prompts"), cine_body, canon="prompts",
+                         extra_css=sub_css(CINE_CSS),
+                         extra_js=CINE_JS.replace("__CINE__", CINE_JSON)),
 }
 
 

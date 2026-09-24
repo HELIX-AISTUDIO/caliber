@@ -87,7 +87,7 @@
 | **Build output directory** | **`deploy`** |
 | Root directory | `/` |
 
-`deploy/` 是**仓库内**的发布包（9 个文件，不含 `data/` 与 `build/`），
+`deploy/` 是**仓库内**的发布包（10 个文件，不含 `data/` 与 `build/`），
 由生成器与站点源码一起产出并提交 —— 因此发布出去的只有成品，源码与数据不外露。
 
 > 生成器实际写两份：仓库内 `deploy/`（供 Cloudflare 发布）与仓库外 `../deploy/`
@@ -106,7 +106,7 @@
 
 ### 手动部署（备用）
 
-若 Git 部署不可用，把 `deploy/` 目录（9 个文件）拖到该项目的 Deployments 页即可，链接不变。
+若 Git 部署不可用，把 `deploy/` 目录（10 个文件）拖到该项目的 Deployments 页即可，链接不变。
 
 ---
 
@@ -181,15 +181,17 @@ index.html                 首页（构建产物）
 cost.html                  平台成本对比（构建产物）
 cycles.html                三周期全清单 · 动态排名（构建产物）
 glossary.html              术语表（构建产物）
+prompts.html               提示词库 · 电影技法与提示词（构建产物）
 leaderboard-vlm.html       视觉理解模型排行榜（构建产物）
 data/
   site.json                站点元数据：品牌、出品方、导航
   platforms.json           平台元数据：名称、颜色、币种、地区
   cost-seedance25.json     成本数据集：口径、汇率、单条积分、47 个积分档、风险项、来源
   glossary.json            术语词典：17 条口径与指标定义
+  cinematique.json         提示词库数据集：2309 条技法 / 胶片 / 大师提示词（含来源与采集时点）
   leaderboard-vlm.json     排行榜数据集：维度权重、字段结构、entries
 build/
-  build_site.py            站点生成器（读 data/ → 输出五页 HTML）
+  build_site.py            站点生成器（读 data/ → 输出六页 HTML）
   build_data.py            数据层初始化（可从零重建 data/*.json）
   audit_independent.py     独立数据审计（重算 + 与产物逐值对拍）
   smoke.js                 浏览器冒烟测试
@@ -202,7 +204,7 @@ _headers                   Cloudflare Pages 安全响应头
 .nojekyll                  GitHub Pages 用，禁 Jekyll 过滤
 ```
 
-`deploy/` 为公网发布包（9 个文件，不含 `data/` 与 `build/`），由生成器自动产出。
+`deploy/` 为公网发布包（10 个文件，不含 `data/` 与 `build/`），由生成器自动产出。
 **它在仓库内并已提交** —— Cloudflare Pages 连 Git 后从这里的产出发布，因此线上只有成品，源码与数据不外露。仓库外另有一份同名回滚包。
 
 ## 内容模型
@@ -312,6 +314,7 @@ Excel 会强制写成 XLSX 二进制而扩展名仍是 `.csv` —— 下游一�
 | `cost.html` | 平台成本对比：左栏选项 + 全档位对比 / 先别急着下单两个视图 | 平台成本对比 |
 | `cycles.html` | **三周期全清单 · 动态排名**：左栏选指标/周期/排序/平台，主区动态出排名条；下方是该页原有的 6 组原始数据与方法论 | 三周期全清单 |
 | `glossary.html` | **术语表**：17 条口径与指标定义，每条带锚点 | 术语表 |
+| `prompts.html` | **提示词库**：2309 条电影技法与提示词模板，检索 / 板块筛选 / [Subject] 替换 / 一键复制 | 提示词库 |
 | `leaderboard-vlm.html` | 视觉理解模型排行榜（待回填） | 视觉理解模型排行榜 |
 
 > 原先「04 更多对比数据」整块嵌在成本页里，与成本页主表在语义上重复（都是成本数据），

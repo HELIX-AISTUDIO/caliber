@@ -27,6 +27,11 @@
       "key": "glossary",
       "label": "术语表",
       "href": "glossary.html"
+    },
+    {
+      "key": "prompts",
+      "label": "提示词库",
+      "href": "prompts.html"
     }
   ],
   "issues": "https://github.com/HELIX-AISTUDIO/caliber/issues/new",
