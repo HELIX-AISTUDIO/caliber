@@ -182,7 +182,6 @@ cost.html                  平台成本对比（构建产物）
 cycles.html                三周期全清单 · 动态排名（构建产物）
 glossary.html              术语表（构建产物）
 prompts.html               提示词库 · 电影技法与提示词（构建产物）
-services.html              AI 服务 · 渠道信息页（构建产物）
 leaderboard-vlm.html       视觉理解模型排行榜（构建产物）
 data/
   site.json                站点元数据：品牌、出品方、导航
@@ -190,10 +189,9 @@ data/
   cost-seedance25.json     成本数据集：口径、汇率、单条积分、47 个积分档、风险项、来源
   glossary.json            术语词典：17 条口径与指标定义
   cinematique.json         提示词库数据集：2309 条技法 / 胶片 / 大师提示词（含来源与采集时点）
-  services.json            AI 服务渠道页数据集：两个店铺 + 13 件在售商品 + 流程与售后（2026-10-13 快照）
   leaderboard-vlm.json     排行榜数据集：维度权重、字段结构、entries
 build/
-  build_site.py            站点生成器（读 data/ → 输出七页 HTML）
+  build_site.py            站点生成器（读 data/ → 输出六页 HTML）
   build_data.py            数据层初始化（可从零重建 data/*.json）
   audit_independent.py     独立数据审计（重算 + 与产物逐值对拍）
   smoke.js                 浏览器冒烟测试
@@ -308,7 +306,7 @@ Excel 会强制写成 XLSX 二进制而扩展名仍是 `.csv` —— 下游一�
 | `build/verify_form.py` | 填写表体检：缺口 / 季付溢价 / 与数据层积分一致性 / 备注违规词 / 三周期单调性 / 年付无优惠 |
 | `build/preview_periods.py` | 生成 `周期结构核对.md`（数据入库前的结论预演，非站点交付物） |
 
-## 页面结构（6 页）
+## 页面结构（5 页）
 
 | 页面 | 内容 | 导航项 |
 |---|---|---|
@@ -317,7 +315,6 @@ Excel 会强制写成 XLSX 二进制而扩展名仍是 `.csv` —— 下游一�
 | `cycles.html` | **三周期全清单 · 动态排名**：左栏选指标/周期/排序/平台，主区动态出排名条；下方是该页原有的 6 组原始数据与方法论 | 三周期全清单 |
 | `glossary.html` | **术语表**：17 条口径与指标定义，每条带锚点 | 术语表 |
 | `prompts.html` | **提示词库**：2309 条电影技法与提示词模板，检索 / 板块筛选 / [Subject] 替换 / 一键复制 | 提示词库 |
-| `services.html` | **AI 服务（渠道信息页）**：HELIX-AI 两个店铺入口 + 13 件在售商品 + 购买流程与售后；不进首页，只占导航一栏；数据快照在 `data/services.json` | AI 服务 |
 | `leaderboard-vlm.html` | 视觉理解模型排行榜（待回填） | 视觉理解模型排行榜 |
 
 > 原先「04 更多对比数据」整块嵌在成本页里，与成本页主表在语义上重复（都是成本数据），
