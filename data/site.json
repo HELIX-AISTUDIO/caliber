@@ -32,6 +32,11 @@
       "key": "prompts",
       "label": "提示词库",
       "href": "prompts.html"
+    },
+    {
+      "key": "services",
+      "label": "AI 服务",
+      "href": "services.html"
     }
   ],
   "issues": "https://github.com/HELIX-AISTUDIO/caliber/issues/new",

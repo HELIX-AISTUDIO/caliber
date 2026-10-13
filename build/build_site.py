@@ -43,6 +43,7 @@ PLATFORMS = load("platforms.json")
 COST = load("cost-seedance25.json")
 GLOSSARY = load("glossary.json")
 CINEMATIQUE = load("cinematique.json")
+SERVICES = load("services.json")
 GLOS_MAP = {x["k"]: x for x in GLOSSARY["terms"]}
 
 
@@ -3616,7 +3617,7 @@ NOTFOUND_BODY = f"""
   <div class="eyebrow">{BRAND}</div>
   <h1>这个页面<br><em>不存在</em></h1>
   <p class="lead">地址可能输错了，或者这个页面已经下线。<br>
-     本站现在只有五页：首页、平台成本对比、三周期全清单、术语表、提示词库。</p>
+     本站现在有六页：首页、平台成本对比、三周期全清单、术语表、提示词库、AI 服务。</p>
   <div class="btns">
     <a class="btn btn-white" href="index.html">回到首页</a>
     <a class="btn btn-ghost" href="cost.html">平台成本对比</a>
@@ -3971,6 +3972,147 @@ cine_body = f"""
 """
 
 # ═══════════════════════════════════════════════════════════════════
+# 5c. AI 服务（渠道信息页）
+#
+# 内容源：HELIX-AI 渠道站（helix-ai-nav，独立静态站）。并入本站时只取「信息」：
+#   两个店铺入口 + 在售商品 + 购买流程 + 售后与联系；不复制其粒子 / 金红视觉。
+#   视觉照本站 token：lime 只做「价格 + 每卡一个标签 + 主行动」，卡片实心 #0B0B0B。
+#   商品与价格为快照（data/services.json）—— 本站 CSP connect-src 'none'，
+#   不做页面内实时同步；店铺调价后重新抓取写入 data/services.json 再构建即可。
+#   本页不进入首页，只在导航占一栏（按需求：不进首页、单独一栏）。
+# ═══════════════════════════════════════════════════════════════════
+SVC_CSS = r"""
+.svcshops{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:22px}
+.svcshop{background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:22px 24px;display:flex;flex-direction:column;gap:12px}
+.svcshop:hover{border-color:rgba(255,255,255,.17)}
+.svchd{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.svctag{background:#D1FE17;color:#0B0B0B;font-size:10.5px;font-weight:700;letter-spacing:.06em;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.svcshop h3{margin:0;font-size:15.5px;letter-spacing:-.015em}
+.svcbadge{font-size:11.5px;color:#767C85}
+.svcshop p{margin:0;font-size:13px;line-height:1.75;color:#8A9099}
+.svcpts{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.svcpts li{font-size:12.5px;color:#C9CDD2;line-height:1.65;padding-left:14px;position:relative}
+.svcpts li:before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:rgba(209,254,23,.8)}
+.svcfit{font-size:11.5px;color:#5A6069}
+.svcgo{margin-top:2px}
+.svcgoods{display:grid;grid-template-columns:repeat(auto-fill,minmax(236px,1fr));gap:12px;margin-top:22px}
+.svcitem{background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;text-decoration:none;transition:border-color .18s}
+.svcitem:hover{border-color:rgba(209,254,23,.5)}
+.svcrow{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.svcst{font-size:10px;font-weight:700;letter-spacing:.09em;color:#767C85;text-transform:uppercase}
+.svcpr{font-family:__MONO__;font-size:15.5px;font-weight:700;letter-spacing:-.03em;color:#D1FE17;white-space:nowrap}
+.svcnm{color:#fff;font-size:13.5px;font-weight:700;letter-spacing:-.01em;line-height:1.5}
+.svcmt{font-size:11px;color:#5A6069;line-height:1.5}
+.svcsteps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:22px}
+.svcstep{background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px 20px}
+.svcno{font-family:__MONO__;font-size:12px;font-weight:700;color:#D1FE17}
+.svct{color:#fff;font-size:14px;font-weight:700;margin:6px 0}
+.svcd{font-size:12.5px;color:#8A9099;line-height:1.75}
+.svcsup{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:22px}
+.svcbox{background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:20px 22px}
+.svclb{font-size:10.5px;font-weight:700;letter-spacing:.095em;text-transform:uppercase;color:#767C85}
+.svcqq{font-family:__MONO__;font-size:26px;font-weight:700;letter-spacing:-.03em;color:#fff;margin-top:8px}
+.svchours{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.svchours span{font-family:__MONO__;font-size:12px;color:#C9CDD2;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:5px 11px}
+.svcsup ul{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.svcsup li{font-size:12.5px;color:#8A9099;line-height:1.7}
+.svcsup li b{color:#C9CDD2}
+.svcn2{font-size:12px;color:#767C85;line-height:1.75;margin:10px 0 0}
+.svcsrc{margin-top:26px;border-left:2px solid rgba(255,201,60,.55);background:#0B0B0B;border-top:1px solid rgba(255,255,255,.08);border-right:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 20px}
+.svcsrc .t{font-size:12px;font-weight:700;color:#C9CDD2;margin-bottom:6px}
+.svcsrc p{margin:0;font-size:12px;color:#767C85;line-height:1.8}
+"""
+
+
+def render_services():
+    """渠道信息页 —— 全部内容来自 data/services.json，改数据不必碰本函数"""
+    SHOP_NM = {"wzyp": "链动小铺", "16688": "16688"}
+    snap = SERVICES["snapshot"]
+    shops = ""
+    for sh in SERVICES["shops"]:
+        pts = "".join(f"<li>{p}</li>" for p in sh["points"])
+        shops += (
+            '<div class="svcshop">'
+            + f'<div class="svchd"><span class="svctag">{sh["tag"]}</span><h3>{sh["name"]}</h3></div>'
+            + f'<div class="svcbadge">{sh["badge"]}</div>'
+            + f'<p>{sh["desc"]}</p>'
+            + f'<ul class="svcpts">{pts}</ul>'
+            + f'<div class="svcfit">{sh["fit"]}</div>'
+            + f'<div class="svcgo"><a class="btn btn-white" href="{sh["url"]}" target="_blank" rel="noopener">{sh["cta"]}</a></div>'
+            + '</div>')
+    goods = ""
+    for g in SERVICES["goods"]:
+        goods += (
+            f'<a class="svcitem" href="{g["href"]}" target="_blank" rel="noopener">'
+            f'<span class="svcrow"><span class="svcst">{SHOP_NM.get(g["shop"], g["shop"])}</span>'
+            f'<span class="svcpr">{g["price"]}</span></span>'
+            f'<span class="svcnm">{g["name"]}</span>'
+            f'<span class="svcmt">{g["meta"]}</span></a>')
+    steps = ""
+    for st in SERVICES["steps"]:
+        steps += (f'<div class="svcstep"><div class="svcno">0{st["n"]}</div>'
+                  f'<div class="svct">{st["t"]}</div><div class="svcd">{st["d"]}</div></div>')
+    sup = SERVICES["support"]
+    hours = "".join(f"<span>{h}</span>" for h in sup["hours"])
+    notes = "".join(f'<li><b>{n["k"]}</b>：{n["v"]}</li>' for n in sup["notes"])
+    return f"""
+<div class="wrap">
+<section class="reveal" style="margin-top:56px">
+  <div class="eyebrow">HELIX AI STUDIO · 服务渠道</div>
+  <h1>AI 服务源头渠道<br><em>两个店铺，任选一个</em></h1>
+  <p class="lead">GPT Plus / Pro 官方卡冲、Codex 与 Claude 美国实卡接码、成品号与 CDK 次数包 ——
+  同一供货渠道、同一售后团队。<b>本栏为渠道信息页</b>：不直接销售、不参与收款与发货，交易与售后均在第三方店铺平台完成。</p>
+  <div class="btns">
+    <a class="btn btn-white" href="#svc-shops">先选店铺</a>
+    <a class="btn btn-ghost" href="#svc-goods">看全部在售商品</a>
+  </div>
+</section>
+
+<section class="reveal" id="svc-shops">
+  {sec_head('01', '两个店铺，任选一个进入', '两店为同一供货方、同一售后团队，商品与服务一致；差别只在平台：一个主打源头低价，一个主打平台担保交易。哪边下单都可以，售后统一处理。')}
+  <div class="svcshops">{shops}</div>
+</section>
+
+<section class="reveal" id="svc-goods">
+  {sec_head('02', '在售商品', f'点击任意商品直达店铺下单页。价格为 {snap} 快照，随店铺活动浮动，以商品页实时价格为准。')}
+  <div class="svcgoods">{goods}</div>
+</section>
+
+<section class="reveal" id="svc-flow">
+  {sec_head('03', '三步完成购买', '全程自助，无需等待人工。下单前请先看清商品详情页的说明与使用要求。')}
+  <div class="svcsteps">{steps}</div>
+</section>
+
+<section class="reveal" id="svc-support">
+  {sec_head('04', '售后与联系', '遇到问题先看订单页与商品说明，仍未解决再联系售后群。')}
+  <div class="svcsup">
+    <div class="svcbox">
+      <div class="svclb">SERVICE HOURS · 售后服务时间</div>
+      <div class="svchours">{hours}</div>
+      <ul>{notes}</ul>
+    </div>
+    <div class="svcbox">
+      <div class="svclb">AFTER-SALE QQ · 售后 QQ 群</div>
+      <div class="svcqq">{sup['qq']}</div>
+      <p class="svcn2">缺货、退款、订单异常等问题请直接私聊客服并备注来意。下单请认准本页两个店铺入口，任何其他渠道与本页无关。</p>
+      <div class="btns" style="margin-top:16px">
+        <a class="btn btn-ghost" href="#svc-shops">回到店铺入口</a>
+      </div>
+    </div>
+  </div>
+  <div class="svcsrc">
+    <div class="t">关于本页数据</div>
+    <p>{SERVICES['note']}　交易、发货与售后均由第三方店铺完成，请以店铺页面展示的实时价格、库存与规则为准；商品仅限正当合规用途。</p>
+  </div>
+</section>
+</div>
+{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　AI 服务渠道 · 数据快照 {snap}')}
+"""
+
+
+services_body = render_services()
+
+# ═══════════════════════════════════════════════════════════════════
 # 6. 输出 + 自检
 # ═══════════════════════════════════════════════════════════════════
 # ═══════════════════════════════════════════════════════════════════
@@ -3994,6 +4136,9 @@ PAGES = {
                          nav("prompts"), cine_body, canon="prompts",
                          extra_css=sub_css(CINE_CSS),
                          extra_js=CINE_JS.replace("__CINE__", CINE_JSON), self_imgs=True),
+    "services.html": page("AI 服务", f"HELIX-AI 服务渠道信息页：{len(SERVICES['goods'])} 件在售商品与两个店铺入口，GPT Plus / Pro 代充、Codex 与 Claude 接码、CDK 次数包；交易与售后均在第三方店铺完成。",
+                          nav("services"), services_body, canon="services",
+                          extra_css=sub_css(SVC_CSS)),
 }
 
 
