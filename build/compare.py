@@ -8,19 +8,20 @@ def membership_anchor(platform):
     return "membership-" + {"即梦": "jimeng", "小云雀": "xiaoyunque"}.get(platform, platform.lower())
 
 
-def compare_view(rows, readings, updated, periods):
+def compare_view(rows, readings, updated, periods, colors):
     platforms = list(readings)
     display_names = {"libtv": "LibTV", "Neowow": "NeoWOW", "Tapnow": "TapNow"}
     plans = []
-    for row in rows:
+    for index, row in enumerate(rows):
         plat = row["plat"]
         plans.append({
+            "id": index,
             "platform": plat,
             "tier": row["tier"],
             "anchor": membership_anchor(plat),
             "periods": {key: [round(p["payCNY"], 2), p["cr"]] for key, p in row["byP"].items()},
         })
-    data = json.dumps({"plans": plans, "readings": readings, "names": display_names,
+    data = json.dumps({"plans": plans, "readings": readings, "names": display_names, "colors": colors,
                        "periods": {key: [label, months] for key, label, months, _ in periods}},
                       ensure_ascii=False).replace("<", "\\u003c")
     platform_options = "".join(
@@ -36,12 +37,14 @@ def compare_view(rows, readings, updated, periods):
 <main id="compare-tool" class="compare-page" data-skip-intro>
   <header class="compare-heading">
     <div>
-      <h1>视频生成成本对比</h1>
-      <p>按每月用量找最低价，或输入预算看最多能做多少条。</p>
+      <h1>哪家画布更划算？</h1>
+      <p>视频生成成本榜 · 用相同规格比较会员价格、每月产能和单条成本。</p>
     </div>
     <p class="compare-date">{len(platforms)} 家平台 · 数据更新于 <time datetime="{updated}">{updated}</time></p>
   </header>
-  <div class="compare-workspace">
+  <nav class="compare-page-links" aria-label="榜单导航">
+    <a href="#compare-results">榜单总览</a><a href="#compare-frontier">价格与产能</a><a href="#compare-records-title">数据与口径</a>
+  </nav>
   <form id="compare-form" class="compare-form">
     <fieldset class="compare-choice compare-mode">
       <legend>怎么比</legend>
@@ -103,11 +106,15 @@ def compare_view(rows, readings, updated, periods):
       <h2 id="compare-results-title">会员成本榜</h2>
       <div class="compare-result-filters">
         <label for="compare-platform">平台 <select id="compare-platform"><option value="">全部平台</option>{platform_options}</select></label>
-        <label for="compare-all"><input id="compare-all" type="checkbox"> 显示全部档位</label>
         <button id="compare-reset" type="button">重置</button>
       </div>
     </div>
     <p class="compare-result-status" id="compare-status" role="status"></p>
+    <div id="compare-highlights" class="compare-highlights" hidden></div>
+    <figure id="compare-bar-figure" class="compare-bar-figure" hidden>
+      <figcaption id="compare-bar-label"></figcaption>
+      <div class="compare-bars-scroll"><div id="compare-bars" class="compare-bars"></div></div>
+    </figure>
     <p id="compare-order" class="compare-order"></p>
     <div id="compare-grid">
       <table aria-label="符合规格的会员方案">
@@ -118,11 +125,37 @@ def compare_view(rows, readings, updated, periods):
         <tbody id="compare-rows"></tbody>
       </table>
     </div>
+    <label class="compare-all-toggle"><input id="compare-all" type="checkbox"> 显示全部档位</label>
     <p id="compare-coverage" class="compare-coverage"></p>
     <p id="compare-calc-note" class="compare-calc-note"></p>
     <noscript><p>启用 JavaScript 可以实时计算。<a href="cycles.html#allperiod">查看固定规格的完整对比表</a></p></noscript>
   </section>
-  </div>
+  <section id="compare-frontier" class="compare-frontier" aria-labelledby="compare-frontier-title" hidden>
+    <header class="compare-result-head">
+      <h2 id="compare-frontier-title">价格与产能前沿</h2>
+      <fieldset class="compare-choice compare-frontier-mode">
+        <legend>横轴</legend>
+        <div>
+          <label><input type="radio" name="frontier-metric" value="spend" checked><span>首期实付</span></label>
+          <label><input type="radio" name="frontier-metric" value="unit"><span>用满单条成本</span></label>
+        </div>
+      </fieldset>
+    </header>
+    <p id="compare-frontier-note"></p>
+    <div class="compare-frontier-layout">
+      <figure class="compare-frontier-chart">
+        <figcaption>每月约能做（条）</figcaption>
+        <div id="compare-frontier-y" class="compare-frontier-y" aria-hidden="true"></div>
+        <div id="compare-frontier-plot" class="compare-frontier-plot" role="group" aria-label="可点击的会员档位散点"></div>
+        <div id="compare-frontier-x" class="compare-frontier-x" aria-hidden="true"></div>
+        <div id="compare-frontier-axis" class="compare-frontier-axis"></div>
+      </figure>
+      <div class="compare-frontier-side">
+        <div id="compare-point-detail" class="compare-point-detail" aria-live="polite"></div>
+        <div id="compare-frontier-list" class="compare-frontier-list" aria-label="前沿档位"></div>
+      </div>
+    </div>
+  </section>
   <div class="compare-record-links" aria-label="核对价格与来源">
     <a href="#membership-prices">会员价格明细</a>
     <a href="#offers">活动与赠送权益</a>
@@ -130,10 +163,11 @@ def compare_view(rows, readings, updated, periods):
   </div>
 </main>
 """
-    return html, COMPARE_JS.replace("__COMPARE_DATA__", data)
+    return html, COMPARE_JS.replace("__COMPARE_DATA__", data).replace("__COMPARE_CHARTS__", COMPARE_CHARTS)
 
 
 COMPARE_CSS = Path(__file__).with_name("compare_style.css").read_text(encoding="utf-8")
+COMPARE_CHARTS = Path(__file__).with_name("compare_charts.js").read_text(encoding="utf-8")
 
 
 COMPARE_JS = r"""
@@ -164,6 +198,7 @@ COMPARE_JS = r"""
   const perClip = new Intl.NumberFormat('zh-CN', {style:'currency', currency:'CNY'});
   const defaultMode = new URLSearchParams(location.search).get('mode') === 'budget' ? 'budget' : 'target';
   const nameOf = platformName => data.names[platformName] || platformName;
+  __COMPARE_CHARTS__
   mode.value = defaultMode;
 
   function render(){
@@ -191,6 +226,7 @@ COMPARE_JS = r"""
     coverage.textContent = '';
     order.textContent = '';
     table.hidden = true;
+    clearCharts();
     if (!input.validity.valid) {
       result.textContent = byBudget ? '请输入 ¥1 至 ¥1,000,000 的预算，最多保留两位小数。'
         : '请输入 1 到 10,000 之间的整数条数。';
@@ -211,7 +247,7 @@ COMPARE_JS = r"""
       if (!reading || !pricing) continue;
       const [pay, monthlyCredits] = pricing;
       const capacity = Math.floor(monthlyCredits / reading.credits);
-      offers.push({plan, pay, capacity, monthlyCredits, sourceDate:reading.sourceDate});
+      offers.push({plan, pay, capacity, monthlyCredits, creditsPerClip:reading.credits, sourceDate:reading.sourceDate});
     }
     const providers = new Set(offers.map(offer => offer.plan.platform));
     for (const name of available.keys()) {
@@ -277,6 +313,8 @@ COMPARE_JS = r"""
       + ' · ' + ranked.length + (showAll.checked ? ' 档符合' : ' 家平台符合') : '';
     displayed.forEach((offer, index) => {
       const tr = rows.insertRow();
+      tr.dataset.chartPlan = offer.plan.id;
+      tr.tabIndex = -1;
       if (offer === best) tr.className = 'compare-best';
       const title = tr.insertCell();
       const rank = document.createElement('span');
@@ -302,6 +340,7 @@ COMPARE_JS = r"""
         const bar = document.createElement('span');
         bar.className = 'compare-bar';
         bar.setAttribute('aria-hidden', 'true');
+        bar.style.background = data.colors[offer.plan.platform];
         bar.style.width = ((byBudget ? offer.capacity : offer.pay) / scale * 100) + '%';
         (byBudget ? volumeCell : spendCell).append(bar);
       }
@@ -312,6 +351,7 @@ COMPARE_JS = r"""
     if (short.length) notes.push(short.map(nameOf).join('、') + (byBudget ? ' 在当前预算内暂无可用档位' : ' 的单账号档位未达用量'));
     if (excluded.length) notes.push('当前未计入：' + excluded.join('、'));
     coverage.textContent = notes.join('。') + (notes.length ? '。' : '');
+    renderCharts(offers, ranked, byBudget, cycle[1]);
   }
   form.addEventListener('submit', event => event.preventDefault());
   form.addEventListener('change', render);

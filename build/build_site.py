@@ -3439,7 +3439,7 @@ cycles_body = f"""
 {foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　{len(ROWS)} 个可选积分档 × 3 个周期')}
 """
 
-COMPARE_VIEW, COMPARE_JS = compare_view(ROWS, CANVAS["rows"], UPDATED, PERIODS)
+COMPARE_VIEW, COMPARE_JS = compare_view(ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR)
 cost_body = f"""
 {COMPARE_VIEW}
 <section class="compare-records" aria-labelledby="compare-records-title">
@@ -3613,19 +3613,39 @@ cost_body = f"""
 """
 
 # ── 首页 ──────────────────────────────────────────────────────────
+home_monthly = [(r, r["byP"]["m"], int(r["byP"]["m"]["cap"]))
+                for r in ROWS if "m" in r["byP"] and r["byP"]["m"]["cap"] >= 1]
+home_goal = min((item for item in home_monthly if item[2] >= 30), key=lambda item: item[1]["payCNY"], default=None)
+home_unit = min(home_monthly, key=lambda item: item[1]["payCNY"] / item[2])
+home_volume = max(home_monthly, key=lambda item: (item[2], -item[1]["payCNY"]))
+home_insights = "".join(
+    f'<div><span>{label}</span><strong style="--series:{row["color"]}">{row["plat"]} {row["tier"]}</strong>'
+    f'<small>{detail}{" · 扣分沿用留档" if REVIEW[row["plat"]].get("creditPending") else ""}</small></div>'
+    for label, (row, price, capacity), detail in (
+        ("月做 30 条，首期最省", home_goal, f'¥{f2(home_goal[1]["payCNY"])} 首期') if home_goal else
+        ("首期支出参考", home_unit, f'¥{f2(home_unit[1]["payCNY"])} 首期'),
+        ("用满基础积分，单条最省", home_unit, f'¥{f2(home_unit[1]["payCNY"] / home_unit[2])} / 条'),
+        ("单账号月产能最高", home_volume, f'约 {home_volume[2]} 条/月'),
+    )
+)
 home_body = f"""
 <main class="compare-page compare-home" data-skip-intro>
   <header id="cost" class="compare-heading">
     <div>
-      <h1>AI 视频会员，怎么买划算？</h1>
-      <p>比较 {len(PLATFORMS)} 家平台的会员价格和画布扣分，按你的规格和用量计算。</p>
+      <h1>哪家画布更划算？</h1>
+      <p>用同一条视频的规格，比较 {len(PLATFORMS)} 家平台的价格、产能和会员权益。</p>
     </div>
     <p class="compare-date">数据更新于 <time datetime="{UPDATED}">{UPDATED}</time></p>
   </header>
   <div class="btns compare-home-actions">
-    <a class="btn btn-white" href="cost.html">开始比价</a>
+    <a class="btn btn-white" href="cost.html">查看完整榜单</a>
     <a href="cost.html?mode=budget">按预算估算</a>
   </div>
+  <section class="home-benchmark-block" aria-labelledby="home-benchmark-title">
+    <h2 id="home-benchmark-title">月付标准版 720p 一览</h2>
+    <div class="home-benchmark">{home_insights}</div>
+    <a href="cost.html#compare-frontier">看价格与产能图</a>
+  </section>
   <details id="budget" class="compare-home-budget">
     <summary>查看标准版的预算与升档门槛<span class="chev">›</span></summary>
     <div class="dbody">
@@ -4062,12 +4082,12 @@ PAGES = {
     #   没有才回落到 index.html 并返回 200。`_redirects` 那条实测没拦住，
     #   404.html 是更可靠的开关。不挂进 nav，也不参与任何导航高亮。
     #   canon=None —— 不发分享卡片，不给错误页做分享预览。
-    "404.html": page("页面不存在", "你要找的页面不存在。", nav(""), NOTFOUND_BODY),
+    "404.html": page("页面不存在", "你要找的页面不存在。", nav(""), NOTFOUND_BODY, extra_css=COMPARE_CSS),
     "glossary.html": page("术语表", f"{len(GLOSSARY['terms'])} 条口径与指标定义：口径、单条成本、承诺期、倒挂、组合订阅等。",
-                          nav("glossary"), glossary_body, canon="glossary"),
+                          nav("glossary"), glossary_body, canon="glossary", extra_css=COMPARE_CSS),
     "prompts.html": page("提示词库", f"{CINE_N} 条电影技法与提示词模板：摄影机运动、灯光、构图、剪辑、胶片、镜头与大师肖像，可直接复制投喂 AI 生成器。",
                          nav("prompts"), cine_body, canon="prompts",
-                         extra_css=sub_css(CINE_CSS),
+                         extra_css=sub_css(CINE_CSS) + COMPARE_CSS,
                          extra_js=CINE_JS.replace("__CINE__", CINE_JSON), self_imgs=True),
 }
 
