@@ -8,6 +8,7 @@ import io
 import json
 import re
 import os
+from decimal import Decimal, ROUND_HALF_UP
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # site/
 DAT = os.path.join(ROOT, "data")
@@ -79,9 +80,9 @@ for plan in C["plans"]:
                 continue
             credit = {"y": m_credit, "q": qcr, "m": mcr}[key]
             mo = MONTHS[key]
-            pay_cny = raw * fx                        # ← 汇率方向：USD × RATE
-            per_unit = pay_cny / (credit * mo)         # 每积分人民币
-            per_clip = per_unit * CPV[plat]            # 单条成本
+            price_fen = (Decimal(str(raw)) * Decimal(str(fx)) * 100).to_integral_value(rounding=ROUND_HALF_UP)
+            pay_cny = int(price_fen) / 100            # USD × RATE，再按人民币分入账
+            per_clip = float(price_fen * CPV[plat] / (100 * credit * mo))
             # ⚠ 月产能必须用【该周期自己的积分】→ 买月付拿到的是 mCr，
             #   买季付拿到的是 qCr。用年付月积分套所有周期是错的：
             #   即梦标准会员月付 4,000 / 年付 2,210，两者产能差近一倍。
@@ -244,5 +245,6 @@ if fails:
     print("\n！！发现 %d 处问题：" % len(fails))
     for f in fails[:20]:
         print("   ✗ " + f)
+    raise SystemExit(1)
 else:
     print("✓ 全部通过：%d 条记录独立重算，与渲染产物逐值一致，排名顺序正确。" % len(recs))

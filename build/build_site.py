@@ -20,6 +20,7 @@ import os
 import re
 import shutil
 import subprocess
+from decimal import Decimal, ROUND_HALF_UP
 from html import escape
 
 from compare import COMPARE_CSS, DISCLOSURE_JS, compare_view, membership_anchor
@@ -90,6 +91,10 @@ CU = {"CNY": "¥", "USD": "$"}
 # ═══════════════════════════════════════════════════════════════════
 # 2. 派生计算 —— 全部现算，无落盘
 # ═══════════════════════════════════════════════════════════════════
+def convert_cny(amount, rate):
+    return float((Decimal(str(amount)) * Decimal(str(rate))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+
 def auto_label(m):
     """按数量级选可读单位：11.7K / 12K / 10.8W"""
     if m >= 100000:
@@ -116,12 +121,14 @@ def build_rows():
             monthly, price = c["credits"], c["price"]
             year_credits = monthly * 12
             unit = price / year_credits                    # 本币/积分
-            per_video = unit * per * k                     # CNY/条
+            price_cny = convert_cny(price, k)
+            unit_cny = price_cny / year_credits
+            per_video = unit_cny * per                     # CNY/条
             mcap = monthly / per                           # 条/月
             out.append({
                 "plat": plat, "tier": p["tier"], "cur": cur, "k": k, "per": per,
-                "monthly": monthly, "price": price, "priceCNY": price * k,
-                "unitCNY": unit * k, "perYuan": 1.0 / unit,
+                "monthly": monthly, "price": price, "priceCNY": price_cny,
+                "unitCNY": unit_cny, "perYuan": 1.0 / unit,
                 "perVideo": per_video, "perSec": per_video / SEC_PER_CLIP,
                 "mCap": mcap, "yCap": mcap * 12,
                 "label": c.get("label") or (auto_label(monthly) if multi else ""),
@@ -169,9 +176,9 @@ for r in ROWS:
         # ⚠ 三周期各自的月积分：年付用 credits，季付用 qCr，月付用 mCr（缺省同年付）。
         # 原实现把年付与季付绑在同一个值上 —— 若平台按周期给不同积分就会算错。
         cr = {"y": r["monthly"], "q": r["qCr"], "m": r["mCr"]}[key]
-        unit = pay / (cr * months)
-        r["byP"][key] = {"pay": pay, "payCNY": pay * r["k"], "cr": cr,
-                         "perVideo": unit * r["per"] * r["k"], "cap": cr / r["per"]}
+        pay_cny = convert_cny(pay, r["k"])
+        r["byP"][key] = {"pay": pay, "payCNY": pay_cny, "cr": cr,
+                         "perVideo": pay_cny * r["per"] / (cr * months), "cap": cr / r["per"]}
     # 该档三周期中的最优周期（单条成本最低）
     r["bestP"] = min(r["byP"], key=lambda kk: r["byP"][kk]["perVideo"]) if r["byP"] else None
     # 周期倒挂：更长的承诺期反而单价更高 —— 逐对检查（季/月、年/月、年/季）
@@ -2641,6 +2648,9 @@ def membership_price(option, currency, price_key, renewal_key, period):
         return '<td class="sub">未提供</td>'
     renewal = option.get(renewal_key)
     extra = [f'续费 {cash(renewal, currency)}' if renewal is not None else "续费价未展示"]
+    list_price = option.get("listPrice", {}).get(period)
+    if list_price is not None:
+        extra.insert(0, f'页面原价 {cash(list_price, currency)}')
     if period == "y" and option.get("yearOneOff"):
         extra = ["一次性购买"]
     if period == "y" and option.get("annualMonthlyRate"):
@@ -3656,26 +3666,13 @@ HOME_TITLE_FONT_CSS = '''
 '''
 home_monthly = [(r, r["byP"]["m"], int(r["byP"]["m"]["cap"]))
                 for r in ROWS if "m" in r["byP"] and r["byP"]["m"]["cap"] >= 1]
-home_goal = min((item for item in home_monthly if item[2] >= 30), key=lambda item: item[1]["payCNY"], default=None)
-home_unit = min(home_monthly, key=lambda item: item[1]["payCNY"] / item[2])
-home_volume = max(home_monthly, key=lambda item: (item[2], -item[1]["payCNY"]))
-home_insights = "".join(
-    f'<div><span>{label}</span><strong>{plogo(row["plat"], "comparison-mark")}{row["plat"]} {row["tier"]}</strong>'
-    f'<small>{detail}{" · 扣分沿用留档" if REVIEW[row["plat"]].get("creditPending") else ""}</small></div>'
-    for label, (row, price, capacity), detail in (
-        ("月做 30 条，首期最省", home_goal, f'¥{f2(home_goal[1]["payCNY"])} 首期') if home_goal else
-        ("首期支出参考", home_unit, f'¥{f2(home_unit[1]["payCNY"])} 首期'),
-        ("用满基础积分，单条最省", home_unit, f'¥{f2(home_unit[1]["payCNY"] / home_unit[2])} / 条'),
-        ("单账号月产能最高", home_volume, f'约 {home_volume[2]} 条/月'),
-    )
-)
 home_preview = {}
 for row, price, capacity in sorted(home_monthly, key=lambda item: item[1]["payCNY"]):
     if capacity >= 30:
         home_preview.setdefault(row["plat"], (row, price))
 home_preview_limit = max((price["payCNY"] for _, price in home_preview.values()), default=1)
 home_preview_rows = "".join(
-    f'<li><span>{plogo(plat, "comparison-mark")}{plat}</span>'
+    f'<li><span>{plogo(plat, "comparison-mark")}{canvas_display_names.get(plat, plat)}</span>'
     f'<span class="home-preview-track" aria-hidden="true"><i style="--series:{row["color"]};'
     f'--share:{price["payCNY"] / home_preview_limit:.1%}"></i></span><strong>¥{f2(price["payCNY"])}</strong></li>'
     for plat, (row, price) in home_preview.items()
@@ -3692,23 +3689,17 @@ home_body = f"""
         <a class="btn btn-white" href="cost.html">查看完整榜单</a>
         <a href="cost.html?mode=budget">按预算估算</a>
       </div>
+      <p class="home-report-meta">{len(PLATFORMS)} 家平台 · {len(ROWS)} 个可参与对比的会员档位 · <time datetime="{UPDATED}">{UPDATED}</time></p>
     </div>
-    <div class="home-report-meta">
-      <div><span>覆盖平台</span><b>{len(PLATFORMS)} 家</b></div>
-      <div><span>参与计算的会员积分档</span><b>{len(ROWS)} 档</b></div>
-      <div><span>数据更新</span><b><time datetime="{UPDATED}">{UPDATED}</time></b></div>
-    </div>
+    <section class="home-benchmark-block" aria-labelledby="home-benchmark-title">
+      <div class="compare-result-head">
+        <h2 id="home-benchmark-title">月做 30 条，首期花多少</h2>
+        <p>Seedance 2.5 标准版 · 720p · 30 秒 · 月付</p>
+      </div>
+      <ul class="home-ranking-preview">{home_preview_rows}</ul>
+      <p class="home-chart-caption">各平台满足用量的最低实付 · <a href="cost.html#canvas-comparison">查看画布扣分</a></p>
+    </section>
   </div>
-  <section class="home-benchmark-block" aria-labelledby="home-benchmark-title">
-    <div class="compare-result-head">
-      <h2 id="home-benchmark-title">月付对比概览</h2>
-      <p>Seedance 2.5 标准版 · 720p · 30 秒</p>
-    </div>
-    <div class="home-benchmark">{home_insights}</div>
-    <p class="compare-order">月做 30 条 · 各平台符合用量的最低首期实付</p>
-    <ul class="home-ranking-preview">{home_preview_rows}</ul>
-    <a href="cost.html#compare-frontier">看价格与产能图</a>
-  </section>
   <details id="budget" class="compare-home-budget">
     <summary>查看标准版的预算与升档门槛<span class="chev">›</span></summary>
     <div class="dbody">

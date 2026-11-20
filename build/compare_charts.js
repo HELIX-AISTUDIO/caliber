@@ -47,8 +47,10 @@
 
   function revealRank(offer) {
     const selector = '[data-chart-plan="' + offer.plan.id + '"]';
-    if (!rows.querySelector(selector)) {
-      includeAll = true;
+    const pendingRow = !rows.querySelector(selector);
+    if (chartView.checked || pendingRow) {
+      rankView.querySelector('[value=table]').checked = true;
+      if (pendingRow) includeAll = true;
       render();
     }
     const row = rows.querySelector(selector);
@@ -71,24 +73,21 @@
     return button;
   }
 
-  function drawHighlights(offers, ranked, byBudget, months) {
+  function drawHighlights(offers, months) {
     highlights.replaceChildren();
-    if (!ranked.length) return;
-    const winner = ranked[0];
+    if (!offers.length) return;
     const efficiency = offer => offer.pay / (offer.capacity * months);
     const lowestUnit = offers.filter(offer => offer.capacity > 0)
       .sort((a,b) => efficiency(a) - efficiency(b) || a.pay - b.pay)[0];
     const maxCapacity = offers.slice().sort((a,b) => b.capacity - a.capacity || a.pay - b.pay)[0];
-    const cards = [
-      [byBudget ? '预算内产能最高' : '达到用量最省', winner,
-       money.format(winner.pay) + ' · 约 ' + winner.capacity + ' 条/月'],
-      ['基础积分用满时最省', lowestUnit,
+    const insights = [
+      ['全档单条成本最低', lowestUnit,
        perClip.format(efficiency(lowestUnit)) + ' / 条 · 周期实付 ' + money.format(lowestUnit.pay)],
-      ['单账号月产能最高', maxCapacity,
+      ['全档单账号月产能最高', maxCapacity,
        maxCapacity.capacity + ' 条/月 · 周期实付 ' + money.format(maxCapacity.pay)]
     ];
-    for (const [label, offer, description] of cards) {
-      const card = document.createElement('div');
+    for (const [label, offer, description] of insights) {
+      const row = document.createElement('div');
       const heading = document.createElement('span');
       heading.textContent = label;
       const link = document.createElement('button');
@@ -98,8 +97,8 @@
       tint(link, offer);
       const detail = document.createElement('small');
       detail.textContent = description + (offer.sourceDate ? ' · 扣分沿用留档' : '');
-      card.append(heading, link, detail);
-      highlights.append(card);
+      row.append(heading, link, detail);
+      highlights.append(row);
     }
     highlights.hidden = false;
   }
@@ -107,7 +106,7 @@
   function drawBars(ranked, byBudget) {
     bars.replaceChildren();
     const leading = ranked.slice(0, 10);
-    if (!leading.length) return;
+    if (!chartView.checked || !leading.length) return;
     const valueOf = byBudget ? offer => offer.capacity : offer => offer.pay;
     const format = byBudget ? value => value.toLocaleString('zh-CN') + ' 条' : value => money.format(value);
     const top = axisMax(Math.max(...leading.map(valueOf)));
@@ -245,7 +244,7 @@
 
   function renderCharts(offers, ranked, byBudget, months) {
     currentPoints = offers.filter(offer => offer.capacity > 0);
-    drawHighlights(currentPoints, ranked, byBudget, months);
+    drawHighlights(currentPoints, months);
     drawBars(ranked, byBudget);
     drawFrontier(months);
   }

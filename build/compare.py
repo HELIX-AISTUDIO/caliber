@@ -19,7 +19,7 @@ def compare_view(rows, readings, updated, periods, colors, logos):
             "platform": plat,
             "tier": row["tier"],
             "anchor": membership_anchor(plat),
-            "periods": {key: [round(p["payCNY"], 2), p["cr"]] for key, p in row["byP"].items()},
+            "periods": {key: [p["payCNY"], p["cr"]] for key, p in row["byP"].items()},
         })
     data = json.dumps({"plans": plans, "readings": readings, "names": display_names, "colors": colors, "logos": logos,
                        "periods": {key: [label, months] for key, label, months, _ in periods}},
@@ -38,11 +38,11 @@ def compare_view(rows, readings, updated, periods, colors, logos):
   <header class="compare-heading">
     <div>
       <h1>视频生成成本榜</h1>
-      <p class="compare-date"><time datetime="{updated}">{updated}</time><span>{len(platforms)} 家平台</span><span>30 秒 · 16:9 · 全能参考</span></p>
+      <p class="compare-date"><span>Seedance 2.5 · 30 秒 · 16:9 · 全能参考</span><span>{len(platforms)} 家平台</span><time datetime="{updated}">采集于 {updated}</time></p>
     </div>
   </header>
   <nav class="compare-page-links" aria-label="榜单导航">
-    <a href="#compare-results">榜单总览</a><a href="#compare-frontier">价格与产能</a><a href="#compare-records-title">数据与口径</a>
+    <a href="#compare-results">榜单</a><a href="#compare-frontier">价格与产能</a><a href="#compare-records-title">原始数据</a>
   </nav>
   <form id="compare-form" class="compare-form">
     <fieldset class="compare-choice compare-mode">
@@ -54,9 +54,9 @@ def compare_view(rows, readings, updated, periods, colors, logos):
     </fieldset>
     <label class="compare-field" for="compare-model"><span class="filter-caption">模型</span>
       <select id="compare-model">
-        <option value="0">Seedance 2.5 标准版</option>
-        <option value="2">Seedance 2.5 Flash</option>
-        <option value="4">Seedance 2.5 样片模式</option>
+        <option value="0">标准版</option>
+        <option value="2">Flash</option>
+        <option value="4">样片模式</option>
       </select>
     </label>
     <div class="compare-spec-picker">
@@ -106,9 +106,15 @@ def compare_view(rows, readings, updated, periods, colors, logos):
   <section id="compare-results" class="compare-results" aria-labelledby="compare-results-title">
     <header class="compare-result-head">
       <h2 id="compare-results-title">会员成本榜</h2>
+      <fieldset class="compare-choice compare-rank-view" id="compare-rank-view">
+        <legend>榜单视图</legend>
+        <div>
+          <label><input type="radio" name="rank-view" value="table" checked><span>表格</span></label>
+          <label><input type="radio" name="rank-view" value="chart"><span>柱图</span></label>
+        </div>
+      </fieldset>
     </header>
     <p class="compare-result-status" id="compare-status" role="status"></p>
-    <div id="compare-highlights" class="compare-highlights" hidden></div>
     <figure id="compare-bar-figure" class="compare-bar-figure" hidden>
       <figcaption id="compare-bar-label"></figcaption>
       <div class="compare-bars-scroll"><div id="compare-bars" class="compare-bars"></div></div>
@@ -126,6 +132,7 @@ def compare_view(rows, readings, updated, periods, colors, logos):
     <button id="compare-all" type="button" aria-expanded="false" aria-controls="compare-grid" hidden>查看全部档位</button>
     <p id="compare-coverage" class="compare-coverage"></p>
     <p id="compare-calc-note" class="compare-calc-note"></p>
+    <div id="compare-highlights" class="compare-highlights" hidden></div>
     <noscript><p>启用 JavaScript 可以实时计算。<a href="cycles.html#allperiod">查看固定规格的完整对比表</a></p></noscript>
   </section>
   <section id="compare-frontier" class="compare-frontier" aria-labelledby="compare-frontier-title" hidden>
@@ -156,7 +163,8 @@ def compare_view(rows, readings, updated, periods, colors, logos):
   </section>
   <div class="compare-record-links" aria-label="核对价格与来源">
     <a href="#membership-prices">会员价格明细</a>
-    <a href="#offers">活动与赠送权益</a>
+    <a href="#canvas-comparison">画布扣分</a>
+    <a href="#offers">活动优惠</a>
     <a href="#pricing-evidence">采集截图</a>
   </div>
 </main>
@@ -190,9 +198,11 @@ COMPARE_JS = r"""
   const budgetPanel = document.getElementById('compare-budget-panel');
   const platform = document.getElementById('compare-platform');
   const showAll = document.getElementById('compare-all');
+  const rankView = document.getElementById('compare-rank-view');
+  const chartView = rankView.querySelector('[value=chart]');
   const presets = form.querySelectorAll('[data-target], [data-budget]');
   const data = __COMPARE_DATA__;
-  const money = new Intl.NumberFormat('zh-CN', {style:'currency', currency:'CNY', maximumFractionDigits:2, minimumFractionDigits:0});
+  const money = new Intl.NumberFormat('zh-CN', {style:'currency', currency:'CNY', trailingZeroDisplay:'stripIfInteger'});
   const perClip = new Intl.NumberFormat('zh-CN', {style:'currency', currency:'CNY'});
   const defaultMode = new URLSearchParams(location.search).get('mode') === 'budget' ? 'budget' : 'target';
   const nameOf = platformName => data.names[platformName] || platformName;
@@ -225,6 +235,7 @@ COMPARE_JS = r"""
 
   function render(){
     const byBudget = mode.value === 'budget';
+    const byChart = chartView.checked;
     const input = byBudget ? budget : target;
     const amount = input.valueAsNumber;
     const cycle = data.periods[period.value];
@@ -323,7 +334,7 @@ COMPARE_JS = r"""
     }
     const ranked = includeAll ? matched : [...platformLeaders.values()];
     const displayed = includeAll ? [...ranked, ...offers.filter(offer => !fits(offer)).sort(rankBy)] : ranked;
-    showAll.hidden = offers.length === platformLeaders.size;
+    showAll.hidden = byChart || offers.length === platformLeaders.size;
     showAll.setAttribute('aria-expanded', String(includeAll));
     showAll.textContent = includeAll ? '收起完整档位' : '查看全部 ' + offers.length + ' 个档位';
     if (ranked.length > 1) {
@@ -365,7 +376,7 @@ COMPARE_JS = r"""
       const reason = byBudget ? (offer.pay > amount ? '超预算' : '额度不足') : '未达用量';
       addMetric(tr, matchedOffer ? perClip.format(unit) : reason, unit, unitMax, null);
     });
-    table.hidden = !displayed.length;
+    table.hidden = byChart || !displayed.length;
     const short = [...providers].filter(name => !matched.some(offer => offer.plan.platform === name));
     const notes = [];
     if (short.length) notes.push(short.map(nameOf).join('、') + (byBudget ? ' 在当前预算内暂无可用档位' : ' 的单账号档位未达用量'));
@@ -375,6 +386,7 @@ COMPARE_JS = r"""
   }
   form.addEventListener('submit', event => event.preventDefault());
   form.addEventListener('change', render);
+  rankView.addEventListener('change', render);
   showAll.addEventListener('click', () => {
     includeAll = !includeAll;
     render();
