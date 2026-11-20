@@ -1,79 +1,128 @@
 """Cost comparison calculator for the main visitor flow."""
 import json
 from html import escape
+from pathlib import Path
+
+
+def membership_anchor(platform):
+    return "membership-" + {"即梦": "jimeng", "小云雀": "xiaoyunque"}.get(platform, platform.lower())
 
 
 def compare_view(rows, readings, updated, periods):
-    platforms = dict.fromkeys(readings)
+    platforms = list(readings)
+    display_names = {"libtv": "LibTV", "Neowow": "NeoWOW", "Tapnow": "TapNow"}
     plans = []
     for row in rows:
         plat = row["plat"]
         plans.append({
             "platform": plat,
             "tier": row["tier"],
-            "periods": {key: [p["payCNY"], p["cr"]] for key, p in row["byP"].items()},
+            "anchor": membership_anchor(plat),
+            "periods": {key: [round(p["payCNY"], 2), p["cr"]] for key, p in row["byP"].items()},
         })
-    data = json.dumps({"plans": plans, "readings": readings,
+    data = json.dumps({"plans": plans, "readings": readings, "names": display_names,
                        "periods": {key: [label, months] for key, label, months, _ in periods}},
                       ensure_ascii=False).replace("<", "\\u003c")
-    platform_options = "".join(f'<option value="{escape(name)}">{escape(name)}</option>' for name in platforms)
-    period_options = "".join(f'<option value="{key}">{label}</option>' for key, label, _, _ in periods)
+    platform_options = "".join(
+        f'<option value="{escape(name)}">{escape(display_names.get(name, name))}</option>'
+        for name in platforms
+    )
+    period_options = "".join(
+        f'<label><input type="radio" name="period" value="{key}"{" checked" if key == "m" else ""}>'
+        f'<span>{label}</span></label>'
+        for key, label, _, _ in periods
+    )
     html = f"""
 <main id="compare-tool" class="compare-page" data-skip-intro>
   <header class="compare-heading">
     <div>
       <h1>视频生成成本对比</h1>
-      <p>选好规格和每月用量，找出能做够、花钱最少的会员方案。</p>
+      <p>按每月用量找最低价，或输入预算看最多能做多少条。</p>
     </div>
     <p class="compare-date">{len(platforms)} 家平台 · 数据更新于 <time datetime="{updated}">{updated}</time></p>
   </header>
+  <div class="compare-workspace">
   <form id="compare-form" class="compare-form">
-    <label for="compare-model">模型
+    <fieldset class="compare-choice compare-mode">
+      <legend>怎么比</legend>
+      <div>
+        <label><input type="radio" name="mode" value="target" checked><span>按月用量</span></label>
+        <label><input type="radio" name="mode" value="budget"><span>按预算</span></label>
+      </div>
+    </fieldset>
+    <label class="compare-field" for="compare-model">模型
       <select id="compare-model">
         <option value="0">Seedance 2.5 标准版</option>
         <option value="2">Seedance 2.5 Flash</option>
         <option value="4">Seedance 2.5 样片模式</option>
       </select>
     </label>
-    <label for="compare-resolution">分辨率
-      <select id="compare-resolution">
-        <option value="0">480p</option>
-        <option value="1" selected>720p</option>
-      </select>
-    </label>
-    <label for="compare-period">会员周期
-      <select id="compare-period">{period_options}</select>
-    </label>
-    <label for="compare-target">每月要生成多少条
-      <span class="compare-input-unit">
-        <input id="compare-target" type="number" inputmode="numeric" min="1" max="10000" step="1" value="30" required>
-        <span aria-hidden="true">条</span>
-      </span>
-    </label>
+    <div class="compare-spec-picker">
+      <fieldset class="compare-choice">
+        <legend>分辨率</legend>
+        <div>
+          <label><input type="radio" name="resolution" value="0"><span>480p</span></label>
+          <label><input type="radio" name="resolution" value="1" checked><span>720p</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="compare-choice">
+        <legend>会员周期</legend>
+        <div>{period_options}</div>
+      </fieldset>
+    </div>
+    <div id="compare-target-panel">
+      <label class="compare-field" for="compare-target">每月要生成多少条
+        <span class="compare-input-unit">
+          <input id="compare-target" type="number" inputmode="numeric" min="1" max="10000" step="1" value="30" required>
+          <span aria-hidden="true">条</span>
+        </span>
+      </label>
+      <div class="compare-presets" aria-label="常用月用量">
+        <button type="button" data-target="10" aria-pressed="false">10 条</button>
+        <button type="button" data-target="30" aria-pressed="true">30 条</button>
+        <button type="button" data-target="60" aria-pressed="false">60 条</button>
+      </div>
+    </div>
+    <div id="compare-budget-panel" hidden>
+      <label class="compare-field" for="compare-budget">所选周期的总预算
+        <span class="compare-input-unit">
+          <input id="compare-budget" type="number" inputmode="decimal" min="1" max="1000000" step="0.01" value="1000" required disabled>
+          <span aria-hidden="true">元</span>
+        </span>
+      </label>
+      <div class="compare-presets" aria-label="常用周期预算">
+        <button type="button" data-budget="300" aria-pressed="false">¥300</button>
+        <button type="button" data-budget="1000" aria-pressed="true">¥1,000</button>
+        <button type="button" data-budget="3000" aria-pressed="false">¥3,000</button>
+      </div>
+    </div>
+    <div class="compare-scope"><span>30 秒 · 16:9 · 全能参考</span><a href="#canvas-comparison">扣分依据</a></div>
   </form>
-  <div class="compare-scope"><span>每条 30 秒 · 16:9 · 全能参考</span><a href="#canvas-comparison">查看画布扣分</a></div>
   <section id="compare-results" class="compare-results" aria-labelledby="compare-results-title">
     <div class="compare-result-head">
-      <h2 id="compare-results-title">会员方案</h2>
+      <h2 id="compare-results-title">会员成本榜</h2>
       <div class="compare-result-filters">
         <label for="compare-platform">平台 <select id="compare-platform"><option value="">全部平台</option>{platform_options}</select></label>
         <label for="compare-all"><input id="compare-all" type="checkbox"> 显示全部档位</label>
+        <button id="compare-reset" type="button">重置</button>
       </div>
     </div>
     <p class="compare-result-status" id="compare-status" role="status"></p>
+    <p id="compare-order" class="compare-order"></p>
     <div id="compare-grid">
       <table aria-label="符合规格的会员方案">
         <thead><tr>
-          <th scope="col">平台 / 档位</th><th scope="col">首期实付</th>
-          <th scope="col">每月约能做</th><th scope="col">按用量 / 条</th>
+          <th scope="col">排名 · 平台 / 档位</th><th scope="col" id="compare-paid">首期实付</th>
+          <th scope="col" id="compare-volume">每月约能做</th><th scope="col">每条成本</th>
         </tr></thead>
         <tbody id="compare-rows"></tbody>
       </table>
     </div>
     <p id="compare-coverage" class="compare-coverage"></p>
-    <p class="compare-calc-note">按单账号、首期价格和基础积分估算。首购优惠以平台结算资格为准。美元按采集日汇率折算。</p>
+    <p id="compare-calc-note" class="compare-calc-note"></p>
     <noscript><p>启用 JavaScript 可以实时计算。<a href="cycles.html#allperiod">查看固定规格的完整对比表</a></p></noscript>
   </section>
+  </div>
   <div class="compare-record-links" aria-label="核对价格与来源">
     <a href="#membership-prices">会员价格明细</a>
     <a href="#offers">活动与赠送权益</a>
@@ -84,91 +133,7 @@ def compare_view(rows, readings, updated, periods):
     return html, COMPARE_JS.replace("__COMPARE_DATA__", data)
 
 
-COMPARE_CSS = """
-body{background:#08090a}
-body::before,body::after{display:none}
-.promo,.nav .spec{display:none}
-.nav{background:#08090a}
-.compare-page,.compare-records{width:min(1112px,calc(100% - 72px));margin-inline:auto}
-.compare-page{padding-top:48px}
-.compare-home{padding-top:68px;padding-bottom:28px}
-.compare-home-actions{display:flex;align-items:center;gap:22px}
-.compare-home-actions .btn{background:#d1fe17;color:#101300}
-.compare-home-actions .btn:hover{background:#e1ff65;box-shadow:none}
-.compare-home-budget{max-width:860px;box-shadow:none;scroll-margin-top:80px}
-.compare-heading{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:28px}
-.compare-heading h1{margin:0 0 10px;font-size:46px;line-height:1.12;letter-spacing:-.035em;color:#fff}
-.compare-heading p{margin:0;color:#bbc0c8;font-size:15px}
-.compare-heading .compare-date{white-space:nowrap;color:#a0a6af;font-size:12px}
-.compare-form{display:grid;grid-template-columns:minmax(210px,1.35fr) minmax(100px,.66fr) minmax(110px,.75fr) minmax(150px,1fr);gap:16px;padding:20px;background:#111315;border-radius:14px;border:1px solid #2c3035}
-.compare-form label{display:grid;gap:8px;align-content:start;color:#d5d8dd;font-size:13px;font-weight:650}
-.compare-page input,.compare-page select,.compare-page button{font:inherit;color:#fff}
-.compare-page select,.compare-page input[type=number]{border:1px solid #3c4147;border-radius:8px;background:#17191c;color-scheme:dark;min-height:44px;width:100%;padding:0 11px}
-.compare-page select:hover,.compare-page input[type=number]:hover{border-color:#797f87}
-.compare-page input:focus-visible,.compare-page select:focus-visible,.compare-page a:focus-visible,.compare-records summary:focus-visible{outline:2px solid #d1fe17;outline-offset:3px}
-.compare-page a,.compare-records a{color:#d1fe17;text-underline-offset:4px}
-.compare-input-unit{position:relative;display:block}
-.compare-input-unit input{padding-right:42px!important}
-.compare-input-unit span{position:absolute;right:11px;top:12px;color:#bac1c9;pointer-events:none}
-.compare-scope{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:11px 0 32px;font-size:12px;color:#b1b7bf}
-.compare-results{margin-top:0;border-top:1px solid #31353a;padding-top:21px}
-.compare-result-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.compare-result-head h2{font-size:24px;color:#fff;margin:0}
-.compare-result-filters{display:flex;align-items:center;flex-wrap:wrap;gap:14px;font-size:13px;color:#d5d8dd}
-.compare-result-filters label{display:flex;gap:6px;align-items:center;min-height:44px}
-.compare-result-filters select{min-width:98px;width:auto}
-.compare-result-filters input{width:16px;height:16px;accent-color:#d1fe17}
-.compare-result-status{margin:12px 0 15px;color:#e1e5ea;font-size:15px}
-.compare-result-status strong{color:#d1fe17;font-weight:750}
-.compare-results table{width:100%;min-width:0;background:#0f1113;box-shadow:none;border-radius:12px;border-color:#2c3035;table-layout:fixed}
-.compare-results th,.compare-results td{text-align:right;padding:13px 15px;line-height:1.45;font-variant-numeric:tabular-nums;border-bottom-color:#282c30}
-.compare-results th{color:#b4bac3;font-size:12px;letter-spacing:normal;white-space:normal;cursor:default}
-.compare-results th:hover{color:#b4bac3}
-.compare-results th:first-child,.compare-results td:first-child{width:35%;text-align:left}
-.compare-results td{color:#e7eaf0;font-size:14px;white-space:normal}
-.compare-results td:first-child small{display:block;color:#aeb5bf;margin-top:2px;font-size:12px}
-.compare-results td:nth-child(2){font-weight:750}
-.compare-results tr.compare-best{background:#161c0c}
-.compare-results tr.compare-best td:nth-child(2){color:#d1fe17}
-.compare-coverage,.compare-calc-note{color:#aeb5bf;font-size:12px;line-height:1.65;margin:10px 0 0}
-.compare-coverage:empty{display:none}
-.compare-record-links{display:flex;flex-wrap:wrap;gap:12px 22px;padding:22px 0 25px}
-.compare-record-links a{font-size:13px}
-.compare-records{margin-top:12px;border-top:1px solid #31353a;padding:20px 0 2px}
-.compare-records > p{color:#bbc0c8;line-height:1.7}
-.compare-records h2{font-size:23px;color:#fff;margin:0 0 12px}
-.compare-records details h2{margin-top:12px}
-.compare-records details,.compare-home-budget,.compare-advanced{background:#111315;box-shadow:none;backdrop-filter:none}
-.compare-records section{scroll-margin-top:80px}
-.compare-records [id]{scroll-margin-top:80px}
-.compare-advanced{margin:16px auto 24px;width:min(1112px,calc(100% - 72px))}
-.compare-advanced .app{width:100%;padding-inline:0}
-.compare-advanced .vhead h2{font-size:22px}
-.legal{background:#101214;border-color:#34383d;color:#bac1c9;box-shadow:none}
-.legal .legal-t,.legal .legal-b,.legal .legal-f{color:#bac1c9}
-.legal .legal-f .fp{background:#171a12;color:#d1fe17}
-@media(max-width:820px){
-  .compare-page,.compare-records,.compare-advanced{width:calc(100% - 36px)}
-  .compare-page{padding-top:28px}
-  .compare-home{padding-top:40px}
-  .compare-heading{display:block;margin-bottom:18px}
-  .compare-heading h1{font-size:34px}
-  .compare-heading .compare-date{margin-top:8px}
-  .compare-form{grid-template-columns:1.1fr 1fr;padding:14px;gap:12px}
-  .compare-results th,.compare-results td{padding:10px 8px}
-  .compare-results td{font-size:13px}
-  .compare-results td:first-child small{font-size:11px}
-  .compare-scope{margin-bottom:18px}
-  .compare-result-head h2{font-size:21px}
-}
-@media(max-width:420px){
-  .compare-page,.compare-records,.compare-advanced{width:calc(100% - 28px)}
-  .compare-heading h1{font-size:30px}
-  .compare-form select,.compare-form input{font-size:13px;padding-left:8px}
-  .compare-results th,.compare-results td{padding-inline:6px}
-  .compare-result-head{align-items:start;flex-direction:column;gap:4px}
-}
-"""
+COMPARE_CSS = Path(__file__).with_name("compare_style.css").read_text(encoding="utf-8")
 
 
 COMPARE_JS = r"""
@@ -178,35 +143,64 @@ COMPARE_JS = r"""
   const table = document.getElementById('compare-grid');
   const rows = document.getElementById('compare-rows');
   const coverage = document.getElementById('compare-coverage');
-  const model = document.getElementById('compare-model');
-  const resolution = document.getElementById('compare-resolution');
-  const period = document.getElementById('compare-period');
+  const order = document.getElementById('compare-order');
+  const title = document.getElementById('compare-results-title');
+  const calcNote = document.getElementById('compare-calc-note');
+  const paidHead = document.getElementById('compare-paid');
+  const volumeHead = document.getElementById('compare-volume');
+  const model = form.elements.namedItem('compare-model');
+  const resolution = form.elements.namedItem('resolution');
+  const period = form.elements.namedItem('period');
+  const mode = form.elements.namedItem('mode');
   const target = document.getElementById('compare-target');
+  const budget = document.getElementById('compare-budget');
+  const targetPanel = document.getElementById('compare-target-panel');
+  const budgetPanel = document.getElementById('compare-budget-panel');
   const platform = document.getElementById('compare-platform');
   const showAll = document.getElementById('compare-all');
+  const presets = form.querySelectorAll('[data-target], [data-budget]');
   const data = __COMPARE_DATA__;
   const money = new Intl.NumberFormat('zh-CN', {style:'currency', currency:'CNY', maximumFractionDigits:2, minimumFractionDigits:0});
   const perClip = new Intl.NumberFormat('zh-CN', {style:'currency', currency:'CNY'});
+  const defaultMode = new URLSearchParams(location.search).get('mode') === 'budget' ? 'budget' : 'target';
+  const nameOf = platformName => data.names[platformName] || platformName;
+  mode.value = defaultMode;
 
   function render(){
-    const amount = target.valueAsNumber;
+    const byBudget = mode.value === 'budget';
+    const input = byBudget ? budget : target;
+    const amount = input.valueAsNumber;
     const cycle = data.periods[period.value];
     const spec = Number(model.value) + Number(resolution.value);
     const available = new Map();
     const excluded = [];
     const offers = [];
+    target.disabled = targetPanel.hidden = byBudget;
+    budget.disabled = budgetPanel.hidden = !byBudget;
+    for (const preset of presets) {
+      const activeValue = preset.dataset.budget ? budget.valueAsNumber : target.valueAsNumber;
+      preset.setAttribute('aria-pressed', String(Number(preset.dataset.budget || preset.dataset.target) === activeValue));
+    }
+    title.textContent = byBudget ? '预算产能榜' : '会员成本榜';
+    table.dataset.mode = mode.value;
+    calcNote.textContent = (byBudget ? '每条成本按用完可生成额度计算。' : '每条成本按你填写的用量计算。')
+      + '结果基于单账号、首期价格和基础积分。首购资格以结算页为准。';
+    paidHead.setAttribute('aria-sort', byBudget ? 'none' : 'ascending');
+    volumeHead.setAttribute('aria-sort', byBudget ? 'descending' : 'none');
     rows.textContent = '';
     coverage.textContent = '';
+    order.textContent = '';
     table.hidden = true;
-    if (!target.validity.valid) {
-      result.textContent = '请输入 1 到 10,000 之间的生成条数。';
+    if (!input.validity.valid) {
+      result.textContent = byBudget ? '请输入 ¥1 至 ¥1,000,000 的预算，最多保留两位小数。'
+        : '请输入 1 到 10,000 之间的整数条数。';
       return;
     }
     for (const [name, cells] of Object.entries(data.readings)) {
       if (platform.value && platform.value !== name) continue;
       const reading = cells[spec];
       if (typeof reading === 'string') {
-        excluded.push(name + '（' + reading + '）');
+        excluded.push(nameOf(name) + '（' + reading + '）');
         continue;
       }
       available.set(name, typeof reading === 'number' ? {credits:reading} : reading);
@@ -221,55 +215,122 @@ COMPARE_JS = r"""
     }
     const providers = new Set(offers.map(offer => offer.plan.platform));
     for (const name of available.keys()) {
-      if (!providers.has(name)) excluded.push(name + '（无' + cycle[0] + '）');
+      if (!providers.has(name)) excluded.push(nameOf(name) + '（无' + cycle[0] + '）');
     }
-    const matched = offers.filter(offer => offer.capacity >= amount);
-    matched.sort((a,b) => a.pay - b.pay || b.capacity - a.capacity);
-    const fastest = Math.max(0, ...offers.map(offer => offer.capacity));
-    const cheapest = matched[0];
+    const fits = byBudget ? offer => offer.capacity > 0 && offer.pay <= amount
+      : offer => offer.capacity >= amount;
+    const rankBy = byBudget ? (a,b) => b.capacity - a.capacity || a.pay - b.pay
+      : (a,b) => a.pay - b.pay || b.capacity - a.capacity;
+    const matched = offers.filter(fits).sort(rankBy);
+    const best = matched[0];
+    const highestCapacity = Math.max(0, ...offers.map(offer => offer.capacity));
     result.textContent = '';
-    if (cheapest) {
-      result.append('满足 ' + amount.toLocaleString('zh-CN') + ' 条/月，首期最低 ');
-      const price = document.createElement('strong');
-      price.textContent = money.format(cheapest.pay);
-      result.append(price, '（' + cycle[0] + '）');
+    if (best) {
+      result.append(byBudget ? money.format(amount) + ' 预算内，每月最多约 ' : amount.toLocaleString('zh-CN') + ' 条/月，首期最低 ');
+      const answer = document.createElement('strong');
+      answer.textContent = byBudget ? best.capacity + ' 条' : money.format(best.pay);
+      result.append(answer, '（' + cycle[0] + '）');
+      const caption = document.createElement('small');
+      caption.textContent = nameOf(best.plan.platform) + ' ' + best.plan.tier
+        + (byBudget ? ' · 实付 ' + money.format(best.pay) : ' · 月产能约 ' + best.capacity + ' 条')
+        + (best.sourceDate ? ' · 扣分沿用留档' : '');
+      result.append(caption);
     } else {
-      result.textContent = offers.length
-        ? '本周期没有单账号档位能满足用量，最高约 ' + fastest + ' 条/月。可调低用量或换一个规格。'
-        : '当前选择没有可计算的方案。请选择其他规格、周期或平台。';
+      const paidPlans = offers.filter(offer => offer.capacity > 0);
+      if (paidPlans.length && byBudget) {
+        const entryPrice = Math.min(...paidPlans.map(offer => offer.pay));
+        result.textContent = '当前预算没覆盖可出片的档位。该规格的最低首期支出为 ' + money.format(entryPrice) + '。';
+      } else if (highestCapacity && !byBudget) {
+        result.textContent = '当前单账号最多约 ' + highestCapacity + ' 条/月。减小用量或换规格可查看更多方案。';
+      } else {
+        result.textContent = '这个组合暂无可计算的方案。';
+        if (spec === 5) {
+          const change = document.createElement('button');
+          change.type = 'button';
+          change.className = 'compare-switch-res';
+          change.textContent = '试试 480p';
+          change.addEventListener('click', () => {
+            resolution.value = '0';
+            render();
+            form.querySelector('[name=resolution]:checked').focus();
+          });
+          result.append(change);
+        }
+      }
     }
     const seen = new Set();
-    const displayed = showAll.checked
-      ? [...matched, ...offers.filter(offer => offer.capacity < amount).sort((a,b) => a.pay - b.pay)]
-      : matched.filter(({plan}) => {
+    const ranked = showAll.checked ? matched : matched.filter(({plan}) => {
           if (seen.has(plan.platform)) return false;
           seen.add(plan.platform);
           return true;
         });
-    for (const offer of displayed) {
+    const displayed = showAll.checked ? [...ranked, ...offers.filter(offer => !fits(offer)).sort(rankBy)] : ranked;
+    if (ranked.length > 1) {
+      const next = ranked[1];
+      const gap = byBudget ? best.capacity - next.capacity : next.pay - best.pay;
+      if (gap > 0) result.querySelector('small').append(byBudget
+        ? ' · 比第 2 名每月多 ' + gap + ' 条'
+        : ' · 比第 2 名少付 ' + money.format(gap));
+    }
+    const scale = Math.max(1, ...ranked.map(offer => byBudget ? offer.capacity : offer.pay));
+    order.textContent = displayed.length ? (byBudget ? '月产能从高到低 · 条越长，能做越多' : '首期实付从低到高 · 条越短，花钱越少')
+      + ' · ' + ranked.length + (showAll.checked ? ' 档符合' : ' 家平台符合') : '';
+    displayed.forEach((offer, index) => {
       const tr = rows.insertRow();
-      if (offer === cheapest) tr.className = 'compare-best';
+      if (offer === best) tr.className = 'compare-best';
       const title = tr.insertCell();
-      const name = document.createElement('b');
-      name.textContent = offer.plan.platform === 'Tapnow' ? 'TapNow' : offer.plan.platform;
+      const rank = document.createElement('span');
+      rank.className = 'compare-rank';
+      rank.textContent = index < ranked.length ? String(index + 1).padStart(2, '0') : '—';
+      const name = document.createElement('a');
+      name.className = 'compare-result-name';
+      name.href = '#' + offer.plan.anchor;
+      name.textContent = nameOf(offer.plan.platform);
+      name.setAttribute('aria-label', '查看 ' + name.textContent + ' 的会员价格');
       const detail = document.createElement('small');
       detail.textContent = offer.plan.tier + ' · ' + offer.monthlyCredits.toLocaleString('zh-CN') + ' 分/月'
         + (offer.sourceDate ? ' · 扣分沿用留档' : '');
-      title.append(name, detail);
-      tr.insertCell().textContent = money.format(offer.pay);
-      tr.insertCell().textContent = offer.capacity + ' 条';
-      tr.insertCell().textContent = offer.capacity >= amount ? perClip.format(offer.pay / (amount * cycle[1])) : '未达用量';
-    }
+      title.append(rank, name, detail);
+      const spendCell = tr.insertCell();
+      spendCell.textContent = money.format(offer.pay);
+      const volumeCell = tr.insertCell();
+      volumeCell.textContent = offer.capacity + ' 条';
+      const unit = tr.insertCell();
+      unit.textContent = fits(offer) ? perClip.format(offer.pay / ((byBudget ? offer.capacity : amount) * cycle[1]))
+        : byBudget && offer.pay > amount ? '超预算' : '未达用量';
+      if (index < ranked.length) {
+        const bar = document.createElement('span');
+        bar.className = 'compare-bar';
+        bar.setAttribute('aria-hidden', 'true');
+        bar.style.width = ((byBudget ? offer.capacity : offer.pay) / scale * 100) + '%';
+        (byBudget ? volumeCell : spendCell).append(bar);
+      }
+    });
     table.hidden = !displayed.length;
     const short = [...providers].filter(name => !matched.some(offer => offer.plan.platform === name));
     const notes = [];
-    if (short.length) notes.push(short.join('、') + ' 的单账号档位未达用量');
+    if (short.length) notes.push(short.map(nameOf).join('、') + (byBudget ? ' 在当前预算内暂无可用档位' : ' 的单账号档位未达用量'));
     if (excluded.length) notes.push('当前未计入：' + excluded.join('、'));
     coverage.textContent = notes.join('。') + (notes.length ? '。' : '');
   }
   form.addEventListener('submit', event => event.preventDefault());
-  [model, resolution, period, platform, showAll].forEach(input => input.addEventListener('change', render));
-  target.addEventListener('input', render);
+  form.addEventListener('change', render);
+  [platform, showAll].forEach(input => input.addEventListener('change', render));
+  [target, budget].forEach(input => input.addEventListener('input', render));
+  form.addEventListener('click', event => {
+    const preset = event.target.closest('[data-target], [data-budget]');
+    if (!preset) return;
+    if (preset.dataset.budget) budget.value = preset.dataset.budget;
+    else target.value = preset.dataset.target;
+    render();
+  });
+  document.getElementById('compare-reset').addEventListener('click', () => {
+    form.reset();
+    mode.value = defaultMode;
+    platform.value = '';
+    showAll.checked = false;
+    render();
+  });
   render();
 })();
 """

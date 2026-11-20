@@ -706,89 +706,132 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   .kb>b{font-size:18px}
   .side{gap:14px}
 }
-
-body{background:#08090a}
-body::before,body::after{display:none}
-.promo,.nav .spec{display:none}
-.nav{background:#08090a}
-.compare-page,.compare-records{width:min(1112px,calc(100% - 72px));margin-inline:auto}
-.compare-page{padding-top:48px}
-.compare-home{padding-top:68px;padding-bottom:28px}
-.compare-home-actions{display:flex;align-items:center;gap:22px}
-.compare-home-actions .btn{background:#d1fe17;color:#101300}
-.compare-home-actions .btn:hover{background:#e1ff65;box-shadow:none}
-.compare-home-budget{max-width:860px;box-shadow:none;scroll-margin-top:80px}
-.compare-heading{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:28px}
-.compare-heading h1{margin:0 0 10px;font-size:46px;line-height:1.12;letter-spacing:-.035em;color:#fff}
-.compare-heading p{margin:0;color:#bbc0c8;font-size:15px}
-.compare-heading .compare-date{white-space:nowrap;color:#a0a6af;font-size:12px}
-.compare-form{display:grid;grid-template-columns:minmax(210px,1.35fr) minmax(100px,.66fr) minmax(110px,.75fr) minmax(150px,1fr);gap:16px;padding:20px;background:#111315;border-radius:14px;border:1px solid #2c3035}
-.compare-form label{display:grid;gap:8px;align-content:start;color:#d5d8dd;font-size:13px;font-weight:650}
-.compare-page input,.compare-page select,.compare-page button{font:inherit;color:#fff}
-.compare-page select,.compare-page input[type=number]{border:1px solid #3c4147;border-radius:8px;background:#17191c;color-scheme:dark;min-height:44px;width:100%;padding:0 11px}
-.compare-page select:hover,.compare-page input[type=number]:hover{border-color:#797f87}
-.compare-page input:focus-visible,.compare-page select:focus-visible,.compare-page a:focus-visible,.compare-records summary:focus-visible{outline:2px solid #d1fe17;outline-offset:3px}
-.compare-page a,.compare-records a{color:#d1fe17;text-underline-offset:4px}
-.compare-input-unit{position:relative;display:block}
-.compare-input-unit input{padding-right:42px!important}
-.compare-input-unit span{position:absolute;right:11px;top:12px;color:#bac1c9;pointer-events:none}
-.compare-scope{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:11px 0 32px;font-size:12px;color:#b1b7bf}
-.compare-results{margin-top:0;border-top:1px solid #31353a;padding-top:21px}
-.compare-result-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.compare-result-head h2{font-size:24px;color:#fff;margin:0}
-.compare-result-filters{display:flex;align-items:center;flex-wrap:wrap;gap:14px;font-size:13px;color:#d5d8dd}
-.compare-result-filters label{display:flex;gap:6px;align-items:center;min-height:44px}
-.compare-result-filters select{min-width:98px;width:auto}
-.compare-result-filters input{width:16px;height:16px;accent-color:#d1fe17}
-.compare-result-status{margin:12px 0 15px;color:#e1e5ea;font-size:15px}
-.compare-result-status strong{color:#d1fe17;font-weight:750}
-.compare-results table{width:100%;min-width:0;background:#0f1113;box-shadow:none;border-radius:12px;border-color:#2c3035;table-layout:fixed}
-.compare-results th,.compare-results td{text-align:right;padding:13px 15px;line-height:1.45;font-variant-numeric:tabular-nums;border-bottom-color:#282c30}
-.compare-results th{color:#b4bac3;font-size:12px;letter-spacing:normal;white-space:normal;cursor:default}
-.compare-results th:hover{color:#b4bac3}
-.compare-results th:first-child,.compare-results td:first-child{width:35%;text-align:left}
-.compare-results td{color:#e7eaf0;font-size:14px;white-space:normal}
-.compare-results td:first-child small{display:block;color:#aeb5bf;margin-top:2px;font-size:12px}
-.compare-results td:nth-child(2){font-weight:750}
-.compare-results tr.compare-best{background:#161c0c}
-.compare-results tr.compare-best td:nth-child(2){color:#d1fe17}
-.compare-coverage,.compare-calc-note{color:#aeb5bf;font-size:12px;line-height:1.65;margin:10px 0 0}
-.compare-coverage:empty{display:none}
-.compare-record-links{display:flex;flex-wrap:wrap;gap:12px 22px;padding:22px 0 25px}
-.compare-record-links a{font-size:13px}
-.compare-records{margin-top:12px;border-top:1px solid #31353a;padding:20px 0 2px}
-.compare-records > p{color:#bbc0c8;line-height:1.7}
-.compare-records h2{font-size:23px;color:#fff;margin:0 0 12px}
-.compare-records details h2{margin-top:12px}
-.compare-records details,.compare-home-budget,.compare-advanced{background:#111315;box-shadow:none;backdrop-filter:none}
-.compare-records section{scroll-margin-top:80px}
-.compare-records [id]{scroll-margin-top:80px}
-.compare-advanced{margin:16px auto 24px;width:min(1112px,calc(100% - 72px))}
-.compare-advanced .app{width:100%;padding-inline:0}
-.compare-advanced .vhead h2{font-size:22px}
-.legal{background:#101214;border-color:#34383d;color:#bac1c9;box-shadow:none}
-.legal .legal-t,.legal .legal-b,.legal .legal-f{color:#bac1c9}
-.legal .legal-f .fp{background:#171a12;color:#d1fe17}
-@media(max-width:820px){
-  .compare-page,.compare-records,.compare-advanced{width:calc(100% - 36px)}
-  .compare-page{padding-top:28px}
-  .compare-home{padding-top:40px}
-  .compare-heading{display:block;margin-bottom:18px}
-  .compare-heading h1{font-size:34px}
-  .compare-heading .compare-date{margin-top:8px}
-  .compare-form{grid-template-columns:1.1fr 1fr;padding:14px;gap:12px}
-  .compare-results th,.compare-results td{padding:10px 8px}
-  .compare-results td{font-size:13px}
-  .compare-results td:first-child small{font-size:11px}
-  .compare-scope{margin-bottom:18px}
-  .compare-result-head h2{font-size:21px}
+:root {
+  --studio-bg: #101011;
+  --studio-panel: #19191c;
+  --studio-control: #242427;
+  --studio-line: #3a3a40;
+  --studio-text: #f7f7f3;
+  --studio-muted: #b9b9c1;
+  --studio-accent: #d4ff3f;
+  --studio-rose: #ff85ae;
 }
-@media(max-width:420px){
-  .compare-page,.compare-records,.compare-advanced{width:calc(100% - 28px)}
-  .compare-heading h1{font-size:30px}
-  .compare-form select,.compare-form input{font-size:13px;padding-left:8px}
-  .compare-results th,.compare-results td{padding-inline:6px}
-  .compare-result-head{align-items:start;flex-direction:column;gap:4px}
+
+body { background: var(--studio-bg); color: var(--studio-text); color-scheme: dark; }
+body::before, body::after, .promo, .nav .spec { display: none; }
+.nav { background: var(--studio-bg); border-bottom-color: var(--studio-line); }
+.compare-page, .compare-records, .compare-advanced { width: min(1200px, calc(100% - 64px)); margin-inline: auto; }
+.compare-page { padding-top: 52px; }
+.compare-home { padding-top: 76px; padding-bottom: 36px; }
+.compare-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+.compare-heading h1 { margin: 0 0 8px; font-size: 54px; line-height: 1.1; letter-spacing: -.037em; }
+.compare-home h1 { font-size: 60px; }
+.compare-heading p { margin: 0; color: var(--studio-muted); font-size: 15px; }
+.compare-heading .compare-date { white-space: nowrap; font-size: 12px; }
+.compare-home-actions { align-items: center; gap: 22px; }
+.compare-home-actions .btn { background: var(--studio-accent); color: #181b0b; }
+.compare-home-actions .btn:hover { background: #e4ff78; color: #181b0b; box-shadow: none; }
+.compare-home-budget { max-width: 860px; scroll-margin-top: 80px; }
+
+.compare-workspace { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(0, 2.15fr); gap: 24px; align-items: start; }
+.compare-form { display: grid; gap: 14px; padding: 18px; background: var(--studio-panel); border: 1px solid var(--studio-line); border-radius: 14px; }
+.compare-field { display: grid; gap: 6px; color: var(--studio-text); font-size: 13px; font-weight: 650; }
+.compare-choice { min-width: 0; padding: 0; margin: 0; border: 0; }
+.compare-choice legend { padding: 0; margin-bottom: 6px; font-size: 13px; font-weight: 650; }
+.compare-mode legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.compare-choice > div { display: flex; gap: 3px; padding: 3px; background: var(--studio-bg); border: 1px solid var(--studio-line); border-radius: 10px; }
+.compare-choice label { position: relative; flex: 1; min-width: 0; cursor: pointer; }
+.compare-choice input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.compare-choice span { display: grid; place-items: center; min-height: 38px; padding-inline: 2px; border-radius: 7px; color: var(--studio-muted); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.compare-choice label:hover span { background: var(--studio-control); color: #fff; }
+.compare-choice input:checked + span { background: #3b3b3f; color: #fff; }
+.compare-mode input:checked + span { background: var(--studio-accent); color: #15180a; }
+.compare-choice input:focus-visible + span { outline: 2px solid var(--studio-accent); outline-offset: 2px; }
+.compare-spec-picker { display: grid; grid-template-columns: 1fr 1.24fr; gap: 9px; }
+.compare-page :is(input, select, button) { color: var(--studio-text); font: inherit; }
+.compare-page select, .compare-page input[type=number] { width: 100%; min-height: 44px; padding: 0 10px; background: var(--studio-control); border: 1px solid var(--studio-line); border-radius: 8px; }
+.compare-page :is(select,input[type=number],button):hover { border-color: #77777e; }
+.compare-page :is(input,select,a,button):focus-visible, .compare-records summary:focus-visible { outline: 2px solid var(--studio-accent); outline-offset: 3px; }
+.compare-page a, .compare-records a { color: var(--studio-text); text-underline-offset: 4px; }
+.compare-page a:hover, .compare-records a:hover { color: var(--studio-accent); }
+.compare-input-unit { position: relative; display: block; }
+.compare-input-unit input { padding-right: 52px !important; }
+.compare-input-unit span { position: absolute; right: 27px; top: 12px; color: var(--studio-muted); pointer-events: none; }
+.compare-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 7px; }
+.compare-page .compare-presets button, .compare-page #compare-reset, .compare-page .compare-switch-res {
+  min-height: 38px; padding: 4px 8px; background: var(--studio-control); border: 1px solid var(--studio-line); border-radius: 8px; font-size: 12px; cursor: pointer;
+}
+.compare-page .compare-presets button[aria-pressed=true] { border-color: #829a4a; color: var(--studio-accent); background: #262e19; }
+.compare-scope { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; color: var(--studio-muted); font-size: 12px; }
+
+.compare-results { min-width: 0; margin-top: 0; }
+.compare-result-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 5px 12px; }
+.compare-result-head h2 { margin: 0; font-size: 24px; }
+.compare-result-filters { display: flex; align-items: center; gap: 10px; color: var(--studio-muted); font-size: 12px; }
+.compare-result-filters label { display: flex; align-items: center; gap: 5px; min-height: 42px; }
+.compare-result-filters select { width: auto; min-height: 38px; }
+.compare-result-filters input { width: 16px; height: 16px; accent-color: var(--studio-accent); }
+.compare-result-status { margin: 10px 0 6px; padding: 13px 14px; background: #232a18; border: 1px solid #3b4829; border-radius: 11px; font-size: 15px; }
+.compare-result-status strong { color: var(--studio-accent); font-weight: 800; font-size: 1.18em; }
+.compare-result-status small { display: block; color: #e0e9c7; font-size: 12px; margin-top: 4px; }
+.compare-page .compare-switch-res { margin-left: 8px; }
+.compare-order { margin: 8px 0; color: var(--studio-muted); font-size: 12px; }
+.compare-results table { width: 100%; min-width: 0; table-layout: fixed; border-radius: 12px; border-color: var(--studio-line); background: var(--studio-panel); box-shadow: none; }
+.compare-results :is(th,td) { text-align: right; padding: 11px 12px; line-height: 1.4; border-bottom-color: var(--studio-line); font-variant-numeric: tabular-nums; }
+.compare-results th { background: var(--studio-control); color: var(--studio-muted); font-size: 12px; letter-spacing: normal; white-space: normal; cursor: default; }
+.compare-results th:hover { color: var(--studio-muted); }
+.compare-results th:first-child, .compare-results td:first-child { width: 45%; text-align: left; }
+.compare-results td { color: var(--studio-text); font-size: 14px; white-space: normal; }
+.compare-results td:first-child small { display: block; margin-top: 3px; color: var(--studio-muted); font-size: 12px; }
+.compare-results tr.compare-best { background: #232a18; }
+#compare-grid[data-mode=target] .compare-best td:nth-child(2),
+#compare-grid[data-mode=budget] .compare-best td:nth-child(3) { color: var(--studio-accent); }
+.compare-rank { display: inline-block; min-width: 2em; color: var(--studio-muted); font-variant-numeric: tabular-nums; }
+.compare-best .compare-rank { color: var(--studio-accent); }
+.compare-result-name { font-weight: 750; text-decoration-color: #79797e; text-underline-offset: 3px; }
+.compare-bar { display: block; height: 3px; margin: 5px 0 0 auto; background: #73737b; border-radius: 2px; }
+.compare-best .compare-bar { background: var(--studio-accent); }
+.compare-coverage, .compare-calc-note { color: var(--studio-muted); font-size: 12px; line-height: 1.6; margin: 8px 0 0; }
+.compare-coverage:empty, .compare-order:empty { display: none; }
+
+.compare-record-links { display: flex; flex-wrap: wrap; gap: 12px 20px; padding: 18px 0 22px; }
+.compare-record-links a { font-size: 13px; }
+.compare-record-links a[href="#offers"] { color: var(--studio-rose); }
+.compare-records { margin-top: 6px; border-top: 1px solid var(--studio-line); padding-top: 20px; }
+.compare-records h2 { margin: 0 0 12px; font-size: 23px; }
+.compare-records > p { color: var(--studio-muted); line-height: 1.65; }
+.compare-records details, .compare-home-budget, .compare-advanced, .legal { background: var(--studio-panel); box-shadow: none; backdrop-filter: none; border-color: var(--studio-line); }
+.compare-records [id] { scroll-margin-top: 80px; }
+.compare-records tr:target td { background: #303b20; }
+.compare-advanced { margin-top: 16px; margin-bottom: 24px; }
+.compare-advanced .app { width: 100%; padding-inline: 0; }
+.compare-advanced .vhead h2 { font-size: 22px; }
+.legal .legal-t, .legal .legal-b, .legal .legal-f { color: var(--studio-muted); }
+.legal .legal-f .fp { background: #242c19; color: var(--studio-accent); }
+
+@media (max-width: 900px) {
+  .compare-page, .compare-records, .compare-advanced { width: calc(100% - 32px); }
+  .compare-page { padding-top: 25px; }
+  .compare-home { padding-top: 42px; }
+  .compare-heading { display: block; margin-bottom: 16px; }
+  .compare-heading h1, .compare-home h1 { font-size: 37px; }
+  .compare-heading .compare-date { margin-top: 5px; }
+  .compare-workspace { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .compare-form { padding: 12px; gap: 10px; }
+  .compare-choice span { min-height: 36px; }
+  .compare-result-head h2 { font-size: 21px; }
+  .compare-results :is(th,td) { padding: 9px 7px; }
+  .compare-results td { font-size: 13px; }
+  .compare-results td:first-child small { font-size: 11px; }
+}
+@media (max-width: 420px) {
+  .compare-page, .compare-records, .compare-advanced { width: calc(100% - 28px); }
+  .compare-heading h1, .compare-home h1 { font-size: 31px; }
+  .compare-heading p { font-size: 13px; }
+  .compare-result-filters { gap: 8px; }
+  .compare-results :is(th,td) { padding-inline: 5px; }
+  .compare-results th:first-child, .compare-results td:first-child { width: 41%; }
+  .compare-rank { min-width: 1.7em; }
 }
 </style></head><body>
 
@@ -800,57 +843,92 @@ body::before,body::after{display:none}
   <header class="compare-heading">
     <div>
       <h1>视频生成成本对比</h1>
-      <p>选好规格和每月用量，找出能做够、花钱最少的会员方案。</p>
+      <p>按每月用量找最低价，或输入预算看最多能做多少条。</p>
     </div>
     <p class="compare-date">7 家平台 · 数据更新于 <time datetime="2026-11-20">2026-11-20</time></p>
   </header>
+  <div class="compare-workspace">
   <form id="compare-form" class="compare-form">
-    <label for="compare-model">模型
+    <fieldset class="compare-choice compare-mode">
+      <legend>怎么比</legend>
+      <div>
+        <label><input type="radio" name="mode" value="target" checked><span>按月用量</span></label>
+        <label><input type="radio" name="mode" value="budget"><span>按预算</span></label>
+      </div>
+    </fieldset>
+    <label class="compare-field" for="compare-model">模型
       <select id="compare-model">
         <option value="0">Seedance 2.5 标准版</option>
         <option value="2">Seedance 2.5 Flash</option>
         <option value="4">Seedance 2.5 样片模式</option>
       </select>
     </label>
-    <label for="compare-resolution">分辨率
-      <select id="compare-resolution">
-        <option value="0">480p</option>
-        <option value="1" selected>720p</option>
-      </select>
-    </label>
-    <label for="compare-period">会员周期
-      <select id="compare-period"><option value="m">月付</option><option value="q">季付</option><option value="y">年付</option></select>
-    </label>
-    <label for="compare-target">每月要生成多少条
-      <span class="compare-input-unit">
-        <input id="compare-target" type="number" inputmode="numeric" min="1" max="10000" step="1" value="30" required>
-        <span aria-hidden="true">条</span>
-      </span>
-    </label>
+    <div class="compare-spec-picker">
+      <fieldset class="compare-choice">
+        <legend>分辨率</legend>
+        <div>
+          <label><input type="radio" name="resolution" value="0"><span>480p</span></label>
+          <label><input type="radio" name="resolution" value="1" checked><span>720p</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="compare-choice">
+        <legend>会员周期</legend>
+        <div><label><input type="radio" name="period" value="m" checked><span>月付</span></label><label><input type="radio" name="period" value="q"><span>季付</span></label><label><input type="radio" name="period" value="y"><span>年付</span></label></div>
+      </fieldset>
+    </div>
+    <div id="compare-target-panel">
+      <label class="compare-field" for="compare-target">每月要生成多少条
+        <span class="compare-input-unit">
+          <input id="compare-target" type="number" inputmode="numeric" min="1" max="10000" step="1" value="30" required>
+          <span aria-hidden="true">条</span>
+        </span>
+      </label>
+      <div class="compare-presets" aria-label="常用月用量">
+        <button type="button" data-target="10" aria-pressed="false">10 条</button>
+        <button type="button" data-target="30" aria-pressed="true">30 条</button>
+        <button type="button" data-target="60" aria-pressed="false">60 条</button>
+      </div>
+    </div>
+    <div id="compare-budget-panel" hidden>
+      <label class="compare-field" for="compare-budget">所选周期的总预算
+        <span class="compare-input-unit">
+          <input id="compare-budget" type="number" inputmode="decimal" min="1" max="1000000" step="0.01" value="1000" required disabled>
+          <span aria-hidden="true">元</span>
+        </span>
+      </label>
+      <div class="compare-presets" aria-label="常用周期预算">
+        <button type="button" data-budget="300" aria-pressed="false">¥300</button>
+        <button type="button" data-budget="1000" aria-pressed="true">¥1,000</button>
+        <button type="button" data-budget="3000" aria-pressed="false">¥3,000</button>
+      </div>
+    </div>
+    <div class="compare-scope"><span>30 秒 · 16:9 · 全能参考</span><a href="#canvas-comparison">扣分依据</a></div>
   </form>
-  <div class="compare-scope"><span>每条 30 秒 · 16:9 · 全能参考</span><a href="#canvas-comparison">查看画布扣分</a></div>
   <section id="compare-results" class="compare-results" aria-labelledby="compare-results-title">
     <div class="compare-result-head">
-      <h2 id="compare-results-title">会员方案</h2>
+      <h2 id="compare-results-title">会员成本榜</h2>
       <div class="compare-result-filters">
-        <label for="compare-platform">平台 <select id="compare-platform"><option value="">全部平台</option><option value="libtv">libtv</option><option value="Neowow">Neowow</option><option value="即梦">即梦</option><option value="小云雀">小云雀</option><option value="Higgsfield">Higgsfield</option><option value="Tapnow">Tapnow</option><option value="Seko">Seko</option></select></label>
+        <label for="compare-platform">平台 <select id="compare-platform"><option value="">全部平台</option><option value="libtv">LibTV</option><option value="Neowow">NeoWOW</option><option value="即梦">即梦</option><option value="小云雀">小云雀</option><option value="Higgsfield">Higgsfield</option><option value="Tapnow">TapNow</option><option value="Seko">Seko</option></select></label>
         <label for="compare-all"><input id="compare-all" type="checkbox"> 显示全部档位</label>
+        <button id="compare-reset" type="button">重置</button>
       </div>
     </div>
     <p class="compare-result-status" id="compare-status" role="status"></p>
+    <p id="compare-order" class="compare-order"></p>
     <div id="compare-grid">
       <table aria-label="符合规格的会员方案">
         <thead><tr>
-          <th scope="col">平台 / 档位</th><th scope="col">首期实付</th>
-          <th scope="col">每月约能做</th><th scope="col">按用量 / 条</th>
+          <th scope="col">排名 · 平台 / 档位</th><th scope="col" id="compare-paid">首期实付</th>
+          <th scope="col" id="compare-volume">每月约能做</th><th scope="col">每条成本</th>
         </tr></thead>
         <tbody id="compare-rows"></tbody>
       </table>
     </div>
     <p id="compare-coverage" class="compare-coverage"></p>
-    <p class="compare-calc-note">按单账号、首期价格和基础积分估算。首购优惠以平台结算资格为准。美元按采集日汇率折算。</p>
+    <p id="compare-calc-note" class="compare-calc-note"></p>
     <noscript><p>启用 JavaScript 可以实时计算。<a href="cycles.html#allperiod">查看固定规格的完整对比表</a></p></noscript>
   </section>
+  </div>
   <div class="compare-record-links" aria-label="核对价格与来源">
     <a href="#membership-prices">会员价格明细</a>
     <a href="#offers">活动与赠送权益</a>
@@ -865,7 +943,7 @@ body::before,body::after{display:none}
   <summary>7 家平台会员价格与积分档<span class="chev">›</span></summary>
   <div class="dbody">
     <p>月付、季付和年付均显示整个周期的首期价格。¥ 为人民币，$ 为美元。首购、优惠券和续费条件见各平台活动及截图。</p>
-    <div class="tw"><table><thead><tr><th class="ctr">平台</th><th class="ctr">会员</th><th class="ctr">基础积分</th><th class="ctr">月付</th><th class="ctr">季付</th><th class="ctr">年付</th></tr></thead><tbody><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>标准版</td><td class="num">1,500 / 月</td><td class="num">¥66<br><small>续费 ¥66</small></td><td class="num">¥179<br><small>续费 ¥189</small></td><td class="num">¥569<br><small>续费 ¥599</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>进阶版</td><td class="num">4,600 / 月</td><td class="num">¥199<br><small>续费 ¥199</small></td><td class="num">¥499<br><small>续费 ¥559</small></td><td class="num">¥1,199<br><small>续费 ¥1,799</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>高级版</td><td class="num">11,700 / 月</td><td class="num">¥469<br><small>续费 ¥489</small></td><td class="num">¥1,159<br><small>续费 ¥1,399</small></td><td class="num">¥2,999<br><small>续费 ¥3,799</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>高级版</td><td class="num">16,300 / 月</td><td class="num">¥649<br><small>续费 ¥669</small></td><td class="num">¥1,599<br><small>续费 ¥1,899</small></td><td class="num">¥3,999<br><small>续费 ¥5,099</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>豪华版</td><td class="num">32,800 / 月</td><td class="num">¥1,199<br><small>续费 ¥1,299</small></td><td class="num">¥2,699<br><small>续费 ¥3,499</small></td><td class="num">¥6,999<br><small>续费 ¥7,399</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>至尊版</td><td class="num">50,500 / 月</td><td class="num">¥1,799<br><small>续费 ¥1,999</small></td><td class="num">¥3,899<br><small>续费 ¥5,099</small></td><td class="num">¥10,299<br><small>续费 ¥10,999</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>至尊版</td><td class="num">66,000 / 月</td><td class="num">¥2,299<br><small>续费 ¥2,599</small></td><td class="num">¥4,999<br><small>续费 ¥6,599</small></td><td class="num">¥13,499<br><small>一次性购买</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>至尊版</td><td class="num">92,000 / 月</td><td class="num">¥3,099<br><small>续费 ¥3,569</small></td><td class="num">¥6,699<br><small>续费 ¥8,999</small></td><td class="num">¥18,299<br><small>一次性购买</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>PLUS</td><td class="num">8,000 / 月</td><td class="num">¥30<br><small>续费 ¥60 · 首月 8,400 积分</small></td><td class="num">¥168<br><small>续费 ¥189 · 首月 9,850 积分</small></td><td class="num">¥599<br><small>续费 ¥699 · 首月 10,450 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>PRO</td><td class="num">25,000 / 月</td><td class="num">¥165<br><small>续费 ¥219 · 首月 26,250 积分</small></td><td class="num">¥478<br><small>续费 ¥549 · 首月 35,690 积分</small></td><td class="num">¥1,600<br><small>续费 ¥2,500 · 首月 42,240 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>PRO</td><td class="num">63,000 / 月</td><td class="num">¥415<br><small>续费 ¥479 · 首月 66,150 积分</small></td><td class="num">¥1,072<br><small>续费 ¥1,390 · 首月 68,790 积分</small></td><td class="num">¥4,000<br><small>续费 ¥4,500 · 首月 68,790 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>PRO</td><td class="num">90,000 / 月</td><td class="num">¥598<br><small>续费 ¥659 · 首月 94,500 积分</small></td><td class="num">¥1,665<br><small>续费 ¥1,850 · 首月 117,900 积分</small></td><td class="num">¥5,500<br><small>续费 ¥6,000 · 首月 131,400 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>MAX</td><td class="num">178,000 / 月</td><td class="num">¥1,135<br><small>续费 ¥1,299 · 首月 186,900 积分</small></td><td class="num">¥2,839<br><small>续费 ¥3,800 · 首月 206,300 积分</small></td><td class="num">¥9,500<br><small>续费 ¥10,000 · 首月 207,400 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>MAX</td><td class="num">210,000 / 月</td><td class="num">¥1,332<br><small>续费 ¥1,560 · 首月 220,500 积分</small></td><td class="num">¥3,353<br><small>续费 ¥4,400 · 首月 312,900 积分</small></td><td class="num">¥11,059<br><small>续费 ¥12,059 · 首月 380,400 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>ULTRA</td><td class="num">250,000 / 月</td><td class="num">¥1,559<br><small>续费 ¥1,799 · 首月 262,500 积分</small></td><td class="num">¥3,750<br><small>续费 ¥5,800 · 首月 398,900 积分</small></td><td class="num">¥13,144<br><small>含 ¥300 券 · 续费价未展示 · 首月 504,400 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>ULTRA</td><td class="num">552,000 / 月</td><td class="num">¥3,300<br><small>续费 ¥3,890</small></td><td class="num">¥8,199<br><small>续费 ¥10,499 · 首月 579,600 积分</small></td><td class="num">¥19,699<br><small>含 ¥300 券 · 续费价未展示 · 首月 607,200 积分</small></td></tr><tr data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>基础会员</td><td class="num">725 / 月</td><td class="num">¥33<br><small>本次登录显示 ¥69 · 续费 ¥69</small></td><td class="num">¥113<br><small>续费 ¥188</small></td><td class="num">¥393<br><small>本次登录显示 ¥659 · 续费 ¥659</small></td></tr><tr data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>标准会员</td><td class="num">2,210 / 月</td><td class="num">¥100<br><small>本次登录显示 ¥199 · 续费 ¥199</small></td><td class="num">¥341<br><small>续费 ¥568</small></td><td class="num">¥1,099<br><small>本次登录显示 ¥1,899 · 续费 ¥1,899</small></td></tr><tr data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>高级会员</td><td class="num">6,160 / 月</td><td class="num">¥199<br><small>续费 ¥499</small></td><td class="num">¥658<br><small>续费 ¥1,399</small></td><td class="num">¥2,599<br><small>续费 ¥5,199</small></td></tr><tr data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>高级会员</td><td class="num">12,320 / 月</td><td class="num">¥398<br><small>本次登录显示 ¥998 · 续费 ¥998</small></td><td class="num">¥1,227<br><small>续费 ¥2,798</small></td><td class="num">¥5,199<br><small>续费 ¥10,398</small></td></tr><tr data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>高级会员</td><td class="num">18,480 / 月</td><td class="num">¥597<br><small>续费 ¥1,498</small></td><td class="num">¥1,799<br><small>续费 ¥4,199</small></td><td class="num">¥7,019<br><small>续费 ¥15,598</small></td></tr><tr data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>高级会员</td><td class="num">27,720 / 月</td><td class="num">¥896<br><small>续费 ¥2,246</small></td><td class="num">¥2,680<br><small>续费 ¥6,298</small></td><td class="num">¥10,529<br><small>续费 ¥23,398</small></td></tr><tr data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>超级会员</td><td class="num">54,600 / 月</td><td class="num">¥1,706<br><small>本次登录显示 ¥4,299 · 续费 ¥4,299</small></td><td class="num">¥4,999<br><small>续费 ¥11,699</small></td><td class="num">¥19,656<br><small>续费 ¥43,680</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>基础会员</td><td class="num">830 / 月</td><td class="num">¥38<br><small>续费 ¥79</small></td><td class="num">¥219<br><small>续费 ¥219</small></td><td class="num">¥759<br><small>续费 ¥759</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>标准会员</td><td class="num">2,320 / 月</td><td class="num">¥100<br><small>续费 ¥209</small></td><td class="num">¥589<br><small>续费 ¥589</small></td><td class="num">¥1,199<br><small>续费 ¥1,999</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>高级会员</td><td class="num">6,330 / 月</td><td class="num">¥273<br><small>续费 ¥529</small></td><td class="num">¥893<br><small>续费 ¥1,488</small></td><td class="num">¥2,649<br><small>续费 ¥5,299</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>高级会员</td><td class="num">8,600 / 月</td><td class="num">¥374<br><small>续费 ¥719</small></td><td class="num">¥900<br><small>续费 ¥1,999</small></td><td class="num">¥3,600<br><small>续费 ¥7,199</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>高级会员</td><td class="num">10,150 / 月</td><td class="num">¥441<br><small>续费 ¥849</small></td><td class="num">¥1,057<br><small>续费 ¥2,349</small></td><td class="num">¥4,250<br><small>续费 ¥8,499</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>高级会员</td><td class="num">12,000 / 月</td><td class="num">¥519<br><small>续费 ¥999</small></td><td class="num">¥1,260<br><small>续费 ¥2,799</small></td><td class="num">¥4,999<br><small>续费 ¥9,999</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>高级会员</td><td class="num">18,480 / 月</td><td class="num">¥779<br><small>续费 ¥1,498</small></td><td class="num">¥1,890<br><small>续费 ¥4,199</small></td><td class="num">¥7,019<br><small>续费 ¥15,598</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>高级会员</td><td class="num">27,720 / 月</td><td class="num">¥1,168<br><small>续费 ¥2,246</small></td><td class="num">¥2,834<br><small>续费 ¥6,298</small></td><td class="num">¥10,529<br><small>续费 ¥23,398</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>超级会员</td><td class="num">54,600 / 月</td><td class="num">¥2,235<br><small>续费 ¥4,299</small></td><td class="num">¥4,999<br><small>续费 ¥11,699</small></td><td class="num">¥19,656<br><small>续费 ¥43,680</small></td></tr><tr data-membership="Higgsfield"><td><i class="clogo lg-higgsfield" aria-hidden="true"></i><a href="https://higgsfield.ai/zh/pricing" target="_blank" rel="noopener noreferrer">Higgsfield ↗</a></td><td>Starter</td><td class="num">270 / 月<br><small>不支持对比模型</small></td><td class="num">$19<br><small>续费价未展示</small></td><td class="sub">未提供</td><td class="num">$228<br><small>页面月均 $19 · 续费价未展示</small></td></tr><tr data-membership="Higgsfield"><td><i class="clogo lg-higgsfield" aria-hidden="true"></i><a href="https://higgsfield.ai/zh/pricing" target="_blank" rel="noopener noreferrer">Higgsfield ↗</a></td><td>Plus</td><td class="num">1,200 / 月</td><td class="num">$47<br><small>续费 $59</small></td><td class="sub">未提供</td><td class="num">$396<br><small>页面月均 $33 · 续费价未展示</small></td></tr><tr data-membership="Higgsfield"><td><i class="clogo lg-higgsfield" aria-hidden="true"></i><a href="https://higgsfield.ai/zh/pricing" target="_blank" rel="noopener noreferrer">Higgsfield ↗</a></td><td>Ultra</td><td class="num">3,000 / 月</td><td class="num">$79<br><small>续费 $129</small></td><td class="sub">未提供</td><td class="num">$600<br><small>页面月均 $50 · 续费价未展示</small></td></tr><tr data-membership="Higgsfield"><td><i class="clogo lg-higgsfield" aria-hidden="true"></i><a href="https://higgsfield.ai/zh/pricing" target="_blank" rel="noopener noreferrer">Higgsfield ↗</a></td><td>Ultra</td><td class="num">6,000 / 月</td><td class="num">$150<br><small>续费 $250</small></td><td class="sub">未提供</td><td class="num">$1,164<br><small>页面月均 $97 · 续费价未展示</small></td></tr><tr data-membership="Higgsfield"><td><i class="clogo lg-higgsfield" aria-hidden="true"></i><a href="https://higgsfield.ai/zh/pricing" target="_blank" rel="noopener noreferrer">Higgsfield ↗</a></td><td>Ultra</td><td class="num">9,000 / 月</td><td class="num">$209<br><small>续费 $375</small></td><td class="sub">未提供</td><td class="num">$1,668<br><small>页面月均 $139 · 续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>BASIC</td><td class="num">1,500 / 月</td><td class="num">$9<br><small>续费 $15</small></td><td class="num">$27<br><small>续费价未展示</small></td><td class="num">$90<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>PRO</td><td class="num">3,500 / 月</td><td class="num">$30<br><small>续费 $30</small></td><td class="num">$84<br><small>续费价未展示</small></td><td class="num">$315<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>PRO</td><td class="num">6,000 / 月</td><td class="num">$51<br><small>续费 $51</small></td><td class="num">$144<br><small>续费价未展示</small></td><td class="num">$540<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>PRO</td><td class="num">9,500 / 月</td><td class="num">$81<br><small>续费 $81</small></td><td class="num">$216<br><small>续费价未展示</small></td><td class="num">$798<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>PRO</td><td class="num">11,500 / 月</td><td class="num">$98<br><small>续费 $98</small></td><td class="num">$261<br><small>续费价未展示</small></td><td class="num">$966<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>ULTIMATE</td><td class="num">20,000 / 月</td><td class="num">$170<br><small>续费 $170</small></td><td class="num">$450<br><small>续费价未展示</small></td><td class="num">$1,680<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>ULTIMATE</td><td class="num">36,000 / 月</td><td class="num">$306<br><small>续费 $306</small></td><td class="num">$756<br><small>续费价未展示</small></td><td class="num">$2,592<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>MAX</td><td class="num">72,000 / 月</td><td class="num">$612<br><small>续费 $612</small></td><td class="num">$1,512<br><small>续费价未展示</small></td><td class="num">$5,184<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>MAX</td><td class="num">100,000 / 月</td><td class="num">$850<br><small>续费 $850</small></td><td class="num">$2,100<br><small>续费价未展示</small></td><td class="num">$7,200<br><small>续费价未展示</small></td></tr><tr data-membership="Seko"><td><i class="clogo lg-seko" aria-hidden="true"></i><a href="https://seko.sensetime.com/pricing" target="_blank" rel="noopener noreferrer">Seko ↗</a></td><td>标准会员</td><td class="num">500 / 月<br><small>6,000 / 年（年卡）</small></td><td class="num">¥39<br><small>续费 ¥60</small></td><td class="sub">未提供</td><td class="num">¥576<br><small>续费 ¥720</small></td></tr><tr data-membership="Seko"><td><i class="clogo lg-seko" aria-hidden="true"></i><a href="https://seko.sensetime.com/pricing" target="_blank" rel="noopener noreferrer">Seko ↗</a></td><td>高级会员</td><td class="num">3,000 / 月<br><small>36,000 / 年（年卡）</small></td><td class="num">¥220<br><small>续费 ¥300</small></td><td class="sub">未提供</td><td class="num">¥2,880<br><small>续费 ¥3,600</small></td></tr><tr data-membership="Seko"><td><i class="clogo lg-seko" aria-hidden="true"></i><a href="https://seko.sensetime.com/pricing" target="_blank" rel="noopener noreferrer">Seko ↗</a></td><td>至尊会员</td><td class="num">10,000 / 月<br><small>120,000 / 年（年卡）</small></td><td class="num">¥660<br><small>续费 ¥875</small></td><td class="sub">未提供</td><td class="num">¥8,400<br><small>续费 ¥10,500</small></td></tr></tbody></table></div>
+    <div class="tw"><table><thead><tr><th class="ctr">平台</th><th class="ctr">会员</th><th class="ctr">基础积分</th><th class="ctr">月付</th><th class="ctr">季付</th><th class="ctr">年付</th></tr></thead><tbody><tr id="membership-libtv" data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>标准版</td><td class="num">1,500 / 月</td><td class="num">¥66<br><small>续费 ¥66</small></td><td class="num">¥179<br><small>续费 ¥189</small></td><td class="num">¥569<br><small>续费 ¥599</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>进阶版</td><td class="num">4,600 / 月</td><td class="num">¥199<br><small>续费 ¥199</small></td><td class="num">¥499<br><small>续费 ¥559</small></td><td class="num">¥1,199<br><small>续费 ¥1,799</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>高级版</td><td class="num">11,700 / 月</td><td class="num">¥469<br><small>续费 ¥489</small></td><td class="num">¥1,159<br><small>续费 ¥1,399</small></td><td class="num">¥2,999<br><small>续费 ¥3,799</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>高级版</td><td class="num">16,300 / 月</td><td class="num">¥649<br><small>续费 ¥669</small></td><td class="num">¥1,599<br><small>续费 ¥1,899</small></td><td class="num">¥3,999<br><small>续费 ¥5,099</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>豪华版</td><td class="num">32,800 / 月</td><td class="num">¥1,199<br><small>续费 ¥1,299</small></td><td class="num">¥2,699<br><small>续费 ¥3,499</small></td><td class="num">¥6,999<br><small>续费 ¥7,399</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>至尊版</td><td class="num">50,500 / 月</td><td class="num">¥1,799<br><small>续费 ¥1,999</small></td><td class="num">¥3,899<br><small>续费 ¥5,099</small></td><td class="num">¥10,299<br><small>续费 ¥10,999</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>至尊版</td><td class="num">66,000 / 月</td><td class="num">¥2,299<br><small>续费 ¥2,599</small></td><td class="num">¥4,999<br><small>续费 ¥6,599</small></td><td class="num">¥13,499<br><small>一次性购买</small></td></tr><tr data-membership="libtv"><td><i class="clogo lg-libtv" aria-hidden="true"></i><a href="https://www.liblib.tv/" target="_blank" rel="noopener noreferrer">libtv ↗</a></td><td>至尊版</td><td class="num">92,000 / 月</td><td class="num">¥3,099<br><small>续费 ¥3,569</small></td><td class="num">¥6,699<br><small>续费 ¥8,999</small></td><td class="num">¥18,299<br><small>一次性购买</small></td></tr><tr id="membership-neowow" data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>PLUS</td><td class="num">8,000 / 月</td><td class="num">¥30<br><small>续费 ¥60 · 首月 8,400 积分</small></td><td class="num">¥168<br><small>续费 ¥189 · 首月 9,850 积分</small></td><td class="num">¥599<br><small>续费 ¥699 · 首月 10,450 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>PRO</td><td class="num">25,000 / 月</td><td class="num">¥165<br><small>续费 ¥219 · 首月 26,250 积分</small></td><td class="num">¥478<br><small>续费 ¥549 · 首月 35,690 积分</small></td><td class="num">¥1,600<br><small>续费 ¥2,500 · 首月 42,240 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>PRO</td><td class="num">63,000 / 月</td><td class="num">¥415<br><small>续费 ¥479 · 首月 66,150 积分</small></td><td class="num">¥1,072<br><small>续费 ¥1,390 · 首月 68,790 积分</small></td><td class="num">¥4,000<br><small>续费 ¥4,500 · 首月 68,790 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>PRO</td><td class="num">90,000 / 月</td><td class="num">¥598<br><small>续费 ¥659 · 首月 94,500 积分</small></td><td class="num">¥1,665<br><small>续费 ¥1,850 · 首月 117,900 积分</small></td><td class="num">¥5,500<br><small>续费 ¥6,000 · 首月 131,400 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>MAX</td><td class="num">178,000 / 月</td><td class="num">¥1,135<br><small>续费 ¥1,299 · 首月 186,900 积分</small></td><td class="num">¥2,839<br><small>续费 ¥3,800 · 首月 206,300 积分</small></td><td class="num">¥9,500<br><small>续费 ¥10,000 · 首月 207,400 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>MAX</td><td class="num">210,000 / 月</td><td class="num">¥1,332<br><small>续费 ¥1,560 · 首月 220,500 积分</small></td><td class="num">¥3,353<br><small>续费 ¥4,400 · 首月 312,900 积分</small></td><td class="num">¥11,059<br><small>续费 ¥12,059 · 首月 380,400 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>ULTRA</td><td class="num">250,000 / 月</td><td class="num">¥1,559<br><small>续费 ¥1,799 · 首月 262,500 积分</small></td><td class="num">¥3,750<br><small>续费 ¥5,800 · 首月 398,900 积分</small></td><td class="num">¥13,144<br><small>含 ¥300 券 · 续费价未展示 · 首月 504,400 积分</small></td></tr><tr data-membership="Neowow"><td><i class="clogo lg-neowow" aria-hidden="true"></i><a href="https://neowow.cn/neo-tv" target="_blank" rel="noopener noreferrer">Neowow ↗</a></td><td>ULTRA</td><td class="num">552,000 / 月</td><td class="num">¥3,300<br><small>续费 ¥3,890</small></td><td class="num">¥8,199<br><small>续费 ¥10,499 · 首月 579,600 积分</small></td><td class="num">¥19,699<br><small>含 ¥300 券 · 续费价未展示 · 首月 607,200 积分</small></td></tr><tr id="membership-jimeng" data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>基础会员</td><td class="num">725 / 月</td><td class="num">¥33<br><small>本次登录显示 ¥69 · 续费 ¥69</small></td><td class="num">¥113<br><small>续费 ¥188</small></td><td class="num">¥393<br><small>本次登录显示 ¥659 · 续费 ¥659</small></td></tr><tr data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>标准会员</td><td class="num">2,210 / 月</td><td class="num">¥100<br><small>本次登录显示 ¥199 · 续费 ¥199</small></td><td class="num">¥341<br><small>续费 ¥568</small></td><td class="num">¥1,099<br><small>本次登录显示 ¥1,899 · 续费 ¥1,899</small></td></tr><tr data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>高级会员</td><td class="num">6,160 / 月</td><td class="num">¥199<br><small>续费 ¥499</small></td><td class="num">¥658<br><small>续费 ¥1,399</small></td><td class="num">¥2,599<br><small>续费 ¥5,199</small></td></tr><tr data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>高级会员</td><td class="num">12,320 / 月</td><td class="num">¥398<br><small>本次登录显示 ¥998 · 续费 ¥998</small></td><td class="num">¥1,227<br><small>续费 ¥2,798</small></td><td class="num">¥5,199<br><small>续费 ¥10,398</small></td></tr><tr data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>高级会员</td><td class="num">18,480 / 月</td><td class="num">¥597<br><small>续费 ¥1,498</small></td><td class="num">¥1,799<br><small>续费 ¥4,199</small></td><td class="num">¥7,019<br><small>续费 ¥15,598</small></td></tr><tr data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>高级会员</td><td class="num">27,720 / 月</td><td class="num">¥896<br><small>续费 ¥2,246</small></td><td class="num">¥2,680<br><small>续费 ¥6,298</small></td><td class="num">¥10,529<br><small>续费 ¥23,398</small></td></tr><tr data-membership="即梦"><td><i class="clogo lg-jimeng" aria-hidden="true"></i><a href="https://jimeng.jianying.com/" target="_blank" rel="noopener noreferrer">即梦 ↗</a></td><td>超级会员</td><td class="num">54,600 / 月</td><td class="num">¥1,706<br><small>本次登录显示 ¥4,299 · 续费 ¥4,299</small></td><td class="num">¥4,999<br><small>续费 ¥11,699</small></td><td class="num">¥19,656<br><small>续费 ¥43,680</small></td></tr><tr id="membership-xiaoyunque" data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>基础会员</td><td class="num">830 / 月</td><td class="num">¥38<br><small>续费 ¥79</small></td><td class="num">¥219<br><small>续费 ¥219</small></td><td class="num">¥759<br><small>续费 ¥759</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>标准会员</td><td class="num">2,320 / 月</td><td class="num">¥100<br><small>续费 ¥209</small></td><td class="num">¥589<br><small>续费 ¥589</small></td><td class="num">¥1,199<br><small>续费 ¥1,999</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>高级会员</td><td class="num">6,330 / 月</td><td class="num">¥273<br><small>续费 ¥529</small></td><td class="num">¥893<br><small>续费 ¥1,488</small></td><td class="num">¥2,649<br><small>续费 ¥5,299</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>高级会员</td><td class="num">8,600 / 月</td><td class="num">¥374<br><small>续费 ¥719</small></td><td class="num">¥900<br><small>续费 ¥1,999</small></td><td class="num">¥3,600<br><small>续费 ¥7,199</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>高级会员</td><td class="num">10,150 / 月</td><td class="num">¥441<br><small>续费 ¥849</small></td><td class="num">¥1,057<br><small>续费 ¥2,349</small></td><td class="num">¥4,250<br><small>续费 ¥8,499</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>高级会员</td><td class="num">12,000 / 月</td><td class="num">¥519<br><small>续费 ¥999</small></td><td class="num">¥1,260<br><small>续费 ¥2,799</small></td><td class="num">¥4,999<br><small>续费 ¥9,999</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>高级会员</td><td class="num">18,480 / 月</td><td class="num">¥779<br><small>续费 ¥1,498</small></td><td class="num">¥1,890<br><small>续费 ¥4,199</small></td><td class="num">¥7,019<br><small>续费 ¥15,598</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>高级会员</td><td class="num">27,720 / 月</td><td class="num">¥1,168<br><small>续费 ¥2,246</small></td><td class="num">¥2,834<br><small>续费 ¥6,298</small></td><td class="num">¥10,529<br><small>续费 ¥23,398</small></td></tr><tr data-membership="小云雀"><td><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><a href="https://xyq.jianying.com/pricing" target="_blank" rel="noopener noreferrer">小云雀 ↗</a></td><td>超级会员</td><td class="num">54,600 / 月</td><td class="num">¥2,235<br><small>续费 ¥4,299</small></td><td class="num">¥4,999<br><small>续费 ¥11,699</small></td><td class="num">¥19,656<br><small>续费 ¥43,680</small></td></tr><tr id="membership-higgsfield" data-membership="Higgsfield"><td><i class="clogo lg-higgsfield" aria-hidden="true"></i><a href="https://higgsfield.ai/zh/pricing" target="_blank" rel="noopener noreferrer">Higgsfield ↗</a></td><td>Starter</td><td class="num">270 / 月<br><small>不支持对比模型</small></td><td class="num">$19<br><small>续费价未展示</small></td><td class="sub">未提供</td><td class="num">$228<br><small>页面月均 $19 · 续费价未展示</small></td></tr><tr data-membership="Higgsfield"><td><i class="clogo lg-higgsfield" aria-hidden="true"></i><a href="https://higgsfield.ai/zh/pricing" target="_blank" rel="noopener noreferrer">Higgsfield ↗</a></td><td>Plus</td><td class="num">1,200 / 月</td><td class="num">$47<br><small>续费 $59</small></td><td class="sub">未提供</td><td class="num">$396<br><small>页面月均 $33 · 续费价未展示</small></td></tr><tr data-membership="Higgsfield"><td><i class="clogo lg-higgsfield" aria-hidden="true"></i><a href="https://higgsfield.ai/zh/pricing" target="_blank" rel="noopener noreferrer">Higgsfield ↗</a></td><td>Ultra</td><td class="num">3,000 / 月</td><td class="num">$79<br><small>续费 $129</small></td><td class="sub">未提供</td><td class="num">$600<br><small>页面月均 $50 · 续费价未展示</small></td></tr><tr data-membership="Higgsfield"><td><i class="clogo lg-higgsfield" aria-hidden="true"></i><a href="https://higgsfield.ai/zh/pricing" target="_blank" rel="noopener noreferrer">Higgsfield ↗</a></td><td>Ultra</td><td class="num">6,000 / 月</td><td class="num">$150<br><small>续费 $250</small></td><td class="sub">未提供</td><td class="num">$1,164<br><small>页面月均 $97 · 续费价未展示</small></td></tr><tr data-membership="Higgsfield"><td><i class="clogo lg-higgsfield" aria-hidden="true"></i><a href="https://higgsfield.ai/zh/pricing" target="_blank" rel="noopener noreferrer">Higgsfield ↗</a></td><td>Ultra</td><td class="num">9,000 / 月</td><td class="num">$209<br><small>续费 $375</small></td><td class="sub">未提供</td><td class="num">$1,668<br><small>页面月均 $139 · 续费价未展示</small></td></tr><tr id="membership-tapnow" data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>BASIC</td><td class="num">1,500 / 月</td><td class="num">$9<br><small>续费 $15</small></td><td class="num">$27<br><small>续费价未展示</small></td><td class="num">$90<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>PRO</td><td class="num">3,500 / 月</td><td class="num">$30<br><small>续费 $30</small></td><td class="num">$84<br><small>续费价未展示</small></td><td class="num">$315<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>PRO</td><td class="num">6,000 / 月</td><td class="num">$51<br><small>续费 $51</small></td><td class="num">$144<br><small>续费价未展示</small></td><td class="num">$540<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>PRO</td><td class="num">9,500 / 月</td><td class="num">$81<br><small>续费 $81</small></td><td class="num">$216<br><small>续费价未展示</small></td><td class="num">$798<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>PRO</td><td class="num">11,500 / 月</td><td class="num">$98<br><small>续费 $98</small></td><td class="num">$261<br><small>续费价未展示</small></td><td class="num">$966<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>ULTIMATE</td><td class="num">20,000 / 月</td><td class="num">$170<br><small>续费 $170</small></td><td class="num">$450<br><small>续费价未展示</small></td><td class="num">$1,680<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>ULTIMATE</td><td class="num">36,000 / 月</td><td class="num">$306<br><small>续费 $306</small></td><td class="num">$756<br><small>续费价未展示</small></td><td class="num">$2,592<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>MAX</td><td class="num">72,000 / 月</td><td class="num">$612<br><small>续费 $612</small></td><td class="num">$1,512<br><small>续费价未展示</small></td><td class="num">$5,184<br><small>续费价未展示</small></td></tr><tr data-membership="Tapnow"><td><i class="clogo lg-tapnow" aria-hidden="true"></i><a href="https://app.tapnow.ai/pricing" target="_blank" rel="noopener noreferrer">Tapnow ↗</a></td><td>MAX</td><td class="num">100,000 / 月</td><td class="num">$850<br><small>续费 $850</small></td><td class="num">$2,100<br><small>续费价未展示</small></td><td class="num">$7,200<br><small>续费价未展示</small></td></tr><tr id="membership-seko" data-membership="Seko"><td><i class="clogo lg-seko" aria-hidden="true"></i><a href="https://seko.sensetime.com/pricing" target="_blank" rel="noopener noreferrer">Seko ↗</a></td><td>标准会员</td><td class="num">500 / 月<br><small>6,000 / 年（年卡）</small></td><td class="num">¥39<br><small>续费 ¥60</small></td><td class="sub">未提供</td><td class="num">¥576<br><small>续费 ¥720</small></td></tr><tr data-membership="Seko"><td><i class="clogo lg-seko" aria-hidden="true"></i><a href="https://seko.sensetime.com/pricing" target="_blank" rel="noopener noreferrer">Seko ↗</a></td><td>高级会员</td><td class="num">3,000 / 月<br><small>36,000 / 年（年卡）</small></td><td class="num">¥220<br><small>续费 ¥300</small></td><td class="sub">未提供</td><td class="num">¥2,880<br><small>续费 ¥3,600</small></td></tr><tr data-membership="Seko"><td><i class="clogo lg-seko" aria-hidden="true"></i><a href="https://seko.sensetime.com/pricing" target="_blank" rel="noopener noreferrer">Seko ↗</a></td><td>至尊会员</td><td class="num">10,000 / 月<br><small>120,000 / 年（年卡）</small></td><td class="num">¥660<br><small>续费 ¥875</small></td><td class="sub">未提供</td><td class="num">¥8,400<br><small>续费 ¥10,500</small></td></tr></tbody></table></div>
   </div>
 </details>
   <details id="canvas-data" style="margin:14px 0">
@@ -2398,35 +2476,64 @@ document.addEventListener('DOMContentLoaded', function(){
   const table = document.getElementById('compare-grid');
   const rows = document.getElementById('compare-rows');
   const coverage = document.getElementById('compare-coverage');
-  const model = document.getElementById('compare-model');
-  const resolution = document.getElementById('compare-resolution');
-  const period = document.getElementById('compare-period');
+  const order = document.getElementById('compare-order');
+  const title = document.getElementById('compare-results-title');
+  const calcNote = document.getElementById('compare-calc-note');
+  const paidHead = document.getElementById('compare-paid');
+  const volumeHead = document.getElementById('compare-volume');
+  const model = form.elements.namedItem('compare-model');
+  const resolution = form.elements.namedItem('resolution');
+  const period = form.elements.namedItem('period');
+  const mode = form.elements.namedItem('mode');
   const target = document.getElementById('compare-target');
+  const budget = document.getElementById('compare-budget');
+  const targetPanel = document.getElementById('compare-target-panel');
+  const budgetPanel = document.getElementById('compare-budget-panel');
   const platform = document.getElementById('compare-platform');
   const showAll = document.getElementById('compare-all');
-  const data = {"plans": [{"platform": "libtv", "tier": "标准版", "periods": {"m": [66.0, 1500], "q": [179.0, 1500], "y": [569.0, 1500]}}, {"platform": "libtv", "tier": "进阶版", "periods": {"m": [199.0, 4600], "q": [499.0, 4600], "y": [1199.0, 4600]}}, {"platform": "libtv", "tier": "高级版", "periods": {"m": [469.0, 11700], "q": [1159.0, 11700], "y": [2999.0, 11700]}}, {"platform": "libtv", "tier": "高级版", "periods": {"m": [649.0, 16300], "q": [1599.0, 16300], "y": [3999.0, 16300]}}, {"platform": "libtv", "tier": "豪华版", "periods": {"m": [1199.0, 32800], "q": [2699.0, 32800], "y": [6999.0, 32800]}}, {"platform": "libtv", "tier": "至尊版", "periods": {"m": [1799.0, 50500], "q": [3899.0, 50500], "y": [10299.0, 50500]}}, {"platform": "libtv", "tier": "至尊版", "periods": {"m": [2299.0, 66000], "q": [4999.0, 66000], "y": [13499.0, 66000]}}, {"platform": "libtv", "tier": "至尊版", "periods": {"m": [3099.0, 92000], "q": [6699.0, 92000], "y": [18299.0, 92000]}}, {"platform": "Neowow", "tier": "PLUS", "periods": {"m": [30.0, 8000], "q": [168.0, 8000], "y": [599.0, 8000]}}, {"platform": "Neowow", "tier": "PRO", "periods": {"m": [165.0, 25000], "q": [478.0, 25000], "y": [1600.0, 25000]}}, {"platform": "Neowow", "tier": "PRO", "periods": {"m": [415.0, 63000], "q": [1072.0, 63000], "y": [4000.0, 63000]}}, {"platform": "Neowow", "tier": "PRO", "periods": {"m": [598.0, 90000], "q": [1665.0, 90000], "y": [5500.0, 90000]}}, {"platform": "Neowow", "tier": "MAX", "periods": {"m": [1135.0, 178000], "q": [2839.0, 178000], "y": [9500.0, 178000]}}, {"platform": "Neowow", "tier": "MAX", "periods": {"m": [1332.0, 210000], "q": [3353.0, 210000], "y": [11059.0, 210000]}}, {"platform": "Neowow", "tier": "ULTRA", "periods": {"m": [1559.0, 250000], "q": [3750.0, 250000], "y": [13144.0, 250000]}}, {"platform": "Neowow", "tier": "ULTRA", "periods": {"m": [3300.0, 552000], "q": [8199.0, 552000], "y": [19699.0, 552000]}}, {"platform": "即梦", "tier": "基础会员", "periods": {"m": [33.0, 725], "q": [113.0, 725], "y": [393.0, 725]}}, {"platform": "即梦", "tier": "标准会员", "periods": {"m": [100.0, 2210], "q": [341.0, 2210], "y": [1099.0, 2210]}}, {"platform": "即梦", "tier": "高级会员", "periods": {"m": [199.0, 6160], "q": [658.0, 6160], "y": [2599.0, 6160]}}, {"platform": "即梦", "tier": "高级会员", "periods": {"m": [398.0, 12320], "q": [1227.0, 12320], "y": [5199.0, 12320]}}, {"platform": "即梦", "tier": "高级会员", "periods": {"m": [597.0, 18480], "q": [1799.0, 18480], "y": [7019.0, 18480]}}, {"platform": "即梦", "tier": "高级会员", "periods": {"m": [896.0, 27720], "q": [2680.0, 27720], "y": [10529.0, 27720]}}, {"platform": "即梦", "tier": "超级会员", "periods": {"m": [1706.0, 54600], "q": [4999.0, 54600], "y": [19656.0, 54600]}}, {"platform": "小云雀", "tier": "基础会员", "periods": {"m": [38.0, 830], "q": [219.0, 830], "y": [759.0, 830]}}, {"platform": "小云雀", "tier": "标准会员", "periods": {"m": [100.0, 2320], "q": [589.0, 2320], "y": [1199.0, 2320]}}, {"platform": "小云雀", "tier": "高级会员", "periods": {"m": [273.0, 6330], "q": [893.0, 6330], "y": [2649.0, 6330]}}, {"platform": "小云雀", "tier": "高级会员", "periods": {"m": [374.0, 8600], "q": [900.0, 8600], "y": [3600.0, 8600]}}, {"platform": "小云雀", "tier": "高级会员", "periods": {"m": [441.0, 10150], "q": [1057.0, 10150], "y": [4250.0, 10150]}}, {"platform": "小云雀", "tier": "高级会员", "periods": {"m": [519.0, 12000], "q": [1260.0, 12000], "y": [4999.0, 12000]}}, {"platform": "小云雀", "tier": "高级会员", "periods": {"m": [779.0, 18480], "q": [1890.0, 18480], "y": [7019.0, 18480]}}, {"platform": "小云雀", "tier": "高级会员", "periods": {"m": [1168.0, 27720], "q": [2834.0, 27720], "y": [10529.0, 27720]}}, {"platform": "小云雀", "tier": "超级会员", "periods": {"m": [2235.0, 54600], "q": [4999.0, 54600], "y": [19656.0, 54600]}}, {"platform": "Higgsfield", "tier": "Plus", "periods": {"m": [315.5157, 1200], "y": [2658.3876, 1200]}}, {"platform": "Higgsfield", "tier": "Ultra", "periods": {"m": [530.3349, 3000], "y": [4027.86, 3000]}}, {"platform": "Higgsfield", "tier": "Ultra", "periods": {"m": [1006.965, 6000], "y": [7814.0484, 6000]}}, {"platform": "Higgsfield", "tier": "Ultra", "periods": {"m": [1403.0379, 9000], "y": [11197.4508, 9000]}}, {"platform": "Tapnow", "tier": "BASIC", "periods": {"m": [60.417899999999996, 1500], "q": [181.2537, 1500], "y": [604.179, 1500]}}, {"platform": "Tapnow", "tier": "PRO", "periods": {"m": [201.393, 3500], "q": [563.9004, 3500], "y": [2114.6265, 3500]}}, {"platform": "Tapnow", "tier": "PRO", "periods": {"m": [342.36809999999997, 6000], "q": [966.6863999999999, 6000], "y": [3625.074, 6000]}}, {"platform": "Tapnow", "tier": "PRO", "periods": {"m": [543.7610999999999, 9500], "q": [1450.0296, 9500], "y": [5357.0538, 9500]}}, {"platform": "Tapnow", "tier": "PRO", "periods": {"m": [657.8838, 11500], "q": [1752.1191, 11500], "y": [6484.8546, 11500]}}, {"platform": "Tapnow", "tier": "ULTIMATE", "periods": {"m": [1141.2269999999999, 20000], "q": [3020.895, 20000], "y": [11278.008, 20000]}}, {"platform": "Tapnow", "tier": "ULTIMATE", "periods": {"m": [2054.2086, 36000], "q": [5075.1035999999995, 36000], "y": [17400.355199999998, 36000]}}, {"platform": "Tapnow", "tier": "MAX", "periods": {"m": [4108.4172, 72000], "q": [10150.207199999999, 72000], "y": [34800.710399999996, 72000]}}, {"platform": "Tapnow", "tier": "MAX", "periods": {"m": [5706.135, 100000], "q": [14097.51, 100000], "y": [48334.32, 100000]}}, {"platform": "Seko", "tier": "标准会员", "periods": {"m": [39.0, 500], "y": [576.0, 500]}}, {"platform": "Seko", "tier": "高级会员", "periods": {"m": [220.0, 3000], "y": [2880.0, 3000]}}, {"platform": "Seko", "tier": "至尊会员", "periods": {"m": [660.0, 10000], "y": [8400.0, 10000]}}], "readings": {"libtv": [600, 1380, 390, 840, 600, "仅 480p"], "Neowow": [3600, 7500, 1950, 4500, 3600, "仅 480p"], "即梦": ["会员解锁", {"credits": 600, "sourceDate": "2026-09-21"}, "会员解锁", "会员解锁", "会员解锁", "仅 480p"], "小云雀": [300, {"credits": 600, "original": 780}, 270, 570, {"credits": 270, "original": 300}, "仅 480p"], "Higgsfield": [90, 210, "画布未显示", "画布未显示", "画布未显示", "画布未显示"], "Tapnow": ["会员解锁", {"credits": 1200, "sourceDate": "2026-09-21"}, "待核实", "待核实", "待核实", "待核实"], "Seko": [270, 540, "会员解锁", "会员解锁", "会员解锁", "仅 480p"]}, "periods": {"m": ["月付", 1], "q": ["季付", 3], "y": ["年付", 12]}};
+  const presets = form.querySelectorAll('[data-target], [data-budget]');
+  const data = {"plans": [{"platform": "libtv", "tier": "标准版", "anchor": "membership-libtv", "periods": {"m": [66.0, 1500], "q": [179.0, 1500], "y": [569.0, 1500]}}, {"platform": "libtv", "tier": "进阶版", "anchor": "membership-libtv", "periods": {"m": [199.0, 4600], "q": [499.0, 4600], "y": [1199.0, 4600]}}, {"platform": "libtv", "tier": "高级版", "anchor": "membership-libtv", "periods": {"m": [469.0, 11700], "q": [1159.0, 11700], "y": [2999.0, 11700]}}, {"platform": "libtv", "tier": "高级版", "anchor": "membership-libtv", "periods": {"m": [649.0, 16300], "q": [1599.0, 16300], "y": [3999.0, 16300]}}, {"platform": "libtv", "tier": "豪华版", "anchor": "membership-libtv", "periods": {"m": [1199.0, 32800], "q": [2699.0, 32800], "y": [6999.0, 32800]}}, {"platform": "libtv", "tier": "至尊版", "anchor": "membership-libtv", "periods": {"m": [1799.0, 50500], "q": [3899.0, 50500], "y": [10299.0, 50500]}}, {"platform": "libtv", "tier": "至尊版", "anchor": "membership-libtv", "periods": {"m": [2299.0, 66000], "q": [4999.0, 66000], "y": [13499.0, 66000]}}, {"platform": "libtv", "tier": "至尊版", "anchor": "membership-libtv", "periods": {"m": [3099.0, 92000], "q": [6699.0, 92000], "y": [18299.0, 92000]}}, {"platform": "Neowow", "tier": "PLUS", "anchor": "membership-neowow", "periods": {"m": [30.0, 8000], "q": [168.0, 8000], "y": [599.0, 8000]}}, {"platform": "Neowow", "tier": "PRO", "anchor": "membership-neowow", "periods": {"m": [165.0, 25000], "q": [478.0, 25000], "y": [1600.0, 25000]}}, {"platform": "Neowow", "tier": "PRO", "anchor": "membership-neowow", "periods": {"m": [415.0, 63000], "q": [1072.0, 63000], "y": [4000.0, 63000]}}, {"platform": "Neowow", "tier": "PRO", "anchor": "membership-neowow", "periods": {"m": [598.0, 90000], "q": [1665.0, 90000], "y": [5500.0, 90000]}}, {"platform": "Neowow", "tier": "MAX", "anchor": "membership-neowow", "periods": {"m": [1135.0, 178000], "q": [2839.0, 178000], "y": [9500.0, 178000]}}, {"platform": "Neowow", "tier": "MAX", "anchor": "membership-neowow", "periods": {"m": [1332.0, 210000], "q": [3353.0, 210000], "y": [11059.0, 210000]}}, {"platform": "Neowow", "tier": "ULTRA", "anchor": "membership-neowow", "periods": {"m": [1559.0, 250000], "q": [3750.0, 250000], "y": [13144.0, 250000]}}, {"platform": "Neowow", "tier": "ULTRA", "anchor": "membership-neowow", "periods": {"m": [3300.0, 552000], "q": [8199.0, 552000], "y": [19699.0, 552000]}}, {"platform": "即梦", "tier": "基础会员", "anchor": "membership-jimeng", "periods": {"m": [33.0, 725], "q": [113.0, 725], "y": [393.0, 725]}}, {"platform": "即梦", "tier": "标准会员", "anchor": "membership-jimeng", "periods": {"m": [100.0, 2210], "q": [341.0, 2210], "y": [1099.0, 2210]}}, {"platform": "即梦", "tier": "高级会员", "anchor": "membership-jimeng", "periods": {"m": [199.0, 6160], "q": [658.0, 6160], "y": [2599.0, 6160]}}, {"platform": "即梦", "tier": "高级会员", "anchor": "membership-jimeng", "periods": {"m": [398.0, 12320], "q": [1227.0, 12320], "y": [5199.0, 12320]}}, {"platform": "即梦", "tier": "高级会员", "anchor": "membership-jimeng", "periods": {"m": [597.0, 18480], "q": [1799.0, 18480], "y": [7019.0, 18480]}}, {"platform": "即梦", "tier": "高级会员", "anchor": "membership-jimeng", "periods": {"m": [896.0, 27720], "q": [2680.0, 27720], "y": [10529.0, 27720]}}, {"platform": "即梦", "tier": "超级会员", "anchor": "membership-jimeng", "periods": {"m": [1706.0, 54600], "q": [4999.0, 54600], "y": [19656.0, 54600]}}, {"platform": "小云雀", "tier": "基础会员", "anchor": "membership-xiaoyunque", "periods": {"m": [38.0, 830], "q": [219.0, 830], "y": [759.0, 830]}}, {"platform": "小云雀", "tier": "标准会员", "anchor": "membership-xiaoyunque", "periods": {"m": [100.0, 2320], "q": [589.0, 2320], "y": [1199.0, 2320]}}, {"platform": "小云雀", "tier": "高级会员", "anchor": "membership-xiaoyunque", "periods": {"m": [273.0, 6330], "q": [893.0, 6330], "y": [2649.0, 6330]}}, {"platform": "小云雀", "tier": "高级会员", "anchor": "membership-xiaoyunque", "periods": {"m": [374.0, 8600], "q": [900.0, 8600], "y": [3600.0, 8600]}}, {"platform": "小云雀", "tier": "高级会员", "anchor": "membership-xiaoyunque", "periods": {"m": [441.0, 10150], "q": [1057.0, 10150], "y": [4250.0, 10150]}}, {"platform": "小云雀", "tier": "高级会员", "anchor": "membership-xiaoyunque", "periods": {"m": [519.0, 12000], "q": [1260.0, 12000], "y": [4999.0, 12000]}}, {"platform": "小云雀", "tier": "高级会员", "anchor": "membership-xiaoyunque", "periods": {"m": [779.0, 18480], "q": [1890.0, 18480], "y": [7019.0, 18480]}}, {"platform": "小云雀", "tier": "高级会员", "anchor": "membership-xiaoyunque", "periods": {"m": [1168.0, 27720], "q": [2834.0, 27720], "y": [10529.0, 27720]}}, {"platform": "小云雀", "tier": "超级会员", "anchor": "membership-xiaoyunque", "periods": {"m": [2235.0, 54600], "q": [4999.0, 54600], "y": [19656.0, 54600]}}, {"platform": "Higgsfield", "tier": "Plus", "anchor": "membership-higgsfield", "periods": {"m": [315.52, 1200], "y": [2658.39, 1200]}}, {"platform": "Higgsfield", "tier": "Ultra", "anchor": "membership-higgsfield", "periods": {"m": [530.33, 3000], "y": [4027.86, 3000]}}, {"platform": "Higgsfield", "tier": "Ultra", "anchor": "membership-higgsfield", "periods": {"m": [1006.97, 6000], "y": [7814.05, 6000]}}, {"platform": "Higgsfield", "tier": "Ultra", "anchor": "membership-higgsfield", "periods": {"m": [1403.04, 9000], "y": [11197.45, 9000]}}, {"platform": "Tapnow", "tier": "BASIC", "anchor": "membership-tapnow", "periods": {"m": [60.42, 1500], "q": [181.25, 1500], "y": [604.18, 1500]}}, {"platform": "Tapnow", "tier": "PRO", "anchor": "membership-tapnow", "periods": {"m": [201.39, 3500], "q": [563.9, 3500], "y": [2114.63, 3500]}}, {"platform": "Tapnow", "tier": "PRO", "anchor": "membership-tapnow", "periods": {"m": [342.37, 6000], "q": [966.69, 6000], "y": [3625.07, 6000]}}, {"platform": "Tapnow", "tier": "PRO", "anchor": "membership-tapnow", "periods": {"m": [543.76, 9500], "q": [1450.03, 9500], "y": [5357.05, 9500]}}, {"platform": "Tapnow", "tier": "PRO", "anchor": "membership-tapnow", "periods": {"m": [657.88, 11500], "q": [1752.12, 11500], "y": [6484.85, 11500]}}, {"platform": "Tapnow", "tier": "ULTIMATE", "anchor": "membership-tapnow", "periods": {"m": [1141.23, 20000], "q": [3020.89, 20000], "y": [11278.01, 20000]}}, {"platform": "Tapnow", "tier": "ULTIMATE", "anchor": "membership-tapnow", "periods": {"m": [2054.21, 36000], "q": [5075.1, 36000], "y": [17400.36, 36000]}}, {"platform": "Tapnow", "tier": "MAX", "anchor": "membership-tapnow", "periods": {"m": [4108.42, 72000], "q": [10150.21, 72000], "y": [34800.71, 72000]}}, {"platform": "Tapnow", "tier": "MAX", "anchor": "membership-tapnow", "periods": {"m": [5706.14, 100000], "q": [14097.51, 100000], "y": [48334.32, 100000]}}, {"platform": "Seko", "tier": "标准会员", "anchor": "membership-seko", "periods": {"m": [39.0, 500], "y": [576.0, 500]}}, {"platform": "Seko", "tier": "高级会员", "anchor": "membership-seko", "periods": {"m": [220.0, 3000], "y": [2880.0, 3000]}}, {"platform": "Seko", "tier": "至尊会员", "anchor": "membership-seko", "periods": {"m": [660.0, 10000], "y": [8400.0, 10000]}}], "readings": {"libtv": [600, 1380, 390, 840, 600, "仅 480p"], "Neowow": [3600, 7500, 1950, 4500, 3600, "仅 480p"], "即梦": ["会员解锁", {"credits": 600, "sourceDate": "2026-09-21"}, "会员解锁", "会员解锁", "会员解锁", "仅 480p"], "小云雀": [300, {"credits": 600, "original": 780}, 270, 570, {"credits": 270, "original": 300}, "仅 480p"], "Higgsfield": [90, 210, "画布未显示", "画布未显示", "画布未显示", "画布未显示"], "Tapnow": ["会员解锁", {"credits": 1200, "sourceDate": "2026-09-21"}, "待核实", "待核实", "待核实", "待核实"], "Seko": [270, 540, "会员解锁", "会员解锁", "会员解锁", "仅 480p"]}, "names": {"libtv": "LibTV", "Neowow": "NeoWOW", "Tapnow": "TapNow"}, "periods": {"m": ["月付", 1], "q": ["季付", 3], "y": ["年付", 12]}};
   const money = new Intl.NumberFormat('zh-CN', {style:'currency', currency:'CNY', maximumFractionDigits:2, minimumFractionDigits:0});
   const perClip = new Intl.NumberFormat('zh-CN', {style:'currency', currency:'CNY'});
+  const defaultMode = new URLSearchParams(location.search).get('mode') === 'budget' ? 'budget' : 'target';
+  const nameOf = platformName => data.names[platformName] || platformName;
+  mode.value = defaultMode;
 
   function render(){
-    const amount = target.valueAsNumber;
+    const byBudget = mode.value === 'budget';
+    const input = byBudget ? budget : target;
+    const amount = input.valueAsNumber;
     const cycle = data.periods[period.value];
     const spec = Number(model.value) + Number(resolution.value);
     const available = new Map();
     const excluded = [];
     const offers = [];
+    target.disabled = targetPanel.hidden = byBudget;
+    budget.disabled = budgetPanel.hidden = !byBudget;
+    for (const preset of presets) {
+      const activeValue = preset.dataset.budget ? budget.valueAsNumber : target.valueAsNumber;
+      preset.setAttribute('aria-pressed', String(Number(preset.dataset.budget || preset.dataset.target) === activeValue));
+    }
+    title.textContent = byBudget ? '预算产能榜' : '会员成本榜';
+    table.dataset.mode = mode.value;
+    calcNote.textContent = (byBudget ? '每条成本按用完可生成额度计算。' : '每条成本按你填写的用量计算。')
+      + '结果基于单账号、首期价格和基础积分。首购资格以结算页为准。';
+    paidHead.setAttribute('aria-sort', byBudget ? 'none' : 'ascending');
+    volumeHead.setAttribute('aria-sort', byBudget ? 'descending' : 'none');
     rows.textContent = '';
     coverage.textContent = '';
+    order.textContent = '';
     table.hidden = true;
-    if (!target.validity.valid) {
-      result.textContent = '请输入 1 到 10,000 之间的生成条数。';
+    if (!input.validity.valid) {
+      result.textContent = byBudget ? '请输入 ¥1 至 ¥1,000,000 的预算，最多保留两位小数。'
+        : '请输入 1 到 10,000 之间的整数条数。';
       return;
     }
     for (const [name, cells] of Object.entries(data.readings)) {
       if (platform.value && platform.value !== name) continue;
       const reading = cells[spec];
       if (typeof reading === 'string') {
-        excluded.push(name + '（' + reading + '）');
+        excluded.push(nameOf(name) + '（' + reading + '）');
         continue;
       }
       available.set(name, typeof reading === 'number' ? {credits:reading} : reading);
@@ -2441,55 +2548,122 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     const providers = new Set(offers.map(offer => offer.plan.platform));
     for (const name of available.keys()) {
-      if (!providers.has(name)) excluded.push(name + '（无' + cycle[0] + '）');
+      if (!providers.has(name)) excluded.push(nameOf(name) + '（无' + cycle[0] + '）');
     }
-    const matched = offers.filter(offer => offer.capacity >= amount);
-    matched.sort((a,b) => a.pay - b.pay || b.capacity - a.capacity);
-    const fastest = Math.max(0, ...offers.map(offer => offer.capacity));
-    const cheapest = matched[0];
+    const fits = byBudget ? offer => offer.capacity > 0 && offer.pay <= amount
+      : offer => offer.capacity >= amount;
+    const rankBy = byBudget ? (a,b) => b.capacity - a.capacity || a.pay - b.pay
+      : (a,b) => a.pay - b.pay || b.capacity - a.capacity;
+    const matched = offers.filter(fits).sort(rankBy);
+    const best = matched[0];
+    const highestCapacity = Math.max(0, ...offers.map(offer => offer.capacity));
     result.textContent = '';
-    if (cheapest) {
-      result.append('满足 ' + amount.toLocaleString('zh-CN') + ' 条/月，首期最低 ');
-      const price = document.createElement('strong');
-      price.textContent = money.format(cheapest.pay);
-      result.append(price, '（' + cycle[0] + '）');
+    if (best) {
+      result.append(byBudget ? money.format(amount) + ' 预算内，每月最多约 ' : amount.toLocaleString('zh-CN') + ' 条/月，首期最低 ');
+      const answer = document.createElement('strong');
+      answer.textContent = byBudget ? best.capacity + ' 条' : money.format(best.pay);
+      result.append(answer, '（' + cycle[0] + '）');
+      const caption = document.createElement('small');
+      caption.textContent = nameOf(best.plan.platform) + ' ' + best.plan.tier
+        + (byBudget ? ' · 实付 ' + money.format(best.pay) : ' · 月产能约 ' + best.capacity + ' 条')
+        + (best.sourceDate ? ' · 扣分沿用留档' : '');
+      result.append(caption);
     } else {
-      result.textContent = offers.length
-        ? '本周期没有单账号档位能满足用量，最高约 ' + fastest + ' 条/月。可调低用量或换一个规格。'
-        : '当前选择没有可计算的方案。请选择其他规格、周期或平台。';
+      const paidPlans = offers.filter(offer => offer.capacity > 0);
+      if (paidPlans.length && byBudget) {
+        const entryPrice = Math.min(...paidPlans.map(offer => offer.pay));
+        result.textContent = '当前预算没覆盖可出片的档位。该规格的最低首期支出为 ' + money.format(entryPrice) + '。';
+      } else if (highestCapacity && !byBudget) {
+        result.textContent = '当前单账号最多约 ' + highestCapacity + ' 条/月。减小用量或换规格可查看更多方案。';
+      } else {
+        result.textContent = '这个组合暂无可计算的方案。';
+        if (spec === 5) {
+          const change = document.createElement('button');
+          change.type = 'button';
+          change.className = 'compare-switch-res';
+          change.textContent = '试试 480p';
+          change.addEventListener('click', () => {
+            resolution.value = '0';
+            render();
+            form.querySelector('[name=resolution]:checked').focus();
+          });
+          result.append(change);
+        }
+      }
     }
     const seen = new Set();
-    const displayed = showAll.checked
-      ? [...matched, ...offers.filter(offer => offer.capacity < amount).sort((a,b) => a.pay - b.pay)]
-      : matched.filter(({plan}) => {
+    const ranked = showAll.checked ? matched : matched.filter(({plan}) => {
           if (seen.has(plan.platform)) return false;
           seen.add(plan.platform);
           return true;
         });
-    for (const offer of displayed) {
+    const displayed = showAll.checked ? [...ranked, ...offers.filter(offer => !fits(offer)).sort(rankBy)] : ranked;
+    if (ranked.length > 1) {
+      const next = ranked[1];
+      const gap = byBudget ? best.capacity - next.capacity : next.pay - best.pay;
+      if (gap > 0) result.querySelector('small').append(byBudget
+        ? ' · 比第 2 名每月多 ' + gap + ' 条'
+        : ' · 比第 2 名少付 ' + money.format(gap));
+    }
+    const scale = Math.max(1, ...ranked.map(offer => byBudget ? offer.capacity : offer.pay));
+    order.textContent = displayed.length ? (byBudget ? '月产能从高到低 · 条越长，能做越多' : '首期实付从低到高 · 条越短，花钱越少')
+      + ' · ' + ranked.length + (showAll.checked ? ' 档符合' : ' 家平台符合') : '';
+    displayed.forEach((offer, index) => {
       const tr = rows.insertRow();
-      if (offer === cheapest) tr.className = 'compare-best';
+      if (offer === best) tr.className = 'compare-best';
       const title = tr.insertCell();
-      const name = document.createElement('b');
-      name.textContent = offer.plan.platform === 'Tapnow' ? 'TapNow' : offer.plan.platform;
+      const rank = document.createElement('span');
+      rank.className = 'compare-rank';
+      rank.textContent = index < ranked.length ? String(index + 1).padStart(2, '0') : '—';
+      const name = document.createElement('a');
+      name.className = 'compare-result-name';
+      name.href = '#' + offer.plan.anchor;
+      name.textContent = nameOf(offer.plan.platform);
+      name.setAttribute('aria-label', '查看 ' + name.textContent + ' 的会员价格');
       const detail = document.createElement('small');
       detail.textContent = offer.plan.tier + ' · ' + offer.monthlyCredits.toLocaleString('zh-CN') + ' 分/月'
         + (offer.sourceDate ? ' · 扣分沿用留档' : '');
-      title.append(name, detail);
-      tr.insertCell().textContent = money.format(offer.pay);
-      tr.insertCell().textContent = offer.capacity + ' 条';
-      tr.insertCell().textContent = offer.capacity >= amount ? perClip.format(offer.pay / (amount * cycle[1])) : '未达用量';
-    }
+      title.append(rank, name, detail);
+      const spendCell = tr.insertCell();
+      spendCell.textContent = money.format(offer.pay);
+      const volumeCell = tr.insertCell();
+      volumeCell.textContent = offer.capacity + ' 条';
+      const unit = tr.insertCell();
+      unit.textContent = fits(offer) ? perClip.format(offer.pay / ((byBudget ? offer.capacity : amount) * cycle[1]))
+        : byBudget && offer.pay > amount ? '超预算' : '未达用量';
+      if (index < ranked.length) {
+        const bar = document.createElement('span');
+        bar.className = 'compare-bar';
+        bar.setAttribute('aria-hidden', 'true');
+        bar.style.width = ((byBudget ? offer.capacity : offer.pay) / scale * 100) + '%';
+        (byBudget ? volumeCell : spendCell).append(bar);
+      }
+    });
     table.hidden = !displayed.length;
     const short = [...providers].filter(name => !matched.some(offer => offer.plan.platform === name));
     const notes = [];
-    if (short.length) notes.push(short.join('、') + ' 的单账号档位未达用量');
+    if (short.length) notes.push(short.map(nameOf).join('、') + (byBudget ? ' 在当前预算内暂无可用档位' : ' 的单账号档位未达用量'));
     if (excluded.length) notes.push('当前未计入：' + excluded.join('、'));
     coverage.textContent = notes.join('。') + (notes.length ? '。' : '');
   }
   form.addEventListener('submit', event => event.preventDefault());
-  [model, resolution, period, platform, showAll].forEach(input => input.addEventListener('change', render));
-  target.addEventListener('input', render);
+  form.addEventListener('change', render);
+  [platform, showAll].forEach(input => input.addEventListener('change', render));
+  [target, budget].forEach(input => input.addEventListener('input', render));
+  form.addEventListener('click', event => {
+    const preset = event.target.closest('[data-target], [data-budget]');
+    if (!preset) return;
+    if (preset.dataset.budget) budget.value = preset.dataset.budget;
+    else target.value = preset.dataset.target;
+    render();
+  });
+  document.getElementById('compare-reset').addEventListener('click', () => {
+    form.reset();
+    mode.value = defaultMode;
+    platform.value = '';
+    showAll.checked = false;
+    render();
+  });
   render();
 })();
 

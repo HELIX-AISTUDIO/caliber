@@ -22,7 +22,7 @@ import shutil
 import subprocess
 from html import escape
 
-from compare import COMPARE_CSS, DISCLOSURE_JS, compare_view
+from compare import COMPARE_CSS, DISCLOSURE_JS, compare_view, membership_anchor
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # site/
 DATA = os.path.join(ROOT, "data")
@@ -2672,18 +2672,23 @@ def membership_price(option, currency, price_key, renewal_key, period):
 
 
 membership_rows = ""
+membership_platforms = set()
 for plan in COST["plans"]:
     plat = plan["platform"]
     currency = PLATFORMS[plat]["currency"]
     for option in plan["credits"]:
         monthly = option["credits"]
+        anchor = ""
+        if plat not in membership_platforms:
+            anchor = f' id="{membership_anchor(plat)}"'
+            membership_platforms.add(plat)
         points = f'{monthly:,} / 月'
         if plat == "Seko":
             points += f'<br><small>{12 * monthly:,} / 年（年卡）</small>'
         if option.get("modelUnsupported"):
             points += '<br><small>不支持对比模型</small>'
         membership_rows += (
-            f'<tr data-membership="{escape(plat)}"><td>{plogo(plat)}{source_link(plat, REVIEW[plat]["url"])}</td>'
+            f'<tr{anchor} data-membership="{escape(plat)}"><td>{plogo(plat)}{source_link(plat, REVIEW[plat]["url"])}</td>'
             f'<td>{escape(plan["tier"])}</td><td class="num">{points}</td>'
             f'{membership_price(option, currency, "m", "mRenewal", "m")}'
             f'{membership_price(option, currency, "q", "qRenewal", "q")}'
@@ -3619,10 +3624,10 @@ home_body = f"""
   </header>
   <div class="btns compare-home-actions">
     <a class="btn btn-white" href="cost.html">开始比价</a>
-    <a href="#budget">按预算估算</a>
+    <a href="cost.html?mode=budget">按预算估算</a>
   </div>
   <details id="budget" class="compare-home-budget">
-    <summary>输入预算，估算能生成多少条<span class="chev">›</span></summary>
+    <summary>查看标准版的预算与升档门槛<span class="chev">›</span></summary>
     <div class="dbody">
       <p>{SPEC}</p>
   <div class="bud budhome">
@@ -4052,7 +4057,7 @@ PAGES = {
                       extra_js=COMPARE_JS + DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
     "cycles.html": page("三周期全清单", f"{len(ROWS)} 个可选积分档 × 年付/季付/月付三周期，按指标动态排名，附全部原始数据与计算方法。",
                         nav("cycles"), cycles_body, cost_js=True, canon="cycles",
-                        extra_js=DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
+                        extra_css=COMPARE_CSS, extra_js=DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
     # ⚠ Cloudflare Pages 的 SPA 回落：输出目录里【有 404.html 就用它】，
     #   没有才回落到 index.html 并返回 200。`_redirects` 那条实测没拦住，
     #   404.html 是更可靠的开关。不挂进 nav，也不参与任何导航高亮。
