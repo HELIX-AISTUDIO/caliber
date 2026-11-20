@@ -15,12 +15,12 @@
     },
     {
       "key": "cost",
-      "label": "平台成本对比",
+      "label": "成本对比",
       "href": "cost.html"
     },
     {
       "key": "cycles",
-      "label": "三周期全清单",
+      "label": "详细排名",
       "href": "cycles.html"
     },
     {

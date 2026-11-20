@@ -22,6 +22,8 @@ import shutil
 import subprocess
 from html import escape
 
+from compare import COMPARE_CSS, DISCLOSURE_JS, compare_view
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # site/
 DATA = os.path.join(ROOT, "data")
 # 两个发布目录，产物完全一致：
@@ -569,56 +571,22 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   color:#9AA0A8;font-size:13px;font-weight:600;padding:7px 12px;border-radius:999px;flex:0 0 auto;
   transition:color .22s,background .22s}.menu a:hover{color:#fff;background:rgba(255,255,255,.065)}.menu a.active{color:#D1FE17}.nav .spec{margin-left:auto;font-family:__MONO__;font-size:11.5px;font-weight:500;color:#D1FE17;
   border:1px solid rgba(209,254,23,.35);border-radius:999px;padding:6px 13px;flex:0 0 auto}.wrap{max-width:1280px;margin:0 auto;padding:0 24px;position:relative;z-index:1}/* ── Hero 光场：lime 从「涂料」变「光源」── */
-.hero{max-width:1280px;margin:0 auto;padding:58px 24px 6px;position:relative;z-index:1}.hero::before{content:"";position:absolute;left:50%;top:-14%;z-index:-1;pointer-events:none;
-  width:min(1180px,140vw);height:150%;transform:translateX(-50%);
-  background:
-    radial-gradient(42% 34% at 50% 30%,rgba(209,254,23,.26),rgba(209,254,23,.09) 48%,transparent 74%),
-    radial-gradient(76% 62% at 50% 2%,rgba(209,254,23,.085),transparent 72%);
-  -webkit-filter:blur(4px);filter:blur(4px)}.hero::after{content:"";position:absolute;left:-12%;right:-12%;bottom:-4%;height:46%;
-  z-index:-1;pointer-events:none;opacity:.42;
-  background-image:
-    linear-gradient(rgba(209,254,23,.13) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(209,254,23,.13) 1px,transparent 1px);
-  background-size:58px 58px,58px 58px;
-  transform:perspective(400px) rotateX(63deg);transform-origin:50% 100%;
-  -webkit-mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%);
-  mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%)}.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
   color:#D1FE17;margin-bottom:15px;font-family:__MONO__}h1{font-family:__DISP__;font-size:clamp(31px,5.3vw,60px);font-weight:800;color:#fff;
   letter-spacing:-.038em;line-height:1.07}h1 em{font-style:normal;color:#D1FE17}
-/* ⚠ 用 .lead 而不是 .hero .lead：说明文字现在住在 .heromore 里（手机端要排到滑块之后），
-   写成 .hero .lead 会失配，max-width:720px 静默丢失，段落拉成 1232px 的长行。
-   .lead 全站只有首页一处，直接按类选中即可。 */
 .lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
-/* 首页首屏顺序 —— .homeopen 用 flex order 控制「标题 / 反查滑块 / 说明文字」的先后。
-   源序写成 hero → wrap(#budget) → heromore，桌面端 order 复原成
-   hero → heromore → wrap（与改造前一致，桌面观感零变化）。
-   ⚠ 这里必须是 order 而不是改 DOM 顺序：桌面端要「标题带说明+按钮」成组，
-   手机端要「标题之后立刻是滑块」。同一份 DOM 靠 order 分叉，避免维护两份首页。
-   ⚠ 子元素必须显式 width:100% —— flex 规范里「交叉轴 margin 为 auto」的项
-   【不会被 stretch】，而 .hero/.wrap 都带 margin:0 auto 做居中。
-   不写 width:100% 的话它们会收缩成内容宽度并居中：标题和预算框都变窄，桌面端明显回退。
-   （这个坑量 top/height 抓不到，只有量宽度或看截图才发现。） */
-.homeopen{display:flex;flex-direction:column}
-.homeopen>.hero{order:1;width:100%}.homeopen>.heromore{order:2;width:100%}
-.homeopen>.wrap{order:3;width:100%}
-.heromore{max-width:1280px;margin:0 auto;padding:0 24px}.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
+.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
   text-decoration:none;white-space:nowrap;
   transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s}.btn-white{background:#fff;color:#0B0B0B}.btn-white:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,255,255,.2)}.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}.btn-ghost:hover{border-color:rgba(255,255,255,.45);transform:translateY(-2px)}h2{font-family:__DISP__;font-size:20px;font-weight:750;color:#fff;letter-spacing:-.025em;line-height:1.3}h2 .ey{display:inline-block;font-family:__MONO__;font-size:12px;font-weight:600;color:#D1FE17;
-  margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:__DISP__;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.note, .entry, .legal, details{
+  margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:__DISP__;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.note, .legal, details{
   background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 46%,rgba(0,0,0,.30));
   -webkit-backdrop-filter:blur(28px) saturate(150%);backdrop-filter:blur(28px) saturate(150%);
   border:1px solid rgba(255,255,255,.12);border-radius:18px;
   box-shadow:inset 0 0 0 .61px rgba(255,255,255,.07),inset 0 1px 0 rgba(255,255,255,.05),
              0 1px 2px rgba(0,0,0,.45),0 10px 24px rgba(0,0,0,.4),0 30px 60px rgba(0,0,0,.48)}
-@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){.note, .entry, .legal, details, .nav{
+@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){.note, .legal, details, .nav{
     background:linear-gradient(158deg,#161B18,#0D110F)}
-}.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}.entry{display:block;text-decoration:none;padding:26px;position:relative;
-  transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .3s}.entry:hover{transform:translateY(-4px);border-color:rgba(209,254,23,.42);
-  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.09),0 26px 60px rgba(0,0,0,.62),0 0 42px rgba(209,254,23,.09)}.entry .et{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#767C85;
-  font-family:__MONO__;margin-bottom:12px}.entry h3{margin:0 0 9px;font-size:18px;font-weight:750;color:#fff}.entry p{color:#8A9099;font-size:13px;line-height:1.65;margin-bottom:16px}.entry .nums{display:flex;gap:22px;flex-wrap:wrap;padding-top:16px;
-  border-top:1px solid rgba(255,255,255,.07)}.entry .nums div{display:flex;flex-direction:column;gap:3px}.entry .nums s{text-decoration:none;font-family:__MONO__;font-size:18px;font-weight:700;
-  color:#D1FE17;letter-spacing:-.03em}.entry .nums em{font-style:normal;font-size:10.5px;color:#767C85;letter-spacing:.06em;text-transform:uppercase}.entry .arrow{position:absolute;top:24px;right:24px;color:#D1FE17;font-size:17px;
-  transition:transform .3s cubic-bezier(.22,1,.36,1)}.entry:hover .arrow{transform:translateX(4px)}table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
+}table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
   background:linear-gradient(158deg,rgba(22,27,24,.86),rgba(10,13,11,.92));
   border:1px solid rgba(255,255,255,.12);border-radius:18px;overflow:hidden;
   box-shadow:inset 0 0 0 .61px rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.5),
@@ -878,8 +846,7 @@ input[type=number]{width:110px;background:rgba(255,255,255,.06);
 /* ⚠ hero 的内容（meta 行）在 1440 视口下会撑到 1514px，导致整页横向溢出 ——
    这是首页原有缺陷，加散点后被冒烟测试抓出来。overflow-x:clip 不产生滚动容器，
    只裁掉溢出，不影响 sticky；配合 meta 允许换行双保险。 */
-.hero{overflow-x:clip}
-.hero .pareto,.wrap>.pareto{margin-top:34px}
+.wrap>.pareto{margin-top:34px}
 .pareto{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:18px;
   background:rgba(255,255,255,.024);border:1px solid rgba(255,255,255,.075)}
 .phd b{display:block;font-size:14px;color:#E4E7EA}
@@ -970,10 +937,9 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   -webkit-backdrop-filter:none}.legal-t{font-size:16px;font-weight:800;letter-spacing:-.025em;margin-bottom:9px}.legal-b{color:#1F2A00;max-width:1000px}.legal-f{margin-top:14px;font-family:__MONO__;font-size:11px;color:#1F2A00}.legal-f .fp{background:#0B0B0B;color:#D1FE17;padding:2.5px 9px;border-radius:6px;font-weight:600}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}.reveal{opacity:0;transform:translateY(16px);
-  transition:opacity .62s cubic-bezier(.22,1,.36,1),transform .62s cubic-bezier(.22,1,.36,1)}.reveal.in{opacity:1;transform:none}.hero>*{animation:fadeUp .7s cubic-bezier(.22,1,.36,1) both}.hero>*:nth-child(2){animation-delay:.06s}.hero>*:nth-child(3){animation-delay:.12s}.hero>*:nth-child(4){animation-delay:.18s}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal,.hero>*{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}
+  transition:opacity .62s cubic-bezier(.22,1,.36,1),transform .62s cubic-bezier(.22,1,.36,1)}.reveal.in{opacity:1;transform:none}@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}
 }
-@media print{body{background:#fff!important;color:#000!important;padding:0}body::before,body::after,.hero::before,.hero::after{display:none!important}.note, .entry, .legal, details, .nav, table{
+@media print{body{background:#fff!important;color:#000!important;padding:0}body::before,body::after{display:none!important}.note, .legal, details, .nav, table{
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
     box-shadow:none!important;background:#fff!important}.nav{position:static!important}.promo{background:#D1FE17!important;color:#000!important}.brand .bw b, .menu a, h1, h2, h3, td, th, li, .lead{color:#000!important}.legal{background:#F2FFB8!important}.legal-t,.legal-b,.legal-f{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
 }
@@ -984,25 +950,12 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
      改为换行独占一行，始终可见；不做引导/弹窗（那是把关键前提延迟交付）。 */
   .nav .spec{margin-left:0;flex:1 1 100%;order:9;font-size:11px;line-height:1.5;
     padding-top:7px;margin-top:2px;border-top:1px solid rgba(255,255,255,.08)}
-  /* ── 手机端首页首屏：滑块优先 ──
-     实测（390×844）：原布局 hero 一口气吃掉 334px（40% 屏高），滑块被推到 y=686，
-     用户点进来先读到一屏方法论说明，才看到唯一能互动的东西。
-     改法：标题块只留 eyebrow + h1（padding 36→18），说明文字与按钮用 order 移到最后，
-     #budget 提到标题正下方。实测滑块 686 → 约 430，整块反查含结果都在首屏内。 */
-  .hero{padding:18px 15px 0}.homeopen>.wrap{order:2}
-  .homeopen>.heromore{order:3;margin-top:32px}.heromore{padding:0 15px}
   .wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}
   /* 滑块拇指放大到 24px（+3px 黑边 = 30px 触控目标）。
      ⚠ 必须落在这里：本块在基础 .cqr 规则之后，同权重靠顺序决胜；
        放到前面的媒体查询里会被基础规则盖掉，等于没写。 */
   .cqr::-webkit-slider-thumb{width:24px;height:24px}
-  .cqr::-moz-range-thumb{width:24px;height:24px}.entry{padding:20px}.note, .legal, table, details, .entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g2{grid-template-columns:1fr 1fr}
-  /* ── KPI：竖排五张卡会吃掉 1.5 屏，用户滚到反查与表格之前就以为「页面到头了」。
-     改成横向滑动的一行，高度固定，下方内容自然进入首屏。 */
-  .grid.g5{display:flex;overflow-x:auto;overscroll-behavior-x:auto;gap:10px;
-    scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;
-    margin:0 -15px;padding:2px 15px 6px;scrollbar-width:none}
-  .grid.g5::-webkit-scrollbar{display:none}
+  .cqr::-moz-range-thumb{width:24px;height:24px}.note, .legal, table, details{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}
   /* ── 反查表：套用与「全部档位排名」同一套卡片节奏 ──
      5 列在手机上必然横滑；上一版做成「标签在上、值在下」的纵向大卡，占太高、看着散。
      用户要求跟排名卡一样大小，故复用同一套：1fr + auto 两列、11px 内边距、圆角 13。 */
@@ -1107,7 +1060,7 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   .tw-main tbody td:nth-child(7) s{display:none}
 
 }
-@media (max-width:520px){.g2{grid-template-columns:1fr} }/* ── 窄屏：左栏改为【底部抽屉】+ 底部摘要条 ──
+/* ── 窄屏：左栏改为【底部抽屉】+ 底部摘要条 ──
    上一版把侧栏做成「吸顶横向滚动条」，实测失败：吸顶块挡住内容，
    月产量与平台筛选被挤出视野、用户根本找不到。
    移动端的正确形态是「底部条 + 弹层」：不占首屏、信息一个不少、可发现。 */
@@ -1408,7 +1361,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   var seen = false;
   try{ seen = !!localStorage.getItem(KEY); }catch(e){ seen = true; }  /* 存不了就别弹，别每次都打扰 */
-  if(!seen) setTimeout(open, 700);   /* 让首屏先渲染完再弹，避免闪一下 */
+  if(!seen && !document.querySelector('[data-skip-intro]')) setTimeout(open, 700);
 })();
 
 /* ══════════ 全站通用：术语提示 ══════════
@@ -2900,13 +2853,6 @@ for _t in TRAPS:
         f'<td class="num neg">+{_t["pct"]*100:.1f}%</td>'
         f'<td class="num">¥{_t["longPay"]:,.0f} <s>vs ¥{_t["shortPay"]:,.0f}</s></td></tr>')
 
-# ═══════════ 执行建议 ═══════════
-budget_bullets = "".join(
-    f'<li><b>月产 {"0" if _i == 0 else "%.2f" % _x["lo"]}–{_x["hi"]:.2f} 条：</b>'
-    f'{_x["row"]["plat"]} {tname(_x["row"])} — ¥{_x["row"]["priceCNY"]:,.0f}/年'
-    f'（¥{f2(_x["row"]["perVideo"])}/条 · 单价为最优解的 {_x["row"]["perVideo"]/BEST:.2f} 倍）</li>'
-    for _i, _x in enumerate(LADDER))
-
 # ═══════════ 全场极值（首页与成本页共用）═══════════
 _best = min(ROWS, key=lambda r: r["perVideo"])
 _second = sorted(ROWS, key=lambda r: r["perVideo"])[1]
@@ -3488,7 +3434,23 @@ cycles_body = f"""
 {foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　{len(ROWS)} 个可选积分档 × 3 个周期')}
 """
 
+COMPARE_VIEW, COMPARE_JS = compare_view(ROWS, CANVAS["rows"], UPDATED, PERIODS)
 cost_body = f"""
+{COMPARE_VIEW}
+<section class="compare-records" aria-labelledby="compare-records-title">
+  <h2 id="compare-records-title">价格与折算依据</h2>
+  <p>{COST["liveNote"]}</p>
+  {MEMBERSHIP_DETAILS.strip()}
+  <details id="canvas-data" style="margin:14px 0">
+    <summary>画布扣分与各规格成本<span class="chev">›</span></summary>
+    <div class="dbody">{CANVAS_DETAILS}</div>
+  </details>
+  {OFFER_DETAILS.strip()}
+  {EVIDENCE_DETAILS.strip()}
+</section>
+<details id="more" class="compare-advanced">
+  <summary>进阶对比与多账号方案<span class="chev">›</span></summary>
+  <div class="dbody"><a href="cycles.html">查看动态排名及完整计算方法</a></div>
 <div class="app">
 <aside class="side">
   {SHEET_HEAD}
@@ -3562,13 +3524,13 @@ cost_body = f"""
   </div>
 </aside>
 
-<main class="mainv">
+<div class="mainv">
   <div class="tabs" data-seg="view" role="tablist" aria-label="查看方式">
     <button type="button" class="on" data-v="all" role="tab">全档位对比<s>逐档成本 + 反查</s></button>
     <button type="button" data-v="period" role="tab">先别急着下单<s>看懂周期与倒挂</s></button>
   </div>
   <div class="vhead">
-    <h1>同一条 {SEC_PER_CLIP} 秒视频，最贵档比最省档贵 <em>{WORST/BEST:.2f} 倍</em></h1>
+    <h2>标准版 720p · 进阶对比</h2>
     <div class="vmeta">
       <span><svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1" y="2.2" width="10" height="9" rx="1.6" stroke="currentColor" stroke-width="1.1"/><path d="M1 5h10M4 1v2.4M8 1v2.4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>数据时点 <b>{UPDATED}</b></span>
       <span><svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.1"/><path d="M3.4 8.4V6.2M6 8.4V3.8M8.6 8.4V5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg><b>{len(PLAT_SUM)}</b> 平台 · <b>{NTIER}</b> 会员档 · <b>{len(ROWS)}</b> 积分档</span>
@@ -3581,11 +3543,6 @@ cost_body = f"""
     {KPI_BARS}
 
   <div class="vnote"><b>首期订阅成本</b> · {COST["priceRule"]}<br>{COST["liveNote"]}</div>
-{CANVAS_DETAILS}
-{MEMBERSHIP_DETAILS}
-{OFFER_DETAILS}
-
-
 <div class="vpanel" data-view="period" id="period">
   <div class="vptitle">先别急着下单<span>承诺越久越便宜？全场有 {len(TRAPS)} 处例外 —— 先看懂倒挂，再决定充哪个周期</span></div>
   <div class="chips">
@@ -3638,7 +3595,7 @@ cost_body = f"""
     <div class="vptitle">全部档位 · 按「该周期支出」排名<span>名次＝<b style="color:#D1FE17">该周期总支出</b>由低到高（你实际要掏的钱），不是单条成本 —— 所以单价更低但档位更贵的会排在后面。<br>条形越长＝越省；上行＝用满产能的固有单价，下行＝按你当前产量的实际每条 · <b id="coverN" style="color:#D1FE17">—</b><br><b style="color:#D1FE17">测试口径</b>：{SPEC}<br><b style="color:#D1FE17">{T("koujing", "口径")}＝{T("danZhangHao", "单账号单平台")}</b>：1 个平台 + 1 个账号能做出你设定的月产量才算可用；做不到的<b>整行置灰</b>，但<b>名次照常给出</b> —— 名次只反映该周期实付（档位固有属性，与产量无关），否则月产量一旦越过单账号上限，全表零名次、只剩一片灰。需要多账号时请用下方组合订阅。想看<b>按单价</b>排名请到「三周期全清单 · 动态排名」。</span></div>
   {PT_TABLES}
 </div>
-</main>
+</div>
   <div class="scrim" id="scrim"></div>
 </div>
 <div class="mobar">
@@ -3646,43 +3603,28 @@ cost_body = f"""
   <button type="button" id="moOpen" aria-label="调整周期、月产量与平台筛选"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M1 4.2h7M11.6 4.2H14M1 10.8h2.4M7 10.8h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="9.8" cy="4.2" r="1.9" stroke="currentColor" stroke-width="1.7"/><circle cx="5.2" cy="10.8" r="1.9" stroke="currentColor" stroke-width="1.7"/></svg>调整</button>
 </div>
 
-<section id="more" class="reveal">
-  <div class="wrap">
-    <div class="sechead">
-      <h2><span class="ey">04</span>完整数据已独立成页</h2>
-      <div class="sd">达标阶梯、边际成本、官方公示对照、失败退分、三周期全清单、方法论与原始数据 —— 已重构为可切换指标的动态排名页。</div>
-    </div>
-    <a class="btn btn-white" href="cycles.html">进入「三周期全清单」→</a>
-  </div>
-</section>
-<div class="wrap">
-<section class="reveal">
-  {sec_head("", "执行建议", "决策顺序：先在左栏（手机端点右下角「调整」）定周期与月产量 → 看「全档位对比」顶部的反查结论 → 再逐档核对。以下建议以<b>年付口径</b>给出。")}
-  <div class="note good"><ul style="margin-top:0">{budget_bullets}</ul></div>
-  <div class="note warn" style="margin-top:12px">
-    <b>{COST["risks"][0]["title"]}</b><br>{COST["risks"][0]["body"][0]}<br><br>{COST["risks"][0]["body"][1]}
-  </div>
-</section>
-{EVIDENCE_DETAILS}
-</div>
+</details>
 {foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　数据采集 {UPDATED}　·　全部数值按统一口径重算，非平台宣传数字')}
 """
 
 # ── 首页 ──────────────────────────────────────────────────────────
 home_body = f"""
-<div class="homeopen">
-<div class="hero">
-  <div class="eyebrow">{BRAND} · Unified Benchmark</div>
-  <h1>把 AI 视频生成平台<br>放在<em>同一把尺子</em>上</h1>
-</div>
-
-<div class="wrap">
-<section id="budget" class="reveal" style="margin-top:36px">
-  <div class="sechead">
-    <h2><span class="ey">先用一下</span>我有多少钱，最多能做多少条？</h2>
-    <div class="sd">本站最常见的问法其实是反过来的 —— 不是「要 N 条花多少钱」，
-      而是「我预算就这么多，能做多少」。填个数字就有答案。</div>
+<main class="compare-page compare-home" data-skip-intro>
+  <header id="cost" class="compare-heading">
+    <div>
+      <h1>AI 视频会员，怎么买划算？</h1>
+      <p>比较 {len(PLATFORMS)} 家平台的会员价格和画布扣分，按你的规格和用量计算。</p>
+    </div>
+    <p class="compare-date">数据更新于 <time datetime="{UPDATED}">{UPDATED}</time></p>
+  </header>
+  <div class="btns compare-home-actions">
+    <a class="btn btn-white" href="cost.html">开始比价</a>
+    <a href="#budget">按预算估算</a>
   </div>
+  <details id="budget" class="compare-home-budget">
+    <summary>输入预算，估算能生成多少条<span class="chev">›</span></summary>
+    <div class="dbody">
+      <p>{SPEC}</p>
   <div class="bud budhome">
     <div class="budrow">
       <span class="budlbl">预算</span>
@@ -3697,58 +3639,15 @@ home_body = f"""
     <input type="range" id="hbudR" class="cqr budr" min="0" max="1000" step="1"
       value="450" aria-label="预算滑块">   <!-- 450 → ¥3,000，与数字框默认值一致 -->
     <div class="budout budbig" id="hbudOut">—</div>
-    <div class="budtip">「再加多少能跳档」是本表最有价值的一栏 ——
-      实测预算曲线不单调，花不到门槛钱就白花了。完整对比见
-      <a href="cost.html">平台成本对比 ›</a></div>
+    <div class="budtip">{COST["liveNote"]}</div>
   </div>
-</section>
-</div>
-
-<!-- 说明文字与按钮：桌面端 order:2 紧跟标题成组，手机端 order:3 落到反查块之后。
-     拆出来的理由见上方 .homeopen 的注释 —— 手机端首屏必须留给能互动的东西。 -->
-<div class="heromore">
-  <p class="lead">各平台用自己的积分币计价，币值互不相同。{BRAND} 先把它们压平到同一口径，再折算成可比较的现金成本与能力得分 —— 不采信宣传数字，只给可复核的结果。</p>
-  <div class="btns">
-    <a class="btn btn-white" href="#cost">进入平台成本对比</a>
-    <a class="btn btn-ghost" href="cycles.html">三周期全清单 · 动态排名</a>
+    </div>
+  </details>
+  <div class="compare-record-links">
+    <a href="cost.html#membership-prices">会员价格明细</a>
+    <a href="cost.html#pricing-evidence">数据来源和截图</a>
   </div>
-</div>
-</div>
-
-<div class="wrap">
-<section id="cost" class="reveal" style="margin-top:44px">
-  <div class="sechead">
-    <h2><span class="ey">板块</span>两条对比线</h2>
-    <div class="sd">统一口径的方法论复用在同一套框架下：成本线已上线，能力线在建。</div>
-  </div>
-  <div class="grid g2">
-    <a class="entry" href="cost.html">
-      <span class="arrow">→</span>
-      <div class="et">LIVE · {UPDATED}</div>
-      <h3>平台成本对比</h3>
-      <p>{len(PLATFORMS)} 家会员价格。{len(CPV)} 家、{len(ROWS)} 个积分档，按「{SPEC}」折算单条成本。{COST["liveNote"]}</p>
-      <div class="nums">
-        <div><s>¥{f2(BEST)}</s><em>最低单条</em></div>
-        <div><s>{WORST/BEST:.2f}×</s><em>最贵/最省</em></div>
-        <div><s>{len(ROWS)}</s><em>可选档位</em></div>
-      </div>
-    </a>
-    <a class="entry" href="cycles.html">
-      <span class="arrow">→</span>
-      <div class="et">LIVE · {UPDATED}</div>
-      <h3>三周期动态排名</h3>
-      <p>{len(ROWS)} 个可选积分档 × 年付 / 季付 / 月付，按指标动态排名，右侧散点看「花多少钱买到多少产能」。</p>
-      <div class="nums">
-        <div><s>{len(PERIODS)}</s><em>承诺周期</em></div>
-        <div><s>{len(TRAPS)}</s><em>周期倒挂</em></div>
-        <div><s>{len(ROWS)}</s><em>可选档位</em></div>
-      </div>
-    </a>
-  </div>
-</section>
-
-</div>
-
+</main>
 {foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　数据采集 {UPDATED}　·　全部数值按统一口径重算，非平台宣传数字')}
 """
 
@@ -4147,11 +4046,13 @@ cine_body = f"""
 # ═══════════════════════════════════════════════════════════════════
 PAGES = {
     "index.html": page("首页", f"{BRAND} — {SITE['tagline']}。AI 视频生成平台的成本对比，统一口径折算，只给可复核的结果。",
-                       nav("home"), home_body, cost_js=True, canon=""),
+                       nav("home"), home_body, cost_js=True, canon="", extra_css=COMPARE_CSS, extra_js=DISCLOSURE_JS),
     "cost.html": page("平台成本对比", f"{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本，含达标阶梯、边际成本与跨平台组合最省。",
-                      nav("cost"), cost_body, cost_js=True, canon="cost", self_imgs=bool(EVIDENCE)),
+                      nav("cost"), cost_body, cost_js=True, canon="cost", extra_css=COMPARE_CSS,
+                      extra_js=COMPARE_JS + DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
     "cycles.html": page("三周期全清单", f"{len(ROWS)} 个可选积分档 × 年付/季付/月付三周期，按指标动态排名，附全部原始数据与计算方法。",
-                        nav("cycles"), cycles_body, cost_js=True, canon="cycles", self_imgs=bool(EVIDENCE)),
+                        nav("cycles"), cycles_body, cost_js=True, canon="cycles",
+                        extra_js=DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
     # ⚠ Cloudflare Pages 的 SPA 回落：输出目录里【有 404.html 就用它】，
     #   没有才回落到 index.html 并返回 200。`_redirects` 那条实测没拦住，
     #   404.html 是更可靠的开关。不挂进 nav，也不参与任何导航高亮。

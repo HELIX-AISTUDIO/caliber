@@ -64,56 +64,22 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   color:#9AA0A8;font-size:13px;font-weight:600;padding:7px 12px;border-radius:999px;flex:0 0 auto;
   transition:color .22s,background .22s}.menu a:hover{color:#fff;background:rgba(255,255,255,.065)}.menu a.active{color:#D1FE17}.nav .spec{margin-left:auto;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;font-weight:500;color:#D1FE17;
   border:1px solid rgba(209,254,23,.35);border-radius:999px;padding:6px 13px;flex:0 0 auto}.wrap{max-width:1280px;margin:0 auto;padding:0 24px;position:relative;z-index:1}/* ── Hero 光场：lime 从「涂料」变「光源」── */
-.hero{max-width:1280px;margin:0 auto;padding:58px 24px 6px;position:relative;z-index:1}.hero::before{content:"";position:absolute;left:50%;top:-14%;z-index:-1;pointer-events:none;
-  width:min(1180px,140vw);height:150%;transform:translateX(-50%);
-  background:
-    radial-gradient(42% 34% at 50% 30%,rgba(209,254,23,.26),rgba(209,254,23,.09) 48%,transparent 74%),
-    radial-gradient(76% 62% at 50% 2%,rgba(209,254,23,.085),transparent 72%);
-  -webkit-filter:blur(4px);filter:blur(4px)}.hero::after{content:"";position:absolute;left:-12%;right:-12%;bottom:-4%;height:46%;
-  z-index:-1;pointer-events:none;opacity:.42;
-  background-image:
-    linear-gradient(rgba(209,254,23,.13) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(209,254,23,.13) 1px,transparent 1px);
-  background-size:58px 58px,58px 58px;
-  transform:perspective(400px) rotateX(63deg);transform-origin:50% 100%;
-  -webkit-mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%);
-  mask-image:radial-gradient(58% 82% at 50% 100%,#000,transparent 74%)}.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
   color:#D1FE17;margin-bottom:15px;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}h1{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:clamp(31px,5.3vw,60px);font-weight:800;color:#fff;
   letter-spacing:-.038em;line-height:1.07}h1 em{font-style:normal;color:#D1FE17}
-/* ⚠ 用 .lead 而不是 .hero .lead：说明文字现在住在 .heromore 里（手机端要排到滑块之后），
-   写成 .hero .lead 会失配，max-width:720px 静默丢失，段落拉成 1232px 的长行。
-   .lead 全站只有首页一处，直接按类选中即可。 */
 .lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
-/* 首页首屏顺序 —— .homeopen 用 flex order 控制「标题 / 反查滑块 / 说明文字」的先后。
-   源序写成 hero → wrap(#budget) → heromore，桌面端 order 复原成
-   hero → heromore → wrap（与改造前一致，桌面观感零变化）。
-   ⚠ 这里必须是 order 而不是改 DOM 顺序：桌面端要「标题带说明+按钮」成组，
-   手机端要「标题之后立刻是滑块」。同一份 DOM 靠 order 分叉，避免维护两份首页。
-   ⚠ 子元素必须显式 width:100% —— flex 规范里「交叉轴 margin 为 auto」的项
-   【不会被 stretch】，而 .hero/.wrap 都带 margin:0 auto 做居中。
-   不写 width:100% 的话它们会收缩成内容宽度并居中：标题和预算框都变窄，桌面端明显回退。
-   （这个坑量 top/height 抓不到，只有量宽度或看截图才发现。） */
-.homeopen{display:flex;flex-direction:column}
-.homeopen>.hero{order:1;width:100%}.homeopen>.heromore{order:2;width:100%}
-.homeopen>.wrap{order:3;width:100%}
-.heromore{max-width:1280px;margin:0 auto;padding:0 24px}.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
+.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
   text-decoration:none;white-space:nowrap;
   transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s}.btn-white{background:#fff;color:#0B0B0B}.btn-white:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,255,255,.2)}.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}.btn-ghost:hover{border-color:rgba(255,255,255,.45);transform:translateY(-2px)}h2{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:20px;font-weight:750;color:#fff;letter-spacing:-.025em;line-height:1.3}h2 .ey{display:inline-block;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:600;color:#D1FE17;
-  margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.note, .entry, .legal, details{
+  margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.note, .legal, details{
   background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 46%,rgba(0,0,0,.30));
   -webkit-backdrop-filter:blur(28px) saturate(150%);backdrop-filter:blur(28px) saturate(150%);
   border:1px solid rgba(255,255,255,.12);border-radius:18px;
   box-shadow:inset 0 0 0 .61px rgba(255,255,255,.07),inset 0 1px 0 rgba(255,255,255,.05),
              0 1px 2px rgba(0,0,0,.45),0 10px 24px rgba(0,0,0,.4),0 30px 60px rgba(0,0,0,.48)}
-@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){.note, .entry, .legal, details, .nav{
+@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){.note, .legal, details, .nav{
     background:linear-gradient(158deg,#161B18,#0D110F)}
-}.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}.entry{display:block;text-decoration:none;padding:26px;position:relative;
-  transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .3s}.entry:hover{transform:translateY(-4px);border-color:rgba(209,254,23,.42);
-  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.09),0 26px 60px rgba(0,0,0,.62),0 0 42px rgba(209,254,23,.09)}.entry .et{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#767C85;
-  font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin-bottom:12px}.entry h3{margin:0 0 9px;font-size:18px;font-weight:750;color:#fff}.entry p{color:#8A9099;font-size:13px;line-height:1.65;margin-bottom:16px}.entry .nums{display:flex;gap:22px;flex-wrap:wrap;padding-top:16px;
-  border-top:1px solid rgba(255,255,255,.07)}.entry .nums div{display:flex;flex-direction:column;gap:3px}.entry .nums s{text-decoration:none;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:18px;font-weight:700;
-  color:#D1FE17;letter-spacing:-.03em}.entry .nums em{font-style:normal;font-size:10.5px;color:#767C85;letter-spacing:.06em;text-transform:uppercase}.entry .arrow{position:absolute;top:24px;right:24px;color:#D1FE17;font-size:17px;
-  transition:transform .3s cubic-bezier(.22,1,.36,1)}.entry:hover .arrow{transform:translateX(4px)}table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
+}table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
   background:linear-gradient(158deg,rgba(22,27,24,.86),rgba(10,13,11,.92));
   border:1px solid rgba(255,255,255,.12);border-radius:18px;overflow:hidden;
   box-shadow:inset 0 0 0 .61px rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.5),
@@ -373,8 +339,7 @@ input[type=number]{width:110px;background:rgba(255,255,255,.06);
 /* ⚠ hero 的内容（meta 行）在 1440 视口下会撑到 1514px，导致整页横向溢出 ——
    这是首页原有缺陷，加散点后被冒烟测试抓出来。overflow-x:clip 不产生滚动容器，
    只裁掉溢出，不影响 sticky；配合 meta 允许换行双保险。 */
-.hero{overflow-x:clip}
-.hero .pareto,.wrap>.pareto{margin-top:34px}
+.wrap>.pareto{margin-top:34px}
 .pareto{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:18px;
   background:rgba(255,255,255,.024);border:1px solid rgba(255,255,255,.075)}
 .phd b{display:block;font-size:14px;color:#E4E7EA}
@@ -465,10 +430,9 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   -webkit-backdrop-filter:none}.legal-t{font-size:16px;font-weight:800;letter-spacing:-.025em;margin-bottom:9px}.legal-b{color:#1F2A00;max-width:1000px}.legal-f{margin-top:14px;font-family:"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;color:#1F2A00}.legal-f .fp{background:#0B0B0B;color:#D1FE17;padding:2.5px 9px;border-radius:6px;font-weight:600}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}.reveal{opacity:0;transform:translateY(16px);
-  transition:opacity .62s cubic-bezier(.22,1,.36,1),transform .62s cubic-bezier(.22,1,.36,1)}.reveal.in{opacity:1;transform:none}.hero>*{animation:fadeUp .7s cubic-bezier(.22,1,.36,1) both}.hero>*:nth-child(2){animation-delay:.06s}.hero>*:nth-child(3){animation-delay:.12s}.hero>*:nth-child(4){animation-delay:.18s}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal,.hero>*{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}
+  transition:opacity .62s cubic-bezier(.22,1,.36,1),transform .62s cubic-bezier(.22,1,.36,1)}.reveal.in{opacity:1;transform:none}@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}
 }
-@media print{body{background:#fff!important;color:#000!important;padding:0}body::before,body::after,.hero::before,.hero::after{display:none!important}.note, .entry, .legal, details, .nav, table{
+@media print{body{background:#fff!important;color:#000!important;padding:0}body::before,body::after{display:none!important}.note, .legal, details, .nav, table{
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
     box-shadow:none!important;background:#fff!important}.nav{position:static!important}.promo{background:#D1FE17!important;color:#000!important}.brand .bw b, .menu a, h1, h2, h3, td, th, li, .lead{color:#000!important}.legal{background:#F2FFB8!important}.legal-t,.legal-b,.legal-f{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
 }
@@ -479,25 +443,12 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
      改为换行独占一行，始终可见；不做引导/弹窗（那是把关键前提延迟交付）。 */
   .nav .spec{margin-left:0;flex:1 1 100%;order:9;font-size:11px;line-height:1.5;
     padding-top:7px;margin-top:2px;border-top:1px solid rgba(255,255,255,.08)}
-  /* ── 手机端首页首屏：滑块优先 ──
-     实测（390×844）：原布局 hero 一口气吃掉 334px（40% 屏高），滑块被推到 y=686，
-     用户点进来先读到一屏方法论说明，才看到唯一能互动的东西。
-     改法：标题块只留 eyebrow + h1（padding 36→18），说明文字与按钮用 order 移到最后，
-     #budget 提到标题正下方。实测滑块 686 → 约 430，整块反查含结果都在首屏内。 */
-  .hero{padding:18px 15px 0}.homeopen>.wrap{order:2}
-  .homeopen>.heromore{order:3;margin-top:32px}.heromore{padding:0 15px}
   .wrap{padding:0 15px}section{margin-top:44px}h2{font-size:17.5px}
   /* 滑块拇指放大到 24px（+3px 黑边 = 30px 触控目标）。
      ⚠ 必须落在这里：本块在基础 .cqr 规则之后，同权重靠顺序决胜；
        放到前面的媒体查询里会被基础规则盖掉，等于没写。 */
   .cqr::-webkit-slider-thumb{width:24px;height:24px}
-  .cqr::-moz-range-thumb{width:24px;height:24px}.entry{padding:20px}.note, .legal, table, details, .entry{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}.g2{grid-template-columns:1fr 1fr}
-  /* ── KPI：竖排五张卡会吃掉 1.5 屏，用户滚到反查与表格之前就以为「页面到头了」。
-     改成横向滑动的一行，高度固定，下方内容自然进入首屏。 */
-  .grid.g5{display:flex;overflow-x:auto;overscroll-behavior-x:auto;gap:10px;
-    scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;
-    margin:0 -15px;padding:2px 15px 6px;scrollbar-width:none}
-  .grid.g5::-webkit-scrollbar{display:none}
+  .cqr::-moz-range-thumb{width:24px;height:24px}.note, .legal, table, details{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}
   /* ── 反查表：套用与「全部档位排名」同一套卡片节奏 ──
      5 列在手机上必然横滑；上一版做成「标签在上、值在下」的纵向大卡，占太高、看着散。
      用户要求跟排名卡一样大小，故复用同一套：1fr + auto 两列、11px 内边距、圆角 13。 */
@@ -602,7 +553,7 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   .tw-main tbody td:nth-child(7) s{display:none}
 
 }
-@media (max-width:520px){.g2{grid-template-columns:1fr} }/* ── 窄屏：左栏改为【底部抽屉】+ 底部摘要条 ──
+/* ── 窄屏：左栏改为【底部抽屉】+ 底部摘要条 ──
    上一版把侧栏做成「吸顶横向滚动条」，实测失败：吸顶块挡住内容，
    月产量与平台筛选被挤出视野、用户根本找不到。
    移动端的正确形态是「底部条 + 弹层」：不占首屏、信息一个不少、可发现。 */
@@ -829,7 +780,7 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
 </style></head><body>
 
 <div class="promo"><span><b>价格说明：</b>统一口径基准数据核对于 2026-11-20<i class="pmore">，价格和生成积分的采集日期见各平台来源</i></span><span class="tag2">核对日期 2026-11-20</span></div>
-<div class="nav"><div class="inner"><a class="brand" href="index.html"><i></i><span class="bw"><b>CALIBER</b><s>HELIX AI Studio</s></span></a><nav class="menu"><a href="index.html">首页</a><a href="cost.html">平台成本对比</a><a href="cycles.html">三周期全清单</a><a href="glossary.html">术语表</a><a href="prompts.html" class="active">提示词库</a></nav><span class="spec">Seedance 2.5 · 720p · 16:9 · 30s · 全能参考</span><button type="button" class="nburger" id="nBurger" aria-label="导航菜单" aria-expanded="false" aria-controls="nDrop"><i></i><i></i><i></i></button></div><div class="ndrop" id="nDrop"><nav><a href="index.html">首页</a><a href="cost.html">平台成本对比</a><a href="cycles.html">三周期全清单</a><a href="glossary.html">术语表</a><a href="prompts.html" class="active">提示词库</a></nav></div></div>
+<div class="nav"><div class="inner"><a class="brand" href="index.html"><i></i><span class="bw"><b>CALIBER</b><s>HELIX AI Studio</s></span></a><nav class="menu"><a href="index.html">首页</a><a href="cost.html">成本对比</a><a href="cycles.html">详细排名</a><a href="glossary.html">术语表</a><a href="prompts.html" class="active">提示词库</a></nav><span class="spec">Seedance 2.5 · 720p · 16:9 · 30s · 全能参考</span><button type="button" class="nburger" id="nBurger" aria-label="导航菜单" aria-expanded="false" aria-controls="nDrop"><i></i><i></i><i></i></button></div><div class="ndrop" id="nDrop"><nav><a href="index.html">首页</a><a href="cost.html">成本对比</a><a href="cycles.html">详细排名</a><a href="glossary.html">术语表</a><a href="prompts.html" class="active">提示词库</a></nav></div></div>
 
 <div class="wrap">
 <section class="reveal" style="margin-top:34px">
@@ -1070,7 +1021,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   var seen = false;
   try{ seen = !!localStorage.getItem(KEY); }catch(e){ seen = true; }  /* 存不了就别弹，别每次都打扰 */
-  if(!seen) setTimeout(open, 700);   /* 让首屏先渲染完再弹，避免闪一下 */
+  if(!seen && !document.querySelector('[data-skip-intro]')) setTimeout(open, 700);
 })();
 
 /* ══════════ 全站通用：术语提示 ══════════
