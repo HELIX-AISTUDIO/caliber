@@ -18,6 +18,13 @@
     element.style.setProperty('--series', data.colors[offer.plan.platform]);
   }
 
+  function platformLogo(offer) {
+    const logo = document.createElement('i');
+    logo.className = 'comparison-mark ' + data.logos[offer.plan.platform];
+    logo.setAttribute('aria-hidden', 'true');
+    return logo;
+  }
+
   function axisMax(value) {
     const magnitude = 10 ** Math.floor(Math.log10(Math.max(1, value)));
     return magnitude * [1, 2, 2.5, 5, 10].find(step => step * magnitude >= value);
@@ -86,7 +93,7 @@
       heading.textContent = label;
       const link = document.createElement('button');
       link.type = 'button';
-      link.textContent = planName(offer);
+      link.append(platformLogo(offer), planName(offer));
       link.addEventListener('click', () => revealRank(offer));
       tint(link, offer);
       const detail = document.createElement('small');
@@ -108,7 +115,7 @@
       + (ranked.length > leading.length ? ' · 显示前 ' + leading.length + ' 名' : '');
     const axis = document.createElement('div');
     axis.className = 'compare-bar-y';
-    [top, top / 2, 0].forEach(value => {
+    [top, top * .75, top * .5, top * .25, 0].forEach(value => {
       const tick = document.createElement('span');
       tick.textContent = format(value);
       axis.append(tick);
@@ -116,7 +123,7 @@
     const columns = document.createElement('div');
     columns.className = 'compare-bar-columns';
     bars.style.setProperty('--bar-count', leading.length);
-    leading.forEach((offer, index) => {
+    leading.forEach(offer => {
       const value = valueOf(offer);
       const button = chartButton(offer, 'compare-column', planName(offer) + ' ' + format(value), revealRank);
       const measure = document.createElement('span');
@@ -129,7 +136,9 @@
       fill.className = 'compare-column-fill';
       const label = document.createElement('span');
       label.className = 'compare-column-label';
-      label.textContent = (index + 1) + ' · ' + nameOf(offer.plan.platform);
+      const planTier = document.createElement('small');
+      planTier.textContent = offer.plan.tier;
+      label.append(platformLogo(offer), nameOf(offer.plan.platform), planTier);
       measure.append(exact, fill);
       button.append(measure, label);
       columns.append(button);

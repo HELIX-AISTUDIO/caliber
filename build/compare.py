@@ -8,7 +8,7 @@ def membership_anchor(platform):
     return "membership-" + {"即梦": "jimeng", "小云雀": "xiaoyunque"}.get(platform, platform.lower())
 
 
-def compare_view(rows, readings, updated, periods, colors):
+def compare_view(rows, readings, updated, periods, colors, logos):
     platforms = list(readings)
     display_names = {"libtv": "LibTV", "Neowow": "NeoWOW", "Tapnow": "TapNow"}
     plans = []
@@ -21,7 +21,7 @@ def compare_view(rows, readings, updated, periods, colors):
             "anchor": membership_anchor(plat),
             "periods": {key: [round(p["payCNY"], 2), p["cr"]] for key, p in row["byP"].items()},
         })
-    data = json.dumps({"plans": plans, "readings": readings, "names": display_names, "colors": colors,
+    data = json.dumps({"plans": plans, "readings": readings, "names": display_names, "colors": colors, "logos": logos,
                        "periods": {key: [label, months] for key, label, months, _ in periods}},
                       ensure_ascii=False).replace("<", "\\u003c")
     platform_options = "".join(
@@ -37,10 +37,9 @@ def compare_view(rows, readings, updated, periods, colors):
 <main id="compare-tool" class="compare-page" data-skip-intro>
   <header class="compare-heading">
     <div>
-      <h1>哪家画布更划算？</h1>
-      <p>视频生成成本榜 · 用相同规格比较会员价格、每月产能和单条成本。</p>
+      <h1>视频生成成本榜</h1>
+      <p class="compare-date"><time datetime="{updated}">{updated}</time><span>{len(platforms)} 家平台</span><span>30 秒 · 16:9 · 全能参考</span></p>
     </div>
-    <p class="compare-date">{len(platforms)} 家平台 · 数据更新于 <time datetime="{updated}">{updated}</time></p>
   </header>
   <nav class="compare-page-links" aria-label="榜单导航">
     <a href="#compare-results">榜单总览</a><a href="#compare-frontier">价格与产能</a><a href="#compare-records-title">数据与口径</a>
@@ -53,7 +52,7 @@ def compare_view(rows, readings, updated, periods, colors):
         <label><input type="radio" name="mode" value="budget"><span>按预算</span></label>
       </div>
     </fieldset>
-    <label class="compare-field" for="compare-model">模型
+    <label class="compare-field" for="compare-model"><span class="filter-caption">模型</span>
       <select id="compare-model">
         <option value="0">Seedance 2.5 标准版</option>
         <option value="2">Seedance 2.5 Flash</option>
@@ -74,10 +73,10 @@ def compare_view(rows, readings, updated, periods, colors):
       </fieldset>
     </div>
     <div id="compare-target-panel">
-      <label class="compare-field" for="compare-target">每月要生成多少条
+      <label class="compare-field" for="compare-target"><span class="filter-caption">每月要生成多少条</span>
         <span class="compare-input-unit">
           <input id="compare-target" type="number" inputmode="numeric" min="1" max="10000" step="1" value="30" required>
-          <span aria-hidden="true">条</span>
+          <span aria-hidden="true">条/月</span>
         </span>
       </label>
       <div class="compare-presets" aria-label="常用月用量">
@@ -87,10 +86,10 @@ def compare_view(rows, readings, updated, periods, colors):
       </div>
     </div>
     <div id="compare-budget-panel" hidden>
-      <label class="compare-field" for="compare-budget">所选周期的总预算
+      <label class="compare-field" for="compare-budget"><span class="filter-caption">所选周期的总预算</span>
         <span class="compare-input-unit">
           <input id="compare-budget" type="number" inputmode="decimal" min="1" max="1000000" step="0.01" value="1000" required disabled>
-          <span aria-hidden="true">元</span>
+          <span aria-hidden="true">元预算</span>
         </span>
       </label>
       <div class="compare-presets" aria-label="常用周期预算">
@@ -99,16 +98,16 @@ def compare_view(rows, readings, updated, periods, colors):
         <button type="button" data-budget="3000" aria-pressed="false">¥3,000</button>
       </div>
     </div>
-    <div class="compare-scope"><span>30 秒 · 16:9 · 全能参考</span><a href="#canvas-comparison">扣分依据</a></div>
+    <label class="compare-field compare-platform-field" for="compare-platform"><span class="filter-caption">平台</span>
+      <select id="compare-platform"><option value="">全部平台</option>{platform_options}</select>
+    </label>
+    <button id="compare-reset" type="button">重置</button>
   </form>
   <section id="compare-results" class="compare-results" aria-labelledby="compare-results-title">
-    <div class="compare-result-head">
+    <header class="compare-result-head">
       <h2 id="compare-results-title">会员成本榜</h2>
-      <div class="compare-result-filters">
-        <label for="compare-platform">平台 <select id="compare-platform"><option value="">全部平台</option>{platform_options}</select></label>
-        <button id="compare-reset" type="button">重置</button>
-      </div>
-    </div>
+      <label class="compare-all-toggle"><input id="compare-all" type="checkbox"> 显示全部档位</label>
+    </header>
     <p class="compare-result-status" id="compare-status" role="status"></p>
     <div id="compare-highlights" class="compare-highlights" hidden></div>
     <figure id="compare-bar-figure" class="compare-bar-figure" hidden>
@@ -125,7 +124,6 @@ def compare_view(rows, readings, updated, periods, colors):
         <tbody id="compare-rows"></tbody>
       </table>
     </div>
-    <label class="compare-all-toggle"><input id="compare-all" type="checkbox"> 显示全部档位</label>
     <p id="compare-coverage" class="compare-coverage"></p>
     <p id="compare-calc-note" class="compare-calc-note"></p>
     <noscript><p>启用 JavaScript 可以实时计算。<a href="cycles.html#allperiod">查看固定规格的完整对比表</a></p></noscript>
@@ -328,7 +326,7 @@ COMPARE_JS = r"""
       const detail = document.createElement('small');
       detail.textContent = offer.plan.tier + ' · ' + offer.monthlyCredits.toLocaleString('zh-CN') + ' 分/月'
         + (offer.sourceDate ? ' · 扣分沿用留档' : '');
-      title.append(rank, name, detail);
+      title.append(rank, platformLogo(offer), name, detail);
       const spendCell = tr.insertCell();
       spendCell.textContent = money.format(offer.pay);
       const volumeCell = tr.insertCell();
@@ -355,7 +353,7 @@ COMPARE_JS = r"""
   }
   form.addEventListener('submit', event => event.preventDefault());
   form.addEventListener('change', render);
-  [platform, showAll].forEach(input => input.addEventListener('change', render));
+  showAll.addEventListener('change', render);
   [target, budget].forEach(input => input.addEventListener('input', render));
   form.addEventListener('click', event => {
     const preset = event.target.closest('[data-target], [data-budget]');

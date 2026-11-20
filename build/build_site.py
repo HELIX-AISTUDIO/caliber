@@ -371,8 +371,6 @@ def chart_rows(metric, period):
         if not best:
             rel = 1.0
         t = math.sqrt((rel - 1.0) / rel_span) if rel_span else 0.0
-        # 色阶下限 0.10：原公式最差档 alpha≈0，条形直接消失（用户反馈「颜色暗淡看不清变化」）
-        a = 0.10 + 0.42 * (1 - t)
         w = (1 - t) * 100
         lbl = f'<s>{r["label"]}</s>' if r.get("label") else ""
         out += (
@@ -381,7 +379,7 @@ def chart_rows(metric, period):
             f'<span class="crk{" top3" if i <= 3 else ""}">{i}</span>'
             f'{plogo(r["plat"])}'
             f'<span class="cname">{r["plat"]} {r["tier"]}{lbl}</span>'
-            f'<span class="cbar"><i style="width:{w:.1f}%;background:rgba(209,254,23,{a:.3f})"></i></span>'
+            f'<span class="cbar"><i style="width:{w:.1f}%;--series:{r["color"]}"></i></span>'
             f'<span class="cval">{fmt(v)}<s>{rel:.2f}×</s></span>'
             f'</div>')
     return out
@@ -2109,13 +2107,12 @@ function renderChart(){
     var rel = low ? v / best : best / v;            /* 1＝最优 */
     var t = Math.sqrt((rel - 1) / relSpan);         /* 0＝最优，1＝最差（平方根刻度） */
     var w = (1 - t) * 100;
-    var a = (0.10 + 0.42 * (1 - t)).toFixed(3);   /* 下限 0.10，最差档也看得见 */
     var rk9 = d.p + '|' + d.t + '|' + (d.l || '');
     h += '<div class="crow" data-plat="' + d.p + '" data-k="' + rk9 + '">'
       +  '<span class="crk' + (rows[j].rk <= 3 ? ' top3' : '') + '">' + rows[j].rk + '</span>'
       +  mkI('clogo', d)
       +  '<span class="cname">' + d.p + ' ' + d.t + (d.l ? '<s>' + d.l + '</s>' : '') + '</span>'
-      +  '<span class="cbar"><i style="width:' + w.toFixed(1) + '%;background:rgba(209,254,23,' + a + ')"></i></span>'
+      +  '<span class="cbar"><i style="width:' + w.toFixed(1) + '%;--series:' + d.c + '"></i></span>'
       /* 倍率一律写成「相对最优值的比」：成本 5.51× 读作「贵 5.51 倍」，
          产能 0.01× 读作「只有最优的 1%」—— 两个方向都能正确读。 */
       +  '<span class="cval">' + fmt(v) + '<s>'
@@ -2208,10 +2205,10 @@ function renderPareto(){
 
 /* 指标元信息：标题、副标、轴方向 —— 用户要求「切指标时标题要变成解释标题」 */
 var METAM = {
-  cost: ['单条成本', '同样 30 秒 Seedance 2.5 视频，这个档位要花多少钱 —— 越低越好。'],
-  cap:  ['每月可生成', '这一个档位每月最多能出多少条 —— 越高越好。做不到你设定的月产量就整行置灰，但名次仍会给出（名次只反映该周期实付）。'],
-  sec:  ['元每秒', '把单价摊到每一秒素材上 —— 越低越好，用来和其他规格横向比较。'],
-  pay:  ['该周期实付', '这个周期实际要付出去的总额（年费 / 季费 / 月费）—— 越低越好。']
+  cost: ['单条成本', '按用满订阅积分时的平均单条成本排名，越低越省。'],
+  cap:  ['可生成条数', '按订阅积分可生成的条数排名，越多越靠前。'],
+  sec:  ['每秒成本', '按每秒视频的成本排名，越低越省。'],
+  pay:  ['周期实付', '按选定会员周期的首期实付排名，越低越省。']
 };
 
 function cycSync(){
@@ -2233,7 +2230,7 @@ function cycSync(){
      改为直接取各周期的真实档位数 PT_N。 */
   if(e3) e3.textContent = (PT_N[CT.k] || 0) + ' \u6863';
   var e4 = document.getElementById('cycTitle');
-  if(e4) e4.innerHTML = METAM[CT.m][0] + '<span style="color:#D1FE17"> \u00b7 </span>\u52a8\u6001\u6392\u540d';
+  if(e4) e4.textContent = METAM[CT.m][0] + '排名';
   var e5 = document.getElementById('cycSub');
   if(e5) e5.textContent = METAM[CT.m][1];
   updateMoSum();
@@ -3277,11 +3274,23 @@ SIDE_PLAT = "".join(
 NTIER = len({r["tier"] for r in ROWS})
 
 cycles_body = f"""
-<div class="app">
-<aside class="side">
-  {SHEET_HEAD}
+<main class="cycle-report" data-skip-intro>
+  <div class="vhead">
+    <h1 id="cycTitle">单条成本排名</h1>
+    <div class="vsub" id="cycSub">按用满订阅积分时的平均单条成本排名，越低越省。</div>
+    <div class="vmeta">
+      <span>数据时点 <b>{UPDATED}</b></span>
+      <span><b>{len(PLAT_SUM)}</b> 平台 · <b>{NTIER}</b> 会员档 · <b>{len(ROWS)}</b> 积分档</span>
+      <span>{T("koujing", "口径")} <b>{SCOPE["currentShort"]}</b></span>
+      <span>当前 <b id="cycNow">单条成本 · 年付 · 最优在前</b></span>
+    </div>
+  </div>
+
+  <details class="rank-filters" id="rank-filters">
+    <summary>筛选详细排名<span class="chev">›</span></summary>
+    <div class="rank-controls">
   <div class="sgroup" id="sgMetric">
-    <div class="sgt">排名指标<span class="sgchip">条越长＝越接近最优</span></div>
+    <div class="sgt">排名指标</div>
     <div class="segv" id="metricSeg" role="tablist" aria-label="排名指标">
       <button type="button" class="on" data-m="cost" role="tab">单条成本<s>元/条 · 越低越好</s></button>
       <button type="button" data-m="cap" role="tab">每月可生成<s>条/月 · 越高越好</s></button>
@@ -3298,13 +3307,10 @@ cycles_body = f"""
     </div>
   </div>
   <div class="sgroup">
-    <div class="sgt">产能显示单位<span class="sgchip">每月</span></div>
+    <div class="sgt">产能显示单位</div>
     <div class="segv" id="capSeg2" role="tablist" aria-label="产能口径">
-      <button type="button" class="on" data-cap="m" role="tab">每月<s>按 91 条/月显示</s></button>
-      <button type="button" data-cap="p" role="tab">整个周期<s>按 ×3 / ×12 显示</s></button>
-    </div>
-    <div class="srow" style="margin-top:8px">
-      <span style="font-size:11px;line-height:1.6;color:#7A8088">只影响「能做多少」的显示单位，不改变排名与结论。</span>
+      <button type="button" class="on" data-cap="m" role="tab">每月</button>
+      <button type="button" data-cap="p" role="tab">整个周期</button>
     </div>
   </div>
   <div class="sgroup" id="sgOrder">
@@ -3318,24 +3324,11 @@ cycles_body = f"""
     <div class="sgt">平台<span class="sgchip" id="cycPlatN">{len(PLAT_SUM)}/{len(PLAT_SUM)}</span></div>
     <div class="pf" id="cycPlat">{SIDE_PLAT}</div>
   </div>
-</aside>
-
-<main class="mainv">
-  <div class="vhead">
-    <h1 id="cycTitle">单条成本<span style="color:#D1FE17"> · </span>动态排名</h1>
-    <div class="vsub" id="cycSub">同样 30 秒 Seedance 2.5 视频，这个档位要花多少钱 —— 越低越好。</div>
-    <p>{COST["liveNote"]}</p>
-    <div class="vmeta">
-      <span>数据时点 <b>{UPDATED}</b></span>
-      <span><b>{len(PLAT_SUM)}</b> 平台 · <b>{NTIER}</b> 会员档 · <b>{len(ROWS)}</b> 积分档</span>
-      <span>{T("koujing", "口径")} <b>{SCOPE["currentShort"]}</b></span>
-      <span>当前 <b id="cycNow">单条成本 · 年付 · 最优在前</b></span>
     </div>
-  </div>
-
-  {GUIDE}
-  {pareto_block("y")}
+  </details>
   <div class="chart" id="chart">{chart_rows("cost", "y")}</div>
+  {pareto_block("y")}
+  <p class="cycle-source-note">{COST["liveNote"]}</p>
 
 {CANVAS_DETAILS}
 {MEMBERSHIP_DETAILS}
@@ -3343,7 +3336,7 @@ cycles_body = f"""
 
   <div class="wrap" style="padding:0">
   <div class="sechead">
-    <h2><span class="ey">05</span>原始数据与方法论</h2>
+    <h2>原始数据与方法论</h2>
     <div class="sd">排名图背后的全部输入与计算链条：达标阶梯、边际成本、官方公示对照、失败退分、三周期全清单、方法论与原始清单。</div>
   </div>
   <details>
@@ -3430,17 +3423,26 @@ cycles_body = f"""
 {EVIDENCE_DETAILS}
   </div>
 </main>
-</div>
-
-<div class="mobar">
-  <span class="mosum" id="moSum">单条成本 · 年付 · 最优在前 · 6/6 平台</span>
-  <button type="button" id="moOpen" aria-label="调整指标、周期与平台"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M1 4.2h7M11.6 4.2H14M1 10.8h2.4M7 10.8h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="9.8" cy="4.2" r="1.9" stroke="currentColor" stroke-width="1.7"/><circle cx="5.2" cy="10.8" r="1.9" stroke="currentColor" stroke-width="1.7"/></svg>调整</button>
-</div>
 {foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　{len(ROWS)} 个可选积分档 × 3 个周期')}
 """
 
-COMPARE_VIEW, COMPARE_JS = compare_view(ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR)
+COMPARE_VIEW, COMPARE_JS = compare_view(ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR, PLAT_LG)
 cost_body = f"""
+<div class="report-layout">
+  <aside class="report-rail" aria-label="成本榜目录">
+    <nav>
+      <a class="report-current" href="#compare-tool">视频生成成本榜</a>
+      <a href="#compare-results">总览与排名</a>
+      <a href="#compare-frontier">价格与产能</a>
+    </nav>
+    <nav aria-label="可核对的数据">
+      <a href="#membership-prices">会员价格</a>
+      <a href="#canvas-comparison">画布扣分</a>
+      <a href="#pricing-evidence">来源截图</a>
+    </nav>
+    <a class="report-rail-link" href="cycles.html">详细排名</a>
+  </aside>
+  <div class="report-content">
 {COMPARE_VIEW}
 <section class="compare-records" aria-labelledby="compare-records-title">
   <h2 id="compare-records-title">价格与折算依据</h2>
@@ -3609,6 +3611,8 @@ cost_body = f"""
 </div>
 
 </details>
+</div>
+</div>
 {foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　数据采集 {UPDATED}　·　全部数值按统一口径重算，非平台宣传数字')}
 """
 
@@ -3619,7 +3623,7 @@ home_goal = min((item for item in home_monthly if item[2] >= 30), key=lambda ite
 home_unit = min(home_monthly, key=lambda item: item[1]["payCNY"] / item[2])
 home_volume = max(home_monthly, key=lambda item: (item[2], -item[1]["payCNY"]))
 home_insights = "".join(
-    f'<div><span>{label}</span><strong style="--series:{row["color"]}">{row["plat"]} {row["tier"]}</strong>'
+    f'<div><span>{label}</span><strong>{plogo(row["plat"], "comparison-mark")}{row["plat"]} {row["tier"]}</strong>'
     f'<small>{detail}{" · 扣分沿用留档" if REVIEW[row["plat"]].get("creditPending") else ""}</small></div>'
     for label, (row, price, capacity), detail in (
         ("月做 30 条，首期最省", home_goal, f'¥{f2(home_goal[1]["payCNY"])} 首期') if home_goal else
@@ -3628,22 +3632,44 @@ home_insights = "".join(
         ("单账号月产能最高", home_volume, f'约 {home_volume[2]} 条/月'),
     )
 )
+home_preview = {}
+for row, price, capacity in sorted(home_monthly, key=lambda item: item[1]["payCNY"]):
+    if capacity >= 30:
+        home_preview.setdefault(row["plat"], (row, price))
+home_preview_limit = max((price["payCNY"] for _, price in home_preview.values()), default=1)
+home_preview_rows = "".join(
+    f'<li><span>{plogo(plat, "comparison-mark")}{plat}</span>'
+    f'<span class="home-preview-track" aria-hidden="true"><i style="--series:{row["color"]};'
+    f'--share:{price["payCNY"] / home_preview_limit:.1%}"></i></span><strong>¥{f2(price["payCNY"])}</strong></li>'
+    for plat, (row, price) in home_preview.items()
+)
 home_body = f"""
 <main class="compare-page compare-home" data-skip-intro>
-  <header id="cost" class="compare-heading">
+  <div class="home-report-hero">
     <div>
-      <h1>哪家画布更划算？</h1>
-      <p>用同一条视频的规格，比较 {len(PLATFORMS)} 家平台的价格、产能和会员权益。</p>
+      <header id="cost" class="compare-heading">
+        <h1>视频生成<br><em>成本基准</em></h1>
+        <p>用同一规格比较各家画布的会员价格、月产能与单条成本。</p>
+      </header>
+      <div class="btns compare-home-actions">
+        <a class="btn btn-white" href="cost.html">查看完整榜单</a>
+        <a href="cost.html?mode=budget">按预算估算</a>
+      </div>
     </div>
-    <p class="compare-date">数据更新于 <time datetime="{UPDATED}">{UPDATED}</time></p>
-  </header>
-  <div class="btns compare-home-actions">
-    <a class="btn btn-white" href="cost.html">查看完整榜单</a>
-    <a href="cost.html?mode=budget">按预算估算</a>
+    <div class="home-report-meta">
+      <div><span>覆盖平台</span><b>{len(PLATFORMS)} 家</b></div>
+      <div><span>参与计算的会员积分档</span><b>{len(ROWS)} 档</b></div>
+      <div><span>数据更新</span><b><time datetime="{UPDATED}">{UPDATED}</time></b></div>
+    </div>
   </div>
   <section class="home-benchmark-block" aria-labelledby="home-benchmark-title">
-    <h2 id="home-benchmark-title">月付标准版 720p 一览</h2>
+    <div class="compare-result-head">
+      <h2 id="home-benchmark-title">月付对比概览</h2>
+      <p>Seedance 2.5 标准版 · 720p · 30 秒</p>
+    </div>
     <div class="home-benchmark">{home_insights}</div>
+    <p class="compare-order">月做 30 条 · 各平台符合用量的最低首期实付</p>
+    <ul class="home-ranking-preview">{home_preview_rows}</ul>
     <a href="cost.html#compare-frontier">看价格与产能图</a>
   </section>
   <details id="budget" class="compare-home-budget">
