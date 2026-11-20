@@ -523,7 +523,7 @@ def main_rows_for(key):
 
 # 指纹：随数据集变化
 import hashlib
-_sig = json.dumps([COST["plans"], RATE, SPEC, BRAND], ensure_ascii=False, sort_keys=True)
+_sig = json.dumps([COST["plans"], COST["canvasTests"], RATE, SPEC, BRAND], ensure_ascii=False, sort_keys=True)
 # ── 溯源指纹（两级）──────────────────────────────────────────────
 # FP_WORK    作品指纹：永久稳定，回答「这始终是我的作品」，任何数据更新都不变。
 #            所有对外文件（LICENSE / robots / _headers / SECURITY）统一携带它，
@@ -2757,8 +2757,13 @@ for plat, readings in CANVAS["rows"].items():
             cells.append(f'<td class="sub">{escape(reading)}</td>')
             continue
         credits = reading["credits"] if isinstance(reading, dict) else reading
-        original = f'<br><small><s>{reading["original"]:,}</s></small>' if isinstance(reading, dict) else ""
-        cells.append(f'<td class="num strong" data-canvas-credit="{credits}">{credits:,}{original}</td>')
+        note = ""
+        if isinstance(reading, dict):
+            if "original" in reading:
+                note = f'<br><small><s>{reading["original"]:,}</s></small>'
+            if "sourceDate" in reading:
+                note = f'<br><small>沿用 {escape(reading["sourceDate"])} 留档</small>'
+        cells.append(f'<td class="num strong" data-canvas-credit="{credits}">{credits:,}{note}</td>')
     canvas_rows += f'<tr><td>{plat}</td>{"".join(cells)}</tr>'
     for key, label, _, _ in PERIODS:
         prices = [r["byP"][key]["perVideo"] / r["per"] for r in ROWS if r["plat"] == plat and key in r["byP"]]
@@ -2771,12 +2776,13 @@ for plat, readings in CANVAS["rows"].items():
             else f'<td class="num" data-canvas-cost="{per_credit * credits:.2f}">¥{f2(per_credit * credits)}</td>'
             for credits in values
         ]
-        canvas_cost_rows += f'<tr><td>{plat} · {label}</td>{"".join(cells)}</tr>'
+        provenance = '<br><small>扣分沿用留档</small>' if REVIEW[plat].get("creditPending") else ""
+        canvas_cost_rows += f'<tr><td>{plat} · {label}{provenance}</td>{"".join(cells)}</tr>'
 canvas_headers = [("平台", None)] + [(label, None) for label in CANVAS["columns"]]
 CANVAS_DETAILS = f"""
 <section id="canvas-comparison" style="margin:18px 0">
   <h2>画布生成扣分对比</h2>
-  <p>{CANVAS["date"]} 实录 · Seedance 2.5 · 30 秒 · 16:9 · 全能参考。数字来自提交生成前的积分预估。划线为界面同时显示的原扣分。「会员解锁」表示当前账号无法查看扣分。<a href="#pricing-evidence">查看采集截图 ↓</a></p>
+  <p>Seedance 2.5 · 30 秒 · 16:9 · 全能参考。读数采集于 {CANVAS["date"]}，沿用留档的项目标有原日期。划线为界面同时显示的原扣分。「会员解锁」表示当前账号无法查看扣分。<a href="#pricing-evidence">查看采集截图 ↓</a></p>
   {table(canvas_headers, canvas_rows, "tw")}
   <details style="margin-top:12px">
     <summary>各平台各周期最低单条成本 · 人民币<span class="chev">›</span></summary>
@@ -2797,7 +2803,7 @@ offer_rows = "".join(
     f'<tr><td>{source_link(plat, review["url"])}</td>'
     f'<td style="white-space:normal">{escape(review["offer"])}</td>'
     f'<td class="num">{format(CPV[plat], ",") if plat in CPV else "会员解锁"}'
-    f'<br><small>{review["creditDate"]}</small></td></tr>'
+    f'<br><small>{review["creditDate"]}{" 留档" if review.get("creditPending") else ""}</small></td></tr>'
     for plat, review in REVIEW.items()
 )
 offer_benefit_rows = ""
@@ -3367,6 +3373,7 @@ cycles_body = f"""
   <div class="vhead">
     <h1 id="cycTitle">单条成本<span style="color:#D1FE17"> · </span>动态排名</h1>
     <div class="vsub" id="cycSub">同样 30 秒 Seedance 2.5 视频，这个档位要花多少钱 —— 越低越好。</div>
+    <p>{COST["liveNote"]}</p>
     <div class="vmeta">
       <span>数据时点 <b>{UPDATED}</b></span>
       <span><b>{len(PLAT_SUM)}</b> 平台 · <b>{NTIER}</b> 会员档 · <b>{len(ROWS)}</b> 积分档</span>
@@ -3573,7 +3580,7 @@ cost_body = f"""
   {GUIDE}
     {KPI_BARS}
 
-  <div class="vnote"><b>首期订阅成本</b> · {COST["priceRule"]}<details class="tiny"><summary>采集说明<span class="chev">›</span></summary><div class="dbody">{COST["liveNote"]}</div></details></div>
+  <div class="vnote"><b>首期订阅成本</b> · {COST["priceRule"]}<br>{COST["liveNote"]}</div>
 {CANVAS_DETAILS}
 {MEMBERSHIP_DETAILS}
 {OFFER_DETAILS}
@@ -3719,7 +3726,7 @@ home_body = f"""
       <span class="arrow">→</span>
       <div class="et">LIVE · {UPDATED}</div>
       <h3>平台成本对比</h3>
-      <p>{len(PLATFORMS)} 家会员价格。{len(CPV)} 家、{len(ROWS)} 个已核实画布扣分的档位，按「{SPEC}」折算单条成本。</p>
+      <p>{len(PLATFORMS)} 家会员价格。{len(CPV)} 家、{len(ROWS)} 个积分档，按「{SPEC}」折算单条成本。{COST["liveNote"]}</p>
       <div class="nums">
         <div><s>¥{f2(BEST)}</s><em>最低单条</em></div>
         <div><s>{WORST/BEST:.2f}×</s><em>最贵/最省</em></div>

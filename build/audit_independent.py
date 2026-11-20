@@ -43,6 +43,10 @@ for plat, cells in readings.items():
     chk(len(cells) == 6, f"{plat} 画布对比规格数量不为 6")
     base = cells[1]
     if isinstance(base, dict):
+        if "sourceDate" in base:
+            review = C["platformReview"][plat]
+            chk(review.get("creditPending") and base["sourceDate"] == review["creditDate"] < C["canvasTests"]["date"],
+                f"{plat} 留档扣分日期或待复测状态错误")
         base = base["credits"]
     chk(CPV.get(plat) == (None if isinstance(base, str) else base), f"{plat} 标准 720p 读数不一致")
 for k, v in CPV.items():
