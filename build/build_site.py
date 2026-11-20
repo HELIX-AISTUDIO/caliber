@@ -18,7 +18,9 @@ import json
 import math
 import os
 import re
+import shutil
 import subprocess
+from html import escape
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # site/
 DATA = os.path.join(ROOT, "data")
@@ -28,7 +30,7 @@ DATA = os.path.join(ROOT, "data")
 DEPLOY = os.path.join(os.path.dirname(ROOT), "deploy")
 DEPLOY_IN = os.path.join(ROOT, "deploy")
 DEPLOY_DIRS = (DEPLOY, DEPLOY_IN)
-NODE = r"C:\Users\admin\.workbuddy\binaries\node\versions\22.22.2-3\node.EXE"
+NODE = shutil.which("node")
 
 # ═══════════════════════════════════════════════════════════════════
 # 1. 载入
@@ -73,9 +75,8 @@ RATE = COST["fx"]["rate"]
 SPEC = COST["spec"]["text"]
 SEC_PER_CLIP = COST["spec"]["secondsPerClip"]
 UPDATED = COST["updatedAt"]
+REVIEW = COST.get("platformReview", {})
 CPV = COST["creditsPerVideo"]
-OFFICIAL_RATE = COST["officialRate"]
-AD_CLAIM = COST["adClaim"]
 SCOPE = COST["scope"]
 # 数据范围文案一律由 SCOPE["items"] 推导 —— 曾因页面上两处各自硬编码、
 # 数据层改成三周期后页面仍写「月度／季度会员后续补充」，两处文案互相矛盾。
@@ -101,11 +102,15 @@ def build_rows():
     out = []
     for p in COST["plans"]:
         plat = p["platform"]
+        if plat not in CPV:
+            continue
         cur = PLATFORMS[plat]["currency"]
         k = RATE if cur == "USD" else 1.0
         per = CPV[plat]
         multi = len(p["credits"]) > 1
         for c in p["credits"]:
+            if c.get("modelUnsupported"):
+                continue
             monthly, price = c["credits"], c["price"]
             year_credits = monthly * 12
             unit = price / year_credits                    # 本币/积分
@@ -121,6 +126,10 @@ def build_rows():
                 "multi": multi,
                 # 次年续费价在选项级（libtv 续费价随积分档变，不随档位变）
                 "renewal": c.get("renewal"),
+                "mRenewal": c.get("mRenewal"),
+                "qRenewal": c.get("qRenewal"),
+                "yearOneOff": c.get("yearOneOff", False),
+                "priceDates": c.get("priceDates", {}),
                 # 三周期原始实付总额（年付即 price）；mCr = 月付口径月积分，缺省同年付
                 "payY": price, "payQ": c.get("q"), "payM": c.get("m"),
                 # 三周期各自的「月积分」——平台可能按周期给不同积分。
@@ -143,7 +152,7 @@ for i, r in enumerate(sorted(ROWS, key=lambda x: x["perVideo"]), 1):
 #  本币/积分 = 该周期实付总额 ÷ (该周期月积分 × 周期月数)
 #  单条成本 = 本币/积分 × 单条消耗积分 × 汇率
 #  月产能   = 该周期月积分 ÷ 单条消耗积分
-# 注意月付用 mCr —— 即梦标准会员月付给 4,000 积分，年/季付只给 2,210。
+# 月付与季付分别使用本周期的积分配置。
 # 顺序＝用户的观看习惯：月付 → 季付 → 年付（由短到长，先看门槛低的）。
 # 默认落在第一项（月付）—— 首屏 narrative 与 KPI 都跟着走。
 PERIODS = [("m", "月付", 1, "payM"), ("q", "季付", 3, "payQ"), ("y", "年付", 12, "payY")]
@@ -164,8 +173,6 @@ for r in ROWS:
     # 该档三周期中的最优周期（单条成本最低）
     r["bestP"] = min(r["byP"], key=lambda kk: r["byP"][kk]["perVideo"]) if r["byP"] else None
     # 周期倒挂：更长的承诺期反而单价更高 —— 逐对检查（季/月、年/月、年/季）
-    # 注意：这不总是平台的错。即梦标准会员月付给 4,000 积分、年付只给 2,210，
-    # 所以年付单条成本反而比月付贵 44% —— 是「积分随周期缩水」造成的真实倒挂。
     r["traps"] = []
     for _lk, _sk, _llbl, _slbl in (("q", "m", "季付", "月付"),
                                    ("y", "m", "年付", "月付"),
@@ -480,6 +487,15 @@ def main_rows_for(key):
         ca = 0.118 * (1 - (p["rank"] - 1) / N) ** 0.85
         price_disp = f'{CU[r["cur"]]}{p["pay"]:,}'
         sub = f'≈¥{p["payCNY"]:,.0f}' if r["cur"] == "USD" else PT_HEAD[key][1]
+        renewed = r[{"y": "renewal", "q": "qRenewal", "m": "mRenewal"}[key]]
+        if renewed is not None and renewed != p["pay"]:
+            sub += f' · 续费 {CU[r["cur"]]}{renewed:,}'
+        elif key == "y" and r["yearOneOff"]:
+            sub += " · 一次性付费"
+        review = REVIEW.get(r["plat"], {})
+        price_date = r["priceDates"].get(key, review.get("priceDate"))
+        if price_date and price_date != UPDATED:
+            sub += f' · 待核（{price_date[5:]}）'
         vl = f'<span class="vlabel">{r["label"]}</span>' if r["multi"] else ""
         usd = '<span class="tagu">USD</span>' if r["cur"] == "USD" else ""
         w = best / p["perVideo"] * 100
@@ -2532,9 +2548,9 @@ def sub_css(s):
 # ═══════════════════════════════════════════════════════════════════
 def promo():
     # 移动端只显示前半句 —— 整段在 390px 下要占三行，把首屏挤掉（用户反馈「观感不舒服」）
-    return (f'<div class="promo"><span><b>价格说明：</b>{BRAND_CN}数据采集于 {UPDATED}'
-            f'<i class="pmore">，各平台价格取决于当期活动与限时优惠力度，不代表最终价格</i></span>'
-            f'<span class="tag2">数据时点 {UPDATED}</span></div>')
+    return (f'<div class="promo"><span><b>价格说明：</b>{BRAND_CN}数据核对于 {UPDATED}'
+            f'<i class="pmore">，价格和生成积分的采集日期见各平台来源</i></span>'
+            f'<span class="tag2">核对日期 {UPDATED}</span></div>')
 
 
 def nav(active):
@@ -2649,18 +2665,6 @@ for _m in sorted(MARGINAL, key=lambda x: x["mCost"]):
         f'<td class="num">{_m["avg"]:.2f}</td>'
         f'<td class="ctr"><span class="tag {_tag}">{_lbl}</span></td></tr>')
 
-claim_rows = ""
-for _p, _c in AD_CLAIM.items():
-    # 取 AD_CLAIM 指定的那个顶级档位（同档多积分档时取第一个），与海报口径对应
-    _act = next(r for r in ROWS
-                if r["plat"] == _p and r["tier"] == _c["tier"])["perSec"]
-    claim_rows += (
-        f'<tr><td><span class="dot" style="background:{COLOR[_p]}"></span>{_p}</td>'
-        f'<td>{_c["tier"]}</td>'
-        f'<td class="num">¥{_c["perSec"]:.2f}</td>'
-        f'<td class="num strong">¥{_act:.3f}</td>'
-        f'<td class="num">{_act/_c["perSec"]:.2f}×</td></tr>')
-
 retry_rows = "".join(
     f'<tr><td><span class="dot" style="background:{COLOR[_r["plat"]]}"></span>{_r["plat"]}</td>'
     f'<td class="ctr"><span class="tag v-good">{_r["retry"]}</span></td>'
@@ -2684,9 +2688,180 @@ for _r in sorted(ROWS, key=lambda x: x["perVideo"]):
         f'<td>{tname(_r)}</td>{_c}'
         f'<td class="ctr"><span class="tag v-good">{_pl}</span></td></tr>')
 
+def source_link(label, url):
+    label = escape(label)
+    return f'<a href="{escape(url, quote=True)}" target="_blank" rel="noopener noreferrer">{label} ↗</a>' if url else label
+
+
+def cash(value, currency):
+    return f"{CU[currency]}{value:,}"
+
+
+def membership_price(option, currency, price_key, renewal_key, period):
+    pay = option.get(price_key)
+    if pay is None:
+        return '<td class="sub">未提供</td>'
+    renewal = option.get(renewal_key)
+    extra = [f'续费 {cash(renewal, currency)}' if renewal is not None else "续费价未展示"]
+    if period == "y" and option.get("yearOneOff"):
+        extra = ["一次性购买"]
+    if period == "y" and option.get("annualMonthlyRate"):
+        extra.insert(0, f'页面月均 {cash(option["annualMonthlyRate"], currency)}')
+    if period == "y" and option.get("annualCoupon"):
+        extra.insert(0, f'含 {cash(option["annualCoupon"], currency)} 券')
+    account_price = option.get("accountPrice", {}).get(period)
+    if account_price is not None and account_price != pay:
+        extra.insert(0, f'本次登录显示 {cash(account_price, currency)}')
+    first_month = option.get("firstMonthCredits", {}).get(period)
+    if first_month is not None and first_month != option["credits"]:
+        extra.append(f'首月 {first_month:,} 积分')
+    return f'<td class="num">{cash(pay, currency)}<br><small>{" · ".join(extra)}</small></td>'
+
+
+membership_rows = ""
+for plan in COST["plans"]:
+    plat = plan["platform"]
+    currency = PLATFORMS[plat]["currency"]
+    for option in plan["credits"]:
+        monthly = option["credits"]
+        points = f'{monthly:,} / 月'
+        if plat == "Seko":
+            points += f'<br><small>{12 * monthly:,} / 年（年卡）</small>'
+        if option.get("modelUnsupported"):
+            points += '<br><small>不支持对比模型</small>'
+        membership_rows += (
+            f'<tr data-membership="{escape(plat)}"><td>{plogo(plat)}{source_link(plat, REVIEW[plat]["url"])}</td>'
+            f'<td>{escape(plan["tier"])}</td><td class="num">{points}</td>'
+            f'{membership_price(option, currency, "m", "mRenewal", "m")}'
+            f'{membership_price(option, currency, "q", "qRenewal", "q")}'
+            f'{membership_price(option, currency, "price", "renewal", "y")}</tr>'
+        )
+
+MEMBERSHIP_DETAILS = f"""
+<details id="membership-prices" style="margin:14px 0">
+  <summary>7 家平台会员价格与积分档<span class="chev">›</span></summary>
+  <div class="dbody">
+    <p>月付、季付和年付均显示整个周期的首期价格。¥ 为人民币，$ 为美元。首购、优惠券和续费条件见各平台活动及截图。</p>
+    {table([("平台", None), ("会员", None), ("基础积分", None), ("月付", None), ("季付", None), ("年付", None)], membership_rows, "tw")}
+  </div>
+</details>
+"""
+
+CANVAS = COST["canvasTests"]
+canvas_rows = ""
+canvas_cost_rows = ""
+for plat, readings in CANVAS["rows"].items():
+    cells = []
+    for reading in readings:
+        if isinstance(reading, str):
+            cells.append(f'<td class="sub">{escape(reading)}</td>')
+            continue
+        credits = reading["credits"] if isinstance(reading, dict) else reading
+        original = f'<br><small><s>{reading["original"]:,}</s></small>' if isinstance(reading, dict) else ""
+        cells.append(f'<td class="num strong" data-canvas-credit="{credits}">{credits:,}{original}</td>')
+    canvas_rows += f'<tr><td>{plat}</td>{"".join(cells)}</tr>'
+    for key, label, _, _ in PERIODS:
+        prices = [r["byP"][key]["perVideo"] / r["per"] for r in ROWS if r["plat"] == plat and key in r["byP"]]
+        if not prices:
+            continue
+        per_credit = min(prices)
+        values = [reading["credits"] if isinstance(reading, dict) else reading for reading in readings]
+        cells = [
+            '<td class="sub">—</td>' if isinstance(credits, str)
+            else f'<td class="num" data-canvas-cost="{per_credit * credits:.2f}">¥{f2(per_credit * credits)}</td>'
+            for credits in values
+        ]
+        canvas_cost_rows += f'<tr><td>{plat} · {label}</td>{"".join(cells)}</tr>'
+canvas_headers = [("平台", None)] + [(label, None) for label in CANVAS["columns"]]
+CANVAS_DETAILS = f"""
+<section id="canvas-comparison" style="margin:18px 0">
+  <h2>画布生成扣分对比</h2>
+  <p>{CANVAS["date"]} 实录 · Seedance 2.5 · 30 秒 · 16:9 · 全能参考。数字来自提交生成前的积分预估。划线为界面同时显示的原扣分。「会员解锁」表示当前账号无法查看扣分。<a href="#pricing-evidence">查看采集截图 ↓</a></p>
+  {table(canvas_headers, canvas_rows, "tw")}
+  <details style="margin-top:12px">
+    <summary>各平台各周期最低单条成本 · 人民币<span class="chev">›</span></summary>
+    <div class="dbody">
+      <p>每行取该平台在所选订阅周期内单位积分最便宜的档位，按基础积分和画布读数折算。</p>
+      {table(canvas_headers, canvas_cost_rows, "tw")}
+    </div>
+  </details>
+</section>
+"""
+
+
 src_rows = "".join(
-    f'<tr><td>{_x["page"]}</td><td style="white-space:normal">{_x["data"]}</td></tr>'
-    for _x in COST["sources"])
+    f'<tr><td>{source_link(x["page"], x.get("url"))}</td><td style="white-space:normal">{escape(x["data"])}</td></tr>'
+    for x in COST["sources"])
+
+offer_rows = "".join(
+    f'<tr><td>{source_link(plat, review["url"])}</td>'
+    f'<td style="white-space:normal">{escape(review["offer"])}</td>'
+    f'<td class="num">{format(CPV[plat], ",") if plat in CPV else "会员解锁"}'
+    f'<br><small>{review["creditDate"]}</small></td></tr>'
+    for plat, review in REVIEW.items()
+)
+offer_benefit_rows = ""
+for benefit in COST.get("offerBenefits", []):
+    if benefit["platform"] not in CPV:
+        continue
+    r = next(r for r in ROWS if r["plat"] == benefit["platform"] and r["monthly"] == benefit["credits"])
+    key = benefit["period"]
+    p = r["byP"][key]
+    extra_credits = benefit.get("bonusCredits", 0)
+    extra_clips = benefit.get("bonusClips", 0)
+    baseline_clips = p["cap"] * MONTHOF[key]
+    cost_with_bonus = p["payCNY"] / (baseline_clips + extra_credits / r["per"] + extra_clips)
+    gift = f"{extra_credits:,} 积分" if extra_credits else f"{extra_clips} 条"
+    offer_benefit_rows += (
+        f'<tr data-bonus-cost="{cost_with_bonus:.2f}"><td>{r["plat"]} {tname(r)}</td>'
+        f'<td>{"年付" if key == "y" else "季付"}</td>'
+        f'<td class="num">{CU[r["cur"]]}{p["pay"]:,}</td><td>{gift}</td>'
+        f'<td class="num">¥{f2(p["perVideo"])}</td><td class="num strong">¥{f2(cost_with_bonus)}</td></tr>'
+    )
+
+OFFER_DETAILS = f"""
+<details id="offers" style="margin:14px 0">
+  <summary>平台活动、生成积分与数据出处<span class="chev">›</span></summary>
+  <div class="dbody">
+    {table([("平台官网", None), ("活动与订阅政策", None), ("基准积分 / 30 秒", None)], offer_rows, "tw")}
+    <h3>可量化赠送对首期成本的影响</h3>
+    <p>用基础积分加上已核对数量的赠分或赠送条数重新折算。结果假设在有效期内用完这些权益，沿用基准扣分。赠送会员月数、限时扣分折扣和不限次数权益见上表。</p>
+    {table([("平台与档位", None), ("周期", None), ("首期实付", None), ("已核对赠送", None),
+            ("基础成本 / 条", None), ("计入该赠送 / 条", None)], offer_benefit_rows, "tw")}
+  </div>
+</details>
+""" if REVIEW else ""
+
+EVIDENCE = COST.get("evidence", [])
+evidence_cards = {platform: [] for platform in REVIEW}
+for shot in EVIDENCE:
+    name = shot["file"]
+    if os.path.basename(name) != name or not os.path.isfile(os.path.join(ROOT, "img", "pricing", name)):
+        raise ValueError(f"截图文件不存在：{name}")
+    caption = escape(f'{shot["platform"]} · {shot["label"]} · {shot["date"]}')
+    src = f'img/pricing/{escape(name, quote=True)}'
+    evidence_cards[shot["platform"]].append(
+        f'<figure style="margin:0"><a href="{src}" target="_blank" rel="noopener">'
+        f'<img src="{src}" alt="{caption}" loading="lazy" decoding="async" '
+        f'style="display:block;width:100%;aspect-ratio:16/9;object-fit:contain;background:#141414"></a>'
+        f'<figcaption style="margin-top:8px">{caption}</figcaption></figure>'
+    )
+evidence_groups = "".join(
+    f'<details id="evidence-{index}"><summary>{escape(plat)} · {len(cards)} 张<span class="chev">›</span></summary>'
+    f'<div class="dbody"><p>{source_link("官方会员或活动入口", REVIEW[plat]["url"])}</p>'
+    f'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px">'
+    f'{"".join(cards)}</div></div></details>'
+    for index, (plat, cards) in enumerate(evidence_cards.items(), 1) if cards
+)
+EVIDENCE_DETAILS = f"""
+<details id="pricing-evidence" style="margin:14px 0">
+  <summary>会员页与画布截图 · {len(EVIDENCE)} 张<span class="chev">›</span></summary>
+  <div class="dbody">
+    <p>采集于 {UPDATED}。点击平台展开，点击图片可查看原尺寸。</p>
+    {evidence_groups}
+  </div>
+</details>
+""" if evidence_groups else ""
 
 # ═══════════ 平台级周期对照 ═══════════
 pp_rows = ""
@@ -2802,22 +2977,15 @@ def _period_wins():
     """
     win = {"y": 0, "q": 0, "m": 0}
     q_total = q_lose_m = 0
-    for p in COST["plans"]:
-        k = RATE if PLATFORMS[p["platform"]]["currency"] == "USD" else 1.0
-        for c in p["credits"]:
-            m = c["credits"]; mcr = c.get("mCr", m); qcr = c.get("qCr", m)
-            v = {}
-            for key, pay, mo, cr in (("y", c["price"], 12, m), ("q", c.get("q"), 3, qcr),
-                                     ("m", c.get("m"), 1, mcr)):
-                if pay is not None:
-                    v[key] = pay * k / (cr * mo) * CPV[p["platform"]]
-            if len(v) < 2:
-                continue
-            win[min(v, key=v.get)] += 1
-            if "q" in v and "m" in v:
-                q_total += 1
-                if v["m"] < v["q"]:
-                    q_lose_m += 1
+    for row in ROWS:
+        v = {key: price["perVideo"] for key, price in row["byP"].items()}
+        if len(v) < 2:
+            continue
+        win[min(v, key=v.get)] += 1
+        if "q" in v and "m" in v:
+            q_total += 1
+            if v["m"] < v["q"]:
+                q_lose_m += 1
     return win, q_total, q_lose_m
 
 
@@ -2892,7 +3060,7 @@ INTRO = """
     <div class="is on">
       <div class="ieyebrow">01 / 这是什么</div>
       <h3>把各平台的积分，<br>换算成同一种钱</h3>
-      <p>各平台用自己的积分计价，币值互不相同 —— 同一条 30 秒视频，即梦扣 600 分、
+      <p>各平台用自己的积分计价，币值互不相同 —— 同一条 30 秒视频，小云雀扣 600 分、
       Neowow 扣 7,500 分。直接比积分没有意义。</p>
       <p>本站在把它们压平到同一口径之后，再折算成人民币。
       <b style="color:#D1FE17">不采信宣传数字，只给可复核的结果。</b></p>
@@ -3211,7 +3379,9 @@ cycles_body = f"""
   {pareto_block("y")}
   <div class="chart" id="chart">{chart_rows("cost", "y")}</div>
 
-
+{CANVAS_DETAILS}
+{MEMBERSHIP_DETAILS}
+{OFFER_DETAILS}
 
   <div class="wrap" style="padding:0">
   <div class="sechead">
@@ -3219,7 +3389,7 @@ cycles_body = f"""
     <div class="sd">排名图背后的全部输入与计算链条：达标阶梯、边际成本、官方公示对照、失败退分、三周期全清单、方法论与原始清单。</div>
   </div>
   <details>
-    <summary>展开全部对比数据（6 组表格 + 方法论）<span class="chev">›</span></summary>
+    <summary>展开全部对比数据与方法论<span class="chev">›</span></summary>
     <div class="dbody" style="padding-top:6px">
 
 <div id="ladder">
@@ -3234,18 +3404,11 @@ cycles_body = f"""
           ("边际单条", None), ("达档均值", None), ("判定", None)], marg_rows)}
 </div>
 
-<div id="official">
-  {sec_head("", "海报宣传价 vs 实际到手价", "各平台「低至 X 元/秒」多按非全能参考档位计算，与统一口径不可混用。")}
-  {table([("平台", None), ("顶级档位", None), ("海报低至", None),
-          ("全能参考实算", None), ("倍差", None)], claim_rows)}
-</div>
-
 <div id="retry">
-  {sec_head("", "失败重试成本", "各平台失败均<b>不消耗积分</b> —— 本表全部单价按「成功出片才扣分」计算，与实际计费一致，无需再折算失败率。")}
+  {sec_head("", "失败重试成本", "下表保留 9 月测试结果，平台规则可能更新。")}
   {table([("平台", None), ("失败是否扣分", None), ("依据", None)], retry_rows, "tw")}
   <div class="note good" style="margin-top:14px">
-    <b>为什么这一项重要：</b>若某平台失败不退分且失败率 20%，其实际单条成本需上浮 25%，足以反转全部排名。
-    既然各平台均不扣分，<b>上表排名不受失败率影响</b>，可直接按单价决策。<br><br>{COST["retryNote"]}
+    {COST["retryNote"]}
   </div>
   <details style="margin-top:14px">
     <summary>跨零点提交的积分归属差异<span class="chev">›</span></summary>
@@ -3268,9 +3431,9 @@ cycles_body = f"""
       ① <code>本币/积分 = 该周期实付总额 ÷ (该周期月积分 × 周期月数)</code>　<span style="color:#8A9098">年付取 12、季付取 3、月付取 1</span><br>
       ② <code>单条成本 = 本币/积分 × 每条消耗积分</code> ← 唯一可跨平台比较的价格<br>
       ③ <code>月产能 = 月积分 ÷ 每条消耗积分</code><br>
-      ④ USD 档位按 <code>1 USD = {RATE} CNY</code>（{UPDATED} CFETS 中间价）折算<br><br>
+      ④ USD 档位按 <code>1 USD = {RATE} CNY</code>（{COST["fx"]["asOf"]} CFETS 中间价）折算<br><br>
       <b>数据范围：</b>已覆盖 <b>{SCOPE["current"]}</b>（{SCOPE_COVERED}）；{SCOPE_PENDING}尚未纳入。<br><br>
-      <b>口径校验：</b>用各平台自己公示的兑换率反向验证步骤①。<b>{COST["officialRateNote"]}</b>
+      <b>口径校验：</b>{COST["officialRateNote"]}
     </div>
   </details>
   <details>
@@ -3278,19 +3441,19 @@ cycles_body = f"""
     <div class="dbody">
       <div class="note" style="margin:0 0 14px"><b>价格口径：</b>{COST["priceRule"]}</div>
       {table([("选项", None), ("状态", None), ("说明", None)],
-             "".join(f'<tr><td>{{x["label"]}}</td>'
-                     f'<td class="ctr"><span class="tag {{"v-good" if x["done"] else "v-warn"}}">{{x["status"]}}</span></td>'
-                     f'<td style="white-space:normal">{{x["note"]}}</td></tr>' for x in SCOPE["items"]), "tw")}
+             "".join(f'<tr><td>{x["label"]}</td>'
+                     f'<td class="ctr"><span class="tag {"v-good" if x["done"] else "v-warn"}">{x["status"]}</span></td>'
+                     f'<td style="white-space:normal">{x["note"]}</td></tr>' for x in SCOPE["items"]), "tw")}
       <div class="sub" style="margin-top:10px">{SCOPE["impact"]}</div>
     </div>
   </details>
   <details>
-    <summary>单条积分消耗（各平台生成页实测）<span class="chev">›</span></summary>
+    <summary>单条积分消耗与规格<span class="chev">›</span></summary>
     <div class="dbody">
       {table([("平台", None), ("生成页规格", None), ("单条积分", None)],
-             "".join(f'<tr><td><span class="dot" style="background:{{COLOR[p]}}"></span>{{p}}</td>'
-                     f'<td style="white-space:normal">{{COST["creditsSource"][p]}}</td>'
-                     f'<td class="num strong">{{CPV[p]:,}}</td></tr>' for p in CPV), "tw")}
+             "".join(f'<tr><td><span class="dot" style="background:{COLOR[p]}"></span>{p}</td>'
+                     f'<td style="white-space:normal">{COST["creditsSource"][p]}</td>'
+                     f'<td class="num strong">{CPV[p]:,}</td></tr>' for p in CPV), "tw")}
     </div>
   </details>
   <details>
@@ -3306,6 +3469,7 @@ cycles_body = f"""
 
     </div>
   </details>
+{EVIDENCE_DETAILS}
   </div>
 </main>
 </div>
@@ -3409,7 +3573,10 @@ cost_body = f"""
   {GUIDE}
     {KPI_BARS}
 
-  <div class="vnote"><b>价格锚定</b>·本表价格锚定各平台官网【当前实时显示价】，该显示价已是活动价 / 优惠价 / 限时价的最终成交价。<details class="tiny"><summary>完整声明<span class="chev">›</span></summary><div class="dbody">{COST["liveNote"]}</div></details></div>
+  <div class="vnote"><b>首期订阅成本</b> · {COST["priceRule"]}<details class="tiny"><summary>采集说明<span class="chev">›</span></summary><div class="dbody">{COST["liveNote"]}</div></details></div>
+{CANVAS_DETAILS}
+{MEMBERSHIP_DETAILS}
+{OFFER_DETAILS}
 
 
 <div class="vpanel" data-view="period" id="period">
@@ -3420,16 +3587,10 @@ cost_body = f"""
     <span class="chip"><b>月付</b> ¥{f2(PERIOD_LEAD["m"]["cost"])}<s>{PERIOD_LEAD["m"]["who"]}</s></span>
   </div>
   <div class="note warn" style="margin-top:14px">
-    <b>下单前，先看这三个坑：</b>
+    <b>对比不同周期时要看的数字</b>
     <ul style="margin:8px 0 0">
-      <li><b>别买季付。</b>小云雀全系季付比月付贵 <b>22%～96%</b> —— 付更多钱、
-          锁更久、拿同样产能。最贵的一档是 {TRAP_WORST["row"]["plat"]} {tname(TRAP_WORST["row"])}
-          （{TRAP_WORST["long"]}比{TRAP_WORST["short"]}贵 <b>{TRAP_WORST["pct"]*100:.1f}%</b>）。</li>
-      <li><b>年付不总是最省。</b>即梦标准会员月付给 4,000 积分、年付只给 2,210 ——
-          年付单价反而贵 <b>44%</b>。下单前确认年付有没有把积分缩水。</li>
-      <li><b>按月买可能更便宜。</b>全场月付最优 <b>¥{f2(PERIOD_LEAD["m"]["cost"])}/条</b>
-          比季付最优 ¥{f2(PERIOD_LEAD["q"]["cost"])}/条 还低，而且随时能停。
-          所以本站<b>不单独设季付榜</b> —— 三个独立榜会给出自相矛盾的建议。</li>
+      <li>按你计划使用的周期，比较首期实付、每月积分和续费金额。</li>
+      <li>年付、季付的月产能按基础订阅积分估算。临时赠分、赠送条数和扣分折扣见活动栏。</li>
     </ul>
   </div>
   {table([("平台", None), ("年付 ÷ 月付", None), ("季付 ÷ 月付", None),
@@ -3495,6 +3656,7 @@ cost_body = f"""
     <b>{COST["risks"][0]["title"]}</b><br>{COST["risks"][0]["body"][0]}<br><br>{COST["risks"][0]["body"][1]}
   </div>
 </section>
+{EVIDENCE_DETAILS}
 </div>
 {foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　数据采集 {UPDATED}　·　全部数值按统一口径重算，非平台宣传数字')}
 """
@@ -3557,7 +3719,7 @@ home_body = f"""
       <span class="arrow">→</span>
       <div class="et">LIVE · {UPDATED}</div>
       <h3>平台成本对比</h3>
-      <p>{len(PLATFORMS)} 个平台、{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本。</p>
+      <p>{len(PLATFORMS)} 家会员价格。{len(CPV)} 家、{len(ROWS)} 个已核实画布扣分的档位，按「{SPEC}」折算单条成本。</p>
       <div class="nums">
         <div><s>¥{f2(BEST)}</s><em>最低单条</em></div>
         <div><s>{WORST/BEST:.2f}×</s><em>最贵/最省</em></div>
@@ -3980,9 +4142,9 @@ PAGES = {
     "index.html": page("首页", f"{BRAND} — {SITE['tagline']}。AI 视频生成平台的成本对比，统一口径折算，只给可复核的结果。",
                        nav("home"), home_body, cost_js=True, canon=""),
     "cost.html": page("平台成本对比", f"{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本，含达标阶梯、边际成本与跨平台组合最省。",
-                      nav("cost"), cost_body, cost_js=True, canon="cost"),
+                      nav("cost"), cost_body, cost_js=True, canon="cost", self_imgs=bool(EVIDENCE)),
     "cycles.html": page("三周期全清单", f"{len(ROWS)} 个可选积分档 × 年付/季付/月付三周期，按指标动态排名，附全部原始数据与计算方法。",
-                        nav("cycles"), cycles_body, cost_js=True, canon="cycles"),
+                        nav("cycles"), cycles_body, cost_js=True, canon="cycles", self_imgs=bool(EVIDENCE)),
     # ⚠ Cloudflare Pages 的 SPA 回落：输出目录里【有 404.html 就用它】，
     #   没有才回落到 index.html 并返回 200。`_redirects` 那条实测没拦住，
     #   404.html 是更可靠的开关。不挂进 nav，也不参与任何导航高亮。
@@ -4034,7 +4196,6 @@ def write_all():
             with io.open(os.path.join(d, name), "w", encoding="utf-8") as f:
                 f.write(html)
     # 公网附加文件：统一把作品指纹替换为当前值，并补上版本指纹
-    import shutil
     for extra in ("_headers", "_redirects", "robots.txt", "LICENSE", "SECURITY.md"):
         src = os.path.join(ROOT, extra)
         if not os.path.exists(src):
@@ -4072,6 +4233,13 @@ def write_all():
                 if not os.path.exists(_t) or os.path.getsize(_t) != os.path.getsize(_s):
                     shutil.copy2(_s, _t); _n += 1
         print("  配图同步：%d 个文件" % _n)
+    for d in dirs:
+        if EVIDENCE:
+            target = os.path.join(d, "img", "pricing")
+            os.makedirs(target, exist_ok=True)
+            for shot in EVIDENCE:
+                name = shot["file"]
+                shutil.copy2(os.path.join(ROOT, "img", "pricing", name), os.path.join(target, name))
     print("  静态文件指纹已同步：%s / %s" % (FP_WORK, FP_EDITION))
 
 
@@ -4234,7 +4402,7 @@ def selfcheck():
     os.makedirs(os.path.dirname(tmp), exist_ok=True)
     with io.open(tmp, "w", encoding="utf-8") as f:
         f.write(js)
-    if os.path.exists(NODE):
+    if NODE:
         r = subprocess.run([NODE, "--check", tmp], capture_output=True, text=True)
         if r.returncode != 0:
             errs.append("cost.html: JS 语法错误\n" + (r.stderr or "")[-500:])

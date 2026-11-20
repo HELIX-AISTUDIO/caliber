@@ -12,8 +12,8 @@
   "color": "#00C65A",
   "currency": "CNY",
   "region": "cn",
-  "recurring": false,
-  "tierLabel": "PLUS/Pro/MAX/ULTRA"
+  "recurring": true,
+  "tierLabel": "PLUS/PRO/MAX/ULTRA"
  },
  "即梦": {
   "name": "即梦",
@@ -37,7 +37,7 @@
   "currency": "USD",
   "region": "global",
   "excludeTax": true,
-  "recurring": false,
+  "recurring": true,
   "quarterly": false,
   "tierLabel": "Starter/Plus/Ultra"
  },
@@ -54,7 +54,7 @@
   "color": "#14D9C4",
   "currency": "CNY",
   "region": "cn",
-  "recurring": false,
+  "recurring": true,
   "tierLabel": "标准/高级/至尊"
  }
 }

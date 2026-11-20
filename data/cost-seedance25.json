@@ -3,36 +3,34 @@
   "type": "cost",
   "title": "平台成本对比",
   "eyebrow": "Cost Benchmark · Seedance 2.5",
-  "updatedAt": "2026-09-21",
+  "updatedAt": "2026-11-20",
   "spec": {
     "text": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考",
     "secondsPerClip": 30,
-    "note": "全部平台的单条积分消耗均在此口径下测得，是本次对比成立的唯一前提。"
+    "note": "比较 Seedance 2.5 标准版，720p、16:9、30 秒、全能参考。积分采集时间与证据见方法论。"
   },
   "fx": {
     "pair": "USD_CNY",
-    "rate": 6.7487,
-    "asOf": "2026-09-21",
+    "rate": 6.7131,
+    "asOf": "2026-11-20",
     "source": "中国外汇交易中心（CFETS）人民币对美元中间价",
-    "note": "选用中间价而非银行牌价：中间价是当日官方定价，可引用可复核；实际结算按各银行现汇卖出价通常再高 0.5–1%。"
+    "note": "使用当日人民币汇率中间价。支付时的实际汇率、税费和手续费以付款渠道为准。"
   },
   "creditsPerVideo": {
     "libtv": 1380,
     "Neowow": 7500,
-    "即梦": 600,
     "小云雀": 600,
     "Higgsfield": 210,
-    "Tapnow": 1200,
     "Seko": 540
   },
   "creditsSource": {
-    "libtv": "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s",
-    "Neowow": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考 · 分镜栏编辑",
-    "即梦": "即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s",
-    "小云雀": "Seedance 2.5 · 16:9 · 720P · 30s（用户确认 600 积分）",
-    "Higgsfield": "Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard",
-    "Tapnow": "Seedance 2.5 · 相同参数（用户口径）→ 1,200 积分",
-    "Seko": "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30S → 540 积分"
+    "libtv": "画布生成按钮预估扣分",
+    "Neowow": "画布生成按钮预估扣分",
+    "即梦": "当前账号需要会员才能查看",
+    "小云雀": "画布生成按钮预估扣分",
+    "Higgsfield": "画布生成按钮预估扣分",
+    "Tapnow": "当前账号需要会员才能查看",
+    "Seko": "画布生成按钮预估扣分"
   },
   "plans": [
     {
@@ -44,7 +42,9 @@
           "price": 569,
           "m": 66,
           "q": 179,
-          "renewal": 569
+          "renewal": 599,
+          "qRenewal": 189,
+          "mRenewal": 66
         }
       ]
     },
@@ -57,7 +57,9 @@
           "price": 1199,
           "m": 199,
           "q": 499,
-          "renewal": 1199
+          "renewal": 1799,
+          "qRenewal": 559,
+          "mRenewal": 199
         }
       ]
     },
@@ -70,14 +72,18 @@
           "price": 2999,
           "m": 469,
           "q": 1159,
-          "renewal": 3799
+          "renewal": 3799,
+          "qRenewal": 1399,
+          "mRenewal": 489
         },
         {
           "credits": 16300,
-          "price": 3899,
+          "price": 3999,
           "m": 649,
           "q": 1599,
-          "renewal": 5099
+          "renewal": 5099,
+          "qRenewal": 1899,
+          "mRenewal": 669
         }
       ]
     },
@@ -87,10 +93,12 @@
       "credits": [
         {
           "credits": 32800,
-          "price": 6699,
+          "price": 6999,
           "m": 1199,
           "q": 2699,
-          "renewal": 7399
+          "renewal": 7399,
+          "qRenewal": 3499,
+          "mRenewal": 1299
         }
       ]
     },
@@ -100,16 +108,32 @@
       "credits": [
         {
           "credits": 50500,
-          "price": 9599,
+          "price": 10299,
           "m": 1799,
           "q": 3899,
-          "renewal": 10999
+          "renewal": 10999,
+          "qRenewal": 5099,
+          "mRenewal": 1999
         },
         {
           "credits": 66000,
-          "price": 12499,
+          "price": 13499,
           "m": 2299,
-          "q": 4999
+          "q": 4999,
+          "renewal": null,
+          "qRenewal": 6599,
+          "mRenewal": 2599,
+          "yearOneOff": true
+        },
+        {
+          "credits": 92000,
+          "price": 18299,
+          "renewal": null,
+          "q": 6699,
+          "qRenewal": 8999,
+          "m": 3099,
+          "mRenewal": 3569,
+          "yearOneOff": true
         }
       ]
     },
@@ -118,34 +142,66 @@
       "tier": "PLUS",
       "credits": [
         {
-          "credits": 9000,
+          "credits": 8000,
+          "m": 30,
+          "mRenewal": 60,
+          "q": 168,
+          "qRenewal": 189,
           "price": 599,
-          "m": 60,
-          "q": 189
+          "renewal": 699,
+          "firstMonthCredits": {
+            "m": 8400,
+            "q": 9850,
+            "y": 10450
+          }
         }
       ]
     },
     {
       "platform": "Neowow",
-      "tier": "Pro",
+      "tier": "PRO",
       "credits": [
         {
-          "credits": 32800,
-          "price": 1599,
-          "m": 219,
-          "q": 628
+          "credits": 25000,
+          "m": 165,
+          "mRenewal": 219,
+          "q": 478,
+          "qRenewal": 549,
+          "price": 1600,
+          "renewal": 2500,
+          "firstMonthCredits": {
+            "m": 26250,
+            "q": 35690,
+            "y": 42240
+          }
         },
         {
-          "credits": 52800,
-          "price": 2289,
-          "m": 348,
-          "q": 899
+          "credits": 63000,
+          "m": 415,
+          "mRenewal": 479,
+          "q": 1072,
+          "qRenewal": 1390,
+          "price": 4000,
+          "renewal": 4500,
+          "firstMonthCredits": {
+            "m": 66150,
+            "q": 68790,
+            "y": 68790
+          }
         },
         {
-          "credits": 108000,
-          "price": 4666,
-          "m": 718,
-          "q": 1999
+          "credits": 90000,
+          "m": 598,
+          "mRenewal": 659,
+          "q": 1665,
+          "qRenewal": 1850,
+          "price": 5500,
+          "renewal": 6000,
+          "firstMonthCredits": {
+            "m": 94500,
+            "q": 117900,
+            "y": 131400
+          }
         }
       ]
     },
@@ -154,16 +210,32 @@
       "tier": "MAX",
       "credits": [
         {
-          "credits": 188000,
-          "price": 7299,
-          "m": 1199,
-          "q": 2999
+          "credits": 178000,
+          "m": 1135,
+          "mRenewal": 1299,
+          "q": 2839,
+          "qRenewal": 3800,
+          "price": 9500,
+          "renewal": 10000,
+          "firstMonthCredits": {
+            "m": 186900,
+            "q": 206300,
+            "y": 207400
+          }
         },
         {
-          "credits": 288000,
+          "credits": 210000,
+          "m": 1332,
+          "mRenewal": 1560,
+          "q": 3353,
+          "qRenewal": 4400,
           "price": 11059,
-          "m": 1827,
-          "q": 4599
+          "renewal": 12059,
+          "firstMonthCredits": {
+            "m": 220500,
+            "q": 312900,
+            "y": 380400
+          }
         }
       ]
     },
@@ -172,10 +244,34 @@
       "tier": "ULTRA",
       "credits": [
         {
-          "credits": 368000,
-          "price": 11899,
-          "m": 2296,
-          "q": 5520
+          "credits": 250000,
+          "m": 1559,
+          "mRenewal": 1799,
+          "q": 3750,
+          "qRenewal": 5800,
+          "price": 13144,
+          "renewal": null,
+          "firstMonthCredits": {
+            "m": 262500,
+            "q": 398900,
+            "y": 504400
+          },
+          "annualCoupon": 300
+        },
+        {
+          "credits": 552000,
+          "m": 3300,
+          "mRenewal": 3890,
+          "q": 8199,
+          "qRenewal": 10499,
+          "price": 19699,
+          "renewal": null,
+          "firstMonthCredits": {
+            "m": 552000,
+            "q": 579600,
+            "y": 607200
+          },
+          "annualCoupon": 300
         }
       ]
     },
@@ -185,9 +281,16 @@
       "credits": [
         {
           "credits": 725,
-          "price": 659,
-          "m": 69,
-          "q": 188
+          "price": 393,
+          "renewal": 659,
+          "m": 33,
+          "mRenewal": 69,
+          "q": 113,
+          "qRenewal": 188,
+          "accountPrice": {
+            "m": 69,
+            "y": 659
+          }
         }
       ]
     },
@@ -197,10 +300,16 @@
       "credits": [
         {
           "credits": 2210,
-          "price": 1899,
-          "m": 199,
-          "q": 568,
-          "mCr": 4000
+          "price": 1099,
+          "renewal": 1899,
+          "m": 100,
+          "mRenewal": 199,
+          "q": 341,
+          "qRenewal": 568,
+          "accountPrice": {
+            "m": 199,
+            "y": 1899
+          }
         }
       ]
     },
@@ -211,26 +320,41 @@
         {
           "credits": 6160,
           "price": 2599,
-          "m": 499,
-          "q": 1399
+          "renewal": 5199,
+          "m": 199,
+          "mRenewal": 499,
+          "q": 658,
+          "qRenewal": 1399
         },
         {
           "credits": 12320,
           "price": 5199,
-          "m": 998,
-          "q": 1959
+          "renewal": 10398,
+          "m": 398,
+          "mRenewal": 998,
+          "q": 1227,
+          "qRenewal": 2798,
+          "accountPrice": {
+            "m": 998
+          }
         },
         {
           "credits": 18480,
-          "price": 7799,
-          "m": 1498,
-          "q": 2939
+          "price": 7019,
+          "renewal": 15598,
+          "m": 597,
+          "mRenewal": 1498,
+          "q": 1799,
+          "qRenewal": 4199
         },
         {
           "credits": 27720,
-          "price": 11699,
-          "m": 2246,
-          "q": 4409
+          "price": 10529,
+          "renewal": 23398,
+          "m": 896,
+          "mRenewal": 2246,
+          "q": 2680,
+          "qRenewal": 6298
         }
       ]
     },
@@ -240,9 +364,15 @@
       "credits": [
         {
           "credits": 54600,
-          "price": 21840,
-          "m": 4299,
-          "q": 8189
+          "price": 19656,
+          "renewal": 43680,
+          "m": 1706,
+          "mRenewal": 4299,
+          "q": 4999,
+          "qRenewal": 11699,
+          "accountPrice": {
+            "m": 4299
+          }
         }
       ]
     },
@@ -252,9 +382,12 @@
       "credits": [
         {
           "credits": 830,
-          "price": 453,
+          "price": 759,
+          "renewal": 759,
+          "q": 219,
+          "qRenewal": 219,
           "m": 38,
-          "q": 219
+          "mRenewal": 79
         }
       ]
     },
@@ -265,8 +398,11 @@
         {
           "credits": 2320,
           "price": 1199,
+          "renewal": 1999,
+          "q": 589,
+          "qRenewal": 589,
           "m": 100,
-          "q": 589
+          "mRenewal": 209
         }
       ]
     },
@@ -275,40 +411,58 @@
       "tier": "高级会员",
       "credits": [
         {
-          "credits": 6300,
+          "credits": 6330,
           "price": 2649,
+          "renewal": 5299,
+          "q": 893,
+          "qRenewal": 1488,
           "m": 273,
-          "q": 1488
+          "mRenewal": 529
         },
         {
           "credits": 8600,
-          "price": 3599,
+          "price": 3600,
+          "renewal": 7199,
+          "q": 900,
+          "qRenewal": 1999,
           "m": 374,
-          "q": 1999
+          "mRenewal": 719
         },
         {
           "credits": 10150,
-          "price": 4199,
+          "price": 4250,
+          "renewal": 8499,
+          "q": 1057,
+          "qRenewal": 2349,
           "m": 441,
-          "q": 2349
+          "mRenewal": 849
         },
         {
           "credits": 12000,
           "price": 4999,
+          "renewal": 9999,
+          "q": 1260,
+          "qRenewal": 2799,
           "m": 519,
-          "q": 1959
+          "mRenewal": 999
         },
         {
-          "credits": 18500,
-          "price": 7799,
+          "credits": 18480,
+          "price": 7019,
+          "renewal": 15598,
+          "q": 1890,
+          "qRenewal": 4199,
           "m": 779,
-          "q": 2939
+          "mRenewal": 1498
         },
         {
           "credits": 27720,
-          "price": 10699,
+          "price": 10529,
+          "renewal": 23398,
+          "q": 2834,
+          "qRenewal": 6298,
           "m": 1168,
-          "q": 4408
+          "mRenewal": 2246
         }
       ]
     },
@@ -318,9 +472,12 @@
       "credits": [
         {
           "credits": 54600,
-          "price": 21840,
+          "price": 19656,
+          "renewal": 43680,
+          "q": 4999,
+          "qRenewal": 11699,
           "m": 2235,
-          "q": 8189
+          "mRenewal": 4299
         }
       ]
     },
@@ -329,9 +486,12 @@
       "tier": "Starter",
       "credits": [
         {
-          "credits": 200,
-          "price": 180,
-          "m": 15
+          "credits": 270,
+          "m": 19,
+          "mRenewal": null,
+          "price": 228,
+          "annualMonthlyRate": 19,
+          "modelUnsupported": true
         }
       ]
     },
@@ -340,9 +500,12 @@
       "tier": "Plus",
       "credits": [
         {
-          "credits": 1000,
-          "price": 468,
-          "m": 49
+          "credits": 1200,
+          "m": 47,
+          "mRenewal": 59,
+          "price": 396,
+          "annualMonthlyRate": 33,
+          "modelUnsupported": false
         }
       ]
     },
@@ -352,18 +515,27 @@
       "credits": [
         {
           "credits": 3000,
-          "price": 1188,
-          "m": 129
+          "m": 79,
+          "mRenewal": 129,
+          "price": 600,
+          "annualMonthlyRate": 50,
+          "modelUnsupported": false
         },
         {
           "credits": 6000,
-          "price": 2328,
-          "m": 220
+          "m": 150,
+          "mRenewal": 250,
+          "price": 1164,
+          "annualMonthlyRate": 97,
+          "modelUnsupported": false
         },
         {
           "credits": 9000,
-          "price": 3240,
-          "m": 310
+          "m": 209,
+          "mRenewal": 375,
+          "price": 1668,
+          "annualMonthlyRate": 139,
+          "modelUnsupported": false
         }
       ]
     },
@@ -373,9 +545,10 @@
       "credits": [
         {
           "credits": 1500,
-          "price": 90,
-          "m": 15,
-          "q": 27
+          "m": 9,
+          "mRenewal": 15,
+          "q": 27,
+          "price": 90
         }
       ]
     },
@@ -385,33 +558,31 @@
       "credits": [
         {
           "credits": 3500,
-          "price": 315,
           "m": 30,
-          "q": 84
+          "mRenewal": 30,
+          "q": 84,
+          "price": 315
         },
         {
           "credits": 6000,
-          "price": 540,
           "m": 51,
-          "q": 144
+          "mRenewal": 51,
+          "q": 144,
+          "price": 540
         },
         {
           "credits": 9500,
-          "price": 855,
           "m": 81,
-          "q": 228
+          "mRenewal": 81,
+          "q": 216,
+          "price": 798
         },
         {
           "credits": 11500,
-          "price": 1035,
           "m": 98,
-          "q": 276
-        },
-        {
-          "credits": 20000,
-          "price": 1800,
-          "m": 170,
-          "q": 480
+          "mRenewal": 98,
+          "q": 261,
+          "price": 966
         }
       ]
     },
@@ -420,10 +591,18 @@
       "tier": "ULTIMATE",
       "credits": [
         {
+          "credits": 20000,
+          "m": 170,
+          "mRenewal": 170,
+          "q": 450,
+          "price": 1680
+        },
+        {
           "credits": 36000,
-          "price": 2592,
           "m": 306,
-          "q": 756
+          "mRenewal": 306,
+          "q": 756,
+          "price": 2592
         }
       ]
     },
@@ -433,15 +612,17 @@
       "credits": [
         {
           "credits": 72000,
-          "price": 5184,
           "m": 612,
-          "q": 1512
+          "mRenewal": 612,
+          "q": 1512,
+          "price": 5184
         },
         {
           "credits": 100000,
-          "price": 7200,
           "m": 850,
-          "q": 2100
+          "mRenewal": 850,
+          "q": 2100,
+          "price": 7200
         }
       ]
     },
@@ -452,7 +633,9 @@
         {
           "credits": 500,
           "price": 576,
-          "m": 39
+          "m": 39,
+          "mRenewal": 60,
+          "renewal": 720
         }
       ]
     },
@@ -463,7 +646,9 @@
         {
           "credits": 3000,
           "price": 2880,
-          "m": 195
+          "m": 220,
+          "mRenewal": 300,
+          "renewal": 3600
         }
       ]
     },
@@ -474,87 +659,51 @@
         {
           "credits": 10000,
           "price": 8400,
-          "m": 569
+          "m": 660,
+          "mRenewal": 875,
+          "renewal": 10500
         }
       ]
     }
   ],
-  "officialRate": {
-    "libtv": {
-      "标准版": 31.25,
-      "进阶版": 45.45
-    },
-    "Neowow": {
-      "PLUS": 180.0,
-      "Pro": 282.0,
-      "MAX": 350.0,
-      "ULTRA": 371.0
-    },
-    "即梦": {
-      "基础会员": 13.0,
-      "标准会员": 14.0
-    },
-    "小云雀": {
-      "基础会员": 21.9,
-      "标准会员": 23.2,
-      "高级会员": 28.8,
-      "超级会员": 30.0
-    }
-  },
-  "officialRateNote": "部分公示值按调价前的年费计算（Neowow MAX/Pro 尤为明显），按现价实算低于公示值。故本表全部结论以「年费 ÷ (月积分 × 12)」的实算值为准，公示值仅作口径校验。",
-  "adClaim": {
-    "libtv": {
-      "tier": "至尊版",
-      "perSec": 0.36
-    },
-    "Neowow": {
-      "tier": "ULTRA",
-      "perSec": 0.26
-    },
-    "即梦": {
-      "tier": "超级会员",
-      "perSec": 0.4
-    },
-    "小云雀": {
-      "tier": "超级会员",
-      "perSec": 0.4
-    }
-  },
+  "officialRate": {},
+  "officialRateNote": "统一使用各周期实付、基础订阅积分和相同规格的积分口径。具体来源、优惠条件和待复核项目见下表。",
+  "adClaim": {},
   "scope": {
     "current": "年费 / 季付 / 月付 三周期",
     "currentShort": "年付 · 季付 · 月付",
-    "impact": "三周期的承诺期不同，单价不能混着读：年付最省但锁 12 个月，月付最贵但随时能停。另有 11 个档位出现「承诺更久反而更贵」的倒挂（详见「用多久，买哪个周期」一节）。",
-    "promoRule": "各平台页面常挂「限时活动福利」（某模型限时折扣、无限用 N 天、赠送积分等）。本表统一不单独处置 —— 页面显示的实付价已含当期全部活动，再叠一层活动分析等于重复计算，还引入主观判断。唯一例外是续费价，它是有公示的第二期真实扣款，属价格而非宣传。",
+    "impact": "会员价格覆盖七家平台，标准版 720p 实测成本覆盖五家。美元按当日人民币汇率中间价折算。",
+    "promoRule": "限时生成折扣、赠积分、赠时长和免费条数以本页活动栏为准，排名以基础配置计算。",
     "items": [
       {
-        "label": "年费 / 连续包年",
+        "label": "年付",
         "status": "已覆盖",
         "done": true,
-        "note": "全部 44 个可选积分档"
+        "note": "首年实付及已公布的续费价"
       },
       {
-        "label": "季度会员",
+        "label": "季付",
         "status": "已覆盖",
         "done": true,
-        "note": "39 档有季付；Higgsfield 平台不提供季付"
+        "note": "首季实付及已公布的续费价"
       },
       {
-        "label": "月度会员",
+        "label": "月付",
         "status": "已覆盖",
         "done": true,
-        "note": "全部 44 档；Tapnow BASIC 按月付稳态价计（首月促销不计入）"
+        "note": "首月实付及已公布的续费价"
       },
       {
-        "label": "按次购买（非会员）",
-        "status": "后续补充",
+        "label": "按次购买",
+        "status": "待补充",
         "done": false,
-        "note": "用于「订阅 vs 按量」的划算性判断"
+        "note": "充值积分或另购模型权益"
       }
     ]
   },
-  "priceRule": "本表全部价格均为平台页面【显示出来的实付价】，已含当期全部活动；不引用、不分析任何划线原价、折扣徽标、立省百分比与赠品文字。唯一例外是续费价 —— 它是真实会发生的第二期扣款，属价格而非宣传，有公示则记录。",
-  "liveNote": "本表全部价格锚定各平台官网【当前实时显示价】。该显示价本身已是活动价 / 优惠价 / 限时价的最终成交价 —— 不再叠加、不再推算、不引用划线原价。价格随时可能变动；一经发现变化，我们第一时间更正，并同步更新本页的数据时点。",
-  "recurringNote": "连续包年/包季/包月到期会自动扣款续费，且续费价通常高于首期价 —— 其真实成本须按「首期 + 续费 × (期数−1)」折算，并存在「忘记取消」的实际风险。非连续包（Higgsfield、Neowow）为一次性购买，到期自动结束、无自动扣款、无续费价，首期价即为全部成本。故本表横向比较时按「你打算用多久」分流：连续包要看续费后的均价，非连续包只看一口价。",
+  "priceRule": "按所选周期的首期价格 ÷ 基础订阅积分 × 画布预估扣分折算；赠送积分和会员月数见活动。",
+  "liveNote": "画布结果是生成前的积分预估。会员锁定或无法复核的规格留空，不参加成本排名。",
+  "recurringNote": "连续订阅到期会自动续费。首期和续费是两次扣款，表内分别列出。一次性付费档到期后按平台规则处理。",
   "retryPolicy": [
     {
       "plat": "libtv",
@@ -587,85 +736,810 @@
       "basis": "用户实测（与其他平台同口径）"
     }
   ],
-  "retryNote": "各平台失败均不消耗积分（用户实测口径），故本表全部单价与实际计费一致，排名不受失败率影响，可直接按单价决策。Higgsfield 另有官方文档保证：failed / nsfw 请求不计费，预扣积分自动退还，排队取消亦退，超时标记失败不扣费（唯一例外 Grok —— 一经开始生成即扣费）。",
+  "retryNote": "失败任务的退分记录沿用 9 月测试。完成但未采用的片段通常仍会扣积分。",
   "crossMidnightNote": "跨零点提交时两家字节系平台的积分归属日不同：23:55 提交、0:05 完成时，即梦计入前一天、小云雀计入后一天；小云雀若未在零点前完成，未用完的当日积分会作废。",
   "risks": [
     {
-      "title": "积分按月发放，不能提前支取 —— 「该周期产能」是累计可得，不是随即可用",
+      "title": "核对积分到账节奏和有效期",
       "body": [
-        "各周期的会员积分（月付 / 季付 / 年付）均【按月发放】：买年付拿到的是 12 个月的发放额度，不是一次到账的 12 倍积分；季付同理。",
-        "因此本表的「该周期产能」应读作【该周期内累计可得的总量】，而不是【下单后即可支配的总量】。",
-        "推论：想在一个季度内做完一整年的量，靠买年付做不到 —— 必须【多账号并行】（见下方组合订阅），或把工期拉长到与发放节奏匹配。",
-        "排名与单条成本不受此影响：它们只取决于『该周期总支出 ÷ 该周期总产能』，与积分的发放时点无关。"
-      ]
-    },
-    {
-      "level": "warn",
-      "title": "年费档位均为限时活动价，活动退坡后结论会变",
-      "body": [
-        "用户确认：各平台年费均为限时活动价。本表记录的是页面显示的实付价，已含当期全部活动；活动一旦结束或退坡，页面显示价上升、单条成本随之上升，排名可能变化。",
-        "libtv 高级版与至尊版、即梦高级四档、小云雀高级六档、Neowow Pro 三档与 MAX 两档均为联动定价，活动结束后可能同步调整档位结构，届时选项数量与积分档位都可能变。",
-        "六家中 Tapnow 的年价折让力度最大，活动退坡对其单条成本的影响也最大。"
-      ]
-    },
-    {
-      "level": "warn",
-      "title": "Seko 月付为首购优惠价，次月起按原价",
-      "body": [
-        "Seko 月付三个档位页面均标「首购优惠」：标准 ¥39（划线 ¥60）、高级 ¥195（划线 ¥300）、至尊 ¥569（划线 ¥875）。按本表口径，已录页面显示的实付价。",
-        "但该优惠通常只适用于首次购买的一个月。若你要连续用，第二个月起按原价续购，单条成本会明显上升 —— 以标准会员为例：¥39 → ¥60 时，单条成本由 ¥42.12 升至 ¥64.80。按年购买（8 折，月均 ¥48）则不受此影响。",
-        "另外注意：Seko 没有季付，年付与月付均为一次性购买、到期即止，不存在自动续费与续费价。"
+        "多数平台逐月发放或刷新订阅积分。Seko 包年官方按年度额度公示，有效期自发放起一年。",
+        "表中月产能按周期平均值估算。具体下单后可用余额及赠送权益到账时间以平台规则为准。"
       ]
     }
   ],
   "sources": [
     {
-      "page": "libtv 生成页",
-      "data": "Seedance 2.5 · 全能参考 · 16:9 · 720P · 30s → 1,380 积分"
+      "page": "libtv 官方会员或活动入口",
+      "url": "https://www.liblib.tv/",
+      "data": "双 11 返场。年付指定档首 3 月额外共给 4,500–201,000 积分，66K/92K 档分别送 1/3 个月会员。免费生成只适用指定模型和时段。"
     },
     {
-      "page": "libtv 订阅页",
-      "data": "五档年费 + 次年续费价；高级版 11.7K/16.3K、至尊版 50.5K/66K 联动"
+      "page": "Neowow 官方会员或活动入口",
+      "url": "https://neowow.cn/neo-tv",
+      "data": "双 11 返场。PLUS 首月 ¥30。部分档位首月额外到账，月积分按月发放并到期清零。ULTRA 年付截图价含 ¥300 会员券，两档分别加送 1 和 2 个月。"
     },
     {
-      "page": "Neowow 生成页",
-      "data": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考 → 7,500 积分"
+      "page": "即梦 官方会员或活动入口",
+      "url": "https://jimeng.jianying.com/",
+      "data": "11 月 16–23 日，高级与超级会员带参考视频的 Seedance 2.5 720p 标准版分别按 6.2 折和 5 折扣积分，Flash 分别按 5.8 折和 3.7 折扣积分。指定年档按月加赠，指定季档另送 5–60 条，每账号限领一次，赠送有效期 29 天。 官网新人年付基础／标准档显示 ¥393／¥1,099，本次登录账号显示 ¥659／¥1,899，以结算页资格为准。"
     },
     {
-      "page": "Neowow 订阅页",
-      "data": "四档年费；Pro 三档、MAX 两档联动；ULTRA 无联动"
+      "page": "小云雀 官方会员或活动入口",
+      "url": "https://xyq.jianying.com/pricing",
+      "data": "11 月 17–23 日，高级与超级会员带参考视频的 Seedance 2.5 720p 标准版分别按 6.2 折和 5 折扣积分，Flash 分别按 5.8 折和 3.7 折扣积分。超级会员年付显示赠 3 个月。赠分随月发放，规则详情见官网。 免费账号画布固定参数另显示标准 720p 为 600 分（划线 780）、样片 480p 为 270 分（划线 300）。"
     },
     {
-      "page": "即梦生成页",
-      "data": "即梦 Seedance 2.5 · 16:9 · 720P · 全能参考 · 30s → 600 积分"
+      "page": "Seko 官方会员或活动入口",
+      "url": "https://seko.sensetime.com/pricing",
+      "data": "月付首购 ¥39／220／660，后续 ¥60／300／875。年付首期 8 折，6000／36000／120000 年积分一次到账，有效期一年。"
     },
     {
-      "page": "即梦订阅页",
-      "data": "四档年费；高级会员 6.2K–27.7K 四档联动；超级会员单档"
+      "page": "Higgsfield 官方会员或活动入口",
+      "url": "https://higgsfield.ai/zh/pricing",
+      "data": "黑五活动页显示最高 63% 优惠。年付按页面展示的月均价乘以 12 折算，未含税费。Starter 不支持 Seedance 2.5。免积分权益按官方指定模型、入口和期限执行。"
     },
     {
-      "page": "小云雀生成页",
-      "data": "Seedance 2.5 · 16:9 · 720P · 30s → 600 积分（用户确认）"
+      "page": "Tapnow 官方会员或活动入口",
+      "url": "https://app.tapnow.ai/pricing",
+      "data": "黑五年付最高减 50%、季付最高减 40%。指定年付档赠 2、4 或 7 天 Seedance 2.5 免积分；以所选档位权益为准。采集价格为美元。"
     },
     {
-      "page": "小云雀 订阅页",
-      "data": "四档年费；高级会员 6.3K–27.7K 六档联动"
+      "page": "中国外汇交易中心",
+      "url": "https://www.chinamoney.com.cn/chinese/bkccpr/",
+      "data": "11 月 20 日人民币对美元汇率中间价 6.7131。"
+    }
+  ],
+  "platformReview": {
+    "libtv": {
+      "url": "https://www.liblib.tv/",
+      "priceDate": "2026-11-20",
+      "creditDate": "2026-11-20",
+      "offer": "双 11 返场。年付指定档首 3 月额外共给 4,500–201,000 积分，66K/92K 档分别送 1/3 个月会员。免费生成只适用指定模型和时段。",
+      "creditPending": false
+    },
+    "Neowow": {
+      "url": "https://neowow.cn/neo-tv",
+      "priceDate": "2026-11-20",
+      "creditDate": "2026-11-20",
+      "offer": "双 11 返场。PLUS 首月 ¥30。部分档位首月额外到账，月积分按月发放并到期清零。ULTRA 年付截图价含 ¥300 会员券，两档分别加送 1 和 2 个月。",
+      "creditPending": false
+    },
+    "即梦": {
+      "url": "https://jimeng.jianying.com/",
+      "priceDate": "2026-11-20",
+      "creditDate": "2026-11-20",
+      "offer": "11 月 16–23 日，高级与超级会员带参考视频的 Seedance 2.5 720p 标准版分别按 6.2 折和 5 折扣积分，Flash 分别按 5.8 折和 3.7 折扣积分。指定年档按月加赠，指定季档另送 5–60 条，每账号限领一次，赠送有效期 29 天。 官网新人年付基础／标准档显示 ¥393／¥1,099，本次登录账号显示 ¥659／¥1,899，以结算页资格为准。",
+      "creditPending": true
+    },
+    "小云雀": {
+      "url": "https://xyq.jianying.com/pricing",
+      "priceDate": "2026-11-20",
+      "creditDate": "2026-11-20",
+      "offer": "11 月 17–23 日，高级与超级会员带参考视频的 Seedance 2.5 720p 标准版分别按 6.2 折和 5 折扣积分，Flash 分别按 5.8 折和 3.7 折扣积分。超级会员年付显示赠 3 个月。赠分随月发放，规则详情见官网。 免费账号画布固定参数另显示标准 720p 为 600 分（划线 780）、样片 480p 为 270 分（划线 300）。",
+      "creditPending": false
+    },
+    "Seko": {
+      "url": "https://seko.sensetime.com/pricing",
+      "priceDate": "2026-11-20",
+      "creditDate": "2026-11-20",
+      "offer": "月付首购 ¥39／220／660，后续 ¥60／300／875。年付首期 8 折，6000／36000／120000 年积分一次到账，有效期一年。",
+      "creditPending": false
+    },
+    "Higgsfield": {
+      "url": "https://higgsfield.ai/zh/pricing",
+      "priceDate": "2026-11-20",
+      "creditDate": "2026-11-20",
+      "offer": "黑五活动页显示最高 63% 优惠。年付按页面展示的月均价乘以 12 折算，未含税费。Starter 不支持 Seedance 2.5。免积分权益按官方指定模型、入口和期限执行。",
+      "creditPending": false
+    },
+    "Tapnow": {
+      "url": "https://app.tapnow.ai/pricing",
+      "priceDate": "2026-11-20",
+      "creditDate": "2026-11-20",
+      "offer": "黑五年付最高减 50%、季付最高减 40%。指定年付档赠 2、4 或 7 天 Seedance 2.5 免积分；以所选档位权益为准。采集价格为美元。",
+      "creditPending": true
+    }
+  },
+  "offerBenefits": [
+    {
+      "platform": "libtv",
+      "period": "y",
+      "credits": 16300,
+      "bonusCredits": 4500
     },
     {
-      "page": "Higgsfield 订阅页",
-      "data": "Starter $15 / Plus $39 / Ultra $99；Ultra 为 3,000–9,000 分三档滑块"
+      "platform": "libtv",
+      "period": "y",
+      "credits": 32800,
+      "bonusCredits": 15000
     },
     {
-      "page": "Higgsfield 生成页",
-      "data": "Model: Seedance 2.5 · 30s · 16:9 · 720p · Bitrate Standard → 210 积分"
+      "platform": "libtv",
+      "period": "y",
+      "credits": 50500,
+      "bonusCredits": 30000
     },
     {
-      "page": "Tapnow 订阅页",
-      "data": "USD 计价。BASIC $90/年 1,500 分；PRO 五档滑动 $315/540/855/1035/1800（3.5K–20K 分）；ULTIMATE $2592/年 36,000 分；MAX 两档 $5184/7200（72K / 100K 分）"
+      "platform": "libtv",
+      "period": "y",
+      "credits": 66000,
+      "bonusCredits": 45000
     },
     {
-      "page": "Tapnow 生成页",
-      "data": "Seedance 2.5 · 相同参数 → 1,200 积分（用户口径）"
+      "platform": "libtv",
+      "period": "y",
+      "credits": 92000,
+      "bonusCredits": 201000
+    },
+    {
+      "platform": "即梦",
+      "period": "y",
+      "credits": 6160,
+      "bonusCredits": 3750
+    },
+    {
+      "platform": "即梦",
+      "period": "y",
+      "credits": 12320,
+      "bonusCredits": 12600
+    },
+    {
+      "platform": "即梦",
+      "period": "y",
+      "credits": 18480,
+      "bonusCredits": 27240
+    },
+    {
+      "platform": "即梦",
+      "period": "y",
+      "credits": 27720,
+      "bonusCredits": 41700
+    },
+    {
+      "platform": "即梦",
+      "period": "y",
+      "credits": 54600,
+      "bonusCredits": 147000
+    },
+    {
+      "platform": "小云雀",
+      "period": "y",
+      "credits": 6330,
+      "bonusCredits": 3600
+    },
+    {
+      "platform": "小云雀",
+      "period": "y",
+      "credits": 8600,
+      "bonusCredits": 6900
+    },
+    {
+      "platform": "小云雀",
+      "period": "y",
+      "credits": 10150,
+      "bonusCredits": 9000
+    },
+    {
+      "platform": "小云雀",
+      "period": "y",
+      "credits": 12000,
+      "bonusCredits": 11640
+    },
+    {
+      "platform": "小云雀",
+      "period": "y",
+      "credits": 18480,
+      "bonusCredits": 36060
+    },
+    {
+      "platform": "小云雀",
+      "period": "y",
+      "credits": 27720,
+      "bonusCredits": 87900
+    },
+    {
+      "platform": "小云雀",
+      "period": "y",
+      "credits": 54600,
+      "bonusCredits": 199200
+    },
+    {
+      "platform": "即梦",
+      "period": "q",
+      "credits": 12320,
+      "bonusClips": 5
+    },
+    {
+      "platform": "即梦",
+      "period": "q",
+      "credits": 18480,
+      "bonusClips": 15
+    },
+    {
+      "platform": "即梦",
+      "period": "q",
+      "credits": 27720,
+      "bonusClips": 30
+    },
+    {
+      "platform": "即梦",
+      "period": "q",
+      "credits": 54600,
+      "bonusClips": 60
+    }
+  ],
+  "canvasTests": {
+    "date": "2026-11-20",
+    "columns": [
+      "标准版 480p",
+      "标准版 720p",
+      "Flash 480p",
+      "Flash 720p",
+      "样片 480p",
+      "样片 720p"
+    ],
+    "rows": {
+      "libtv": [
+        600,
+        1380,
+        390,
+        840,
+        600,
+        "仅 480p"
+      ],
+      "Neowow": [
+        3600,
+        7500,
+        1950,
+        4500,
+        3600,
+        "仅 480p"
+      ],
+      "即梦": [
+        "会员解锁",
+        "会员解锁",
+        "会员解锁",
+        "会员解锁",
+        "会员解锁",
+        "仅 480p"
+      ],
+      "小云雀": [
+        300,
+        {
+          "credits": 600,
+          "original": 780
+        },
+        270,
+        570,
+        {
+          "credits": 270,
+          "original": 300
+        },
+        "仅 480p"
+      ],
+      "Higgsfield": [
+        90,
+        210,
+        "画布未显示",
+        "画布未显示",
+        "画布未显示",
+        "画布未显示"
+      ],
+      "Tapnow": [
+        "会员解锁",
+        "会员解锁",
+        "待核实",
+        "待核实",
+        "待核实",
+        "待核实"
+      ],
+      "Seko": [
+        270,
+        540,
+        "会员解锁",
+        "会员解锁",
+        "会员解锁",
+        "仅 480p"
+      ]
+    }
+  },
+  "evidence": [
+    {
+      "platform": "libtv",
+      "file": "lib-m-11.7K.webp",
+      "label": "月付会员 · 11.7K 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-m-50.5K.webp",
+      "label": "月付会员 · 50.5K 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-m-92K.webp",
+      "label": "月付会员 · 92K 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-q-11.7K.webp",
+      "label": "季付会员 · 11.7K 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-q-50.5K.webp",
+      "label": "季付会员 · 50.5K 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-q-92K.webp",
+      "label": "季付会员 · 92K 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-y-11.7K.webp",
+      "label": "年付会员 · 11.7K 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-y-50.5K.webp",
+      "label": "年付会员 · 50.5K 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-y-92K.webp",
+      "label": "年付会员 · 92K 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-m-pro25.webp",
+      "label": "月付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-m-pro63.webp",
+      "label": "月付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-m-max178.webp",
+      "label": "月付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-m-ultra250.webp",
+      "label": "月付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-m-top.webp",
+      "label": "月付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-q-pro25.webp",
+      "label": "季付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-q-pro90.webp",
+      "label": "季付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-q-max210.webp",
+      "label": "季付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-q-ultra552.webp",
+      "label": "季付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-y-pro25.webp",
+      "label": "年付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-y-pro63.webp",
+      "label": "年付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-y-max178.webp",
+      "label": "年付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-y-ultra25.webp",
+      "label": "年付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-y-top.webp",
+      "label": "年付会员 · 积分档与首期优惠",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "即梦",
+      "file": "jimeng-m.webp",
+      "label": "月付会员 · 登录后页面",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "小云雀",
+      "file": "xyq-m.webp",
+      "label": "月付会员 · 官网公示",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "即梦",
+      "file": "jimeng-q.webp",
+      "label": "季付会员 · 登录后页面",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "小云雀",
+      "file": "xyq-q.webp",
+      "label": "季付会员 · 官网公示",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "即梦",
+      "file": "jimeng-y.webp",
+      "label": "年付会员 · 登录后页面",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "小云雀",
+      "file": "xyq-y.webp",
+      "label": "年付会员 · 官网公示",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Higgsfield",
+      "file": "higg-m-3000.webp",
+      "label": "月付会员 · Ultra 3,000 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Higgsfield",
+      "file": "higg-m-6000.webp",
+      "label": "月付会员 · Ultra 6,000 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Higgsfield",
+      "file": "higg-m-9000.webp",
+      "label": "月付会员 · Ultra 9,000 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Higgsfield",
+      "file": "higg-y-3000.webp",
+      "label": "年付会员 · Ultra 3,000 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Higgsfield",
+      "file": "higg-y-6000.webp",
+      "label": "年付会员 · Ultra 6,000 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Higgsfield",
+      "file": "higg-y-9000.webp",
+      "label": "年付会员 · Ultra 9,000 积分选项",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Tapnow",
+      "file": "tap-m-1.webp",
+      "label": "月付会员 · 美元价格",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Tapnow",
+      "file": "tap-m-2.webp",
+      "label": "月付会员 · 美元价格",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Tapnow",
+      "file": "tap-m-11500.webp",
+      "label": "月付会员 · 美元价格",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Tapnow",
+      "file": "tap-m-3500.webp",
+      "label": "月付会员 · 美元价格",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Tapnow",
+      "file": "tap-q-2.webp",
+      "label": "季付会员 · 美元价格",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Tapnow",
+      "file": "tap-q-3.webp",
+      "label": "季付会员 · 美元价格",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Tapnow",
+      "file": "tap-q-9500.webp",
+      "label": "季付会员 · 美元价格",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Tapnow",
+      "file": "tap-y-1.webp",
+      "label": "年付会员 · 美元价格",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Tapnow",
+      "file": "tap-y-2.webp",
+      "label": "年付会员 · 美元价格",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Tapnow",
+      "file": "tap-y-11500.webp",
+      "label": "年付会员 · 美元价格",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Tapnow",
+      "file": "tap-y-9500.webp",
+      "label": "年付会员 · 美元价格",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Seko",
+      "file": "seko-m.webp",
+      "label": "月付会员 · 官网公示",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "Seko",
+      "file": "seko-y.webp",
+      "label": "年付会员 · 官网公示",
+      "date": "2026-11-20",
+      "kind": "membership"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-canvas-std-480.webp",
+      "label": "画布 · 标准版 · 480p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-canvas-std-720.webp",
+      "label": "画布 · 标准版 · 720p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-canvas-flash-480.webp",
+      "label": "画布 · Flash · 480p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-canvas-flash-720.webp",
+      "label": "画布 · Flash · 720p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-canvas-sample-480.webp",
+      "label": "画布 · 样片模式 · 480p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "libtv",
+      "file": "lib-canvas-sample-options.webp",
+      "label": "画布 · 样片模式 · 可选规格",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-canvas-std-480.webp",
+      "label": "画布 · 标准版 · 480p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-canvas-std-720.webp",
+      "label": "画布 · 标准版 · 720p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-canvas-flash-480.webp",
+      "label": "画布 · Flash · 480p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-canvas-flash-720-settings.webp",
+      "label": "画布 · Flash · 720p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-canvas-sample-480.webp",
+      "label": "画布 · 样片模式 · 480p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "Neowow",
+      "file": "neo-canvas-sample-options.webp",
+      "label": "画布 · 样片模式 · 可选规格",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "小云雀",
+      "file": "xyq-canvas-std-480.webp",
+      "label": "画布 · 标准版 · 480p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "小云雀",
+      "file": "xyq-canvas-std-720.webp",
+      "label": "画布 · 标准版 · 720p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "小云雀",
+      "file": "xyq-canvas-flash-480.webp",
+      "label": "画布 · Flash · 480p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "小云雀",
+      "file": "xyq-canvas-flash-720.webp",
+      "label": "画布 · Flash · 720p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "小云雀",
+      "file": "xyq-canvas-sample-480.webp",
+      "label": "画布 · 样片模式 · 480p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "小云雀",
+      "file": "xyq-canvas-sample-options.webp",
+      "label": "画布 · 样片模式 · 可选规格",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "Higgsfield",
+      "file": "higg-canvas-std-480.webp",
+      "label": "画布 · 标准版 · 480p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "Higgsfield",
+      "file": "higg-canvas-std-720.webp",
+      "label": "画布 · 标准版 · 720p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "Seko",
+      "file": "seko-canvas-std-480.webp",
+      "label": "画布 · 标准版 · 480p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "Seko",
+      "file": "seko-canvas-std-720.webp",
+      "label": "画布 · 标准版 · 720p",
+      "date": "2026-11-20",
+      "kind": "canvas"
+    },
+    {
+      "platform": "Seko",
+      "file": "seko-canvas-model-list.webp",
+      "label": "画布 · 模型选择",
+      "date": "2026-11-20",
+      "kind": "canvas"
     }
   ]
 }

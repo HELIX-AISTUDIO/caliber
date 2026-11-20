@@ -37,8 +37,14 @@ for k in sorted(CPV):
     print("     %-12s %d" % (k, CPV[k]))
 chk(0 < RATE < 20, "汇率超出合理区间", RATE)
 chk(SEC == 30, "单条时长不是 30 秒", SEC)
-chk(set(CPV) == set(P), "单条积分的平台集合与 platforms.json 不一致",
-    set(CPV) ^ set(P))
+readings = C["canvasTests"]["rows"]
+chk(set(readings) == set(P), "画布对比未覆盖全部平台")
+for plat, cells in readings.items():
+    chk(len(cells) == 6, f"{plat} 画布对比规格数量不为 6")
+    base = cells[1]
+    if isinstance(base, dict):
+        base = base["credits"]
+    chk(CPV.get(plat) == (None if isinstance(base, str) else base), f"{plat} 标准 720p 读数不一致")
 for k, v in CPV.items():
     chk(0 < v < 100000, "%s 单条积分异常" % k, v)
 
@@ -48,10 +54,14 @@ print("\n═══ ② 逐选项独立重算 ═══")
 recs = []
 for plan in C["plans"]:
     plat = plan["platform"]
+    if plat not in CPV:
+        continue
     cur = P[plat]["currency"]
     fx = RATE if cur == "USD" else 1.0
     chk(cur in ("CNY", "USD"), "%s 币种异常" % plat, cur)
     for c in plan["credits"]:
+        if c.get("modelUnsupported"):
+            continue
         m_credit = c["credits"]                      # 年付口径的月积分
         mcr = c.get("mCr", m_credit)
         qcr = c.get("qCr", m_credit)
@@ -79,8 +89,10 @@ for plan in C["plans"]:
                 "pay": pay_cny, "per": per_clip, "cap": cap_month,
                 "capp": cap_period, "persec": per_clip / SEC,
             })
-print("  共重算 %d 条（47 档 × 可用周期）" % len(recs))
-chk(len(recs) >= 130, "记录数偏少", len(recs))
+n_options = sum(not opt.get("modelUnsupported") for plan in C["plans"] if plan["platform"] in CPV
+                for opt in plan["credits"])
+print("  共重算 %d 条（%d 档 × 可用周期）" % (len(recs), n_options))
+chk(len(recs) >= n_options, "记录数少于积分档位数", len(recs))
 
 # 合理性边界
 for r in recs:
@@ -112,6 +124,38 @@ def read_html(fn):
 
 cost_h = read_html("cost.html")
 cyc_h = read_html("cycles.html")
+
+prices_expected = []
+credits_expected = []
+for plat, cells in readings.items():
+    observed = [cell["credits"] if isinstance(cell, dict) else cell
+                for cell in cells if not isinstance(cell, str)]
+    credits_expected.extend(str(n) for n in observed)
+    for key in "mqy":
+        subset = [r for r in recs if r["plat"] == plat and r["key"] == key]
+        if subset:
+            unit = min(r["pay"] / (r["credits"] * r["months"]) for r in subset)
+            prices_expected.extend("%.2f" % (unit * n) for n in observed)
+chk(re.findall(r'data-canvas-credit="(\d+)"', cost_h) == credits_expected, "画布积分与数据不一致")
+chk(re.findall(r'data-canvas-cost="([\d.]+)"', cost_h) == prices_expected, "分规格单条成本与重算不一致")
+chk(len(re.findall(r'data-membership=', cost_h)) == sum(len(p["credits"]) for p in C["plans"]),
+    "会员价格表档位缺失")
+
+bonus_expected = []
+for offer in C.get("offerBenefits", []):
+    if offer["platform"] not in CPV:
+        continue
+    row = next(r for r in recs if (
+        r["plat"], r["key"], r["credits"]
+    ) == (offer["platform"], offer["period"], offer["credits"]))
+    credits_per_clip = CPV[row["plat"]]
+    total_credits = row["credits"] * row["months"] + offer.get("bonusCredits", 0)
+    total_credits += offer.get("bonusClips", 0) * credits_per_clip
+    bonus_expected.append(f'{row["pay"] * credits_per_clip / total_credits:.2f}')
+bonus_displayed = re.findall(r'data-bonus-cost="([\d.]+)"', cost_h)
+chk(bonus_displayed == bonus_expected, "活动赠送成本与重算结果不一致")
+if bonus_expected:
+    print(f"  ✓ {len(bonus_expected)} 条活动赠送成本逐值一致")
 
 # 按 data-pt 切出三张主表 —— 不能用「下一个 <div class=\"pt」做前瞻：
 # 周期顺序改成 m→q→y 后，年付是最后一个，前瞻匹配不到任何东西。
