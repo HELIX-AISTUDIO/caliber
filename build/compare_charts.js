@@ -48,7 +48,7 @@
   function revealRank(offer) {
     const selector = '[data-chart-plan="' + offer.plan.id + '"]';
     if (!rows.querySelector(selector)) {
-      showAll.checked = true;
+      includeAll = true;
       render();
     }
     const row = rows.querySelector(selector);

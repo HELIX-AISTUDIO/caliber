@@ -625,8 +625,6 @@ input[type=number]{width:110px;background:rgba(255,255,255,.06);
 .budn{width:6.4em}
 .budout{margin-top:10px;font-size:12.5px;line-height:1.8;color:#A8AEB6}
 .budout b{color:#D1FE17;font-weight:700}
-.budout .up{color:#8A9098;font-size:12px}
-.budout .no{color:#FF8A5B}
 /* 首页版：更大更醒目 —— 它是本站最直观的一个入口 */
 .budhome{padding:18px 20px;border-radius:15px;border-color:rgba(209,254,23,.18);
   background:rgba(209,254,23,.045)}
@@ -638,8 +636,6 @@ input[type=number]{width:110px;background:rgba(255,255,255,.06);
 .budr{width:100%;margin-top:13px;display:block}
 .budbig{margin-top:15px;font-size:15px;line-height:1.85;color:#D7DBDF}
 .budbig b{font-size:19px;color:#D1FE17;font-weight:800;font-family:__MONO__;white-space:nowrap}
-.budbig .up{font-size:12.5px;color:#8A9098}
-.budbig .up b{font-size:14px;font-family:inherit}
 .budtip{margin-top:11px;font-size:11.5px;line-height:1.7;color:#767C85}
 .budtip a{color:#9AA85E;text-decoration:none;border-bottom:1px dashed rgba(209,254,23,.35)}
 .budtip a:hover{color:#D1FE17}
@@ -1830,14 +1826,8 @@ function budgetCalc(inp, out, unitEl, k){
   var b = parseInt(inp.value, 10);
   if(isNaN(b) || b < 0) b = 0;
 
-  /* ── ¥0 彩蛋档 ──
-     全站唯一一个不按公式说话的出口。0 元档在任何平台都买不到东西，算下去只会
-     得到「买不到任何档位」这句正确的废话；改成一句自嘲，比第十次强调口径更容易被记住。
-     后面那句不是凑数 —— 免费试用额度确实不在这张表里，那才是 0 预算的真实解。 */
   if(b === 0){
-    out.innerHTML = '最多能做到 <b>0 条</b>　——　能做个蛋。'
-      + '<br><span class="up">这是本站唯一不需要计算的一档：¥0 买不到任何平台的任何积分档。'
-      + '顺带一提，各家都有免费试用额度，那个不花钱 —— 只是也不在这张表里。</span>';
+    out.textContent = '输入预算，查看所选周期能买到的会员档位。';
     return;
   }
 
@@ -1845,38 +1835,34 @@ function budgetCalc(inp, out, unitEl, k){
   var afford = priced.filter(function(p){ return p.pc[k] <= b; });
   if(!afford.length){
     var floor = priced.reduce(function(a, c){ return a.pc[k] < c.pc[k] ? a : c; });
-    out.innerHTML = '<span class="no">¥' + b.toLocaleString() + ' 买不到任何档位</span>'
-      + ' —— ' + kz + '最低要 <b>¥' + Math.round(floor.pc[k]).toLocaleString() + '</b>（'
-      + floor.plat + ' ' + floor.tier + (floor.label ? ' · ' + floor.label : '')
-      + '，' + (floor.cp[k] * mo).toFixed(0) + ' ' + u + '）';
+    out.innerHTML = '<p class="budget-message">当前预算低于' + kz + '最低首期支出 <strong>¥'
+      + floor.pc[k].toLocaleString('zh-CN', {maximumFractionDigits:2}) + '</strong>。</p>'
+      + '<p class="budget-next">' + floor.plat + ' ' + floor.tier
+      + (floor.label ? ' · ' + floor.label : '') + ' · 约 ' + (floor.cp[k] * mo).toFixed(0) + ' ' + u + '</p>';
     return;
   }
   var best = afford.reduce(function(a, c){ return (c.cp[k] * mo > a.cp[k] * mo) ? c : a; });
   var cap = best.cp[k] * mo;
-  /* ⚠ 只给「91 条/月」用户不知道是多久 —— 补上总时长，与三周期页同一算法 */
   var _sec = cap * SECC;
   var _dur = _sec >= 3600 ? (_sec / 3600).toFixed(1) + ' 小时'
                           : Math.round(_sec / 60) + ' 分钟';
-  var html = '最多能做到 <b>' + cap.toFixed(0) + ' ' + u + '</b>'
-    + ' ｜ 合计 <b>' + _dur + '</b>'
-    /* ⚠ 结果固定拆成三段：能产多少 / 买什么 / 折合多少。
-       原因是窄屏（390px）下这一行放不下，浏览器会在「折合」后面断，
-       留下「¥2,235 买 小云雀 超级会员 ｜ 折合」+「¥24.56/条」这种断法 ——
-       行尾挂一个孤零零的「｜」，金额单独掉下去。显式换行后宽窄屏都是干净的。
-       原本想写成不换行绑定，但那样只把孤立的「｜」挪到行首，更难看。 */
-    + '<br>¥'
-    + Math.round(best.pc[k]).toLocaleString() + ' 买 ' + best.plat + ' ' + best.tier
-    + (best.label ? ' · ' + best.label : '')
-    + '<br>折合 <b>¥' + (best.pc[k] / cap).toFixed(2) + '/条</b>';
+  var html = '<dl class="budget-result">'
+    + '<div><dt>预计可生成</dt><dd><strong>' + cap.toFixed(0) + '</strong> ' + u
+    + '<small>约 ' + _dur + ' 素材</small></dd></div>'
+    + '<div><dt>对应会员</dt><dd>' + best.plat + ' ' + best.tier
+    + (best.label ? ' · ' + best.label : '') + '<small>首期实付 ¥'
+    + best.pc[k].toLocaleString('zh-CN', {maximumFractionDigits:2}) + '</small></dd></div>'
+    + '<div><dt>用满积分时的单条成本</dt><dd><strong>¥'
+    + (best.pc[k] / cap).toFixed(2) + '</strong> / 条</dd></div></dl>';
   var higher = priced.filter(function(p){ return p.cp[k] * mo > cap + 1e-9; })
                      .sort(function(x, y){ return x.pc[k] - y.pc[k]; })[0];
   if(higher){
-    html += '<br><span class="up">再加 <b>¥' + Math.round(higher.pc[k] - b).toLocaleString()
-      + '</b> 可升到 ' + (higher.cp[k] * mo).toFixed(0) + ' ' + u + '（'
+    html += '<p class="budget-next">预算再加 <strong>¥' + (higher.pc[k] - b).toLocaleString('zh-CN', {maximumFractionDigits:2})
+      + '</strong> 可升到 ' + (higher.cp[k] * mo).toFixed(0) + ' ' + u + '（'
       + higher.plat + ' ' + higher.tier + (higher.label ? ' · ' + higher.label : '')
-      + '，合计 ¥' + Math.round(higher.pc[k]).toLocaleString() + '）</span>';
+      + '，合计 ¥' + higher.pc[k].toLocaleString('zh-CN', {maximumFractionDigits:2}) + '）</p>';
   } else {
-    html += '<br><span class="up">已是该周期内产能最高的档位</span>';
+    html += '<p class="budget-next">已达到所选周期的最高单账号产能。</p>';
   }
   out.innerHTML = html;
 }
@@ -1894,7 +1880,9 @@ function renderBudget(){
   var seg = document.getElementById('hbudSeg');
   if(seg){
     Array.prototype.forEach.call(seg.querySelectorAll('button'), function(b){
-      b.classList.toggle('on', b.getAttribute('data-k') === HPK);
+      var selected = b.getAttribute('data-k') === HPK;
+      b.classList.toggle('on', selected);
+      b.setAttribute('aria-selected', String(selected));
     });
   }
 }
@@ -2697,56 +2685,98 @@ MEMBERSHIP_DETAILS = f"""
   <summary>7 家平台会员价格与积分档<span class="chev">›</span></summary>
   <div class="dbody">
     <p>月付、季付和年付均显示整个周期的首期价格。¥ 为人民币，$ 为美元。首购、优惠券和续费条件见各平台活动及截图。</p>
-    {table([("平台", None), ("会员", None), ("基础积分", None), ("月付", None), ("季付", None), ("年付", None)], membership_rows, "tw")}
+    <label class="record-filter">平台
+      <select id="membership-platform">
+        <option value="">全部平台</option>
+        {"".join(f'<option>{escape(p)}</option>' for p in PLATFORMS)}
+      </select>
+    </label>
+    {table([("平台", None), ("会员", None), ("基础积分", None), ("月付", None), ("季付", None), ("年付", None)], membership_rows, "tw records-table")}
   </div>
 </details>
 """
 
 CANVAS = COST["canvasTests"]
+canvas_model_names = ("标准版", "Flash", "样片")
+canvas_states = {"会员解锁": "需会员", "画布未显示": "画布未显示", "仅 480p": "仅 480p"}
+canvas_display_names = {"libtv": "LibTV", "Neowow": "NeoWOW", "Tapnow": "TapNow"}
+
+
+def canvas_table(rows, label):
+    headers = "".join(
+        f'<th scope="col" data-canvas-column="{i // 2}">'
+        f'<span class="canvas-all-label">{canvas_model_names[i // 2]} </span>{480 if i % 2 == 0 else 720}p</th>'
+        for i in range(6)
+    )
+    return (f'<div class="tw records-table canvas-table"><table aria-label="{label}">'
+            f'<thead><tr><th scope="col">平台</th>{headers}</tr></thead><tbody>{rows}</tbody></table></div>')
+
+
 canvas_rows = ""
 canvas_cost_rows = ""
 for plat, readings in CANVAS["rows"].items():
+    display = canvas_display_names.get(plat, plat)
+    platform_label = f'{plogo(plat, "comparison-mark")}{display}'
     cells = []
-    for reading in readings:
+    for i, reading in enumerate(readings):
+        column = f'data-canvas-column="{i // 2}"'
         if isinstance(reading, str):
-            cells.append(f'<td class="sub">{escape(reading)}</td>')
+            cells.append(f'<td {column}><span class="canvas-state">{escape(canvas_states.get(reading, reading))}</span></td>')
             continue
         credits = reading["credits"] if isinstance(reading, dict) else reading
         note = ""
         if isinstance(reading, dict):
             if "original" in reading:
-                note = f'<br><small><s>{reading["original"]:,}</s></small>'
+                note = f'<small class="canvas-meta">原 <s>{reading["original"]:,}</s></small>'
             if "sourceDate" in reading:
-                note = f'<br><small>沿用 {escape(reading["sourceDate"])} 留档</small>'
-        cells.append(f'<td class="num strong" data-canvas-credit="{credits}">{credits:,}{note}</td>')
-    canvas_rows += f'<tr><td>{plat}</td>{"".join(cells)}</tr>'
+                note = f'<small class="canvas-meta">留档 · {escape(reading["sourceDate"])}</small>'
+        cells.append(f'<td {column} data-canvas-credit="{credits}"><strong>{credits:,}</strong>{note}</td>')
+    canvas_rows += f'<tr><th scope="row">{platform_label}</th>{"".join(cells)}</tr>'
     for key, label, _, _ in PERIODS:
         prices = [r["byP"][key]["perVideo"] / r["per"] for r in ROWS if r["plat"] == plat and key in r["byP"]]
-        if not prices:
-            continue
-        per_credit = min(prices)
-        values = [reading["credits"] if isinstance(reading, dict) else reading for reading in readings]
-        cells = [
-            '<td class="sub">—</td>' if isinstance(credits, str)
-            else f'<td class="num" data-canvas-cost="{per_credit * credits:.2f}">¥{f2(per_credit * credits)}</td>'
-            for credits in values
-        ]
-        provenance = '<br><small>扣分沿用留档</small>' if REVIEW[plat].get("creditPending") else ""
-        canvas_cost_rows += f'<tr><td>{plat} · {label}{provenance}</td>{"".join(cells)}</tr>'
-canvas_headers = [("平台", None)] + [(label, None) for label in CANVAS["columns"]]
+        per_credit = min(prices, default=None)
+        cells = []
+        for i, reading in enumerate(readings):
+            column = f'data-canvas-column="{i // 2}"'
+            if isinstance(reading, str) or per_credit is None:
+                status = f'无{label}' if per_credit is None else canvas_states.get(reading, reading)
+                cells.append(f'<td {column}><span class="canvas-state">{escape(status)}</span></td>')
+                continue
+            credits = reading["credits"] if isinstance(reading, dict) else reading
+            price = per_credit * credits
+            provenance = '<small class="canvas-meta">扣分沿用留档</small>' if isinstance(reading, dict) and "sourceDate" in reading else ""
+            cells.append(f'<td {column} data-canvas-cost="{price:.2f}"><strong>¥{f2(price)}</strong>{provenance}</td>')
+        canvas_cost_rows += (
+            f'<tr data-canvas-period="{key}"><th scope="row">{platform_label}'
+            f'<small class="canvas-unfiltered-period"> · {label}</small></th>{"".join(cells)}</tr>'
+        )
 CANVAS_DETAILS = f"""
-<section id="canvas-comparison" style="margin:18px 0">
-  <h2>画布生成扣分对比</h2>
-  <p>Seedance 2.5 · 30 秒 · 16:9 · 全能参考。读数采集于 {CANVAS["date"]}，沿用留档的项目标有原日期。划线为界面同时显示的原扣分。「会员解锁」表示当前账号无法查看扣分。<a href="#pricing-evidence">查看采集截图 ↓</a></p>
-  {table(canvas_headers, canvas_rows, "tw")}
-  <details style="margin-top:12px">
-    <summary>各平台各周期最低单条成本 · 人民币<span class="chev">›</span></summary>
-    <div class="dbody">
-      <p>每行取该平台在所选订阅周期内单位积分最便宜的档位，按基础积分和画布读数折算。</p>
-      {table(canvas_headers, canvas_cost_rows, "tw")}
+<details id="canvas-comparison">
+  <summary>画布扣分与单条成本<span class="chev">›</span></summary>
+  <div class="dbody" id="canvas-data">
+    <p class="canvas-context">Seedance 2.5 · 30 秒 · 16:9 · 全能参考 · {CANVAS["date"]} 采集</p>
+    <div class="canvas-controls" hidden>
+      <label class="record-filter">模型<select id="canvas-model">
+        {"".join(f'<option value="{i}">{name}</option>' for i, name in enumerate(canvas_model_names))}
+      </select></label>
+      <label class="record-filter">对比项<select id="canvas-measure">
+        <option value="credits">生成扣分</option><option value="cost">单条成本</option>
+      </select></label>
+      <label class="record-filter" id="canvas-period-field" hidden>会员周期<select id="canvas-period">
+        {"".join(f'<option value="{key}">{label}</option>' for key, label, _, _ in PERIODS)}
+      </select></label>
     </div>
-  </details>
-</section>
+    <div data-canvas-view="credits">
+      {canvas_table(canvas_rows, "不同分辨率的生成扣分")}
+      <p class="canvas-footnote">「需会员」表示采集账号看不到扣分。划线数字为画布当时显示的原扣分。</p>
+    </div>
+    <div data-canvas-view="cost">
+      {canvas_table(canvas_cost_rows, "各平台各周期最低单条成本")}
+      <p class="canvas-footnote">每个平台按所选周期单位积分最便宜的档位估算，金额为人民币。</p>
+    </div>
+    <a class="canvas-proof" href="#pricing-evidence">查看会员页与画布截图</a>
+  </div>
+</details>
 """
 
 
@@ -3448,10 +3478,7 @@ cost_body = f"""
   <h2 id="compare-records-title">价格与折算依据</h2>
   <p>{COST["liveNote"]}</p>
   {MEMBERSHIP_DETAILS.strip()}
-  <details id="canvas-data" style="margin:14px 0">
-    <summary>画布扣分与各规格成本<span class="chev">›</span></summary>
-    <div class="dbody">{CANVAS_DETAILS}</div>
-  </details>
+  {CANVAS_DETAILS.strip()}
   {OFFER_DETAILS.strip()}
   {EVIDENCE_DETAILS.strip()}
 </section>
@@ -3617,6 +3644,16 @@ cost_body = f"""
 """
 
 # ── 首页 ──────────────────────────────────────────────────────────
+HOME_TITLE_FONT_CSS = '''
+@font-face {
+  font-family: "Caliber Noto Sans SC";
+  src: url("fonts/caliber-title.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  unicode-range: U+51C6,U+57FA,U+6210,U+672C,U+751F,U+89C6,U+9891;
+}
+'''
 home_monthly = [(r, r["byP"]["m"], int(r["byP"]["m"]["cap"]))
                 for r in ROWS if "m" in r["byP"] and r["byP"]["m"]["cap"] >= 1]
 home_goal = min((item for item in home_monthly if item[2] >= 30), key=lambda item: item[1]["payCNY"], default=None)
@@ -3678,7 +3715,7 @@ home_body = f"""
       <p>{SPEC}</p>
   <div class="bud budhome">
     <div class="budrow">
-      <span class="budlbl">预算</span>
+      <label class="budlbl" for="hbud">预算</label>
       <span class="nval">¥<input type="number" id="hbud" class="nvi budn" min="0" step="100"
         inputmode="numeric" value="3000" aria-label="预算金额"></span>
       <span class="segv segk budseg" id="hbudSeg" role="tablist" aria-label="会员周期">
@@ -3689,7 +3726,7 @@ home_body = f"""
     </div>
     <input type="range" id="hbudR" class="cqr budr" min="0" max="1000" step="1"
       value="450" aria-label="预算滑块">   <!-- 450 → ¥3,000，与数字框默认值一致 -->
-    <div class="budout budbig" id="hbudOut">—</div>
+    <div class="budout budbig" id="hbudOut" role="status">—</div>
     <div class="budtip">{COST["liveNote"]}</div>
   </div>
     </div>
@@ -4097,7 +4134,8 @@ cine_body = f"""
 # ═══════════════════════════════════════════════════════════════════
 PAGES = {
     "index.html": page("首页", f"{BRAND} — {SITE['tagline']}。AI 视频生成平台的成本对比，统一口径折算，只给可复核的结果。",
-                       nav("home"), home_body, cost_js=True, canon="", extra_css=COMPARE_CSS, extra_js=DISCLOSURE_JS),
+                       nav("home"), home_body, cost_js=True, canon="", extra_css=COMPARE_CSS + HOME_TITLE_FONT_CSS,
+                       extra_js=DISCLOSURE_JS),
     "cost.html": page("平台成本对比", f"{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本，含达标阶梯、边际成本与跨平台组合最省。",
                       nav("cost"), cost_body, cost_js=True, canon="cost", extra_css=COMPARE_CSS,
                       extra_js=COMPARE_JS + DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
@@ -4180,6 +4218,11 @@ def write_all():
             continue
         for d in _usable_dirs():
             shutil.copy2(src, os.path.join(d, extra_bin))
+    for d in dirs:
+        for font_asset in ("caliber-title.woff2", "OFL-NotoSansSC.txt"):
+            target = os.path.join(d, "fonts")
+            os.makedirs(target, exist_ok=True)
+            shutil.copy2(os.path.join(ROOT, "fonts", font_asset), target)
     # 提示词库配图：目录级同步（增量，按字节数判断是否需要重拷）
     _img_src = os.path.join(ROOT, "img", "cine")
     if os.path.isdir(_img_src):

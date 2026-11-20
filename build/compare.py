@@ -106,7 +106,6 @@ def compare_view(rows, readings, updated, periods, colors, logos):
   <section id="compare-results" class="compare-results" aria-labelledby="compare-results-title">
     <header class="compare-result-head">
       <h2 id="compare-results-title">会员成本榜</h2>
-      <label class="compare-all-toggle"><input id="compare-all" type="checkbox"> 显示全部档位</label>
     </header>
     <p class="compare-result-status" id="compare-status" role="status"></p>
     <div id="compare-highlights" class="compare-highlights" hidden></div>
@@ -119,11 +118,12 @@ def compare_view(rows, readings, updated, periods, colors, logos):
       <table aria-label="符合规格的会员方案">
         <thead><tr>
           <th scope="col">排名 · 平台 / 档位</th><th scope="col" id="compare-paid">首期实付</th>
-          <th scope="col" id="compare-volume">每月约能做</th><th scope="col">每条成本</th>
+          <th scope="col" id="compare-volume">每月条数</th><th scope="col">每条成本</th>
         </tr></thead>
         <tbody id="compare-rows"></tbody>
       </table>
     </div>
+    <button id="compare-all" type="button" aria-expanded="false" aria-controls="compare-grid" hidden>查看全部档位</button>
     <p id="compare-coverage" class="compare-coverage"></p>
     <p id="compare-calc-note" class="compare-calc-note"></p>
     <noscript><p>启用 JavaScript 可以实时计算。<a href="cycles.html#allperiod">查看固定规格的完整对比表</a></p></noscript>
@@ -196,8 +196,32 @@ COMPARE_JS = r"""
   const perClip = new Intl.NumberFormat('zh-CN', {style:'currency', currency:'CNY'});
   const defaultMode = new URLSearchParams(location.search).get('mode') === 'budget' ? 'budget' : 'target';
   const nameOf = platformName => data.names[platformName] || platformName;
+  let includeAll = false;
   __COMPARE_CHARTS__
   mode.value = defaultMode;
+
+  function addMetric(row, label, value, max, platformColor) {
+    const cell = row.insertCell();
+    const metric = document.createElement('span');
+    metric.className = 'compare-metric';
+    const number = document.createElement('span');
+    number.textContent = label;
+    metric.append(number);
+    if (value !== null) {
+      const track = document.createElement('span');
+      track.className = 'compare-meter';
+      track.setAttribute('aria-hidden', 'true');
+      const bar = document.createElement('i');
+      bar.style.width = (value / max * 100) + '%';
+      if (platformColor) {
+        metric.classList.add('compare-metric-primary');
+        bar.style.background = platformColor;
+      }
+      track.append(bar);
+      metric.append(track);
+    }
+    cell.append(metric);
+  }
 
   function render(){
     const byBudget = mode.value === 'budget';
@@ -224,6 +248,7 @@ COMPARE_JS = r"""
     coverage.textContent = '';
     order.textContent = '';
     table.hidden = true;
+    showAll.hidden = true;
     clearCharts();
     if (!input.validity.valid) {
       result.textContent = byBudget ? '请输入 ¥1 至 ¥1,000,000 的预算，最多保留两位小数。'
@@ -292,13 +317,15 @@ COMPARE_JS = r"""
         }
       }
     }
-    const seen = new Set();
-    const ranked = showAll.checked ? matched : matched.filter(({plan}) => {
-          if (seen.has(plan.platform)) return false;
-          seen.add(plan.platform);
-          return true;
-        });
-    const displayed = showAll.checked ? [...ranked, ...offers.filter(offer => !fits(offer)).sort(rankBy)] : ranked;
+    const platformLeaders = new Map();
+    for (const offer of matched) {
+      if (!platformLeaders.has(offer.plan.platform)) platformLeaders.set(offer.plan.platform, offer);
+    }
+    const ranked = includeAll ? matched : [...platformLeaders.values()];
+    const displayed = includeAll ? [...ranked, ...offers.filter(offer => !fits(offer)).sort(rankBy)] : ranked;
+    showAll.hidden = offers.length === platformLeaders.size;
+    showAll.setAttribute('aria-expanded', String(includeAll));
+    showAll.textContent = includeAll ? '收起完整档位' : '查看全部 ' + offers.length + ' 个档位';
     if (ranked.length > 1) {
       const next = ranked[1];
       const gap = byBudget ? best.capacity - next.capacity : next.pay - best.pay;
@@ -306,9 +333,12 @@ COMPARE_JS = r"""
         ? ' · 比第 2 名每月多 ' + gap + ' 条'
         : ' · 比第 2 名少付 ' + money.format(gap));
     }
-    const scale = Math.max(1, ...ranked.map(offer => byBudget ? offer.capacity : offer.pay));
-    order.textContent = displayed.length ? (byBudget ? '月产能从高到低 · 条越长，能做越多' : '首期实付从低到高 · 条越短，花钱越少')
-      + ' · ' + ranked.length + (showAll.checked ? ' 档符合' : ' 家平台符合') : '';
+    const unitCost = offer => offer.pay / ((byBudget ? offer.capacity : amount) * cycle[1]);
+    const payMax = Math.max(1, ...displayed.map(offer => offer.pay));
+    const volumeMax = Math.max(1, ...displayed.map(offer => offer.capacity));
+    const unitMax = Math.max(1, ...ranked.map(unitCost));
+    order.textContent = displayed.length ? (byBudget ? '按月产能从高到低' : '按首期实付从低到高')
+      + ' · ' + ranked.length + (includeAll ? ' 档符合' : ' 家平台符合') : '';
     displayed.forEach((offer, index) => {
       const tr = rows.insertRow();
       tr.dataset.chartPlan = offer.plan.id;
@@ -327,21 +357,13 @@ COMPARE_JS = r"""
       detail.textContent = offer.plan.tier + ' · ' + offer.monthlyCredits.toLocaleString('zh-CN') + ' 分/月'
         + (offer.sourceDate ? ' · 扣分沿用留档' : '');
       title.append(rank, platformLogo(offer), name, detail);
-      const spendCell = tr.insertCell();
-      spendCell.textContent = money.format(offer.pay);
-      const volumeCell = tr.insertCell();
-      volumeCell.textContent = offer.capacity + ' 条';
-      const unit = tr.insertCell();
-      unit.textContent = fits(offer) ? perClip.format(offer.pay / ((byBudget ? offer.capacity : amount) * cycle[1]))
-        : byBudget && offer.pay > amount ? '超预算' : '未达用量';
-      if (index < ranked.length) {
-        const bar = document.createElement('span');
-        bar.className = 'compare-bar';
-        bar.setAttribute('aria-hidden', 'true');
-        bar.style.background = data.colors[offer.plan.platform];
-        bar.style.width = ((byBudget ? offer.capacity : offer.pay) / scale * 100) + '%';
-        (byBudget ? volumeCell : spendCell).append(bar);
-      }
+      const matchedOffer = index < ranked.length;
+      const platformColor = matchedOffer ? data.colors[offer.plan.platform] : null;
+      addMetric(tr, money.format(offer.pay), offer.pay, payMax, byBudget ? null : platformColor);
+      addMetric(tr, offer.capacity + ' 条', offer.capacity, volumeMax, byBudget ? platformColor : null);
+      const unit = matchedOffer ? unitCost(offer) : null;
+      const reason = byBudget ? (offer.pay > amount ? '超预算' : '额度不足') : '未达用量';
+      addMetric(tr, matchedOffer ? perClip.format(unit) : reason, unit, unitMax, null);
     });
     table.hidden = !displayed.length;
     const short = [...providers].filter(name => !matched.some(offer => offer.plan.platform === name));
@@ -353,7 +375,10 @@ COMPARE_JS = r"""
   }
   form.addEventListener('submit', event => event.preventDefault());
   form.addEventListener('change', render);
-  showAll.addEventListener('change', render);
+  showAll.addEventListener('click', () => {
+    includeAll = !includeAll;
+    render();
+  });
   [target, budget].forEach(input => input.addEventListener('input', render));
   form.addEventListener('click', event => {
     const preset = event.target.closest('[data-target], [data-budget]');
@@ -366,7 +391,7 @@ COMPARE_JS = r"""
     form.reset();
     mode.value = defaultMode;
     platform.value = '';
-    showAll.checked = false;
+    includeAll = false;
     render();
   });
   render();
@@ -376,9 +401,44 @@ COMPARE_JS = r"""
 
 DISCLOSURE_JS = r"""
 (function(){
+  const prices = document.getElementById('membership-platform');
+  const priceRows = [...document.querySelectorAll('[data-membership]')];
+  function filterPrices(){
+    for (const row of priceRows) row.hidden = Boolean(prices.value && row.dataset.membership !== prices.value);
+  }
+  if (prices) prices.addEventListener('change', filterPrices);
+
+  const canvas = document.getElementById('canvas-comparison');
+  if (canvas) {
+    const model = document.getElementById('canvas-model');
+    const measure = document.getElementById('canvas-measure');
+    const periodField = document.getElementById('canvas-period-field');
+    const period = document.getElementById('canvas-period');
+    function filterCanvas(){
+      canvas.dataset.filtered = 'true';
+      periodField.hidden = measure.value === 'credits';
+      for (const column of canvas.querySelectorAll('[data-canvas-column]')) {
+        column.hidden = column.dataset.canvasColumn !== model.value;
+      }
+      for (const view of canvas.querySelectorAll('[data-canvas-view]')) {
+        view.hidden = view.dataset.canvasView !== measure.value;
+      }
+      for (const row of canvas.querySelectorAll('[data-canvas-period]')) {
+        row.hidden = row.dataset.canvasPeriod !== period.value;
+      }
+    }
+    [model,measure,period].forEach(control => control.addEventListener('change', filterCanvas));
+    canvas.querySelector('.canvas-controls').hidden = false;
+    filterCanvas();
+  }
+
   function reveal(id){
     const target = document.getElementById(id);
     if (!target) return;
+    if (prices && target.dataset.membership && prices.value && prices.value !== target.dataset.membership) {
+      prices.value = target.dataset.membership;
+      filterPrices();
+    }
     for (let node = target; node; node = node.parentElement) {
       if (node.tagName === 'DETAILS') node.open = true;
     }
