@@ -10,7 +10,7 @@ def membership_anchor(platform):
 
 def compare_view(rows, readings, updated, periods, colors, logos):
     platforms = list(readings)
-    display_names = {"libtv": "LibTV", "Neowow": "NeoWOW", "Tapnow": "TapNow"}
+    display_names = {"libtv": "LibTV", "Tapnow": "TapNow"}
     plans = []
     for index, row in enumerate(rows):
         plat = row["plat"]

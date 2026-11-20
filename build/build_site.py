@@ -2699,7 +2699,7 @@ MEMBERSHIP_DETAILS = f"""
 CANVAS = COST["canvasTests"]
 canvas_model_names = ("标准版", "Flash", "样片")
 canvas_states = {"会员解锁": "需会员", "画布未显示": "画布未显示", "仅 480p": "仅 480p"}
-canvas_display_names = {"libtv": "LibTV", "Neowow": "NeoWOW", "Tapnow": "TapNow"}
+canvas_display_names = {"libtv": "LibTV", "Tapnow": "TapNow"}
 
 
 def canvas_table(rows, label):
