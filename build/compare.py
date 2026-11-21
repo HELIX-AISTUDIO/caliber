@@ -240,16 +240,14 @@ COMPARE_JS = r"""
     const number = document.createElement('span');
     number.textContent = label;
     metric.append(number);
-    if (value !== null) {
+    if (platformColor) {
       const track = document.createElement('span');
       track.className = 'compare-meter';
       track.setAttribute('aria-hidden', 'true');
       const bar = document.createElement('i');
       bar.style.width = (value / max * 100) + '%';
-      if (platformColor) {
-        metric.classList.add('compare-metric-primary');
-        bar.style.background = platformColor;
-      }
+      metric.classList.add('compare-metric-primary');
+      bar.style.background = platformColor;
       track.append(bar);
       metric.append(track);
     }
@@ -321,15 +319,20 @@ COMPARE_JS = r"""
     const highestCapacity = Math.max(0, ...offers.map(offer => offer.capacity));
     result.textContent = '';
     if (best) {
-      result.append(byBudget ? money.format(amount) + ' 预算内，每月最多约 ' : amount.toLocaleString('zh-CN') + ' 条/月，首期最低 ');
+      const lead = document.createElement('span');
+      lead.className = 'compare-answer';
       const answer = document.createElement('strong');
-      answer.textContent = byBudget ? best.capacity + ' 条' : money.format(best.pay);
-      result.append(answer, '（' + cycle[0] + '）');
+      answer.textContent = byBudget ? best.capacity + ' 条/月' : money.format(best.pay);
+      lead.append(byBudget ? '最多可做 ' : '首期最低 ', answer);
+      const scope = document.createElement('span');
+      scope.className = 'compare-answer-scope';
+      scope.textContent = (byBudget ? money.format(amount) + ' 预算' : amount.toLocaleString('zh-CN') + ' 条/月')
+        + ' · ' + cycle[0];
       const caption = document.createElement('small');
       caption.textContent = nameOf(best.plan.platform) + ' ' + best.plan.tier
         + (byBudget ? ' · 实付 ' + money.format(best.pay) : '')
         + (best.sourceDate ? ' · 扣分留档' : '');
-      result.append(caption);
+      result.append(lead, scope, caption);
     } else {
       const paidPlans = offers.filter(offer => offer.capacity > 0);
       if (paidPlans.length && byBudget) {
@@ -365,7 +368,6 @@ COMPARE_JS = r"""
     const unitCost = offer => offer.pay / ((byBudget ? offer.capacity : amount) * cycle[1]);
     const payMax = Math.max(1, ...displayed.map(offer => offer.pay));
     const volumeMax = Math.max(1, ...displayed.map(offer => offer.capacity));
-    const unitMax = Math.max(1, ...ranked.map(unitCost));
     order.textContent = displayed.length ? (byBudget ? '产能从高到低' : '实付从低到高')
       + ' · ' + ranked.length + (includeAll ? ' 档' : ' 家') + (byBudget ? '在预算内' : '达标') : '';
     displayed.forEach((offer, index) => {
@@ -392,7 +394,7 @@ COMPARE_JS = r"""
       addMetric(tr, offer.capacity + ' 条', offer.capacity, volumeMax, byBudget ? platformColor : null);
       const unit = matchedOffer ? unitCost(offer) : null;
       const reason = byBudget ? (offer.pay > amount ? '超预算' : '额度不足') : '未达用量';
-      addMetric(tr, matchedOffer ? perClip.format(unit) : reason, unit, unitMax, null);
+      addMetric(tr, matchedOffer ? perClip.format(unit) : reason);
     });
     table.hidden = byChart || !displayed.length;
     const short = [...providers].filter(name => !matched.some(offer => offer.plan.platform === name));

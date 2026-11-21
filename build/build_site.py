@@ -2072,6 +2072,8 @@ var CP = {};
 function renderChart(){
   var box = document.getElementById('chart');
   if(!box) return;
+  var metricColumn = document.getElementById('cycMetricColumn');
+  if(metricColumn) metricColumn.textContent = CM[CT.m].lb;
   var idx = MI[CT.m], low = CM[CT.m].low, fmt = CM[CT.m].f;
   var rows = [];
   for(var i = 0; i < CDATA.length; i++){
@@ -2216,9 +2218,9 @@ function cycSync(){
   var n = document.querySelectorAll('#cycPlat .pfb.on').length;
   var tot = document.querySelectorAll('#cycPlat .pfb').length;
   var e1 = document.getElementById('cycPlatN'); if(e1) e1.textContent = n + '/' + tot;
+  CM.cap.lb = capLab(CT.k);      /* 换周期后指标名跟着变 */
   var e2 = document.getElementById('cycNow');
   if(e2) e2.textContent = CM[CT.m].lb + ' \u00b7 ' + PERLB[CT.k] + ' \u00b7 ' + (CT.o === 'best' ? '最优在前' : '最差在前');
-  CM.cap.lb = capLab(CT.k);      /* 换周期后指标名跟着变 */
   var e3 = document.getElementById('cycChip');
   /* ⚠ 曾写死 (k==='y'?44:k==='q'?39:44) —— 那是【加 Seko 之前】的档位数，
      数据一更新就再也对不上（实际是年付 47 / 季付 39 / 月付 47）。
@@ -3156,8 +3158,8 @@ def page(title, desc, nav_html, body, cost_js=False, canon=None, extra_css="", e
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="format-detection" content="telephone=no,email=no,address=no">
-<meta name="theme-color" content="#000000">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
 <meta name="description" content="{desc}">
 <meta property="og:title" content="{BRAND} · {title}">
 <meta property="og:description" content="{desc}">
@@ -3178,7 +3180,7 @@ def page(title, desc, nav_html, body, cost_js=False, canon=None, extra_css="", e
 <meta name="edition" content="{FP_EDITION}">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate, noai, noimageai">
 <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:{imgsrc}; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:{imgsrc}; font-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
 <style>{sub_css(CSS)}{extra_css}</style></head><body>
@@ -3370,6 +3372,9 @@ cycles_body = f"""
   </div>
     </div>
   </details>
+  <div class="cycle-columns">
+    <span>平台与档位</span><span>相对表现 · 越长越好</span><span id="cycMetricColumn">单条成本</span>
+  </div>
   <div class="chart" id="chart">{chart_rows("cost", "y")}</div>
   {pareto_block("y")}
   <p class="cycle-source-note">{COST["liveNote"]}</p>
@@ -3658,14 +3663,14 @@ cost_body = f"""
 """
 
 # ── 首页 ──────────────────────────────────────────────────────────
-HOME_TITLE_FONT_CSS = '''
+DISPLAY_FONT_CSS = '''
 @font-face {
   font-family: "Caliber Noto Sans SC";
   src: url("fonts/caliber-title.woff2") format("woff2");
   font-style: normal;
   font-weight: 900;
   font-display: swap;
-  unicode-range: U+51C6,U+57FA,U+6210,U+672C,U+751F,U+89C6,U+9891;
+  unicode-range: U+4ED8,U+51C6,U+5355,U+53EF,U+540D,U+5468,U+57FA,U+5B9E,U+6210,U+6392,U+6570,U+671F,U+672C,U+6761,U+699C,U+6BCF,U+751F,U+79D2,U+89C6,U+9891;
 }
 '''
 home_monthly = [(r, r["byP"]["m"], int(r["byP"]["m"]["cap"]))
@@ -3676,9 +3681,10 @@ for row, price, capacity in sorted(home_monthly, key=lambda item: item[1]["payCN
         home_preview.setdefault(row["plat"], (row, price))
 home_preview_limit = max((price["payCNY"] for _, price in home_preview.values()), default=1)
 home_preview_rows = "".join(
-    f'<li><span>{plogo(plat, "comparison-mark")}{canvas_display_names.get(plat, plat)}</span>'
+    f'<li><div class="home-preview-platform">{plogo(plat, "comparison-mark")}<span>'
+    f'<b>{escape(canvas_display_names.get(plat, plat))}</b><small>{escape(tname(row))}</small></span></div>'
     f'<span class="home-preview-track" aria-hidden="true"><i style="--series:{row["color"]};'
-    f'--share:{price["payCNY"] / home_preview_limit:.1%}"></i></span><strong>¥{f2(price["payCNY"])}</strong></li>'
+    f'--share:{price["payCNY"] / home_preview_limit:.1%}"></i></span><strong>¥{f2(price["payCNY"]).removesuffix(".00")}</strong></li>'
     for plat, (row, price) in home_preview.items()
 )
 home_body = f"""
@@ -3700,12 +3706,14 @@ home_body = f"""
         <h2 id="home-benchmark-title">月做 30 条，首期花多少</h2>
         <p>Seedance 2.5 标准版 · 720p · 30 秒 · 月付</p>
       </div>
+      <div class="home-preview-columns"><span>平台与档位</span><span>首期实付</span></div>
       <ul class="home-ranking-preview">{home_preview_rows}</ul>
       <p class="home-chart-caption">各平台满足用量的最低实付 · <a href="cost.html#canvas-comparison">查看画布扣分</a></p>
     </section>
   </div>
-  <details id="budget" class="compare-home-budget">
-    <summary>查看标准版的预算与升档门槛<span class="chev">›</span></summary>
+  <div class="home-resources">
+    <details id="budget" class="compare-home-budget">
+    <summary>预算与升档门槛<span class="chev">›</span></summary>
     <div class="dbody">
       <p>{SPEC}</p>
   <div class="bud budhome">
@@ -3725,10 +3733,11 @@ home_body = f"""
     <div class="budtip">{COST["liveNote"]}</div>
   </div>
     </div>
-  </details>
-  <div class="compare-record-links">
-    <a href="cost.html#membership-prices">会员价格明细</a>
-    <a href="cost.html#pricing-evidence">数据来源和截图</a>
+    </details>
+    <nav class="compare-record-links" aria-label="核对价格与来源">
+      <a href="cost.html#membership-prices">会员价格明细</a>
+      <a href="cost.html#pricing-evidence">数据来源和截图</a>
+    </nav>
   </div>
 </main>
 {foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　数据采集 {UPDATED}　·　全部数值按统一口径重算，非平台宣传数字')}
@@ -4129,14 +4138,14 @@ cine_body = f"""
 # ═══════════════════════════════════════════════════════════════════
 PAGES = {
     "index.html": page("首页", f"{BRAND} — {SITE['tagline']}。AI 视频生成平台的成本对比，统一口径折算，只给可复核的结果。",
-                       nav("home"), home_body, cost_js=True, canon="", extra_css=COMPARE_CSS + HOME_TITLE_FONT_CSS,
+                       nav("home"), home_body, cost_js=True, canon="", extra_css=COMPARE_CSS + DISPLAY_FONT_CSS,
                        extra_js=DISCLOSURE_JS),
     "cost.html": page("平台成本对比", f"{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本，含达标阶梯、边际成本与跨平台组合最省。",
-                      nav("cost"), cost_body, cost_js=True, canon="cost", extra_css=COMPARE_CSS,
+                      nav("cost"), cost_body, cost_js=True, canon="cost", extra_css=COMPARE_CSS + DISPLAY_FONT_CSS,
                       extra_js=COMPARE_JS + DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
     "cycles.html": page("三周期全清单", f"{len(ROWS)} 个可选积分档 × 年付/季付/月付三周期，按指标动态排名，附全部原始数据与计算方法。",
                         nav("cycles"), cycles_body, cost_js=True, canon="cycles",
-                        extra_css=COMPARE_CSS, extra_js=DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
+                        extra_css=COMPARE_CSS + DISPLAY_FONT_CSS, extra_js=DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
     # ⚠ Cloudflare Pages 的 SPA 回落：输出目录里【有 404.html 就用它】，
     #   没有才回落到 index.html 并返回 200。`_redirects` 那条实测没拦住，
     #   404.html 是更可靠的开关。不挂进 nav，也不参与任何导航高亮。

@@ -2,8 +2,8 @@
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="format-detection" content="telephone=no,email=no,address=no">
-<meta name="theme-color" content="#000000">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
 <meta name="description" content="48 个可选积分档 × 年付/季付/月付三周期，按指标动态排名，附全部原始数据与计算方法。">
 <meta property="og:title" content="CALIBER · 三周期全清单">
 <meta property="og:description" content="48 个可选积分档 × 年付/季付/月付三周期，按指标动态排名，附全部原始数据与计算方法。">
@@ -37,7 +37,7 @@
 <meta name="edition" content="HX-CLB-ED-20261120-61B18039">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate, noai, noimageai">
 <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data: 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data: 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
 <style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{-webkit-text-size-adjust:100%;overflow-x:clip;scroll-behavior:smooth}:root{--navh:57px;--subh:50px;--gap:18px}/* ⚠️ 必须是 clip 而非 hidden：overflow-x:hidden 会让 html/body 变成滚动容器，
@@ -703,14 +703,16 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   .side{gap:14px}
 }
 :root {
-  --studio-bg: #fafaf9;
+  --studio-bg: #fff;
   --studio-panel: #fff;
-  --studio-control: #f5f3ef;
-  --studio-line: #e3e0da;
-  --studio-text: #252420;
-  --studio-muted: #514d46;
-  --studio-ink: #24231f;
-  --studio-soft: #eeeae3;
+  --studio-control: #f6f6f5;
+  --studio-line: #e3e3df;
+  --studio-rule: #bdbdb7;
+  --studio-text: #1e1e1c;
+  --studio-muted: #53534f;
+  --studio-ink: #191918;
+  --studio-soft: #eeeee9;
+  --studio-display: "Caliber Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 body { background: var(--studio-bg); color: var(--studio-text); color-scheme: light; }
@@ -723,6 +725,8 @@ body :is(h1,h2,h3,p,summary) { color: var(--studio-text); }
 .nav :is(.bw b,.menu a,.ndrop a) { color: var(--studio-ink); }
 .nav .bw s { color: var(--studio-muted); }
 .nav :is(.menu a,.ndrop a):is(:hover,.active) { color: #16171a; background: var(--studio-soft); }
+.nav .menu a { border-radius: 4px; }
+.nav .menu a.active { background: transparent; border-radius: 0; box-shadow: inset 0 -1px var(--studio-ink); }
 .nav .nburger { border-color: var(--studio-line); background: var(--studio-control); }
 .nav .nburger i { background: var(--studio-ink); }
 .compare-page, .compare-records, .compare-advanced, .cycle-report { width: min(1250px, calc(100% - 72px)); margin-inline: auto; }
@@ -733,20 +737,18 @@ body :is(h1,h2,h3,p,summary) { color: var(--studio-text); }
 .report-rail nav { display: grid; gap: 1px; padding-bottom: 13px; margin-bottom: 13px; border-bottom: 1px solid var(--studio-line); }
 .report-rail a { display: block; padding: 7px 9px; border-radius: 5px; color: var(--studio-muted); text-decoration: none; }
 .report-rail a:hover { background: var(--studio-soft); color: var(--studio-text); }
-.report-rail .report-current { color: var(--studio-text); font-weight: 750; }
+.report-rail .report-current { color: var(--studio-text); font-weight: 750; background: var(--studio-control); }
 .report-rail-link { font-weight: 650; }
 .compare-page { padding-top: 31px; scroll-margin-top: 58px; }
-.compare-home { padding-top: clamp(32px, 6vw, 78px); padding-bottom: 30px; }
+.compare-home { padding-top: clamp(32px, 6vw, 78px); padding-bottom: 12px; }
 .compare-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 17px; }
-.compare-heading h1 { margin: 0 0 12px; font-family: Georgia, "Songti SC", SimSun, serif; font-size: 56px; line-height: 1.11; font-weight: 700; letter-spacing: -.037em; }
-#compare-tool .compare-heading h1 { font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; font-size: clamp(32px, 4.2vw, 50px); font-weight: 800; }
+.compare-heading h1 { margin: 0 0 12px; font-family: var(--studio-display); font-size: clamp(32px, 4.2vw, 50px); line-height: 1.11; font-weight: 900; letter-spacing: -.037em; }
 .compare-heading p, .compare-scope { margin: 0; color: var(--studio-muted); font-size: 14px; }
 .compare-heading .compare-date { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 14px; font-size: 14px; }
 .compare-date > :not(:first-child) { padding-left: 14px; border-left: 1px solid var(--studio-line); }
 .compare-home-actions { align-items: center; gap: 20px; margin-bottom: 21px; }
 .compare-home-actions .btn { background: var(--studio-ink); color: #fff; }
 .compare-home-actions .btn:hover { background: #43454d; color: #fff; box-shadow: none; transform: none; }
-.compare-home-budget { max-width: 760px; scroll-margin-top: 80px; }
 .compare-page :is(a,button,input,select,summary):focus-visible, .compare-records :is(a,summary):focus-visible { outline: 2px solid #1c1d20; outline-offset: 3px; }
 .compare-page a, .compare-records a { color: var(--studio-ink); text-underline-offset: 4px; }
 .compare-page a:hover, .compare-records a:hover { color: #555962; }
@@ -793,8 +795,10 @@ body :is(h1,h2,h3,p,summary) { color: var(--studio-text); }
 .compare-result-filters label { display: flex; align-items: center; gap: 5px; }
 .compare-result-filters select { width: auto; min-height: 34px; }
 .compare-result-status { margin: 9px 0 12px; color: var(--studio-text); font-size: 15px; line-height: 1.48; }
-.compare-result-status strong { color: var(--studio-text); font-weight: 800; font-size: 1.27em; }
-.compare-result-status small { display: inline-block; margin-left: 7px; color: var(--studio-muted); font-size: 13px; }
+.compare-result-status:has(.compare-answer) { display: flex; align-items: baseline; flex-wrap: wrap; gap: 3px 13px; }
+.compare-answer { display: inline-flex; gap: 7px; align-items: baseline; font-weight: 650; }
+.compare-answer strong { color: var(--studio-ink); font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.compare-answer-scope, .compare-result-status small { color: var(--studio-muted); font-size: 13px; }
 .compare-page .compare-suggestion { display: block; min-height: 36px; margin-top: 7px; background: var(--studio-panel); font-size: 13px; font-weight: 650; }
 .compare-highlights { display: grid; gap: 0; margin-top: 13px; }
 .compare-highlights > div { min-width: 0; display: grid; grid-template-columns: 150px minmax(0,.7fr) minmax(0,1fr); align-items: center; gap: 7px 12px; padding: 8px 0; border-top: 1px solid var(--studio-line); }
@@ -822,25 +826,25 @@ body :is(h1,h2,h3,p,summary) { color: var(--studio-text); }
 .compare-column.compare-linked .compare-column-fill { outline: 2px solid #27282c; outline-offset: -2px; }
 
 .compare-results table, .compare-records table, .compare-advanced table { width: 100%; background: var(--studio-panel); box-shadow: none; border-color: var(--studio-line); }
-.compare-results table { min-width: 0; table-layout: fixed; border: 1px solid var(--studio-line); border-radius: 8px; }
+.compare-results table { min-width: 0; table-layout: fixed; border: 0; border-top: 1px solid var(--studio-rule); border-radius: 0; }
 .compare-results :is(th,td) { text-align: right; padding: 10px 13px; line-height: 1.45; font-variant-numeric: tabular-nums; border-bottom-color: var(--studio-line); }
-.compare-results th { background: var(--studio-control); border-bottom-color: var(--studio-line); color: var(--studio-muted); font-size: 12px; font-weight: 700; letter-spacing: normal; white-space: normal; cursor: default; }
+.compare-results th { background: var(--studio-panel); border-bottom-color: var(--studio-rule); color: var(--studio-muted); font-size: 12px; font-weight: 700; letter-spacing: normal; white-space: normal; cursor: default; }
 .compare-results th:hover { color: var(--studio-muted); }
-.compare-results th:first-child, .compare-results td:first-child { width: 32%; text-align: left; }
+.compare-results th[aria-sort]:not([aria-sort="none"]) { color: var(--studio-text); }
+.compare-results th:first-child, .compare-results td:first-child { width: 34%; text-align: left; }
 .compare-results td { color: var(--studio-text); font-size: 15px; white-space: normal; }
-.compare-results :is(th,td):not(:first-child) { text-align: left; }
+.compare-results tbody tr:last-child td { border-bottom: 1px solid var(--studio-line); }
 .compare-results td:first-child small { display: block; margin: 3px 0 0 2.5em; color: var(--studio-muted); font-size: 12px; }
-.compare-results tr.compare-best { background: #f9f9f8; }
-.compare-results tr.compare-linked { background: #f2efe9; }
+.compare-results tr.compare-best { background: var(--studio-control); }
+.compare-results tr.compare-linked { background: var(--studio-soft); }
 .compare-results tr:focus { outline: 2px solid #292b32; outline-offset: -2px; }
 .compare-rank { display: inline-grid; place-items: center; min-width: 1.9em; margin-right: 7px; border-radius: 4px; color: var(--studio-muted); font-variant-numeric: tabular-nums; }
 .compare-best .compare-rank { background: var(--studio-ink); color: #fff; }
 .compare-result-name { font-weight: 750; text-decoration-color: #9a9da5; }
-.compare-metric { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
-.compare-metric > span:first-child { flex: 0 0 5.5em; }
-.compare-metric-primary { font-weight: 750; }
-.compare-meter { flex: 1; height: 6px; border-radius: 2px; overflow: hidden; background: var(--studio-soft); }
-.compare-meter i { display: block; height: inherit; background: #b6b2aa; border-radius: inherit; }
+.compare-metric { display: flex; align-items: center; justify-content: flex-end; gap: 12px; white-space: nowrap; }
+.compare-metric-primary { flex-direction: row-reverse; justify-content: flex-start; font-weight: 750; }
+.compare-meter { flex: 0 1 130px; height: 4px; border-radius: 2px; overflow: hidden; background: var(--studio-soft); }
+.compare-meter i { display: block; height: inherit; border-radius: inherit; }
 .compare-page #compare-all { min-height: 38px; margin: 9px 0 4px; padding: 0 12px; background: transparent; border: 1px solid var(--studio-line); border-radius: 6px; cursor: pointer; font-size: 13px; }
 .compare-page #compare-all:hover { background: var(--studio-soft); }
 .compare-coverage, .compare-calc-note { color: var(--studio-muted); font-size: 12px; line-height: 1.6; margin: 6px 0 0; }
@@ -919,16 +923,27 @@ body :is(h1,h2,h3,p,summary) { color: var(--studio-text); }
 .compare-advanced { margin-top: 13px; margin-bottom: 22px; }
 .compare-advanced .app { width: 100%; padding-inline: 0; }
 .compare-advanced .vhead h2 { font-size: 22px; }
-.cycle-report { padding-top: 32px; }
-.cycle-report #cycTitle { font-family: Georgia, "Songti SC", SimSun, serif; font-size: 42px; color: var(--studio-text); }
+.cycle-report { --cycle-columns: 26px 24px minmax(0,1fr) minmax(0,1.28fr) 164px; padding-top: 32px; }
+.cycle-report #cycTitle { font-family: var(--studio-display); font-size: 42px; font-weight: 900; color: var(--studio-text); }
 .cycle-report .vhead p { margin-top: 6px; color: var(--studio-muted); font-size: 13px; line-height: 1.65; }
-.cycle-report .chart { margin: 12px 0 25px; }
+.cycle-columns, .cycle-report .crow { display: grid; grid-template-columns: var(--cycle-columns); align-items: center; gap: 0 10px; padding-inline: 10px; }
+.cycle-columns { padding-block: 9px; border-block: 1px solid var(--studio-rule); color: var(--studio-muted); font-size: 12px; }
+.cycle-columns span:first-child { grid-column: 1 / 4; }
+.cycle-columns span:last-child { text-align: right; }
+.cycle-report .chart { gap: 0; margin: 0 0 25px; padding-right: 0; scrollbar-width: thin; scrollbar-color: var(--studio-rule) transparent; }
+.cycle-report .crow { min-height: 49px; border: 0; border-bottom: 1px solid var(--studio-line); border-radius: 0; }
+.cycle-report .crow:hover, .cycle-report .crow.hl { background: var(--studio-control); }
+.cycle-report .crk { grid-area: 1 / 1; }
+.cycle-report .clogo { grid-area: 1 / 2; width: 22px; height: 22px; border-radius: 5px; }
+.cycle-report .cname { grid-area: 1 / 3; }
+.cycle-report .cbar { grid-area: 1 / 4; height: 4px; }
+.cycle-report .cval { grid-area: 1 / 5; font-family: inherit; font-size: 15px; font-variant-numeric: tabular-nums; }
 .cycle-report .cbar i { background: var(--series); background: color-mix(in srgb,var(--series) 77%,#fff); }
 .cycle-report :is(.crk.top3,.pareto b, .pareto strong, .sgchip) { color: var(--studio-text); }
 .cycle-report .cycle-source-note { margin-top: 20px; color: var(--studio-muted); font-size: 12px; }
 .cycle-report details[open] summary .chev { color: var(--studio-muted); }
-.rank-filters { margin: 14px 0 16px; }
-.rank-filters summary { justify-content: space-between; padding: 12px 16px; }
+.rank-filters { margin: 15px 0 12px; border-width: 1px 0 0; border-radius: 0; }
+.rank-filters summary { justify-content: space-between; padding: 12px 0; }
 .rank-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px 20px; padding: 4px 16px 16px; }
 .rank-controls .sgroup { min-width: 0; padding: 0; margin: 0; border: 0; }
 .rank-controls #sgMetric { grid-column: span 2; }
@@ -947,22 +962,34 @@ body :is(tr.top, tbody tr:hover, .gterm:target,.segv button.on, .pfb.on,.ybest,.
 body :is(.cbar,.mini,.pplot,.reco,.vnote,.bud) { background: var(--studio-control); border-color: var(--studio-line); box-shadow: none; }
 body :is(.pplot,.pcorner,.phd,.cval s,.cname s,.vmeta b,.vptitle,.foot a,.tm,.foot .introAgain) { color: var(--studio-muted) !important; }
 body :is(.mobar button,.sheet-x,.pjgo,.cfh,.vpanel .chips .chip) { background: var(--studio-soft); color: var(--studio-ink); }
-.home-report-hero { display: grid; grid-template-columns: minmax(0,1fr) minmax(320px,1fr); align-items: center; gap: clamp(28px,6vw,88px); margin-bottom: 40px; }
+.home-report-hero { display: grid; grid-template-columns: minmax(0,1fr) minmax(320px,1fr); align-items: start; gap: clamp(28px,6vw,88px); margin-bottom: 34px; }
 .home-report-hero .compare-heading { display: block; }
-.home-report-hero .compare-heading h1 { font-family: "Caliber Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif; font-size: clamp(44px, 7vw, 88px); line-height: 1.06; font-weight: 900; letter-spacing: -.038em; }
+.home-report-hero .compare-heading h1 { font-size: clamp(44px, 7vw, 88px); line-height: 1.06; }
 .home-report-hero h1 em { color: var(--studio-text); font-style: normal; }
 .home-report-hero .compare-heading p { max-width: 30em; line-height: 1.7; }
 .home-report-meta { color: var(--studio-muted); font-size: 13px; font-variant-numeric: tabular-nums; }
 .home-benchmark-block { margin: 0; padding: 13px 0 0; border-top: 2px solid var(--studio-ink); }
 .home-benchmark-block .compare-result-head { display: grid; gap: 5px; }
 .home-benchmark-block .compare-result-head p { margin: 0; color: var(--studio-muted); font-size: 12px; }
-.home-ranking-preview { list-style: none; padding: 0; margin: 11px 0 8px; }
-.home-ranking-preview li { display: grid; grid-template-columns: minmax(92px,155px) 1fr minmax(75px,105px); align-items: center; gap: 13px; min-height: 38px; margin: 0; border-bottom: 1px solid var(--studio-line); }
-.home-ranking-preview strong { text-align: right; font-variant-numeric: tabular-nums; font-weight: 650; }
-.home-preview-track { height: 6px; background: var(--studio-control); }
+.home-preview-columns { display: flex; justify-content: space-between; margin-top: 13px; padding: 0 0 6px; border-bottom: 1px solid var(--studio-rule); color: var(--studio-muted); font-size: 12px; }
+.home-ranking-preview { list-style: none; padding: 0; margin: 0 0 9px; }
+.home-ranking-preview li { display: grid; grid-template-columns: minmax(125px,1fr) minmax(22px,1.1fr) minmax(83px,.51fr); align-items: center; gap: 12px; min-height: 46px; margin: 0; padding-block: 4px; border-bottom: 1px solid var(--studio-line); }
+.home-preview-platform { display: flex; align-items: center; min-width: 0; gap: 8px; }
+.home-preview-platform .comparison-mark { flex: none; margin: 0; }
+.home-preview-platform b, .home-preview-platform small { display: block; line-height: 1.4; }
+.home-preview-platform b { font-size: 14px; }
+.home-preview-platform small { margin-top: 2px; color: var(--studio-muted); font-size: 11px; }
+.home-ranking-preview strong { text-align: right; font-size: 16px; font-variant-numeric: tabular-nums; font-weight: 700; }
+.home-preview-track { height: 4px; background: var(--studio-control); }
 .home-preview-track i { display: block; width: var(--share); height: 100%; background: var(--series); background: color-mix(in srgb,var(--series) 77%,#fff); }
 .home-chart-caption { color: var(--studio-muted); font-size: 12px; }
-.compare-home-budget summary { font-size: 15px; }
+.home-resources { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(0,1fr); align-items: start; gap: 16px; border-top: 1px solid var(--studio-line); }
+.home-resources:has(.compare-home-budget[open]) { grid-template-columns: 1fr; gap: 0; }
+.home-resources .compare-home-budget { margin: 0; border: 0; border-radius: 0; scroll-margin-top: 80px; }
+.home-resources .compare-record-links { justify-content: flex-end; padding: 0; }
+.home-resources .compare-record-links a, .compare-home-budget summary { display: flex; align-items: center; min-height: 48px; }
+.compare-home-budget summary { padding: 9px 0; font-size: 15px; }
+.compare-home-budget > .dbody { padding-inline: 0; }
 .compare-home-budget .bud { margin-top: 11px; padding: 18px 21px; background: var(--studio-panel); border-radius: 9px; }
 .compare-home-budget .budrow { color: var(--studio-text); }
 .compare-home-budget .budlbl { color: var(--studio-text); font-size: 14px; font-weight: 650; }
@@ -1002,7 +1029,6 @@ body :is(.budtip,.vptitle span,.scopenote,.pjh span,.pjnote,.note.warn b,.foot .
 .compare-advanced :is(.segv button.on s,.kpi.good .v,.kpi.hi .v) { color: var(--studio-text); }
 .compare-advanced :is(b,span)[style*="color:#D1FE17"] { color: var(--studio-text) !important; }
 @media (max-width: 650px) {
-  .compare-result-status small { display: block; margin: 2px 0 0; }
   .compare-home-budget .bud { padding: 11px; }
   .compare-home-budget #hbudSeg { width: 100%; margin: 2px 0 0; }
   .budget-result { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
@@ -1057,6 +1083,11 @@ body :is(.nav a,.gterm a,.libsrc a) { text-underline-offset: 3px; }
   .compare-results, .compare-frontier { padding-top: 12px; }
   .compare-result-head h2 { font-size: 19px; }
   .compare-result-status { margin: 8px 0 9px; }
+  .compare-result-status:has(.compare-answer) { gap: 2px 8px; }
+  .compare-answer { font-size: 13px; gap: 5px; }
+  .compare-answer strong { font-size: 24px; }
+  .compare-answer-scope, .compare-result-status small { font-size: 12px; }
+  .compare-result-status small { flex-basis: 100%; }
   .compare-page .compare-suggestion, .compare-page #compare-all, .compare-result-links a { min-height: 44px; }
   .compare-rank-view span { min-height: 38px; }
   .compare-highlights > div { grid-template-columns: minmax(0,.9fr) minmax(0,1fr); gap: 3px 7px; }
@@ -1065,21 +1096,29 @@ body :is(.nav a,.gterm a,.libsrc a) { text-underline-offset: 3px; }
   .compare-results td { font-size: 12px; }
   .compare-results th:first-child, .compare-results td:first-child { width: 39%; }
   .compare-results td:first-child small { font-size: 10px; }
-  .compare-meter { display: none; }
-  .compare-metric-primary .compare-meter { display: block; height: 3px; }
+  .compare-meter { height: 3px; }
   .compare-rank { margin-right: 4px; }
   .comparison-mark { width: 14px; height: 14px; margin-right: 4px; }
   .compare-bars { --bar-body: 165px; }
   .compare-frontier-layout { grid-template-columns: minmax(0,1fr); gap: 13px; }
   .compare-frontier-chart { grid-template-rows: auto 205px auto auto; }
-  .cycle-report { padding-top: 22px; }
+  .cycle-report { --cycle-columns: 20px 20px minmax(0,1fr) minmax(76px,auto); padding-top: 22px; }
   .cycle-report #cycTitle { font-size: 30px; }
+  .cycle-columns, .cycle-report .crow { gap: 4px 7px; padding-inline: 2px; }
+  .cycle-columns span:nth-child(2) { display: none; }
+  .cycle-report .clogo { width: 19px; height: 19px; }
+  .cycle-report .cname { line-height: 1.4; white-space: normal; overflow-wrap: anywhere; }
+  .cycle-report .cval { grid-area: 1 / 4; font-size: 13px; }
+  .cycle-report .cbar { grid-area: 2 / 3 / 2 / 5; height: 3px; }
   .rank-controls { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; padding: 0 11px 11px; }
   .rank-controls #sgMetric { grid-column: 1 / -1; }
   .rank-controls #sgMetric .segv { grid-template-columns: repeat(2,minmax(0,1fr)); grid-auto-flow: row; }
   .rank-controls #sgPeriod { grid-column: 1 / -1; }
   .rank-controls .segv button { padding: 5px 3px; }
   .home-report-hero { grid-template-columns: 1fr; gap: 22px; margin-bottom: 24px; }
+  .home-ranking-preview li { column-gap: 9px; }
+  .home-resources { grid-template-columns: 1fr; gap: 0; }
+  .home-resources .compare-record-links { justify-content: flex-start; border-top: 1px solid var(--studio-line); }
 }
 @media (max-width: 390px) {
   .compare-results .compare-result-head { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: start; }
@@ -1090,6 +1129,15 @@ body :is(.nav a,.gterm a,.libsrc a) { text-underline-offset: 3px; }
 @media (max-width: 360px) {
   .compare-results .comparison-mark { display: none; }
   .compare-results td:first-child small { margin-left: 1.9em; }
+}
+
+@font-face {
+  font-family: "Caliber Noto Sans SC";
+  src: url("fonts/caliber-title.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  unicode-range: U+4ED8,U+51C6,U+5355,U+53EF,U+540D,U+5468,U+57FA,U+5B9E,U+6210,U+6392,U+6570,U+671F,U+672C,U+6761,U+699C,U+6BCF,U+751F,U+79D2,U+89C6,U+9891;
 }
 </style></head><body>
 
@@ -1148,6 +1196,9 @@ body :is(.nav a,.gterm a,.libsrc a) { text-underline-offset: 3px; }
   </div>
     </div>
   </details>
+  <div class="cycle-columns">
+    <span>平台与档位</span><span>相对表现 · 越长越好</span><span id="cycMetricColumn">单条成本</span>
+  </div>
   <div class="chart" id="chart"><div class="crow" data-plat="即梦" data-k="即梦|超级会员|"><span class="crk top3">1</span><i class="clogo lg-jimeng" aria-hidden="true"></i><span class="cname">即梦 超级会员</span><span class="cbar"><i style="width:100.0%;--series:#3280FF"></i></span><span class="cval">¥18.00<s>1.00×</s></span></div><div class="crow" data-plat="小云雀" data-k="小云雀|超级会员|"><span class="crk top3">2</span><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><span class="cname">小云雀 超级会员</span><span class="cbar"><i style="width:100.0%;--series:#FABC00"></i></span><span class="cval">¥18.00<s>1.00×</s></span></div><div class="crow" data-plat="即梦" data-k="即梦|高级会员|18.5K 档"><span class="crk top3">3</span><i class="clogo lg-jimeng" aria-hidden="true"></i><span class="cname">即梦 高级会员<s>18.5K 档</s></span><span class="cbar"><i style="width:84.7%;--series:#3280FF"></i></span><span class="cval">¥18.99<s>1.06×</s></span></div><div class="crow" data-plat="小云雀" data-k="小云雀|高级会员|18.5K 档"><span class="crk">4</span><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><span class="cname">小云雀 高级会员<s>18.5K 档</s></span><span class="cbar"><i style="width:84.7%;--series:#FABC00"></i></span><span class="cval">¥18.99<s>1.06×</s></span></div><div class="crow" data-plat="即梦" data-k="即梦|高级会员|27.7K 档"><span class="crk">5</span><i class="clogo lg-jimeng" aria-hidden="true"></i><span class="cname">即梦 高级会员<s>27.7K 档</s></span><span class="cbar"><i style="width:84.7%;--series:#3280FF"></i></span><span class="cval">¥18.99<s>1.06×</s></span></div><div class="crow" data-plat="小云雀" data-k="小云雀|高级会员|27.7K 档"><span class="crk">6</span><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><span class="cname">小云雀 高级会员<s>27.7K 档</s></span><span class="cbar"><i style="width:84.7%;--series:#FABC00"></i></span><span class="cval">¥18.99<s>1.06×</s></span></div><div class="crow" data-plat="小云雀" data-k="小云雀|高级会员|12K 档"><span class="crk">7</span><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><span class="cname">小云雀 高级会员<s>12K 档</s></span><span class="cbar"><i style="width:74.2%;--series:#FABC00"></i></span><span class="cval">¥20.83<s>1.16×</s></span></div><div class="crow" data-plat="小云雀" data-k="小云雀|高级会员|6.3K 档"><span class="crk">8</span><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><span class="cname">小云雀 高级会员<s>6.3K 档</s></span><span class="cbar"><i style="width:73.7%;--series:#FABC00"></i></span><span class="cval">¥20.92<s>1.16×</s></span></div><div class="crow" data-plat="小云雀" data-k="小云雀|高级会员|8.6K 档"><span class="crk">9</span><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><span class="cname">小云雀 高级会员<s>8.6K 档</s></span><span class="cbar"><i style="width:73.7%;--series:#FABC00"></i></span><span class="cval">¥20.93<s>1.16×</s></span></div><div class="crow" data-plat="小云雀" data-k="小云雀|高级会员|10.2K 档"><span class="crk">10</span><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><span class="cname">小云雀 高级会员<s>10.2K 档</s></span><span class="cbar"><i style="width:73.7%;--series:#FABC00"></i></span><span class="cval">¥20.94<s>1.16×</s></span></div><div class="crow" data-plat="即梦" data-k="即梦|高级会员|6.2K 档"><span class="crk">11</span><i class="clogo lg-jimeng" aria-hidden="true"></i><span class="cname">即梦 高级会员<s>6.2K 档</s></span><span class="cbar"><i style="width:73.0%;--series:#3280FF"></i></span><span class="cval">¥21.10<s>1.17×</s></span></div><div class="crow" data-plat="即梦" data-k="即梦|高级会员|12.3K 档"><span class="crk">12</span><i class="clogo lg-jimeng" aria-hidden="true"></i><span class="cname">即梦 高级会员<s>12.3K 档</s></span><span class="cbar"><i style="width:73.0%;--series:#3280FF"></i></span><span class="cval">¥21.10<s>1.17×</s></span></div><div class="crow" data-plat="Higgsfield" data-k="Higgsfield|Ultra|9K 档"><span class="crk">13</span><i class="clogo lg-higgsfield" aria-hidden="true"></i><span class="cname">Higgsfield Ultra<s>9K 档</s></span><span class="cbar"><i style="width:70.2%;--series:#ED1572"></i></span><span class="cval">¥21.77<s>1.21×</s></span></div><div class="crow" data-plat="Neowow" data-k="Neowow|ULTRA|55.2W 档"><span class="crk">14</span><i class="clogo lg-neowow" aria-hidden="true"></i><span class="cname">Neowow ULTRA<s>55.2W 档</s></span><span class="cbar"><i style="width:68.1%;--series:#00C65A"></i></span><span class="cval">¥22.30<s>1.24×</s></span></div><div class="crow" data-plat="Higgsfield" data-k="Higgsfield|Ultra|6K 档"><span class="crk">15</span><i class="clogo lg-higgsfield" aria-hidden="true"></i><span class="cname">Higgsfield Ultra<s>6K 档</s></span><span class="cbar"><i style="width:66.4%;--series:#ED1572"></i></span><span class="cval">¥22.79<s>1.27×</s></span></div><div class="crow" data-plat="libtv" data-k="libtv|至尊版|92K 档"><span class="crk">16</span><i class="clogo lg-libtv" aria-hidden="true"></i><span class="cname">libtv 至尊版<s>92K 档</s></span><span class="cbar"><i style="width:66.1%;--series:#9CE6F3"></i></span><span class="cval">¥22.87<s>1.27×</s></span></div><div class="crow" data-plat="libtv" data-k="libtv|至尊版|50.5K 档"><span class="crk">17</span><i class="clogo lg-libtv" aria-hidden="true"></i><span class="cname">libtv 至尊版<s>50.5K 档</s></span><span class="cbar"><i style="width:64.1%;--series:#9CE6F3"></i></span><span class="cval">¥23.45<s>1.30×</s></span></div><div class="crow" data-plat="Higgsfield" data-k="Higgsfield|Ultra|3K 档"><span class="crk">18</span><i class="clogo lg-higgsfield" aria-hidden="true"></i><span class="cname">Higgsfield Ultra<s>3K 档</s></span><span class="cbar"><i style="width:64.0%;--series:#ED1572"></i></span><span class="cval">¥23.50<s>1.31×</s></span></div><div class="crow" data-plat="libtv" data-k="libtv|至尊版|66K 档"><span class="crk">19</span><i class="clogo lg-libtv" aria-hidden="true"></i><span class="cname">libtv 至尊版<s>66K 档</s></span><span class="cbar"><i style="width:63.9%;--series:#9CE6F3"></i></span><span class="cval">¥23.52<s>1.31×</s></span></div><div class="crow" data-plat="libtv" data-k="libtv|豪华版|"><span class="crk">20</span><i class="clogo lg-libtv" aria-hidden="true"></i><span class="cname">libtv 豪华版</span><span class="cbar"><i style="width:60.7%;--series:#9CE6F3"></i></span><span class="cval">¥24.54<s>1.36×</s></span></div><div class="crow" data-plat="即梦" data-k="即梦|标准会员|"><span class="crk">21</span><i class="clogo lg-jimeng" aria-hidden="true"></i><span class="cname">即梦 标准会员</span><span class="cbar"><i style="width:59.8%;--series:#3280FF"></i></span><span class="cval">¥24.86<s>1.38×</s></span></div><div class="crow" data-plat="小云雀" data-k="小云雀|标准会员|"><span class="crk">22</span><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><span class="cname">小云雀 标准会员</span><span class="cbar"><i style="width:57.0%;--series:#FABC00"></i></span><span class="cval">¥25.84<s>1.44×</s></span></div><div class="crow" data-plat="即梦" data-k="即梦|基础会员|"><span class="crk">23</span><i class="clogo lg-jimeng" aria-hidden="true"></i><span class="cname">即梦 基础会员</span><span class="cbar"><i style="width:53.7%;--series:#3280FF"></i></span><span class="cval">¥27.10<s>1.51×</s></span></div><div class="crow" data-plat="libtv" data-k="libtv|高级版|16.3K 档"><span class="crk">24</span><i class="clogo lg-libtv" aria-hidden="true"></i><span class="cname">libtv 高级版<s>16.3K 档</s></span><span class="cbar"><i style="width:50.9%;--series:#9CE6F3"></i></span><span class="cval">¥28.21<s>1.57×</s></span></div><div class="crow" data-plat="libtv" data-k="libtv|高级版|11.7K 档"><span class="crk">25</span><i class="clogo lg-libtv" aria-hidden="true"></i><span class="cname">libtv 高级版<s>11.7K 档</s></span><span class="cbar"><i style="width:48.0%;--series:#9CE6F3"></i></span><span class="cval">¥29.48<s>1.64×</s></span></div><div class="crow" data-plat="libtv" data-k="libtv|进阶版|"><span class="crk">26</span><i class="clogo lg-libtv" aria-hidden="true"></i><span class="cname">libtv 进阶版</span><span class="cbar"><i style="width:46.9%;--series:#9CE6F3"></i></span><span class="cval">¥29.98<s>1.67×</s></span></div><div class="crow" data-plat="Neowow" data-k="Neowow|ULTRA|25W 档"><span class="crk">27</span><i class="clogo lg-neowow" aria-hidden="true"></i><span class="cname">Neowow ULTRA<s>25W 档</s></span><span class="cbar"><i style="width:40.8%;--series:#00C65A"></i></span><span class="cval">¥32.86<s>1.83×</s></span></div><div class="crow" data-plat="Neowow" data-k="Neowow|MAX|21W 档"><span class="crk">28</span><i class="clogo lg-neowow" aria-hidden="true"></i><span class="cname">Neowow MAX<s>21W 档</s></span><span class="cbar"><i style="width:40.7%;--series:#00C65A"></i></span><span class="cval">¥32.91<s>1.83×</s></span></div><div class="crow" data-plat="Neowow" data-k="Neowow|MAX|17.8W 档"><span class="crk">29</span><i class="clogo lg-neowow" aria-hidden="true"></i><span class="cname">Neowow MAX<s>17.8W 档</s></span><span class="cbar"><i style="width:39.8%;--series:#00C65A"></i></span><span class="cval">¥33.36<s>1.85×</s></span></div><div class="crow" data-plat="Seko" data-k="Seko|至尊会员|"><span class="crk">30</span><i class="clogo lg-seko" aria-hidden="true"></i><span class="cname">Seko 至尊会员</span><span class="cbar"><i style="width:31.7%;--series:#14D9C4"></i></span><span class="cval">¥37.80<s>2.10×</s></span></div><div class="crow" data-plat="Neowow" data-k="Neowow|PRO|90K 档"><span class="crk">31</span><i class="clogo lg-neowow" aria-hidden="true"></i><span class="cname">Neowow PRO<s>90K 档</s></span><span class="cbar"><i style="width:31.0%;--series:#00C65A"></i></span><span class="cval">¥38.19<s>2.12×</s></span></div><div class="crow" data-plat="Higgsfield" data-k="Higgsfield|Plus|"><span class="crk">32</span><i class="clogo lg-higgsfield" aria-hidden="true"></i><span class="cname">Higgsfield Plus</span><span class="cbar"><i style="width:30.0%;--series:#ED1572"></i></span><span class="cval">¥38.77<s>2.15×</s></span></div><div class="crow" data-plat="Neowow" data-k="Neowow|PRO|63K 档"><span class="crk">33</span><i class="clogo lg-neowow" aria-hidden="true"></i><span class="cname">Neowow PRO<s>63K 档</s></span><span class="cbar"><i style="width:28.5%;--series:#00C65A"></i></span><span class="cval">¥39.68<s>2.20×</s></span></div><div class="crow" data-plat="Neowow" data-k="Neowow|PRO|25K 档"><span class="crk">34</span><i class="clogo lg-neowow" aria-hidden="true"></i><span class="cname">Neowow PRO<s>25K 档</s></span><span class="cbar"><i style="width:28.0%;--series:#00C65A"></i></span><span class="cval">¥40.00<s>2.22×</s></span></div><div class="crow" data-plat="Tapnow" data-k="Tapnow|BASIC|"><span class="crk">35</span><i class="clogo lg-tapnow" aria-hidden="true"></i><span class="cname">Tapnow BASIC</span><span class="cbar"><i style="width:27.5%;--series:#A78BFA"></i></span><span class="cval">¥40.28<s>2.24×</s></span></div><div class="crow" data-plat="Seko" data-k="Seko|高级会员|"><span class="crk">36</span><i class="clogo lg-seko" aria-hidden="true"></i><span class="cname">Seko 高级会员</span><span class="cbar"><i style="width:22.9%;--series:#14D9C4"></i></span><span class="cval">¥43.20<s>2.40×</s></span></div><div class="crow" data-plat="libtv" data-k="libtv|标准版|"><span class="crk">37</span><i class="clogo lg-libtv" aria-hidden="true"></i><span class="cname">libtv 标准版</span><span class="cbar"><i style="width:22.3%;--series:#9CE6F3"></i></span><span class="cval">¥43.62<s>2.42×</s></span></div><div class="crow" data-plat="小云雀" data-k="小云雀|基础会员|"><span class="crk">38</span><i class="clogo lg-xiaoyunque" aria-hidden="true"></i><span class="cname">小云雀 基础会员</span><span class="cbar"><i style="width:19.2%;--series:#FABC00"></i></span><span class="cval">¥45.72<s>2.54×</s></span></div><div class="crow" data-plat="Neowow" data-k="Neowow|PLUS|"><span class="crk">39</span><i class="clogo lg-neowow" aria-hidden="true"></i><span class="cname">Neowow PLUS</span><span class="cbar"><i style="width:17.6%;--series:#00C65A"></i></span><span class="cval">¥46.80<s>2.60×</s></span></div><div class="crow" data-plat="Tapnow" data-k="Tapnow|MAX|72K 档"><span class="crk">40</span><i class="clogo lg-tapnow" aria-hidden="true"></i><span class="cname">Tapnow MAX<s>72K 档</s></span><span class="cbar"><i style="width:15.4%;--series:#A78BFA"></i></span><span class="cval">¥48.33<s>2.69×</s></span></div><div class="crow" data-plat="Tapnow" data-k="Tapnow|MAX|10W 档"><span class="crk">41</span><i class="clogo lg-tapnow" aria-hidden="true"></i><span class="cname">Tapnow MAX<s>10W 档</s></span><span class="cbar"><i style="width:15.4%;--series:#A78BFA"></i></span><span class="cval">¥48.33<s>2.69×</s></span></div><div class="crow" data-plat="Tapnow" data-k="Tapnow|ULTIMATE|36K 档"><span class="crk">42</span><i class="clogo lg-tapnow" aria-hidden="true"></i><span class="cname">Tapnow ULTIMATE<s>36K 档</s></span><span class="cbar"><i style="width:15.4%;--series:#A78BFA"></i></span><span class="cval">¥48.33<s>2.69×</s></span></div><div class="crow" data-plat="Seko" data-k="Seko|标准会员|"><span class="crk">43</span><i class="clogo lg-seko" aria-hidden="true"></i><span class="cname">Seko 标准会员</span><span class="cbar"><i style="width:10.7%;--series:#14D9C4"></i></span><span class="cval">¥51.84<s>2.88×</s></span></div><div class="crow" data-plat="Tapnow" data-k="Tapnow|PRO|9.5K 档"><span class="crk">44</span><i class="clogo lg-tapnow" aria-hidden="true"></i><span class="cname">Tapnow PRO<s>9.5K 档</s></span><span class="cbar"><i style="width:4.9%;--series:#A78BFA"></i></span><span class="cval">¥56.39<s>3.13×</s></span></div><div class="crow" data-plat="Tapnow" data-k="Tapnow|PRO|11.5K 档"><span class="crk">45</span><i class="clogo lg-tapnow" aria-hidden="true"></i><span class="cname">Tapnow PRO<s>11.5K 档</s></span><span class="cbar"><i style="width:4.9%;--series:#A78BFA"></i></span><span class="cval">¥56.39<s>3.13×</s></span></div><div class="crow" data-plat="Tapnow" data-k="Tapnow|ULTIMATE|20K 档"><span class="crk">46</span><i class="clogo lg-tapnow" aria-hidden="true"></i><span class="cname">Tapnow ULTIMATE<s>20K 档</s></span><span class="cbar"><i style="width:4.9%;--series:#A78BFA"></i></span><span class="cval">¥56.39<s>3.13×</s></span></div><div class="crow" data-plat="Tapnow" data-k="Tapnow|PRO|6K 档"><span class="crk">47</span><i class="clogo lg-tapnow" aria-hidden="true"></i><span class="cname">Tapnow PRO<s>6K 档</s></span><span class="cbar"><i style="width:0.0%;--series:#A78BFA"></i></span><span class="cval">¥60.42<s>3.36×</s></span></div><div class="crow" data-plat="Tapnow" data-k="Tapnow|PRO|3.5K 档"><span class="crk">48</span><i class="clogo lg-tapnow" aria-hidden="true"></i><span class="cname">Tapnow PRO<s>3.5K 档</s></span><span class="cbar"><i style="width:0.0%;--series:#A78BFA"></i></span><span class="cval">¥60.42<s>3.36×</s></span></div></div>
   <div class="pareto"><div class="phd" id="paretoHd"><b>同样的预算，能换到什么</b><span>两个轴都是<b style="color:#D1FE17">越右／越上越好</b> —— <i>右上角＝又能做又便宜</i>，左下角＝又贵又做不动。横轴＝月产能（越右越多）｜纵轴＝单条成本（越上越省）｜每个点是一个档位。悬停看真实数值，也可与下方排名列表互相联动</span></div><div class="pplot" id="pplot" data-metric="cost"><span class="pcorner" aria-hidden="true">最好 ↗</span><span class="pp" data-k="Tapnow|PRO|3.5K 档" data-rk="48" style="left:26.51%;bottom:3.00%"><i class="lg-tapnow"></i><b>Tapnow PRO · 3.5K 档<s>第 48 名 · 2.92 条 · ¥60.42</s></b></span><span class="pp" data-k="Tapnow|PRO|6K 档" data-rk="47" style="left:37.55%;bottom:3.00%"><i class="lg-tapnow"></i><b>Tapnow PRO · 6K 档<s>第 47 名 · 5.00 条 · ¥60.42</s></b></span><span class="pp" data-k="Tapnow|ULTIMATE|20K 档" data-rk="46" style="left:62.22%;bottom:8.36%"><i class="lg-tapnow"></i><b>Tapnow ULTIMATE · 20K 档<s>第 46 名 · 16.67 条 · ¥56.39</s></b></span><span class="pp" data-k="Tapnow|PRO|11.5K 档" data-rk="45" style="left:50.88%;bottom:8.36%"><i class="lg-tapnow"></i><b>Tapnow PRO · 11.5K 档<s>第 45 名 · 9.58 条 · ¥56.39</s></b></span><span class="pp" data-k="Tapnow|PRO|9.5K 档" data-rk="44" style="left:46.97%;bottom:8.36%"><i class="lg-tapnow"></i><b>Tapnow PRO · 9.5K 档<s>第 44 名 · 7.92 条 · ¥56.39</s></b></span><span class="pp" data-k="Seko|标准会员|" data-rk="43" style="left:3.00%;bottom:14.89%"><i class="lg-seko"></i><b>Seko 标准会员<s>第 43 名 · 0.93 条 · ¥51.84</s></b></span><span class="pp" data-k="Tapnow|ULTIMATE|36K 档" data-rk="42" style="left:74.26%;bottom:20.32%"><i class="lg-tapnow"></i><b>Tapnow ULTIMATE · 36K 档<s>第 42 名 · 30.00 条 · ¥48.33</s></b></span><span class="pp" data-k="Tapnow|MAX|10W 档" data-rk="41" style="left:95.20%;bottom:20.32%"><i class="lg-tapnow"></i><b>Tapnow MAX · 10W 档<s>第 41 名 · 83.33 条 · ¥48.33</s></b></span><span class="pp" data-k="Tapnow|MAX|72K 档" data-rk="40" style="left:88.47%;bottom:20.32%"><i class="lg-tapnow"></i><b>Tapnow MAX · 72K 档<s>第 40 名 · 60.00 条 · ¥48.33</s></b></span><span class="pp" data-k="Neowow|PLUS|" data-rk="39" style="left:5.90%;bottom:22.83%"><i class="lg-neowow"></i><b>Neowow PLUS<s>第 39 名 · 1.07 条 · ¥46.80</s></b></span><span class="pp" data-k="小云雀|基础会员|" data-rk="38" style="left:11.23%;bottom:24.63%"><i class="lg-xiaoyunque"></i><b>小云雀 基础会员<s>第 38 名 · 1.38 条 · ¥45.72</s></b></span><span class="pp" data-k="libtv|标准版|" data-rk="37" style="left:6.29%;bottom:28.28%"><i class="lg-libtv"></i><b>libtv 标准版<s>第 37 名 · 1.09 条 · ¥43.62</s></b></span><span class="pp" data-k="Seko|高级会员|" data-rk="36" style="left:39.71%;bottom:29.04%"><i class="lg-seko"></i><b>Seko 高级会员<s>第 36 名 · 5.56 条 · ¥43.20</s></b></span><span class="pp" data-k="Tapnow|BASIC|" data-rk="35" style="left:9.15%;bottom:34.48%"><i class="lg-tapnow"></i><b>Tapnow BASIC<s>第 35 名 · 1.25 条 · ¥40.28</s></b></span><span class="pp" data-k="Neowow|PRO|25K 档" data-rk="34" style="left:29.25%;bottom:35.01%"><i class="lg-neowow"></i><b>Neowow PRO · 25K 档<s>第 34 名 · 3.33 条 · ¥40.00</s></b></span><span class="pp" data-k="Neowow|PRO|63K 档" data-rk="33" style="left:48.18%;bottom:35.63%"><i class="lg-neowow"></i><b>Neowow PRO · 63K 档<s>第 33 名 · 8.40 条 · ¥39.68</s></b></span><span class="pp" data-k="Higgsfield|Plus|" data-rk="32" style="left:40.29%;bottom:37.44%"><i class="lg-higgsfield"></i><b>Higgsfield Plus<s>第 32 名 · 5.71 条 · ¥38.77</s></b></span><span class="pp" data-k="Neowow|PRO|90K 档" data-rk="31" style="left:55.49%;bottom:38.60%"><i class="lg-neowow"></i><b>Neowow PRO · 90K 档<s>第 31 名 · 12.00 条 · ¥38.19</s></b></span><span class="pp" data-k="Seko|至尊会员|" data-rk="30" style="left:64.38%;bottom:39.41%"><i class="lg-seko"></i><b>Seko 至尊会员<s>第 30 名 · 18.52 条 · ¥37.80</s></b></span><span class="pp" data-k="Neowow|MAX|17.8W 档" data-rk="29" style="left:69.46%;bottom:49.11%"><i class="lg-neowow"></i><b>Neowow MAX · 17.8W 档<s>第 29 名 · 23.73 条 · ¥33.36</s></b></span><span class="pp" data-k="Neowow|MAX|21W 档" data-rk="28" style="left:72.85%;bottom:50.15%"><i class="lg-neowow"></i><b>Neowow MAX · 21W 档<s>第 28 名 · 28.00 条 · ¥32.91</s></b></span><span class="pp" data-k="Neowow|ULTRA|25W 档" data-rk="27" style="left:76.42%;bottom:50.28%"><i class="lg-neowow"></i><b>Neowow ULTRA · 25W 档<s>第 27 名 · 33.33 条 · ¥32.86</s></b></span><span class="pp" data-k="libtv|进阶版|" data-rk="26" style="left:29.25%;bottom:57.41%"><i class="lg-libtv"></i><b>libtv 进阶版<s>第 26 名 · 3.33 条 · ¥29.98</s></b></span><span class="pp" data-k="libtv|高级版|11.7K 档" data-rk="25" style="left:48.37%;bottom:58.71%"><i class="lg-libtv"></i><b>libtv 高级版 · 11.7K 档<s>第 25 名 · 8.48 条 · ¥29.48</s></b></span><span class="pp" data-k="libtv|高级版|16.3K 档" data-rk="24" style="left:55.17%;bottom:62.11%"><i class="lg-libtv"></i><b>libtv 高级版 · 16.3K 档<s>第 24 名 · 11.81 条 · ¥28.21</s></b></span><span class="pp" data-k="即梦|基础会员|" data-rk="23" style="left:8.45%;bottom:65.23%"><i class="lg-jimeng"></i><b>即梦 基础会员<s>第 23 名 · 1.21 条 · ¥27.10</s></b></span><span class="pp" data-k="小云雀|标准会员|" data-rk="22" style="left:32.29%;bottom:68.93%"><i class="lg-xiaoyunque"></i><b>小云雀 标准会员<s>第 22 名 · 3.87 条 · ¥25.84</s></b></span><span class="pp" data-k="即梦|标准会员|" data-rk="21" style="left:31.29%;bottom:71.92%"><i class="lg-jimeng"></i><b>即梦 标准会员<s>第 21 名 · 3.68 条 · ¥24.86</s></b></span><span class="pp" data-k="libtv|豪华版|" data-rk="20" style="left:69.49%;bottom:72.94%"><i class="lg-libtv"></i><b>libtv 豪华版<s>第 20 名 · 23.77 条 · ¥24.54</s></b></span><span class="pp" data-k="libtv|至尊版|66K 档" data-rk="19" style="left:83.82%;bottom:76.23%"><i class="lg-libtv"></i><b>libtv 至尊版 · 66K 档<s>第 19 名 · 47.83 条 · ¥23.52</s></b></span><span class="pp" data-k="Higgsfield|Ultra|3K 档" data-rk="18" style="left:59.06%;bottom:76.32%"><i class="lg-higgsfield"></i><b>Higgsfield Ultra · 3K 档<s>第 18 名 · 14.29 条 · ¥23.50</s></b></span><span class="pp" data-k="libtv|至尊版|50.5K 档" data-rk="17" style="left:78.34%;bottom:76.46%"><i class="lg-libtv"></i><b>libtv 至尊版 · 50.5K 档<s>第 17 名 · 36.59 条 · ¥23.45</s></b></span><span class="pp" data-k="libtv|至尊版|92K 档" data-rk="16" style="left:90.62%;bottom:78.40%"><i class="lg-libtv"></i><b>libtv 至尊版 · 92K 档<s>第 16 名 · 66.67 条 · ¥22.87</s></b></span><span class="pp" data-k="Higgsfield|Ultra|6K 档" data-rk="15" style="left:73.26%;bottom:78.68%"><i class="lg-higgsfield"></i><b>Higgsfield Ultra · 6K 档<s>第 15 名 · 28.57 条 · ¥22.79</s></b></span><span class="pp" data-k="Neowow|ULTRA|55.2W 档" data-rk="14" style="left:92.65%;bottom:80.36%"><i class="lg-neowow"></i><b>Neowow ULTRA · 55.2W 档<s>第 14 名 · 73.60 条 · ¥22.30</s></b></span><span class="pp" data-k="Higgsfield|Ultra|9K 档" data-rk="13" style="left:81.57%;bottom:82.23%"><i class="lg-higgsfield"></i><b>Higgsfield Ultra · 9K 档<s>第 13 名 · 42.86 条 · ¥21.77</s></b></span><span class="pp" data-k="即梦|高级会员|12.3K 档" data-rk="12" style="left:66.50%;bottom:84.67%"><i class="lg-jimeng"></i><b>即梦 高级会员 · 12.3K 档<s>第 12 名 · 20.53 条 · ¥21.10</s></b></span><span class="pp" data-k="即梦|高级会员|6.2K 档" data-rk="11" style="left:52.29%;bottom:84.68%"><i class="lg-jimeng"></i><b>即梦 高级会员 · 6.2K 档<s>第 11 名 · 10.27 条 · ¥21.10</s></b></span><span class="pp" data-k="小云雀|高级会员|10.2K 档" data-rk="10" style="left:62.53%;bottom:85.27%"><i class="lg-xiaoyunque"></i><b>小云雀 高级会员 · 10.2K 档<s>第 10 名 · 16.92 条 · ¥20.94</s></b></span><span class="pp" data-k="小云雀|高级会员|8.6K 档" data-rk="9" style="left:59.13%;bottom:85.29%"><i class="lg-xiaoyunque"></i><b>小云雀 高级会员 · 8.6K 档<s>第 9 名 · 14.33 条 · ¥20.93</s></b></span><span class="pp" data-k="小云雀|高级会员|6.3K 档" data-rk="8" style="left:52.85%;bottom:85.31%"><i class="lg-xiaoyunque"></i><b>小云雀 高级会员 · 6.3K 档<s>第 8 名 · 10.55 条 · ¥20.92</s></b></span><span class="pp" data-k="小云雀|高级会员|12K 档" data-rk="7" style="left:65.96%;bottom:85.67%"><i class="lg-xiaoyunque"></i><b>小云雀 高级会员 · 12K 档<s>第 7 名 · 20.00 条 · ¥20.83</s></b></span><span class="pp" data-k="小云雀|高级会员|27.7K 档" data-rk="6" style="left:83.11%;bottom:92.84%"><i class="lg-xiaoyunque"></i><b>小云雀 高级会员 · 27.7K 档<s>第 6 名 · 46.20 条 · ¥18.99</s></b></span><span class="pp" data-k="即梦|高级会员|27.7K 档" data-rk="5" style="left:83.11%;bottom:92.84%"><i class="lg-jimeng"></i><b>即梦 高级会员 · 27.7K 档<s>第 5 名 · 46.20 条 · ¥18.99</s></b></span><span class="pp" data-k="小云雀|高级会员|18.5K 档" data-rk="4" style="left:74.80%;bottom:92.84%"><i class="lg-xiaoyunque"></i><b>小云雀 高级会员 · 18.5K 档<s>第 4 名 · 30.80 条 · ¥18.99</s></b></span><span class="pp" data-k="即梦|高级会员|18.5K 档" data-rk="3" style="left:74.80%;bottom:92.84%"><i class="lg-jimeng"></i><b>即梦 高级会员 · 18.5K 档<s>第 3 名 · 30.80 条 · ¥18.99</s></b></span><span class="pp" data-k="小云雀|超级会员|" data-rk="2" style="left:97.00%;bottom:97.00%"><i class="lg-xiaoyunque"></i><b>小云雀 超级会员<s>第 2 名 · 91.00 条 · ¥18.00</s></b></span><span class="pp rk1" data-k="即梦|超级会员|" data-rk="1" style="left:97.00%;bottom:97.00%"><i class="lg-jimeng"></i><b>即梦 超级会员<s>第 1 名 · 91.00 条 · ¥18.00</s></b></span></div><div class="pfoot"><span id="px0">← 更少 91.00 条</span><span id="px1">0.93 条 更多 →</span></div></div>
   <p class="cycle-source-note">即梦和 TapNow 的标准版 720p 成本使用 2026-09-21 站内留档扣分，搭配本轮会员价格计算。其余缺少画布读数的规格保留待核实状态。</p>
@@ -2198,6 +2249,8 @@ var CP = {};
 function renderChart(){
   var box = document.getElementById('chart');
   if(!box) return;
+  var metricColumn = document.getElementById('cycMetricColumn');
+  if(metricColumn) metricColumn.textContent = CM[CT.m].lb;
   var idx = MI[CT.m], low = CM[CT.m].low, fmt = CM[CT.m].f;
   var rows = [];
   for(var i = 0; i < CDATA.length; i++){
@@ -2342,9 +2395,9 @@ function cycSync(){
   var n = document.querySelectorAll('#cycPlat .pfb.on').length;
   var tot = document.querySelectorAll('#cycPlat .pfb').length;
   var e1 = document.getElementById('cycPlatN'); if(e1) e1.textContent = n + '/' + tot;
+  CM.cap.lb = capLab(CT.k);      /* 换周期后指标名跟着变 */
   var e2 = document.getElementById('cycNow');
   if(e2) e2.textContent = CM[CT.m].lb + ' \u00b7 ' + PERLB[CT.k] + ' \u00b7 ' + (CT.o === 'best' ? '最优在前' : '最差在前');
-  CM.cap.lb = capLab(CT.k);      /* 换周期后指标名跟着变 */
   var e3 = document.getElementById('cycChip');
   /* ⚠ 曾写死 (k==='y'?44:k==='q'?39:44) —— 那是【加 Seko 之前】的档位数，
      数据一更新就再也对不上（实际是年付 47 / 季付 39 / 月付 47）。
