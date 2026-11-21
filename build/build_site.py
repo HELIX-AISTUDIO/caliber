@@ -2690,17 +2690,21 @@ for plan in COST["plans"]:
             f'{membership_price(option, currency, "price", "renewal", "y")}</tr>'
         )
 
-MEMBERSHIP_DETAILS = f"""
+def membership_details(back_href=None):
+    back_link = f'\n      <a href="{escape(back_href, quote=True)}">返回当前榜单</a>' if back_href else ""
+    return f"""
 <details id="membership-prices" style="margin:14px 0">
   <summary>7 家平台会员价格与积分档<span class="chev">›</span></summary>
   <div class="dbody">
     <p>月付、季付和年付均显示整个周期的首期价格。¥ 为人民币，$ 为美元。首购、优惠券和续费条件见各平台活动及截图。</p>
-    <label class="record-filter">平台
-      <select id="membership-platform">
-        <option value="">全部平台</option>
-        {"".join(f'<option>{escape(p)}</option>' for p in PLATFORMS)}
-      </select>
-    </label>
+    <div class="record-tools">
+      <label class="record-filter">平台
+        <select id="membership-platform">
+          <option value="">全部平台</option>
+          {"".join(f'<option>{escape(p)}</option>' for p in PLATFORMS)}
+        </select>
+      </label>{back_link}
+    </div>
     {table([("平台", None), ("会员", None), ("基础积分", None), ("月付", None), ("季付", None), ("年付", None)], membership_rows, "tw records-table")}
   </div>
 </details>
@@ -3371,7 +3375,7 @@ cycles_body = f"""
   <p class="cycle-source-note">{COST["liveNote"]}</p>
 
 {CANVAS_DETAILS}
-{MEMBERSHIP_DETAILS}
+{membership_details()}
 {OFFER_DETAILS}
 
   <div class="wrap" style="padding:0">
@@ -3487,7 +3491,7 @@ cost_body = f"""
 <section class="compare-records" aria-labelledby="compare-records-title">
   <h2 id="compare-records-title">价格与折算依据</h2>
   <p>{COST["liveNote"]}</p>
-  {MEMBERSHIP_DETAILS.strip()}
+  {membership_details('#compare-results').strip()}
   {CANVAS_DETAILS.strip()}
   {OFFER_DETAILS.strip()}
   {EVIDENCE_DETAILS.strip()}
