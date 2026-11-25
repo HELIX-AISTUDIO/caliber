@@ -244,9 +244,12 @@
 
   function renderCharts(offers, ranked, byBudget, months) {
     currentPoints = offers.filter(offer => offer.capacity > 0);
-    drawHighlights(currentPoints, months);
-    drawBars(ranked, byBudget);
-    drawFrontier(months);
+    if (chartView.checked) {
+      drawBars(ranked, byBudget);
+      drawFrontier(months);
+    } else {
+      drawHighlights(currentPoints, months);
+    }
   }
 
   frontier.addEventListener('change', () => drawFrontier(data.periods[period.value][1]));

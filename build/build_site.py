@@ -63,7 +63,11 @@ def T(key, label=None):
 
 BRAND, BRAND_CN = SITE["brand"], SITE["brandCn"]
 STUDIO, OWNER, YEAR = SITE["studio"], SITE["owner"], SITE["year"]
-NAV = SITE["nav"]
+NAV_OVERRIDES = {
+    "home": {"label": "成本榜"},
+    "cost": {"label": "数据来源", "href": "cost.html#compare-records-title"},
+}
+NAV = [{**item, **NAV_OVERRIDES.get(item["key"], {})} for item in SITE["nav"]]
 # 站点公开地址 —— 只用于 og:url / og:image 这类【同源绝对地址】。
 # ⚠ og 规范要求绝对 URL（部分抓取器不解析相对路径），但这**不算外部依赖**：
 #   它指向本站自己的资源，不产生任何跨域请求。自检里另有断言锁死这一点。
@@ -2190,7 +2194,9 @@ function cycSync(){
   ['metricSeg|m', 'cycSeg|k', 'ordSeg|o'].forEach(function(pair){
     var kv = pair.split('|');
     Array.prototype.forEach.call(document.querySelectorAll('#' + kv[0] + ' button'), function(b){
-      b.classList.toggle('on', b.dataset[kv[1]] === CT[kv[1]]);
+      var active = b.dataset[kv[1]] === CT[kv[1]];
+      b.classList.toggle('on', active);
+      if (kv[0] === 'metricSeg') b.setAttribute('aria-pressed', String(active));
     });
   });
   var n = document.querySelectorAll('#cycPlat .pfb.on').length;
@@ -2485,7 +2491,7 @@ def nav(active):
         items += f'<a href="{it["href"]}"{cls}>{it["label"]}</a>'
     # 窄屏下横向菜单必然放不下（「视觉理解模型排行榜」一个字就是 14px），
     # 与其硬裁或让它横向滚动，不如收进汉堡菜单 —— 三项导航的标准做法。
-    return (f'<div class="nav"><div class="inner">'
+    return (f'<header class="nav"><div class="inner">'
             f'<a class="brand" href="index.html"><i></i>'
             f'<span class="bw"><b>{BRAND}</b><s>{STUDIO}</s></span></a>'
             f'<nav class="menu" aria-label="主导航">{items}</nav>'
@@ -2495,7 +2501,7 @@ def nav(active):
             f'<button type="button" class="nburger" id="nBurger" aria-label="导航菜单" '
             f'aria-expanded="false" aria-controls="nDrop"><i></i><i></i><i></i></button>'
             f'</div>'
-            f'<div class="ndrop" id="nDrop"><nav>{items}</nav></div></div>')
+            f'<div class="ndrop" id="nDrop"><nav>{items}</nav></div></header>')
 
 
 def legal():
@@ -3095,20 +3101,20 @@ THEME_SCRIPT = """
   const browserColor = document.querySelector('meta[name="theme-color"]');
   function applyTheme(theme){
     root.dataset.theme = theme;
-    browserColor.content = theme === 'light' ? '#f7f8fb' : '#10141c';
+    browserColor.content = theme === 'light' ? '#ffffff' : '#10141c';
   }
   try {
-    if (localStorage.getItem('caliber.theme') === 'light') applyTheme('light');
+    applyTheme(localStorage.getItem('caliber.theme') === 'dark' ? 'dark' : 'light');
   } catch (_) {}
   document.addEventListener('DOMContentLoaded', () => {
     const toggle = document.getElementById('theme-toggle');
     const label = toggle.querySelector('span');
     function updateToggle(){
-      label.textContent = root.dataset.theme === 'light' ? '深色' : '浅色';
+      label.textContent = root.dataset.theme === 'dark' ? '浅色' : '深色';
       toggle.setAttribute('aria-label', '切换到' + label.textContent + '模式');
     }
     toggle.addEventListener('click', () => {
-      const theme = root.dataset.theme === 'light' ? 'dark' : 'light';
+      const theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
       applyTheme(theme);
       try { localStorage.setItem('caliber.theme', theme); } catch (_) {}
       updateToggle();
@@ -3168,8 +3174,8 @@ def page(title, desc, nav_html, body, cost_js=False, canon=None, extra_css="", e
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="format-detection" content="telephone=no,email=no,address=no">
-<meta name="theme-color" content="#10141c">
-<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light dark">
 <meta name="description" content="{desc}">
 <meta property="og:title" content="{BRAND} · {title}">
 <meta property="og:description" content="{desc}">
@@ -3331,30 +3337,29 @@ NTIER = len({r["tier"] for r in ROWS})
 
 cycles_body = f"""
 <main class="cycle-report" data-skip-intro>
-  <div class="vhead">
+  <header class="compare-heading">
+    <div>
+    <p class="compare-snapshot">数据采集 <time datetime="{UPDATED}">{UPDATED}</time></p>
     <h1 id="cycTitle">单条成本排名</h1>
     <div class="vsub" id="cycSub">按用满订阅积分时的平均单条成本排名，越低越省。</div>
-    <div class="vmeta">
-      <span>数据时点 <b>{UPDATED}</b></span>
-      <span><b>{len(PLAT_SUM)}</b> 平台 · <b>{NTIER}</b> 会员档 · <b>{len(ROWS)}</b> 积分档</span>
-      <span>{T("koujing", "口径")} <b>{SCOPE["currentShort"]}</b></span>
-      <span>当前 <b id="cycNow">单条成本 · 年付 · 最优在前</b></span>
     </div>
-  </div>
-
+    <nav class="compare-jump-links" aria-label="详细排名目录">
+      <a href="index.html">规格成本榜</a><a href="cost.html#compare-records-title">数据来源</a>
+    </nav>
+  </header>
   <div class="cycle-rank-board">
-  <details class="rank-filters" id="rank-filters">
-    <summary>筛选详细排名<span class="chev">›</span></summary>
-    <div class="rank-controls">
-  <div class="sgroup" id="sgMetric">
-    <div class="sgt">排名指标</div>
-    <div class="segv" id="metricSeg" role="tablist" aria-label="排名指标">
-      <button type="button" class="on" data-m="cost" role="tab">单条成本<s>元/条 · 越低越好</s></button>
-      <button type="button" data-m="cap" role="tab">每月可生成<s>条/月 · 越高越好</s></button>
-      <button type="button" data-m="sec" role="tab">元/秒<s>越低越好</s></button>
-      <button type="button" data-m="pay" role="tab">该周期实付<s>总额 · 越低越好</s></button>
-    </div>
-  </div>
+    <div class="cycle-toolbar">
+      <div class="cycle-axis">
+        <div class="segv" id="metricSeg" role="group" aria-label="排名指标">
+          <button type="button" class="on" data-m="cost" aria-pressed="true">单条成本</button>
+          <button type="button" data-m="cap" aria-pressed="false">每月可生成</button>
+          <button type="button" data-m="sec" aria-pressed="false">元/秒</button>
+          <button type="button" data-m="pay" aria-pressed="false">该周期实付</button>
+        </div>
+      </div>
+      <details class="rank-filters" id="rank-filters">
+        <summary><span class="compare-filter-mark" aria-hidden="true"></span>筛选</summary>
+        <div class="rank-controls">
   <div class="sgroup" id="sgPeriod">
     <div class="sgt">{T("chengnuoQi", "会员周期")}<span class="sgchip" id="cycChip">{len(ROWS)} 档</span></div>
     <div class="segv segk" id="cycSeg" role="tablist" aria-label="会员周期">
@@ -3381,12 +3386,17 @@ cycles_body = f"""
     <div class="sgt">平台<span class="sgchip" id="cycPlatN">{len(PLAT_SUM)}/{len(PLAT_SUM)}</span></div>
     <div class="pf" id="cycPlat">{SIDE_PLAT}</div>
   </div>
+        </div>
+      </details>
     </div>
-  </details>
+    <div class="vmeta">
+      <span><b>{len(PLAT_SUM)}</b> 平台 · <b>{NTIER}</b> 会员档 · <b>{len(ROWS)}</b> 积分档</span>
+      <span>当前 <b id="cycNow">单条成本 · 月付 · 最优在前</b></span>
+    </div>
   <div class="cycle-columns">
     <span>平台与档位</span><span>相对表现 · 越长越好</span><span id="cycMetricColumn">单条成本</span>
   </div>
-  <div class="chart" id="chart">{chart_rows("cost", "y")}</div>
+  <div class="chart" id="chart">{chart_rows("cost", _DEFAULT_K)}</div>
   </div>
   {pareto_block("y")}
   <p class="cycle-source-note">{COST["liveNote"]}</p>
@@ -3488,6 +3498,7 @@ cycles_body = f"""
 """
 
 COMPARE_VIEW, COMPARE_JS = compare_view(ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR, PLAT_LG)
+HOME_VIEW, HOME_JS = compare_view(ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR, PLAT_LG, records_page="cost.html")
 cost_body = f"""
 {COMPARE_VIEW}
 <section class="compare-records" aria-labelledby="compare-records-title">
@@ -3667,45 +3678,9 @@ DISPLAY_FONT_CSS = '''
   unicode-range: U+4E0D,U+4E0E,U+4E2A,U+4ED8,U+51C6,U+5355,U+53EF,U+540D,U+5468,U+5728,U+57FA,U+5B58,U+5B9E,U+5E93,U+5F71,U+6210,U+6280,U+6392,U+63D0,U+6570,U+671F,U+672C,U+672F,U+6761,U+699C,U+6BCF,U+6CD5,U+751F,U+7535,U+793A,U+79D2,U+8868,U+89C6,U+8BCD,U+8BED,U+8FD9,U+9762,U+9875,U+9891;
 }
 '''
-home_monthly = [(r, r["byP"]["m"], int(r["byP"]["m"]["cap"]))
-                for r in ROWS if "m" in r["byP"] and r["byP"]["m"]["cap"] >= 1]
-home_preview = {}
-for row, price, capacity in sorted(home_monthly, key=lambda item: item[1]["payCNY"]):
-    if capacity >= 30:
-        home_preview.setdefault(row["plat"], (row, price))
-home_preview_limit = max((price["payCNY"] for _, price in home_preview.values()), default=1)
-home_preview_rows = "".join(
-    f'<li><div class="home-preview-platform">{plogo(plat, "comparison-mark")}<span>'
-    f'<b>{escape(canvas_display_names.get(plat, plat))}</b><small>{escape(tname(row))}</small></span></div>'
-    f'<span class="home-preview-track" aria-hidden="true"><i style="--series:{row["color"]};'
-    f'--share:{price["payCNY"] / home_preview_limit:.1%}"></i></span><strong>¥{f2(price["payCNY"]).removesuffix(".00")}</strong></li>'
-    for plat, (row, price) in home_preview.items()
-)
 home_body = f"""
-<main class="compare-page compare-home" data-skip-intro>
-  <div class="home-report-hero">
-    <div>
-      <header id="cost" class="compare-heading">
-        <h1>视频生成<br><em>成本基准</em></h1>
-        <p>同一规格，比较各家画布的会员价格、月产能和单条成本。</p>
-      </header>
-      <div class="btns compare-home-actions">
-        <a class="btn btn-white" href="cost.html">查看成本榜<i aria-hidden="true"></i></a>
-        <a class="home-budget-link" href="cost.html?mode=budget">按预算估算</a>
-      </div>
-      <p class="home-report-meta"><span><b>{len(PLATFORMS)}</b> 家平台</span><span><b>{len(ROWS)}</b> 个可比较档位</span><time datetime="{UPDATED}">采集于 {UPDATED}</time></p>
-    </div>
-    <section class="home-benchmark-block" aria-labelledby="home-benchmark-title">
-      <div class="compare-result-head">
-        <h2 id="home-benchmark-title">月做 30 条，首期花多少</h2>
-        <p>Seedance 2.5 标准版 · 720p · 30 秒 · 月付</p>
-      </div>
-      <div class="home-preview-columns"><span>平台与档位</span><span>首期实付</span></div>
-      <ul class="home-ranking-preview">{home_preview_rows}</ul>
-      <p class="home-chart-caption">各平台满足用量的最低实付<a href="cost.html#canvas-comparison">查看画布扣分</a></p>
-    </section>
-  </div>
-  <div class="home-resources">
+{HOME_VIEW}
+  <aside class="home-resources" aria-label="预算与来源">
     <details id="budget" class="compare-home-budget">
     <summary>预算与升档门槛<span class="chev">›</span></summary>
     <div class="dbody">
@@ -3732,8 +3707,7 @@ home_body = f"""
       <a href="cost.html#membership-prices">会员价格明细</a>
       <a href="cost.html#pricing-evidence">数据来源和截图</a>
     </nav>
-  </div>
-</main>
+  </aside>
 {foot(f'基准数据采集于 {UPDATED} · 按统一规格折算')}
 """
 
@@ -3751,7 +3725,7 @@ glossary_body = f"""
   <header class="compare-heading"><div><h1>术语表</h1><p>{GLOSSARY["intro"]}</p></div></header>
   <div class="glossary-layout">
     <nav class="glossary-index" aria-label="术语目录">
-      <strong>术语目录</strong><div>{GLOS_INDEX}</div>
+      <strong>术语目录</strong>{GLOS_INDEX}
     </nav>
     <div class="glist">{GLOS_ROW}</div>
   </div>
@@ -3781,10 +3755,10 @@ NOTFOUND_BODY = f"""
 # ═══════════════════════════════════════════════════════════════════
 CINE_CSS = r"""
 .libbar{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) auto;gap:8px 14px;
-  align-items:end;padding:14px 16px;background:var(--studio-panel);border:1px solid var(--studio-line);border-radius:14px}
+  align-items:end;padding:0 0 14px;border-bottom:1px solid var(--studio-line)}
 .libbar label{display:grid;gap:4px;min-width:0;font-size:13px;font-weight:700}
 .libbar input{width:100%;min-height:44px;padding:8px 11px;border:1px solid var(--studio-rule);border-radius:8px;
-  background:var(--studio-bg);color:var(--studio-text);font:inherit;font-weight:500}
+  background:var(--studio-control);color:var(--studio-text);font:inherit;font-weight:500}
 .libbar input::placeholder{color:var(--studio-muted);opacity:1}
 .libactions{display:flex;gap:6px;flex-wrap:wrap}
 .libbar .lib-note{grid-column:1/-1;margin:0;color:var(--studio-muted);font-size:12px}
@@ -3794,17 +3768,15 @@ CINE_CSS = r"""
 .libactions .libbtn{min-height:44px;white-space:nowrap}
 .libbtn:hover,.pcbtn:hover{background:var(--studio-control);border-color:var(--studio-accent)}
 .libbtn.on,.pcbtn.fv.on{background:var(--studio-select);color:var(--studio-accent);border-color:var(--studio-rule)}
-.libwrap2{display:grid;grid-template-columns:196px minmax(0,1fr);gap:14px 20px;align-items:start;margin-top:18px}
-.libside{position:sticky;top:calc(var(--navh) + 12px);max-height:calc(100vh - var(--navh) - 32px);overflow:auto;
-  background:var(--studio-panel);border:1px solid var(--studio-line);border-radius:14px;padding:10px}
-.libside strong{display:block;padding:3px 8px 6px;font-size:13px}
-.libcat{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;min-height:34px;
+.libcategories{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:6px;margin-bottom:15px;
+  background:var(--studio-control);border-radius:10px}
+.libcat{display:flex;flex:none;align-items:center;gap:6px;min-height:34px;
   background:transparent;border:0;color:var(--studio-muted);font:inherit;font-size:13px;
   padding:5px 8px;border-radius:7px;cursor:pointer;text-align:left}
-.libcat:hover{background:var(--studio-control);color:var(--studio-text)}
-.libcat.on{background:var(--studio-select);color:var(--studio-accent);font-weight:700}
+.libcat:hover{background:var(--studio-panel);color:var(--studio-text)}
+.libcat.on{background:var(--studio-ink);color:var(--studio-bg);font-weight:700}
 .libcat .n{color:inherit;font-size:12px;font-variant-numeric:tabular-nums;flex:none}
-.libmain{min-width:0}
+.libmain{min-width:0;margin-top:13px}
 .libcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:13px}
 .pcard{background:var(--studio-panel);border:1px solid var(--studio-line);border-radius:14px;
   padding:15px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -3826,13 +3798,11 @@ CINE_CSS = r"""
 @media(max-width:780px){
   .libbar{grid-template-columns:repeat(2,minmax(0,1fr))}
   .libactions{grid-column:1/-1}
-  .libwrap2{grid-template-columns:minmax(0,1fr)}
-  .libside{position:static;max-height:none;padding:8px}
-  .libcategories{display:flex;gap:4px;overflow:auto;padding:3px}
-  .libcat{width:auto;flex:0 0 auto;min-height:36px}
+  .libcategories{flex-wrap:nowrap;overflow-x:auto}
+  .libcat{min-height:36px}
 }
 @media(max-width:460px){
-  .libbar{grid-template-columns:minmax(0,1fr);padding:10px}
+  .libbar{grid-template-columns:minmax(0,1fr);padding-bottom:10px}
   .pcard{padding:12px}
 }
 """
@@ -4053,6 +4023,7 @@ cine_body = f"""
   <header class="compare-heading"><div><h1>电影技法与提示词库</h1>
     <p>{CINE_N:,} 条可复制的提示词，覆盖摄影机运动、灯光、构图、剪辑和镜头等 {CINE_CATS} 类技法。</p>
   </div></header>
+  <nav class="libcategories" id="libSide" aria-label="技法分类"></nav>
   <div class="libbar">
     <label>搜索提示词<input type="search" id="libQ" placeholder="例如 逆光、close-up"></label>
     <label>替换主体（可选）<input type="text" id="libS" placeholder="输入角色或场景" aria-describedby="lib-subject-note"></label>
@@ -4062,13 +4033,10 @@ cine_body = f"""
     </div>
     <p class="lib-note" id="lib-subject-note">填入主体后，复制时会替换模板里的 [Subject]。</p>
   </div>
-  <div class="libwrap2">
-    <aside class="libside"><strong>技法分类</strong><nav class="libcategories" id="libSide" aria-label="技法分类"></nav></aside>
-    <div class="libmain">
-      <span class="libcnt" id="libCnt" role="status">{CINE_N} / {CINE_N} 条目</span>
-      <div class="libcards" id="libCards"></div>
-      <div class="libmore" id="libMore" style="display:none"></div>
-    </div>
+  <div class="libmain">
+    <span class="libcnt" id="libCnt" role="status">{CINE_N} / {CINE_N} 条目</span>
+    <div class="libcards" id="libCards"></div>
+    <div class="libmore" id="libMore" style="display:none"></div>
   </div>
 
   <div class="libsrc">
@@ -4088,9 +4056,9 @@ cine_body = f"""
 # 6. 输出 + 自检
 # ═══════════════════════════════════════════════════════════════════
 PAGES = {
-    "index.html": page("首页", f"{BRAND} — {SITE['tagline']}。AI 视频生成平台的成本对比，统一口径折算，只给可复核的结果。",
+    "index.html": page("视频生成成本榜", f"{BRAND} — {SITE['tagline']}。AI 视频生成平台的成本对比，统一口径折算，只给可复核的结果。",
                        nav("home"), home_body, cost_js=True, canon="", extra_css=COMPARE_CSS,
-                       extra_js=DISCLOSURE_JS),
+                       extra_js=HOME_JS + DISCLOSURE_JS),
     "cost.html": page("平台成本对比", f"{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本，含达标阶梯、边际成本与跨平台组合最省。",
                       nav("cost"), cost_body, cost_js=True, canon="cost", extra_css=COMPARE_CSS,
                       extra_js=COMPARE_JS + DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),

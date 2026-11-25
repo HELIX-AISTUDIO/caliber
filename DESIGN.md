@@ -1,207 +1,25 @@
-# 设计系统 · 供后续页面复用
+# CALIBER 页面设计
 
-本文件固化 `index.html` 的视觉规范，来源为 **higgsfield.ai 实测**（CSS 变量 + 渲染截图双重取源，非目测）。
-后续页面（如「视觉理解模型排行榜」）**直接复用本规范**，即可保证风格一致。
+CALIBER 用统一的视频规格比较平台的实付价格、产能和单条成本。页面按选规格、筛选、读榜、比较、查来源的顺序组织。
 
----
+## 页面结构
 
-## 一、核心原则（这是「好看」的真正原因）
+| 页面 | 首屏 | 明细入口 |
+| --- | --- | --- |
+| 成本榜 | 数据日期、标题、当前条件下的最低实付或最高产能、生成规格、搜索和榜单 | 每行可查看对应会员报价，也可加入并排对比 |
+| 数据来源 | 可直接从导航和榜单跳到价格与数据来源 | 会员价格、画布扣分、活动及采集截图 |
+| 详细排名 | 指标切换在榜单上方，周期、排序和平台在筛选内 | 三周期全清单、原始数据和计算方法 |
+| 术语表与提示词库 | 和榜单共用导航、标题和内容宽度 | 术语目录可跳转，提示词库可按分类、关键词和收藏筛选 |
 
-Higgsfield 的视觉纪律只有一条：**lime 是唯一强调色，且只做两件事。**
+## 颜色和排版
 
-| lime 的两种用法 | 说明 |
-|---|---|
-| **小号实心药丸** | `background:#D1FE17; color:#0B0B0B` —— 按钮、状态标签、`New` 徽标 |
-| **大块反转面** | 顶部通栏、页脚版权块 —— 整块 lime 底 + 纯黑文字 |
+- 默认白底与深色文字。浅灰用于导航、工具栏和结果摘要，蓝色用于链接、选中状态及当前排序列。平台色用于品牌标识和图表系列。
+- 中文主标题使用本地粗黑体，缺字时回退到系统中文字体。金额、排名和积分使用等宽数字，便于扫读同列。
+- 大屏主内容最大宽度 1512 像素。榜单用细线分行。手机压缩表头和间距，360 像素及以下把平台身份和指标放到同一行记录的上下两层。
+- 公共颜色、宽度和交互样式定义在 [compare_style.css](build/compare_style.css)，导航和页面结构定义在 [build_site.py](build/build_site.py)。
 
-其余一切只用 **黑 / 白 / 灰**。粉色 `#FF4D8D` 仅用于极小徽标（如 `30% OFF`、`TOP`、`USD` 标记）。
+## 交互与数据
 
-> **反面教训**：第一版失败的原因不是颜色选错，而是**色彩过载** —— 5 个平台色 + 4 个语义色 + 荧光格纹理 + 到处发光 + 毛玻璃，全是噪音。修正是「减少」而不是「换色」。
-
-**另一条纪律：不用毛玻璃。** 表面是实心 `#0B0B0B` + `1px rgba(255,255,255,.08)` 发丝描边。这既更接近 Higgsfield 实物，也顺带解决了微信 X5 内核不支持 `backdrop-filter` 的兼容问题。
-
----
-
-## 二、色板
-
-```css
---bg           : #000000;   /* 页面底，纯黑 */
---surface      : #0B0B0B;   /* 卡片 / 表格 / 说明块 */
---line         : rgba(255,255,255,.08);  /* 发丝描边 */
---line-soft    : rgba(255,255,255,.05);  /* 表格行分隔 */
---fg           : #C9CDD2;   /* 正文 */
---fg-strong    : #FFFFFF;   /* 标题 / 强调 */
---fg-mute      : #8A9099;   /* 辅助说明 */
---fg-dim       : #767C85;   /* 表头 / 极弱文字 */
---fg-ghost     : #5A6069;   /* 脚注 */
---lime         : #D1FE17;   /* 唯一强调色，品牌主色 */
---lime-dim     : rgba(209,254,23,.09);   /* lime 淡化底 */
---amber        : #FFC93C;   /* 仅用于风险/提示边框 */
---pink         : #FF4D8D;   /* 仅用于极小徽标 */
---danger       : #FF6B6B;   /* 仅用于否定型标签描边 */
-```
-
-Higgsfield 原始 token 备查：`--color-lime:#d1fe17`、`--color-gray:#0b0b0b`、`--color-black-2:#131313`、`--color-neutral-surface:#171717`、`--color-brand-tertiary:#9ce6f3`。
-
-### 数据分类色（谨慎使用，只做 6px 圆点）
-
-多系列数据需要区分时，只允许用在**小圆点**上，禁止用于面、条、框：
-
-```css
-libtv      #9CE6F3   /* cyan   */
-Neowow     #00C65A   /* green  */
-即梦        #3280FF   /* blue   */
-小云雀      #FABC00   /* amber  */
-Higgsfield #ED1572   /* magenta */
-```
-
-条形图**必须单色分级**，不做彩虹：
-- 最优档 → 实心 `#D1FE17`
-- 中段 → `linear-gradient(90deg,#3A3F47,#6E7681)`
-- 末段 → `linear-gradient(90deg,#23272D,#3A3F47)`
-
----
-
-## 三、字体
-
-```css
---font-sans  : "Inter","Inter Display","SN Pro","Space Grotesk",
-               ui-sans-serif,system-ui,-apple-system,"Segoe UI",
-               "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
---font-disp  : "Space Grotesk","Inter Display","Inter","SN Pro",
-               ui-sans-serif,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
---font-mono  : "IBM Plex Mono","JetBrains Mono","Geist Mono",
-               ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-```
-
-**不加载 webfont**（保持单文件零外部请求）。用同名字体栈 + 系统回退；中文配 PingFang SC / Microsoft YaHei。
-
-| 角色 | 规格 |
-|---|---|
-| h1 主标题 | `clamp(29px,5vw,52px)` / 800 / `letter-spacing:-.038em` / `line-height:1.06` |
-| h2 章节 | 21px / 750 / `-.025em` |
-| h3 子节 | 14.5px / 700 / `-.015em` |
-| 眉标 eyebrow | 11px / 700 / `letter-spacing:.15em` / uppercase / lime / mono |
-| 章节序号 | mono 12px / lime，置于 h2 内 `.ey` |
-| 表头 | 10.5px / 700 / `letter-spacing:.095em` / uppercase / `--fg-dim` |
-| 正文 | 13–14px / 1.7–1.78 |
-| 所有数字 | **必须 mono** + `letter-spacing:-.022em` + 右对齐 |
-| 统计大数字 | mono 26px / 700 / `-.032em` |
-
-大标题字距压紧是 Higgsfield 的签名（原始值 `-1px ~ -4px`），中文靠字号 + 字重 + 负字距建立层级。
-
----
-
-## 四、组件规格
-
-### 顶部 lime 通栏 `.promo`
-```
-background:#D1FE17; color:#0B0B0B; font-size:12.5px; font-weight:600;
-padding:10px 22px; display:flex; justify-content:center; gap:13px; flex-wrap:wrap
-```
-内部可放一个 `border:1.5px solid #0B0B0B; border-radius:999px` 的描边药丸。
-
-### 顶栏 `.nav`
-```
-border-bottom:1px solid rgba(255,255,255,.08)
-```
-- 左侧品牌：`.brand` = `22×22px` lime 圆角方块 + 名称（14px/700/`-.022em`）
-- 中间菜单 `.menu`：13px/600/`#9AA0A8`，项内可嵌 lime 胶囊 `.nb`（9.5px/800/黑字）
-- 右侧：lime 描边药丸（当前口径）
-- **移动端**：`.menu` 横向滚动，`scrollbar-width:none`，条目 `flex:0 0 auto`
-
-### 卡片 `.card` / `.kpi`
-```
-background:#0B0B0B; border:1px solid rgba(255,255,255,.08); border-radius:18px;
-padding:20px 22px      /* .kpi */
-padding:22px 24px      /* .card */
-```
-- `.kpi .t` = 10.5px/700/`letter-spacing:.095em`/uppercase/`--fg-dim`
-- `.kpi .v` = mono 26px/700，**仅最优项染 lime**（`.good` / `.hi`），其余保持白色
-- `.kpi.hi` 仅把描边换成 `rgba(209,254,23,.45)`
-- **禁止**给卡片加彩色左边条（第一版的噪音源之一）
-
-### 按钮
-```
-.btn{ border-radius:999px; padding:12px 23px; font-size:13px; font-weight:700 }
-.btn-fill { background:#D1FE17; color:#0B0B0B }           /* 主行动 */
-.btn-ghost{ background:transparent; color:#fff; border:1px solid rgba(255,255,255,.2) }
-```
-
-### 表格
-```
-th{ background:transparent; 无底色; border-bottom:1px solid rgba(255,255,255,.08) }
-td{ padding:13px 14px; border-bottom:1px solid rgba(255,255,255,.05) }
-tr:hover{ background:rgba(255,255,255,.032) }
-tr.top  { background:rgba(209,254,23,.055) }   /* 最优行 */
-tr.top td:first-child{ box-shadow:inset 3px 0 0 #D1FE17 }
-.ybest  { background:#D1FE17; color:#0B0B0B; font-weight:800 }
-```
-
-### 标签（只给最优给 lime）
-```
-.v-good{ background:#D1FE17; color:#0B0B0B }                       /* 强烈推荐 */
-.v-warn{ background:transparent; color:#C9CDD2; border:1px solid rgba(255,255,255,.18) }
-.v-bad { background:transparent; color:#FF6B6B; border:1px solid rgba(255,107,107,.32) }
-```
-
-### 说明块 `.note`
-统一实心面 + 无底色变化，仅靠左侧 2px 细线区分语义：
-```
-.note.warn{ border-left:2px solid rgba(255,201,60,.55) }
-.note.good{ border-left:2px solid rgba(209,254,23,.5)  }
-.note.pink{ border-left:2px solid rgba(255,77,141,.45) }
-```
-
-### 页脚版权块 `.legal`（签名元素）
-```
-background:#D1FE17; border-color:#D1FE17;
-color:#0B0B0B; padding:28px 30px; border-radius:20px
-.legal-t{ font-size:16px; font-weight:800 }     /* 黑字 */
-.legal-f .fp{ background:#0B0B0B; color:#D1FE17; border-radius:6px }  /* 指纹反色 */
-```
-
----
-
-## 五、条形图规范
-
-**必须用「效率条」，不要用成本占比条。**
-- 成本占比条（`width = 本档成本 / 最高成本`）会让 20–45 元区间全被压在 20–45% 宽度内，看不出差异。
-- 效率条：`width = 全场最优成本 / 本档成本 × 100%` → 最优档 100%，最差价 19%，差异一眼可见。
-- 必须标注「条形越长 = 越省」，否则语义反直觉。
-
-```
-.bar-row { grid-template-columns:206px 1fr 76px; gap:14px }
-.bar-track{ height:14px; background:rgba(255,255,255,.05); border-radius:999px }
-.bar-fill { border-radius:999px }
-```
-
----
-
-## 六、移动端与兼容
-
-```css
-@media (max-width:820px){ /* 两级断点：820 / 520 */ }
-```
-
-- 键盘可达性：`.menu a` 横向滚动，`.tw` 表格横向滚动
-- **微信 X5 兼容**：已彻底不用 `backdrop-filter` / `color-mix` / `100dvh`；固定定位元素加 `translate3d(0,0,0)` 提升合成层
-- `viewport-fit=cover` + `padding-bottom: calc(72px + env(safe-area-inset-bottom,0px))`
-- `@media print` 浅色适配，保证存 PDF 时版权块与溯源指纹保留
-- **字体缺字形自检**：避免用 `▾`（部分中文字体缺此字形，会渲染成小横线），排序指示改用 `↓`
-
----
-
-## 七、多页面导航约定
-
-后续页面（视觉理解模型排行榜等）须满足：
-
-1. **复用本文件的 `.promo` / `.nav` / `.menu` 结构**，品牌区文案统一，菜单项在两个页面间互相可跳。
-2. 当前页面对应菜单项加 `.active` 态（lime 文字）。
-3. 未上线页面用 `<a class="soon">名称<i class="nb">即将上线</i></a>` 占位（无 `href`，`cursor:default`）。
-4. 每个页面的 `<head>` 必须保留版权头注释与溯源指纹；指纹随数据集变化而更新。
-5. 章节锚点约定：`<h2 id="m-N">`（N 为章节序号，不补零），菜单链接 `#m-N`。
-
----
-
-溯源指纹：**HX-CLB-20260921-A215F0AB**
+- 默认标准版、720p、月付和每月 30 条。Flash、样片模式、480p、720p、会员周期和预算都使用同一套数据重算。
+- 表头可切换排序方向，图表中的柱可跳回对应档位。并排支持 2 至 4 档，复制链接可恢复条件和所选档位。
+- 结果以实际画布扣分为依据。沿用旧读数时显示留档标记，对应日期和截图在来源区。金额、档位、截图及溯源指纹由原有数据和构建流程生成。
