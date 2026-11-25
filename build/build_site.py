@@ -23,7 +23,7 @@ import subprocess
 from decimal import Decimal, ROUND_HALF_UP
 from html import escape
 
-from compare import COMPARE_CSS, DISCLOSURE_JS, compare_view, membership_anchor
+from compare import COMPARE_CSS, DISCLOSURE_JS, compare_view, membership_anchor, membership_budget_view
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # site/
 DATA = os.path.join(ROOT, "data")
@@ -3491,6 +3491,7 @@ HOME_VIEW, HOME_JS = compare_view(ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR,
 WORKSPACE_VIEW, WORKSPACE_JS = compare_view(
     ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR, PLAT_LG, records_page="cost.html", workspace=True
 )
+MEMBERSHIP_VIEW, MEMBERSHIP_JS = membership_budget_view(ROWS, CANVAS["rows"], PERIODS, COLOR, PLAT_LG)
 RECORD_PANELS = [
     ("membership-prices", "会员价格", membership_details('index.html#compare-results')),
     ("canvas-comparison", "画布扣分", CANVAS_DETAILS),
@@ -3504,11 +3505,12 @@ cost_body = f"""
   <header class="compare-heading records-heading">
     <div><p class="compare-snapshot">数据快照 <time datetime="{UPDATED}">{UPDATED}</time></p>
     <h1 id="compare-records-title">会员报价与来源</h1>
-    <p>查询月付、季付与年付的实付和积分，复核画布扣分与活动。</p></div>
+    <p>按预算看能生成多少条，再核对会员报价与画布扣分。</p></div>
     <nav class="compare-jump-links" aria-label="价格页导航">
-      <a href="index.html">查看成本榜</a><a href="compare.html">方案对比</a>
+      <a href="index.html">查看成本榜</a><a href="#record-sections">原始报价与来源</a>
     </nav>
   </header>
+{MEMBERSHIP_VIEW}
   <nav class="record-sections" aria-label="价格资料" id="record-sections">
     {RECORD_TABS}
   </nav>
@@ -4110,7 +4112,7 @@ PAGES = {
                        extra_js=HOME_JS + DISCLOSURE_JS),
     "cost.html": page("会员报价与来源", f"{len(ROWS)} 个可比较的会员档位，附实测画布扣分、平台活动、采集截图与进阶对比。",
                       nav("cost"), cost_body, cost_js=True, canon="cost", extra_css=COMPARE_CSS,
-                      extra_js=DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
+                      extra_js=MEMBERSHIP_JS + DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
     "compare.html": page("会员方案对比", "按统一规格并排比较会员方案的实付、月产能、单条成本和画布积分。",
                          nav("compare"), WORKSPACE_VIEW + foot(), canon="compare",
                          extra_css=COMPARE_CSS, extra_js=WORKSPACE_JS + DISCLOSURE_JS),

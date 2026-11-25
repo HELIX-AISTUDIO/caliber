@@ -1,4 +1,3 @@
-  const highlights = document.getElementById('compare-highlights');
   const barsFigure = document.getElementById('compare-bar-figure');
   const bars = document.getElementById('compare-bars');
   const barsLabel = document.getElementById('compare-bar-label');
@@ -6,9 +5,11 @@
   const plot = document.getElementById('compare-frontier-plot');
   const frontierList = document.getElementById('compare-frontier-list');
   const pointDetail = document.getElementById('compare-point-detail');
+  const chartPlatforms = document.getElementById('compare-chart-platforms');
   const chartRoot = document.getElementById('compare-tool');
   let currentPoints = [];
   let selected = null;
+  let chartPlatform = '';
 
   function planName(offer) {
     return nameOf(offer.plan.platform) + ' ' + offer.plan.tier;
@@ -31,7 +32,7 @@
   }
 
   function clearCharts() {
-    highlights.hidden = barsFigure.hidden = frontier.hidden = true;
+    barsFigure.hidden = frontier.hidden = true;
     currentPoints = [];
   }
 
@@ -71,36 +72,6 @@
     tint(button, offer);
     button.addEventListener('click', () => action(offer));
     return button;
-  }
-
-  function drawHighlights(offers, months) {
-    highlights.replaceChildren();
-    if (!offers.length) return;
-    const efficiency = offer => offer.pay / (offer.capacity * months);
-    const lowestUnit = offers.filter(offer => offer.capacity > 0)
-      .sort((a,b) => efficiency(a) - efficiency(b) || a.pay - b.pay)[0];
-    const maxCapacity = offers.slice().sort((a,b) => b.capacity - a.capacity || a.pay - b.pay)[0];
-    const insights = [
-      ['全档单条成本最低', lowestUnit,
-       perClip.format(efficiency(lowestUnit)) + ' / 条 · 周期实付 ' + money.format(lowestUnit.pay)],
-      ['全档单账号月产能最高', maxCapacity,
-       maxCapacity.capacity + ' 条/月 · 周期实付 ' + money.format(maxCapacity.pay)]
-    ];
-    for (const [label, offer, description] of insights) {
-      const row = document.createElement('div');
-      const heading = document.createElement('span');
-      heading.textContent = label;
-      const link = document.createElement('button');
-      link.type = 'button';
-      link.append(platformLogo(offer), planName(offer));
-      link.addEventListener('click', () => revealRank(offer));
-      tint(link, offer);
-      const detail = document.createElement('small');
-      detail.textContent = description + (offer.sourceDate ? ' · 扣分沿用留档' : '');
-      row.append(heading, link, detail);
-      highlights.append(row);
-    }
-    highlights.hidden = false;
   }
 
   function drawBars(ranked, byBudget) {
@@ -169,13 +140,34 @@
   function drawFrontier(months) {
     plot.replaceChildren();
     frontierList.replaceChildren();
-    if (!currentPoints.length) return;
+    frontier.hidden = false;
+    const hasPoints = currentPoints.length > 0;
+    frontier.querySelector('.compare-frontier-layout').hidden = !hasPoints;
+    frontier.querySelector('.compare-frontier-data').hidden = !hasPoints;
+    pointDetail.hidden = chartPlatforms.hidden = !hasPoints;
+    const note = document.getElementById('compare-frontier-note');
+    if (!hasPoints) {
+      note.textContent = '当前规格和周期没有可绘图的档位。';
+      return;
+    }
+    const providers = [...new Set(currentPoints.map(offer => offer.plan.platform))];
+    if (!providers.includes(chartPlatform)) chartPlatform = '';
+    chartPlatforms.replaceChildren(...['', ...providers].map(platform => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.chartPlatform = platform;
+      button.setAttribute('aria-pressed', String(platform === chartPlatform));
+      button.textContent = platform ? nameOf(platform) : '全部平台';
+      if (platform) button.style.setProperty('--series', data.colors[platform]);
+      return button;
+    }));
     const byUnit = frontier.querySelector('[name=frontier-metric]:checked').value === 'unit';
     const xValue = offer => byUnit ? offer.pay / (offer.capacity * months) : offer.pay;
-    const sorted = currentPoints.slice().sort((a,b) => xValue(a) - xValue(b) || b.capacity - a.capacity);
+    const shown = chartPlatform ? currentPoints.filter(offer => offer.plan.platform === chartPlatform) : currentPoints;
+    const sorted = shown.slice().sort((a,b) => xValue(a) - xValue(b) || b.capacity - a.capacity);
     const least = xValue(sorted[0]);
     const most = xValue(sorted[sorted.length - 1]);
-    const isLog = most / least >= 12;
+    const isLog = least > 0 && most / least >= 12;
     const low = isLog ? least / 1.17 : 0;
     const high = isLog ? most * 1.17 : axisMax(most * 1.05);
     const xPosition = value => (isLog ? Math.log(value / low) / Math.log(high / low) : value / high) * 100;
@@ -185,13 +177,13 @@
     for (const offer of sorted) {
       if (!leaders.length || offer.capacity > leaders[leaders.length - 1].capacity) leaders.push(offer);
     }
-    document.getElementById('compare-frontier-note').textContent = byUnit
-      ? '越左，单条成本越低。越上，每月能做越多。同等单条成本下，连线标出产能最高的档位。'
-      : '越左，首期花得越少。越上，每月能做越多。连线标出不同预算下能买到的最高月产能。';
+    note.textContent = (byUnit ? '横轴是用完订阅额度后的单条成本。' : '横轴是首期实付。')
+      + '竖轴是每月可做条数。虚线标出当前图中档位的中位数，阶梯线标出同等支出或单价下的最高产能。';
     document.getElementById('compare-frontier-axis').textContent =
       (byUnit ? '用满积分时每条成本（人民币）' : '首期实付（人民币）') + (isLog ? ' · 对数刻度' : '');
-    document.getElementById('compare-frontier-y').textContent = [maxVolume, maxVolume / 2, 0].join('|');
-    document.getElementById('compare-frontier-x').textContent = [0, .5, 1].map(fraction => {
+    document.getElementById('compare-frontier-count').textContent = '图中档位 · ' + sorted.length;
+    document.getElementById('compare-frontier-y').textContent = [1, .75, .5, .25, 0].map(fraction => maxVolume * fraction).join('|');
+    document.getElementById('compare-frontier-x').textContent = [0, .25, .5, .75, 1].map(fraction => {
       const tick = isLog ? low * (high / low) ** fraction : high * fraction;
       return byUnit ? perClip.format(tick) : money.format(Math.round(tick));
     }).join('|');
@@ -204,6 +196,14 @@
       });
       axis.replaceChildren(...ticks);
     }
+    const median = values => (values[(values.length - 1) >> 1] + values[values.length >> 1]) / 2;
+    plot.style.setProperty('--mid-x', xPosition(median(sorted.map(xValue))) + '%');
+    plot.style.setProperty('--mid-y', (100 - median(sorted.map(yPosition).sort((a,b) => a - b))) + '%');
+    const zone = document.createElement('span');
+    zone.className = 'compare-efficient-zone';
+    zone.setAttribute('aria-hidden', 'true');
+    if (sorted.length > 1) zone.textContent = (byUnit ? '低单价' : '低支出') + ' · 高产能';
+    plot.append(zone);
     const namespace = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(namespace, 'svg');
     svg.setAttribute('viewBox', '0 0 100 100');
@@ -223,12 +223,13 @@
     const select = offer => drawPointDetail(offer, months);
     for (const offer of [...sorted.filter(offer => !onFrontier.has(offer)), ...leaders]) {
       const dot = chartButton(offer, 'compare-plot-point', planName(offer) + '，约 ' + offer.capacity + ' 条/月', select);
+      dot.title = planName(offer) + ' · ' + money.format(offer.pay) + ' · ' + offer.capacity + ' 条/月';
       dot.classList.toggle('compare-on-frontier', onFrontier.has(offer));
       dot.style.left = xPosition(xValue(offer)) + '%';
       dot.style.bottom = yPosition(offer) + '%';
       plot.append(dot);
     }
-    for (const offer of leaders) {
+    for (const offer of sorted) {
       const row = chartButton(offer, 'compare-frontier-item', planName(offer) + '，约 ' + offer.capacity + ' 条/月', select);
       const name = document.createElement('span');
       name.textContent = planName(offer);
@@ -238,21 +239,23 @@
       row.append(name, values);
       frontierList.append(row);
     }
-    drawPointDetail(currentPoints.find(offer => offer.plan.id === selected?.plan.id) || leaders[0], months);
-    frontier.hidden = false;
+    drawPointDetail(shown.find(offer => offer.plan.id === selected?.plan.id) || leaders[0], months);
   }
 
   function renderCharts(offers, ranked, byBudget, months) {
     currentPoints = offers.filter(offer => offer.capacity > 0);
-    if (chartView.checked) {
-      drawBars(ranked, byBudget);
-      drawFrontier(months);
-    } else {
-      drawHighlights(currentPoints, months);
-    }
+    if (chartView.checked) drawBars(ranked, byBudget);
+    drawFrontier(months);
   }
 
   frontier?.addEventListener('change', () => drawFrontier(data.periods[period.value][1]));
+  chartPlatforms?.addEventListener('click', event => {
+    const button = event.target.closest('[data-chart-platform]');
+    if (!button) return;
+    chartPlatform = button.dataset.chartPlatform;
+    drawFrontier(data.periods[period.value][1]);
+    chartPlatforms.querySelector('[aria-pressed=true]')?.focus({preventScroll:true});
+  });
   for (const eventType of ['pointerover', 'focusin']) {
     chartRoot.addEventListener(eventType, event => {
       const item = event.target.closest('[data-chart-plan]');

@@ -8,9 +8,10 @@ def membership_anchor(platform):
     return "membership-" + {"即梦": "jimeng", "小云雀": "xiaoyunque"}.get(platform, platform.lower())
 
 
-def compare_view(rows, readings, updated, periods, colors, logos, records_page="", workspace=False):
-    platforms = list(readings)
-    display_names = {"libtv": "LibTV", "Tapnow": "TapNow"}
+DISPLAY_NAMES = {"libtv": "LibTV", "Tapnow": "TapNow"}
+
+
+def compare_dataset(rows, readings, periods, colors, logos, records_page):
     plans = []
     for index, row in enumerate(rows):
         plat = row["plat"]
@@ -22,12 +23,17 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
             "anchor": membership_anchor(plat),
             "periods": {key: [p["payCNY"], p["cr"]] for key, p in row["byP"].items()},
         })
-    data = json.dumps({"plans": plans, "readings": readings, "names": display_names, "colors": colors, "logos": logos,
-                       "recordsPage": records_page,
-                       "periods": {key: [label, months] for key, label, months, _ in periods}},
-                      ensure_ascii=False).replace("<", "\\u003c")
+    return {"plans": plans, "readings": readings, "names": DISPLAY_NAMES, "colors": colors, "logos": logos,
+            "recordsPage": records_page, "periods": {key: [label, months] for key, label, months, _ in periods}}
+
+
+def compare_view(rows, readings, updated, periods, colors, logos, records_page="", workspace=False):
+    platforms = list(readings)
+    dataset = compare_dataset(rows, readings, periods, colors, logos, records_page)
+    plans = dataset["plans"]
+    data = json.dumps(dataset, ensure_ascii=False).replace("<", "\\u003c")
     platform_options = "".join(
-        f'<option value="{escape(name)}">{escape(display_names.get(name, name))}</option>'
+        f'<option value="{escape(name)}">{escape(DISPLAY_NAMES.get(name, name))}</option>'
         for name in platforms
     )
     period_options = "".join(
@@ -71,10 +77,27 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
       <p class="compare-date">Seedance 2.5 · 30 秒 · 16:9 · 全能参考 <a href="{records_page}#compare-records-title">计算依据</a></p>
     </div>
     <nav class="compare-jump-links" aria-label="成本榜目录">
-      <a href="{records_page}#membership-prices">会员价格</a>
+      <a href="#benchmark-board">查看完整榜单</a>
+      <a href="{records_page}#member-budgets">按预算选会员</a>
       <button type="button" data-share="table">复制榜单链接</button>
     </nav>
     </div>
+  </header>
+"""
+    overview = "" if workspace else """
+  <section class="benchmark-overview" id="benchmark-overview" aria-label="成本总览">
+    <div class="overview-panel overview-usage">
+      <header><h2 id="overview-usage-title">常用月用量</h2><p id="overview-scope"></p></header>
+      <div id="overview-cases" class="overview-cases"></div>
+    </div>
+    <div class="overview-panel overview-providers">
+      <header><h2 id="overview-provider-title">各平台达标档位</h2><a href="#benchmark-board">完整榜单</a></header>
+      <div id="overview-platforms" class="overview-platforms"></div>
+    </div>
+  </section>
+  <header class="benchmark-board-title" id="benchmark-board">
+    <div><h2>会员档位榜</h2><p>按规格和周期筛选，点列名排序，点 ＋ 加入对比。</p></div>
+    <a href="#compare-frontier">价格与产能分析</a>
   </header>
 """
     summary = "" if workspace else """
@@ -119,7 +142,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
     tools = f"""
   <form id="compare-form" class="compare-form">
 {heading}
-{summary}
+{overview}
     <div class="benchmark-controls">
     <div class="compare-specs">
       <fieldset id="compare-model" class="compare-choice compare-axis">
@@ -180,6 +203,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
       </details>
     </div>
     </div>
+{summary}
   </form>
 """
     rank = f"""
@@ -197,7 +221,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
     <div id="compare-grid">
       <table aria-label="符合规格的会员方案">
         <thead><tr>
-          <th scope="col">平台与档位</th>
+          <th scope="col"><span class="compare-identity-head"><span>排名</span><span>平台与档位</span></span></th>
           <th scope="col"><button type="button" data-sort="pay" aria-label="按首期实付排序">首期实付</button></th>
           <th scope="col"><button type="button" data-sort="capacity" aria-label="按月产能排序">月产能</button></th>
           <th scope="col"><button type="button" data-sort="unit" aria-label="按每条成本排序"><span class="compare-unit-label">每条成本</span><span class="compare-unit-short" aria-hidden="true">单价</span></button></th>
@@ -209,13 +233,12 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
 {picked}
     <p id="compare-coverage" class="compare-coverage"></p>
     <p id="compare-calc-note" class="compare-calc-note"></p>
-    <div id="compare-highlights" class="compare-highlights" hidden></div>
 {record_links}
     <noscript><p>启用 JavaScript 可以实时计算。<a href="cycles.html#allperiod">查看固定规格的完整对比表</a></p></noscript>
   </section>
   <section id="compare-frontier" class="compare-frontier" aria-labelledby="compare-frontier-title" hidden>
     <header class="compare-result-head">
-      <h2 id="compare-frontier-title">价格与产能前沿</h2>
+      <h2 id="compare-frontier-title">价格与产能分析</h2>
       <fieldset class="compare-choice compare-frontier-mode">
         <legend>横轴</legend>
         <div>
@@ -225,6 +248,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
       </fieldset>
     </header>
     <p id="compare-frontier-note"></p>
+    <div id="compare-chart-platforms" class="compare-chart-platforms" role="group" aria-label="图上平台"></div>
     <div class="compare-frontier-layout">
       <figure class="compare-frontier-chart">
         <figcaption>每月约能做（条）</figcaption>
@@ -233,11 +257,12 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
         <div id="compare-frontier-x" class="compare-frontier-x" aria-hidden="true"></div>
         <div id="compare-frontier-axis" class="compare-frontier-axis"></div>
       </figure>
-      <div class="compare-frontier-side">
-        <div id="compare-point-detail" class="compare-point-detail" aria-live="polite"></div>
-        <div id="compare-frontier-list" class="compare-frontier-list" aria-label="前沿档位"></div>
-      </div>
     </div>
+    <div id="compare-point-detail" class="compare-point-detail" aria-live="polite"></div>
+    <details class="compare-frontier-data">
+      <summary id="compare-frontier-count">图中档位</summary>
+      <div id="compare-frontier-list" class="compare-frontier-list" aria-label="图中档位"></div>
+    </details>
   </section>
 """
     selection = f"""
@@ -268,11 +293,77 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
   <div id="compare-share-status" class="compare-sr-only" role="status"></div>
 </main>
 """
-    return html, COMPARE_JS.replace("__COMPARE_DATA__", data).replace("__COMPARE_CHARTS__", COMPARE_CHARTS)
+    js = (COMPARE_JS.replace("__COMPARE_CHARTS__", COMPARE_CHARTS)
+          .replace("__COMPARE_OVERVIEW__", COMPARE_OVERVIEW)
+          .replace("__COMPARE_OFFER__", COMPARE_OFFER)
+          .replace("__COMPARE_DATA__", data))
+    return html, js
+
+
+def membership_budget_view(rows, readings, periods, colors, logos):
+    dataset = compare_dataset(rows, readings, periods, colors, logos, "cost.html")
+    data = json.dumps(dataset, ensure_ascii=False).replace("<", "\\u003c")
+    period_options = "".join(f'<option value="{key}">{label}</option>' for key, label, _, _ in periods)
+    html = f"""
+  <div class="membership-dashboard" id="member-budgets">
+    <section class="membership-figure" aria-labelledby="member-chart-title">
+      <header><h2 id="member-chart-title">三种预算下能做多少条</h2>
+        <p id="member-figure-note"></p>
+      </header>
+      <form class="member-controls" id="member-controls">
+        <label>生成模式<select name="model">
+          <option value="0">标准版</option><option value="2">Flash</option><option value="4">样片模式</option>
+        </select></label>
+        <label>分辨率<select name="res"><option value="0">480p</option><option value="1" selected>720p</option></select></label>
+        <label>会员周期<select name="period">{period_options}</select></label>
+        <label class="member-metric-control">比较指标<select name="metric"><option value="capacity">月产能</option><option value="unit">单条均价</option></select></label>
+      </form>
+      <figure class="member-bars" id="member-bars" aria-label="按预算分组的会员比较"></figure>
+      <p class="member-chart-hint">点柱条可用这一预算筛选套餐。每条视频按 30 秒、16:9、全能参考计算。</p>
+    </section>
+    <section id="member-picker" class="member-picker" aria-labelledby="member-picker-title">
+      <header><h2 id="member-picker-title">按预算选会员</h2>
+        <p>预算按首期实付总额计算。选平台可以查看它的每个预算内档位。</p>
+      </header>
+      <div class="member-picker-layout">
+        <aside class="member-rail" aria-label="套餐筛选">
+          <label class="member-custom">预算上限（元）<input id="member-amount" type="number" inputmode="decimal"
+            value="1000" min="1" max="1000000" step="0.01" required></label>
+          <div id="member-bands" class="member-filter-items" role="group" aria-label="常用预算"></div>
+          <h3>平台</h3>
+          <div id="member-providers" class="member-filter-items" role="group" aria-label="预算内的平台"></div>
+        </aside>
+        <div class="member-results">
+          <p id="member-status" class="member-status" role="status"></p>
+          <div id="member-plans" class="member-plans"></div>
+          <div id="member-picks" class="member-picks" hidden>
+            <span id="member-pick-count" role="status"></span><button id="member-clear" type="button">清空</button>
+            <a id="member-compare" hidden>查看对比</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+"""
+    js = COMPARE_BUDGET.replace("__COMPARE_OFFER__", COMPARE_OFFER).replace("__COMPARE_DATA__", data)
+    return html, js
 
 
 COMPARE_CSS = Path(__file__).with_name("compare_style.css").read_text(encoding="utf-8")
 COMPARE_CHARTS = Path(__file__).with_name("compare_charts.js").read_text(encoding="utf-8")
+COMPARE_OVERVIEW = Path(__file__).with_name("compare_overview.js").read_text(encoding="utf-8")
+COMPARE_BUDGET = Path(__file__).with_name("compare_budget.js").read_text(encoding="utf-8")
+COMPARE_OFFER = r"""
+  function offerAt(plan, spec, periodKey) {
+    const reading = data.readings[plan.platform][spec];
+    const pricing = plan.periods[periodKey];
+    if (!pricing || typeof reading === 'string') return null;
+    const [pay, monthlyCredits] = pricing;
+    const credits = typeof reading === 'number' ? reading : reading.credits;
+    return {plan, pay, capacity:Math.floor(monthlyCredits / credits), monthlyCredits,
+      creditsPerClip:credits, sourceDate:reading.sourceDate};
+  }
+""".strip("\n")
 
 
 COMPARE_JS = r"""
@@ -333,6 +424,8 @@ COMPARE_JS = r"""
   let includeAll = false;
   let sort = null;
   __COMPARE_CHARTS__
+  __COMPARE_OVERVIEW__
+  __COMPARE_OFFER__
   mode.value = defaultMode;
   for (const [key, group] of [['model', model], ['res', resolution], ['period', period]]) {
     const value = query.get(key);
@@ -362,10 +455,12 @@ COMPARE_JS = r"""
     sort = {key:sortFromLink, descending:sortDirection === 'desc'};
   }
 
+  const returningToBudget = workspace && query.get('from') === 'member';
+
   function stateLink(toWorkspace, keepPicks) {
     const input = mode.value === 'budget' ? budget : target;
     const path = toWorkspace && !workspace ? 'compare.html'
-      : (!toWorkspace && workspace ? 'index.html' : location.pathname);
+      : (!toWorkspace && workspace ? (returningToBudget ? 'cost.html' : 'index.html') : location.pathname);
     const link = new URL(path, location.href);
     link.search = new URLSearchParams({model:model.value, res:resolution.value,
       period:period.value, mode:mode.value, amount:input.validity.valid ? input.value : input.defaultValue});
@@ -379,6 +474,15 @@ COMPARE_JS = r"""
     if (keepPicks) {
       for (const id of picked) link.searchParams.append('plan', data.plans[id].key);
       if (!toWorkspace) link.searchParams.set('view', 'table');
+    }
+    if (returningToBudget) {
+      if (toWorkspace) link.searchParams.set('from', 'member');
+      else {
+        link.hash = 'member-picker';
+        link.searchParams.set('mode', 'budget');
+        link.searchParams.set('amount', budget.valueAsNumber >= 1 && budget.valueAsNumber <= 1000000
+          ? budget.value : budget.defaultValue);
+      }
     }
     return link;
   }
@@ -466,16 +570,6 @@ COMPARE_JS = r"""
         option.disabled = picked.has(plan.id);
       }
     }
-  }
-
-  function offerAt(plan, spec, periodKey){
-    const reading = data.readings[plan.platform][spec];
-    const pricing = plan.periods[periodKey];
-    if (!pricing || typeof reading === 'string') return null;
-    const [pay, monthlyCredits] = pricing;
-    const credits = typeof reading === 'number' ? reading : reading.credits;
-    return {plan, pay, capacity:Math.floor(monthlyCredits / credits), monthlyCredits,
-      creditsPerClip:credits, sourceDate:reading.sourceDate};
   }
 
   function renderSelection(spec, scope, fits, unitCost, reasonFor, issue){
@@ -567,6 +661,7 @@ COMPARE_JS = r"""
     const reasonFor = offer => byBudget ? (offer.pay > amount ? '超预算' : '额度不足') : '未达用量';
     if (workspace) {
       selectionBack.href = stateLink(false, true);
+      if (returningToBudget) selectionBack.textContent = '返回按预算选会员';
       renderSelection(spec, specName + ' · ' + cycle[0] + (issue ? '' : ' · ' + scenario), fits, unitCost, reasonFor, issue);
       syncPicks();
       if (!issue) {
@@ -594,11 +689,6 @@ COMPARE_JS = r"""
     showAll.hidden = true;
     answerLink.hidden = true;
     clearCharts();
-    if (issue) {
-      result.textContent = issue;
-      syncPicks();
-      return;
-    }
     for (const [name, cells] of Object.entries(data.readings)) {
       if (!matchesPlatform(name)) continue;
       const reading = cells[spec];
@@ -619,6 +709,12 @@ COMPARE_JS = r"""
     }
     const rankBy = byBudget ? (a,b) => b.capacity - a.capacity || a.pay - b.pay
       : (a,b) => a.pay - b.pay || b.capacity - a.capacity;
+    if (issue) {
+      drawOverview(offers, new Map(), rankBy, byBudget, {spec, specName, cycle, amount, issue});
+      result.textContent = issue;
+      syncPicks();
+      return;
+    }
     const matched = offers.filter(fits).sort(rankBy);
     const best = matched[0];
     const highestCapacity = Math.max(0, ...offers.map(offer => offer.capacity));
@@ -735,7 +831,10 @@ COMPARE_JS = r"""
         provider.append(archive);
       }
       provider.append(detail);
-      identity.append(rank, platformLogo(offer), provider);
+      const brand = document.createElement('span');
+      brand.className = 'compare-brand-wrap';
+      brand.append(platformLogo(offer));
+      identity.append(rank, brand, provider);
       title.append(identity);
       const matchedOffer = index < ranked.length;
       addMetric(tr, money.format(offer.pay), offer.pay, payMax, matchedOffer && sortKey === 'pay');
@@ -758,6 +857,7 @@ COMPARE_JS = r"""
     if (short.length) notes.push(short.map(nameOf).join('、') + (byBudget ? ' 在当前预算内暂无可用档位' : ' 的单账号档位未达用量'));
     if (excluded.length) notes.push('当前未计入：' + excluded.join('、'));
     coverage.textContent = notes.join('。') + (notes.length ? '。' : '');
+    drawOverview(offers, platformLeaders, rankBy, byBudget, {spec, specName, cycle, amount});
     renderCharts(offers, ranked, byBudget, cycle[1]);
   }
   form.addEventListener('submit', event => event.preventDefault());
