@@ -56,5 +56,32 @@
   "region": "cn",
   "recurring": true,
   "tierLabel": "标准/高级/至尊"
+ },
+ "updream": {
+  "name": "updream",
+  "color": "#974d9b",
+  "currency": "CNY",
+  "region": "cn",
+  "recurring": true,
+  "quarterly": false,
+  "tierLabel": "Pro/Max/Ultra"
+ },
+ "RunningHub RHTV": {
+  "name": "RunningHub RHTV",
+  "color": "#577027",
+  "currency": "CNY",
+  "region": "cn",
+  "recurring": true,
+  "quarterly": false,
+  "tierLabel": "入门/初创/畅享/专家/大师"
+ },
+ "PixTV": {
+  "name": "PixTV",
+  "color": "#6254a5",
+  "currency": "USD",
+  "region": "global",
+  "recurring": true,
+  "quarterly": false,
+  "tierLabel": "STARTER/PRO/MAX/ULTRA"
  }
 }

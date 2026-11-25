@@ -3,7 +3,7 @@
   "type": "cost",
   "title": "平台成本对比",
   "eyebrow": "Cost Benchmark · Seedance 2.5",
-  "updatedAt": "2026-11-20",
+  "updatedAt": "2026-11-25",
   "spec": {
     "text": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考",
     "secondsPerClip": 30,
@@ -14,7 +14,7 @@
     "rate": 6.7131,
     "asOf": "2026-11-20",
     "source": "中国外汇交易中心（CFETS）人民币对美元中间价",
-    "note": "使用当日人民币汇率中间价。支付时的实际汇率、税费和手续费以付款渠道为准。"
+    "note": "统一沿用 2026-11-20 人民币中间价。支付时的实际汇率、税费和手续费以付款渠道为准。"
   },
   "creditsPerVideo": {
     "libtv": 1380,
@@ -23,7 +23,8 @@
     "小云雀": 600,
     "Higgsfield": 210,
     "Tapnow": 1200,
-    "Seko": 540
+    "Seko": 540,
+    "RunningHub RHTV": 5670
   },
   "creditsSource": {
     "libtv": "画布生成按钮预估扣分",
@@ -32,7 +33,10 @@
     "小云雀": "画布生成按钮预估扣分",
     "Higgsfield": "画布生成按钮预估扣分",
     "Tapnow": "2026-09-21 站内留档的标准版 720p 用户记录，本轮会员锁定待复测。",
-    "Seko": "画布生成按钮预估扣分"
+    "Seko": "画布生成按钮预估扣分",
+    "updream": "视频节点有标准、Flash、样片入口。采集账号选择标准版时弹出会员解锁。",
+    "RunningHub RHTV": "画布全能参考，16:9、30 秒、开启音频。标准 720p 两次预估均为 5,670 分。此处取画布基础价，会员折扣与限时优惠另见官方活动。",
+    "PixTV": "画布标准版与 Flash 已试 480p、720p，均可设 16:9、30 秒、全能参考。生成前界面没有显示扣分，样片规格待核实。"
   },
   "plans": [
     {
@@ -633,7 +637,10 @@
           "credits": 500,
           "price": 576,
           "m": 39,
-          "listPrice": {"m": 60, "y": 720}
+          "listPrice": {
+            "m": 60,
+            "y": 720
+          }
         }
       ]
     },
@@ -645,7 +652,10 @@
           "credits": 3000,
           "price": 2880,
           "m": 220,
-          "listPrice": {"m": 300, "y": 3600}
+          "listPrice": {
+            "m": 300,
+            "y": 3600
+          }
         }
       ]
     },
@@ -657,7 +667,255 @@
           "credits": 10000,
           "price": 8400,
           "m": 660,
-          "listPrice": {"m": 875, "y": 10500}
+          "listPrice": {
+            "m": 875,
+            "y": 10500
+          }
+        }
+      ]
+    },
+    {
+      "platform": "updream",
+      "tier": "Pro",
+      "credits": [
+        {
+          "credits": 19800,
+          "m": 159,
+          "price": 949,
+          "yearOneOff": true,
+          "monthOneOffPrice": 198,
+          "listPrice": {
+            "y": 2376
+          }
+        }
+      ]
+    },
+    {
+      "platform": "updream",
+      "tier": "Max",
+      "credits": [
+        {
+          "credits": 64800,
+          "m": 499,
+          "price": 3109,
+          "yearOneOff": true,
+          "monthOneOffPrice": 648,
+          "listPrice": {
+            "y": 7776
+          }
+        }
+      ]
+    },
+    {
+      "platform": "updream",
+      "tier": "Ultra",
+      "credits": [
+        {
+          "credits": 131400,
+          "m": 999,
+          "price": 6309,
+          "yearOneOff": true,
+          "monthOneOffPrice": 1314,
+          "listPrice": {
+            "y": 15768
+          }
+        }
+      ]
+    },
+    {
+      "platform": "RunningHub RHTV",
+      "tier": "入门版",
+      "credits": [
+        {
+          "credits": 3500,
+          "m": 35,
+          "price": 389,
+          "yearOneOff": true,
+          "mOneOff": false,
+          "listPrice": {
+            "m": 49,
+            "y": 589
+          }
+        }
+      ]
+    },
+    {
+      "platform": "RunningHub RHTV",
+      "tier": "初创版",
+      "credits": [
+        {
+          "credits": 8900,
+          "m": 89,
+          "price": 899,
+          "yearOneOff": true,
+          "mOneOff": false,
+          "listPrice": {
+            "m": 119,
+            "y": 1399
+          }
+        }
+      ]
+    },
+    {
+      "platform": "RunningHub RHTV",
+      "tier": "畅享版-A",
+      "credits": [
+        {
+          "credits": 19300,
+          "m": 189,
+          "price": 1389,
+          "yearOneOff": true,
+          "mOneOff": false,
+          "listPrice": {
+            "m": 239,
+            "y": 2399
+          }
+        }
+      ]
+    },
+    {
+      "platform": "RunningHub RHTV",
+      "tier": "畅享版-B",
+      "credits": [
+        {
+          "credits": 45800,
+          "m": 449,
+          "price": 2799,
+          "yearOneOff": true,
+          "mOneOff": false,
+          "listPrice": {
+            "m": 569,
+            "y": 6499
+          }
+        }
+      ]
+    },
+    {
+      "platform": "RunningHub RHTV",
+      "tier": "畅享版-C",
+      "credits": [
+        {
+          "credits": 65200,
+          "m": 639,
+          "price": 3999,
+          "yearOneOff": true,
+          "mOneOff": false,
+          "listPrice": {
+            "m": 829,
+            "y": 9199
+          }
+        }
+      ]
+    },
+    {
+      "platform": "RunningHub RHTV",
+      "tier": "专家版",
+      "credits": [
+        {
+          "credits": 123100,
+          "m": 1099,
+          "price": 6799,
+          "yearOneOff": true,
+          "mOneOff": true,
+          "listPrice": {
+            "m": 1399,
+            "y": 16789
+          }
+        }
+      ]
+    },
+    {
+      "platform": "RunningHub RHTV",
+      "tier": "大师版-A",
+      "credits": [
+        {
+          "credits": 197000,
+          "m": 1699,
+          "price": 9399,
+          "yearOneOff": true,
+          "mOneOff": true,
+          "listPrice": {
+            "m": 2199,
+            "y": 26399
+          }
+        }
+      ]
+    },
+    {
+      "platform": "RunningHub RHTV",
+      "tier": "大师版-B",
+      "credits": [
+        {
+          "credits": 285800,
+          "m": 2199,
+          "price": 11999,
+          "yearOneOff": true,
+          "mOneOff": true,
+          "listPrice": {
+            "m": 2899,
+            "y": 33999
+          }
+        }
+      ]
+    },
+    {
+      "platform": "RunningHub RHTV",
+      "tier": "大师版-C",
+      "credits": [
+        {
+          "credits": 409000,
+          "m": 3099,
+          "price": 15999,
+          "yearOneOff": true,
+          "mOneOff": true,
+          "listPrice": {
+            "m": 4399,
+            "y": 49999
+          }
+        }
+      ]
+    },
+    {
+      "platform": "PixTV",
+      "tier": "STARTER",
+      "credits": [
+        {
+          "credits": 1000,
+          "m": 10,
+          "price": 100
+        }
+      ]
+    },
+    {
+      "platform": "PixTV",
+      "tier": "PRO",
+      "credits": [
+        {
+          "credits": 6000,
+          "m": 60,
+          "price": 500
+        }
+      ]
+    },
+    {
+      "platform": "PixTV",
+      "tier": "MAX",
+      "credits": [
+        {
+          "credits": 24500,
+          "m": 245,
+          "price": 2000
+        }
+      ]
+    },
+    {
+      "platform": "PixTV",
+      "tier": "ULTRA",
+      "credits": [
+        {
+          "credits": 70000,
+          "m": 700,
+          "price": 5000
         }
       ]
     }
@@ -668,7 +926,7 @@
   "scope": {
     "current": "年费 / 季付 / 月付 三周期",
     "currentShort": "年付 · 季付 · 月付",
-    "impact": "会员价格与标准版 720p 成本覆盖七家平台。即梦和 TapNow 按 9 月 21 日留档扣分估算。美元按当日人民币汇率中间价折算。",
+    "impact": "覆盖十家平台的会员报价，八家具备标准版 720p 计算依据。即梦和 TapNow 沿用 9 月 21 日留档扣分。美元统一使用 11 月 20 日人民币中间价。",
     "promoRule": "限时生成折扣、赠积分、赠时长和免费条数以本页活动栏为准，排名以基础配置计算。",
     "items": [
       {
@@ -698,7 +956,7 @@
     ]
   },
   "priceRule": "按所选周期的首期价格 ÷ 基础订阅积分 × 画布预估扣分折算；赠送积分和会员月数见活动。",
-  "liveNote": "即梦和 TapNow 的标准版 720p 成本使用 2026-09-21 站内留档扣分，搭配本轮会员价格计算。其余缺少画布读数的规格保留待核实状态。",
+  "liveNote": "即梦和 TapNow 的标准版 720p 成本使用 2026-09-21 站内留档扣分，搭配本轮会员价格计算。其余缺少画布读数的规格保留待核实状态。 RHTV 使用画布基础预估，活动优惠另列。updream 与 PixTV 可比较官方报价和积分，画布扣分待核实。",
   "recurringNote": "连续订阅到期会自动续费。首期和续费是两次扣款，表内分别列出。一次性付费档到期后按平台规则处理。",
   "retryPolicy": [
     {
@@ -788,6 +1046,21 @@
       "page": "即梦与 TapNow 扣分留档",
       "url": "https://github.com/HELIX-AISTUDIO/caliber/blob/8e060b29c6ad5e781864e2a4cbc65b602c77a852/data/cost-seedance25.json",
       "data": "2026-09-21 标准版 · 720p · 16:9 · 30 秒 · 全能参考。即梦 600 积分，TapNow 1,200 积分。"
+    },
+    {
+      "page": "updream 官方会员方案",
+      "url": "https://www.updream.cn/",
+      "data": "已核个人会员三档的连续包月、一次性单月及年付。部分年付活动加送 1 个月，邀请码赠分需满足活动条件。720p 会员卡的示例时长为约 102、332、674 秒。 视频节点有标准、Flash、样片入口。采集账号选择标准版时弹出会员解锁。"
+    },
+    {
+      "page": "RunningHub RHTV 官方会员方案",
+      "url": "https://www.runninghub.cn/vip-rights",
+      "data": "已核九个积分档的月费和年付。入门、初创、畅享档的月费自动续订，专家和大师月费为一次性购买。年付按月发积分，部分年卡活动多送 1 至 3 个月。 画布全能参考，16:9、30 秒、开启音频。标准 720p 两次预估均为 5,670 分。此处取画布基础价，会员折扣与限时优惠另见官方活动。"
+    },
+    {
+      "page": "PixTV 官方会员方案",
+      "url": "https://www.pixtv.ai/zh-CN/ai-video-generator",
+      "data": "已核个人会员四档的月付、年费实付和月积分。官方列出的 Seedance 2.5 720p 低至 $0.048/秒为限时示例。 画布标准版与 Flash 已试 480p、720p，均可设 16:9、30 秒、全能参考。生成前界面没有显示扣分，样片规格待核实。"
     }
   ],
   "platformReview": {
@@ -839,6 +1112,30 @@
       "creditDate": "2026-09-21",
       "offer": "黑五年付最高减 50%、季付最高减 40%。指定年付档赠 2、4 或 7 天 Seedance 2.5 免积分；以所选档位权益为准。采集价格为美元。",
       "creditPending": true
+    },
+    "updream": {
+      "url": "https://www.updream.cn/",
+      "priceDate": "2026-11-25",
+      "creditDate": "2026-11-25",
+      "offer": "已核个人会员三档的连续包月、一次性单月及年付。部分年付活动加送 1 个月，邀请码赠分需满足活动条件。720p 会员卡的示例时长为约 102、332、674 秒。",
+      "creditPending": true,
+      "creditNote": "视频节点有标准、Flash、样片入口。采集账号选择标准版时弹出会员解锁。"
+    },
+    "RunningHub RHTV": {
+      "url": "https://www.runninghub.cn/vip-rights",
+      "priceDate": "2026-11-25",
+      "creditDate": "2026-11-25",
+      "offer": "已核九个积分档的月费和年付。入门、初创、畅享档的月费自动续订，专家和大师月费为一次性购买。年付按月发积分，部分年卡活动多送 1 至 3 个月。",
+      "creditPending": false,
+      "creditNote": "画布全能参考，16:9、30 秒、开启音频。标准 720p 两次预估均为 5,670 分。此处取画布基础价，会员折扣与限时优惠另见官方活动。"
+    },
+    "PixTV": {
+      "url": "https://www.pixtv.ai/zh-CN/ai-video-generator",
+      "priceDate": "2026-11-25",
+      "creditDate": "2026-11-25",
+      "offer": "已核个人会员四档的月付、年费实付和月积分。官方列出的 Seedance 2.5 720p 低至 $0.048/秒为限时示例。",
+      "creditPending": true,
+      "creditNote": "画布标准版与 Flash 已试 480p、720p，均可设 16:9、30 秒、全能参考。生成前界面没有显示扣分，样片规格待核实。"
     }
   },
   "offerBenefits": [
@@ -970,7 +1267,7 @@
     }
   ],
   "canvasTests": {
-    "date": "2026-11-20",
+    "date": "2026-11-25",
     "columns": [
       "标准版 480p",
       "标准版 720p",
@@ -1047,6 +1344,30 @@
         "会员解锁",
         "会员解锁",
         "仅 480p"
+      ],
+      "updream": [
+        "会员解锁",
+        "会员解锁",
+        "会员解锁",
+        "会员解锁",
+        "会员解锁",
+        "会员解锁"
+      ],
+      "RunningHub RHTV": [
+        2522,
+        5670,
+        1658,
+        3726,
+        2522,
+        "仅 480p"
+      ],
+      "PixTV": [
+        "画布未显示",
+        "画布未显示",
+        "画布未显示",
+        "画布未显示",
+        "待核实",
+        "待核实"
       ]
     }
   },

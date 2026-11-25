@@ -5,7 +5,8 @@ from pathlib import Path
 
 
 def membership_anchor(platform):
-    return "membership-" + {"即梦": "jimeng", "小云雀": "xiaoyunque"}.get(platform, platform.lower())
+    return "membership-" + {"即梦": "jimeng", "小云雀": "xiaoyunque",
+                            "RunningHub RHTV": "runninghub-rhtv"}.get(platform, platform.lower())
 
 
 DISPLAY_NAMES = {"libtv": "LibTV", "Tapnow": "TapNow"}
@@ -71,15 +72,16 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
 """ if workspace else f"""
   <header id="cost" class="benchmark-heading">
     <div class="benchmark-intro">
-      <h1>视频生成的<br>会员成本怎么算</h1>
-      <p class="benchmark-intro-copy">在相同的视频规格下，比较各平台要付多少钱、每月能做多少条。</p>
+      <h1>同一套视频规格<br>比较各平台会员成本</h1>
+      <p class="benchmark-intro-copy">按月用量或预算，查看首期实付、月产能和每条成本。</p>
       <nav class="benchmark-intro-links" aria-label="开始比较">
         <a class="benchmark-primary" href="#benchmark-board">查看完整榜单</a>
         <a href="{records_page}#member-budgets">按预算选会员</a>
+        <a href="glossary.html#scope">计算口径</a>
       </nav>
       <div class="benchmark-sample">
         <div class="benchmark-platform-marks" aria-hidden="true">{platform_marks}</div>
-        <p><b>{len(platforms)} 家平台</b> · {len(plans)} 个会员档位 · <time datetime="{updated}">{updated}</time> 采集</p>
+        <p><span><b>{len(platforms)}</b> 家平台</span><span><b>{len(plans)}</b> 个会员档位</span><time datetime="{updated}">{updated} 更新</time></p>
       </div>
     </div>
     <figure class="benchmark-profile" aria-labelledby="profile-title" hidden>
@@ -88,10 +90,14 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
           <h2 id="profile-title">每月 30 条的首期实付</h2>
           <p id="profile-scope"></p>
         </div>
-        <a id="profile-evidence" class="profile-link" hidden>报价明细</a>
+        <button type="button" id="profile-toggle" aria-expanded="false" aria-controls="profile-calculation" hidden>积分明细</button>
       </figcaption>
       <div id="profile-rows" class="profile-rows"></div>
-      <p class="profile-note">Seedance 2.5 · 30 秒 · 16:9 · 全能参考 <a href="{records_page}#compare-records-title">计算依据</a></p>
+      <div id="profile-calculation" class="profile-calculation" hidden>
+        <dl id="profile-metrics"></dl>
+        <a href="{records_page}#canvas-comparison">查看画布扣分依据</a>
+      </div>
+      <p class="profile-note"><span>Seedance 2.5 · 30 秒 · 16:9 · 全能参考</span> <a id="profile-evidence" hidden>报价来源</a></p>
     </figure>
   </header>
 """
@@ -107,7 +113,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
     </div>
   </section>
   <header class="benchmark-board-title" id="benchmark-board">
-    <div><h2>会员档位榜</h2><p>按规格和周期筛选，点列名排序，点 ＋ 加入对比。</p></div>
+    <div><h2>会员档位榜</h2><p>默认展示每家平台的达标档位，可切换档位或加入对比。</p></div>
     <div class="compare-jump-links">
       <a href="#compare-frontier">价格与产能分析</a>
       <button type="button" data-share="table">复制榜单链接</button>
@@ -237,7 +243,8 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
     </header>
     <figure id="compare-bar-figure" class="compare-bar-figure" hidden>
       <figcaption id="compare-bar-label"></figcaption>
-      <div class="compare-bars-scroll"><div id="compare-bars" class="compare-bars"></div></div>
+      <div class="compare-bars-scroll" role="region" aria-label="档位柱形图，窄屏可横向滚动" tabindex="0"><div id="compare-bars" class="compare-bars"></div></div>
+      <p id="compare-bar-feedback" class="chart-feedback">指向或聚焦柱条查看档位数据。点选可跳到榜单中的对应档位。</p>
     </figure>
     <div id="compare-grid">
       <table aria-label="符合规格的会员方案">
@@ -272,14 +279,16 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
     <div id="compare-chart-platforms" class="compare-chart-platforms" role="group" aria-label="图上平台"></div>
     <div class="compare-frontier-layout">
       <figure class="compare-frontier-chart">
-        <figcaption>每月约能做（条）</figcaption>
+        <figcaption>月产能（条）</figcaption>
         <div id="compare-frontier-y" class="compare-frontier-y" aria-hidden="true"></div>
         <div id="compare-frontier-plot" class="compare-frontier-plot" role="group" aria-label="可点击的会员档位散点"></div>
         <div id="compare-frontier-x" class="compare-frontier-x" aria-hidden="true"></div>
         <div id="compare-frontier-axis" class="compare-frontier-axis"></div>
       </figure>
+      <p class="compare-frontier-key" aria-label="图例"><span>同等支出或单价下的最高月产能</span><span>当前档位中位数</span></p>
+      <p id="compare-frontier-feedback" class="chart-feedback">指向或聚焦散点预览数据。点选可固定档位明细。</p>
     </div>
-    <div id="compare-point-detail" class="compare-point-detail" aria-live="polite"></div>
+    <div id="compare-point-detail" class="compare-point-detail" aria-live="polite" hidden></div>
     <details class="compare-frontier-data">
       <summary id="compare-frontier-count">图中档位</summary>
       <div id="compare-frontier-list" class="compare-frontier-list" aria-label="图中档位"></div>
@@ -296,18 +305,17 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
       <div id="workspace-shortcuts" class="workspace-shortcuts" aria-label="快速选择"></div>
     </header>
     <p id="workspace-picker-error" class="workspace-picker-error" role="status" hidden></p>
-    <div class="workspace-catalog">
+    <div class="workspace-candidates">
+      <label class="compare-search workspace-search">
+        <input id="workspace-search" type="search" aria-label="搜索平台、档位或积分" placeholder="搜索平台、档位或积分" autocomplete="off">
+      </label>
       <div id="workspace-platforms" class="workspace-platforms" role="group" aria-label="按平台筛选"></div>
-      <div class="workspace-candidates">
-        <label class="compare-search workspace-search">
-          <input id="workspace-search" type="search" aria-label="搜索平台、档位或积分" placeholder="搜索平台、档位或积分" autocomplete="off">
-        </label>
-        <div class="workspace-list-head">
-          <p id="workspace-plan-status" class="workspace-plan-status" role="status"></p>
-          <button type="button" id="workspace-plan-more" class="workspace-plan-more" aria-controls="workspace-plan-grid" aria-expanded="false" hidden>显示全部档位</button>
-        </div>
-        <div id="workspace-plan-grid" class="workspace-plan-grid" aria-label="可选档位"></div>
+      <div class="workspace-list-head">
+        <p id="workspace-plan-status" class="workspace-plan-status" role="status"></p>
+        <button type="button" id="workspace-plan-more" class="workspace-plan-more" aria-controls="workspace-plan-grid" aria-expanded="false" hidden>显示全部档位</button>
+        <button type="button" id="workspace-search-clear" class="workspace-plan-more" hidden>清除搜索</button>
       </div>
+      <div id="workspace-plan-grid" class="workspace-plan-grid" aria-label="可选档位"></div>
     </div>
 {picked}
     <noscript><p>启用 JavaScript 后可选择档位。<a href="cycles.html#allperiod">查看会员档位表</a></p></noscript>
@@ -323,6 +331,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
         <button type="button" data-share="selected" hidden>复制对比链接</button>
       </div>
     </header>
+    <p id="compare-selection-swipe" class="compare-selection-swipe" hidden>横向滑动查看其余档位。</p>
     <div id="compare-selection-table" class="compare-selection-scroll" role="region" aria-label="所选档位的费用与积分" tabindex="0"></div>
     <p id="compare-calc-note" class="compare-calc-note"></p>
 {record_links}
@@ -346,7 +355,20 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
 def membership_budget_view(rows, readings, periods, colors, logos):
     dataset = compare_dataset(rows, readings, periods, colors, logos, "cost.html")
     data = json.dumps(dataset, ensure_ascii=False).replace("<", "\\u003c")
-    period_options = "".join(f'<option value="{key}">{label}</option>' for key, label, _, _ in periods)
+
+    def choices(name, caption, options, selected):
+        radios = "".join(
+            f'<label><input type="radio" name="{name}" value="{escape(value)}"'
+            f'{" checked" if value == selected else ""}><span>{escape(label)}</span></label>'
+            for value, label in options
+        )
+        return (f'<fieldset class="compare-choice member-{name}-control">'
+                f'<legend>{caption}</legend><div>{radios}</div></fieldset>')
+
+    model_choice = choices("model", "生成模式", [("0", "标准版"), ("2", "Flash"), ("4", "样片模式")], "0")
+    resolution_choice = choices("res", "分辨率", [("0", "480p"), ("1", "720p")], "1")
+    period_choice = choices("period", "会员周期", [(key, label) for key, label, _, _ in periods], "m")
+    metric_choice = choices("metric", "比较指标", [("capacity", "月产能"), ("unit", "单条均价")], "capacity")
     html = f"""
   <div class="membership-dashboard" id="member-budgets">
     <section class="membership-figure" aria-labelledby="member-chart-title">
@@ -354,15 +376,14 @@ def membership_budget_view(rows, readings, periods, colors, logos):
         <p id="member-figure-note"></p>
       </header>
       <form class="member-controls" id="member-controls">
-        <label>生成模式<select name="model">
-          <option value="0">标准版</option><option value="2">Flash</option><option value="4">样片模式</option>
-        </select></label>
-        <label>分辨率<select name="res"><option value="0">480p</option><option value="1" selected>720p</option></select></label>
-        <label>会员周期<select name="period">{period_options}</select></label>
-        <label class="member-metric-control">比较指标<select name="metric"><option value="capacity">月产能</option><option value="unit">单条均价</option></select></label>
+        {model_choice}
+        {resolution_choice}
+        {period_choice}
+        {metric_choice}
       </form>
       <figure class="member-bars" id="member-bars" aria-label="按预算分组的会员比较"></figure>
-      <p class="member-chart-hint">点柱条可用这一预算筛选套餐。每条视频按 30 秒、16:9、全能参考计算。</p>
+      <p id="member-chart-hint" class="member-chart-hint">指向或聚焦柱条查看档位数据。点选可按预算和平台筛选套餐。</p>
+      <p class="member-chart-method">每条视频按 30 秒、16:9、全能参考计算。</p>
     </section>
     <section id="member-picker" class="member-picker" aria-labelledby="member-picker-title">
       <header><h2 id="member-picker-title">按预算选会员</h2>
@@ -442,6 +463,7 @@ COMPARE_JS = r"""
   const selectionTitle = document.getElementById('compare-selection-title');
   const selectionScope = document.getElementById('compare-selection-scope');
   const selectionTable = document.getElementById('compare-selection-table');
+  const selectionSwipe = document.getElementById('compare-selection-swipe');
   const selectionBack = document.getElementById('compare-selection-back');
   const shareSelection = root.querySelector('[data-share=selected]');
   const shareStatus = document.getElementById('compare-share-status');
@@ -465,6 +487,7 @@ COMPARE_JS = r"""
   const sortLabels = {pay:'实付', capacity:'产能', unit:'每条成本'};
   let includeAll = false;
   let sort = null;
+  let expandedTierPlatform = '';
   __COMPARE_CHARTS__
   __COMPARE_OVERVIEW__
   __COMPARE_OFFER__
@@ -483,6 +506,7 @@ COMPARE_JS = r"""
   }
   if (platform && [...platform.options].some(option => option.value === query.get('platform'))) platform.value = query.get('platform');
   if (search) search.value = query.get('q') || '';
+  if (chartView && query.get('view') === 'chart') chartView.checked = true;
   includeAll = query.get('all') === '1';
   for (const key of query.getAll('tier').slice(0, Object.keys(data.readings).length)) {
     const plan = data.plans.find(item => item.key === key);
@@ -512,11 +536,16 @@ COMPARE_JS = r"""
     if (provider) link.searchParams.set('platform', provider);
     if (keyword) link.searchParams.set('q', keyword);
     if (sort) link.searchParams.set('sort', sort.key + (sort.descending ? '-desc' : '-asc'));
+    const chart = chartView ? chartView.checked : query.get('view') === 'chart';
+    if (chart) link.searchParams.set('view', 'chart');
+    if (!toWorkspace && !returningToBudget) {
+      if (!chart) link.searchParams.set('view', 'table');
+      link.hash = 'benchmark-board';
+    }
     if (includeAll) link.searchParams.set('all', '1');
     for (const id of rowPlans.values()) link.searchParams.append('tier', data.plans[id].key);
     if (keepPicks) {
       for (const id of picked) link.searchParams.append('plan', data.plans[id].key);
-      if (!toWorkspace) link.searchParams.set('view', 'table');
     }
     if (returningToBudget) {
       if (toWorkspace) link.searchParams.set('from', 'member');
@@ -532,7 +561,7 @@ COMPARE_JS = r"""
   }
 
   // 已分享的旧版榜单链接也进入新的对比页。
-  if (!workspace && picked.size >= 2 && query.get('view') !== 'table') {
+  if (!workspace && picked.size >= 2 && !['table', 'chart'].includes(query.get('view'))) {
     location.replace(stateLink(true, true));
     return;
   }
@@ -583,6 +612,107 @@ COMPARE_JS = r"""
     cell.append(metric);
   }
 
+  function planPick(offer) {
+    const pick = document.createElement('button');
+    pick.type = 'button';
+    pick.className = 'compare-pick';
+    pick.dataset.pickPlan = offer.plan.id;
+    pick.setAttribute('aria-label', '对比 ' + planName(offer) + '，' + offer.monthlyCredits.toLocaleString('zh-CN') + ' 分/月');
+    return pick;
+  }
+
+  function appendTierPanel(current, alternatives, panelId, displayUnit) {
+    const detailRow = rows.insertRow();
+    detailRow.id = panelId;
+    detailRow.className = 'compare-tier-expansion';
+    detailRow.hidden = expandedTierPlatform !== current.plan.platform;
+    const cell = detailRow.insertCell();
+    cell.colSpan = 5;
+    const panel = document.createElement('section');
+    panel.className = 'compare-tier-panel';
+    const header = document.createElement('header');
+    const heading = document.createElement('h3');
+    heading.id = panelId + '-title';
+    heading.textContent = nameOf(current.plan.platform) + ' · 会员档位';
+    const review = document.createElement('button');
+    review.type = 'button';
+    review.className = 'compare-tier-review';
+    review.dataset.tierReview = '';
+    header.append(heading, review);
+    const list = document.createElement('div');
+    list.className = 'compare-tier-options';
+    list.setAttribute('role', 'table');
+    list.setAttribute('aria-labelledby', heading.id);
+    const columns = ['会员档位', '首期实付', '月产能', '每条成本', '对比'];
+    const labels = document.createElement('div');
+    labels.className = 'compare-tier-line compare-tier-labels';
+    labels.setAttribute('role', 'row');
+    for (const label of columns) {
+      const title = document.createElement('span');
+      title.setAttribute('role', 'columnheader');
+      title.textContent = label;
+      labels.append(title);
+    }
+    list.append(labels);
+    for (const offer of alternatives) {
+      const active = current.plan.id === offer.plan.id;
+      const credits = offer.monthlyCredits.toLocaleString('zh-CN') + ' 分/月';
+      const line = document.createElement('div');
+      line.className = 'compare-tier-line';
+      line.classList.toggle('is-current', active);
+      line.setAttribute('role', 'row');
+      const identity = document.createElement('div');
+      identity.className = 'compare-tier-identity';
+      identity.setAttribute('role', 'rowheader');
+      const show = document.createElement('button');
+      show.type = 'button';
+      show.className = 'compare-tier-name';
+      show.dataset.tierPlan = offer.plan.id;
+      show.textContent = offer.plan.tier;
+      show.setAttribute('aria-label', '在榜单显示 ' + planName(offer) + '，' + credits);
+      show.setAttribute('aria-current', String(active));
+      const points = document.createElement('span');
+      points.className = 'compare-tier-points';
+      points.textContent = credits;
+      identity.append(show);
+      if (active) {
+        const badge = document.createElement('span');
+        badge.className = 'compare-tier-current';
+        badge.textContent = '当前展示';
+        identity.append(badge);
+      }
+      identity.append(points);
+      line.append(identity);
+      const values = [money.format(offer.pay), offer.capacity + ' 条', displayUnit(offer)];
+      values.forEach((value, index) => {
+        const metric = document.createElement('span');
+        metric.className = 'compare-tier-metric';
+        metric.setAttribute('role', 'cell');
+        metric.dataset.label = columns[index + 1];
+        metric.textContent = value;
+        line.append(metric);
+      });
+      const actions = document.createElement('div');
+      actions.className = 'compare-tier-pick';
+      actions.setAttribute('role', 'cell');
+      actions.append(planPick(offer));
+      line.append(actions);
+      list.append(line);
+    }
+    panel.append(header, list);
+    cell.append(panel);
+  }
+
+  function setTierPanel(platformName) {
+    expandedTierPlatform = platformName;
+    for (const toggle of rows.querySelectorAll('[data-tier-toggle]')) {
+      const expanded = toggle.dataset.tierToggle === platformName;
+      toggle.setAttribute('aria-expanded', String(expanded));
+      toggle.closest('tr').classList.toggle('compare-tier-open', expanded);
+      document.getElementById(toggle.getAttribute('aria-controls')).hidden = !expanded;
+    }
+  }
+
   function syncPicks(){
     pickedBar.hidden = picked.size === 0;
     pickedCount.textContent = '已选 ' + picked.size + ' / ' + pickLimit + (workspace ? '' : ' 个档位');
@@ -604,6 +734,14 @@ COMPARE_JS = r"""
       button.setAttribute('aria-pressed', String(active));
       button.disabled = !active && picked.size >= pickLimit;
     }
+    for (const review of rows?.querySelectorAll('[data-tier-review]') || []) {
+      review.disabled = picked.size < 2;
+      review.textContent = review.disabled ? '选两档后对比' : '对比所选档位';
+    }
+  }
+
+  function syncSelectionScroll() {
+    selectionSwipe.hidden = selectionTable.scrollWidth <= selectionTable.clientWidth + 1;
   }
 
   function renderSelection(spec, scope, fits, unitCost, reasonFor, issue){
@@ -626,6 +764,8 @@ COMPARE_JS = r"""
     for (const {plan, quote, reading, offer} of choices) {
       const cell = document.createElement('th');
       cell.scope = 'col';
+      const identity = document.createElement('div');
+      identity.className = 'compare-selection-provider';
       const name = document.createElement('a');
       name.href = data.recordsPage + '#' + plan.anchor;
       name.textContent = nameOf(plan.platform);
@@ -634,7 +774,8 @@ COMPARE_JS = r"""
       const status = document.createElement('small');
       if (!quote) status.textContent = '无' + data.periods[period.value][0];
       else if (offer && !fits(offer)) status.textContent = reasonFor(offer);
-      cell.append(platformLogo({plan}), name, tier);
+      identity.append(platformLogo({plan}), name);
+      cell.append(identity, tier);
       if (quote) {
         const credits = document.createElement('small');
         credits.textContent = quote[1].toLocaleString('zh-CN') + ' 分/月';
@@ -661,6 +802,7 @@ COMPARE_JS = r"""
       for (const choice of choices) row.insertCell().textContent = format(choice);
     }
     selectionTable.append(grid);
+    syncSelectionScroll();
   }
 
   function render(){
@@ -837,18 +979,23 @@ COMPARE_JS = r"""
       name.setAttribute('aria-label', '查看 ' + name.textContent + ' 的会员价格');
       const detail = document.createElement('small');
       const alternatives = platformOffers.get(offer.plan.platform);
-      const hasChoices = !includeAll && alternatives.length > 1;
-      const tier = document.createElement(hasChoices ? 'select' : 'span');
+      const hasChoices = !includeAll && !byChart && alternatives.length > 1;
+      const tier = document.createElement(hasChoices ? 'button' : 'span');
+      const panelId = 'compare-tier-' + alternatives[0].plan.id;
+      tier.textContent = offer.plan.tier;
       if (hasChoices) {
-        tier.dataset.rowPlan = offer.plan.platform;
-        tier.setAttribute('aria-label', '切换 ' + name.textContent + ' 的会员档位');
-        for (const option of alternatives) {
-          const active = option.plan.id === offer.plan.id;
-          const label = option.plan.tier + (active ? '' : ' · ' + option.monthlyCredits.toLocaleString('zh-CN') + ' 分/月');
-          tier.add(new Option(label, option.plan.id, false, active));
-        }
-      } else {
-        tier.textContent = offer.plan.tier;
+        const expanded = expandedTierPlatform === offer.plan.platform;
+        tier.type = 'button';
+        tier.className = 'compare-tier-toggle';
+        tier.dataset.tierToggle = offer.plan.platform;
+        tier.setAttribute('aria-label', name.textContent + ' ' + offer.plan.tier + '，' + alternatives.length + ' 个档位');
+        tier.setAttribute('aria-expanded', String(expanded));
+        tier.setAttribute('aria-controls', panelId);
+        tr.classList.toggle('compare-tier-open', expanded);
+        const count = document.createElement('span');
+        count.className = 'compare-tier-count';
+        count.textContent = '· ' + alternatives.length + ' 个档位';
+        tier.append(count);
       }
       const credits = document.createElement('span');
       credits.className = 'compare-credits-detail';
@@ -874,14 +1021,12 @@ COMPARE_JS = r"""
       addMetric(tr, offer.capacity + ' 条', offer.capacity, volumeMax, matchedOffer && sortKey === 'capacity');
       const unit = matchedOffer ? unitCost(offer) : null;
       addMetric(tr, matchedOffer ? perClip.format(unit) : reasonFor(offer), unit, unitMax, matchedOffer && sortKey === 'unit');
-      const pick = document.createElement('button');
-      pick.type = 'button';
-      pick.className = 'compare-pick';
-      pick.dataset.pickPlan = offer.plan.id;
-      pick.setAttribute('aria-label', '对比 ' + planName(offer) + '，' + offer.monthlyCredits.toLocaleString('zh-CN') + ' 分/月');
       const pickCell = tr.insertCell();
       pickCell.className = 'compare-pick-column';
-      pickCell.append(pick);
+      pickCell.append(planPick(offer));
+      if (hasChoices) {
+        appendTierPanel(offer, alternatives, panelId, option => fits(option) ? perClip.format(unitCost(option)) : reasonFor(option));
+      }
     });
     table.hidden = byChart || !displayed.length;
     syncPicks();
@@ -907,15 +1052,27 @@ COMPARE_JS = r"""
     const button = event.target.closest('[data-share]');
     if (button) copyLink(button);
   });
-  rows?.addEventListener('change', event => {
-    const select = event.target.closest('[data-row-plan]');
-    if (!select) return;
-    const platformName = select.dataset.rowPlan;
-    rowPlans.set(platformName, Number(select.value));
-    render();
-    [...rows.querySelectorAll('[data-row-plan]')].find(control => control.dataset.rowPlan === platformName)?.focus();
-  });
   rows?.addEventListener('click', event => {
+    const toggle = event.target.closest('[data-tier-toggle]');
+    if (toggle) {
+      const platformName = toggle.dataset.tierToggle;
+      setTierPanel(platformName === expandedTierPlatform ? '' : platformName);
+      return;
+    }
+    const displayTier = event.target.closest('[data-tier-plan]');
+    if (displayTier) {
+      if (displayTier.getAttribute('aria-current') === 'true') return;
+      const plan = data.plans[Number(displayTier.dataset.tierPlan)];
+      rowPlans.set(plan.platform, plan.id);
+      render();
+      const renewed = rows.querySelector('[data-tier-plan="' + plan.id + '"]');
+      renewed?.focus();
+      return;
+    }
+    if (event.target.closest('[data-tier-review]')) {
+      pickedOpen.click();
+      return;
+    }
     const button = event.target.closest('[data-pick-plan]');
     if (!button) return;
     const id = Number(button.dataset.pickPlan);
@@ -923,11 +1080,20 @@ COMPARE_JS = r"""
     else if (picked.size < pickLimit) picked.add(id);
     syncPicks();
   });
+  rows?.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    const toggle = rows.querySelector('[data-tier-toggle][aria-expanded="true"]');
+    if (!toggle) return;
+    const panel = document.getElementById(toggle.getAttribute('aria-controls'));
+    if (!toggle.contains(event.target) && !panel.contains(event.target)) return;
+    setTierPanel('');
+    toggle.focus({preventScroll:true});
+  });
   pickedOpen.addEventListener('click', () => {
     if (picked.size < 2) return;
     if (workspace) {
       selectionTitle.focus({preventScroll:true});
-      selection.scrollIntoView({behavior:'instant'});
+      selection.scrollIntoView();
     } else location.assign(stateLink(true, true));
   });
   pickedClear.addEventListener('click', () => {
@@ -942,9 +1108,13 @@ COMPARE_JS = r"""
     render();
     (workspace ? pickerSearch : (pickedBar.hidden ? result : pickedClear)).focus({preventScroll:true});
   });
-  if (workspace) bindWorkspacePicker();
+  if (workspace) {
+    bindWorkspacePicker();
+    new ResizeObserver(syncSelectionScroll).observe(selectionTable);
+  }
   showAll?.addEventListener('click', () => {
     includeAll = !includeAll;
+    expandedTierPlatform = '';
     render();
   });
   [target, budget, search].filter(Boolean).forEach(input => input.addEventListener('input', render));
@@ -961,6 +1131,7 @@ COMPARE_JS = r"""
     includeAll = false;
     sort = null;
     rowPlans.clear();
+    expandedTierPlatform = '';
     render();
   });
   render();
@@ -1002,6 +1173,9 @@ DISCLOSURE_JS = r"""
   if (filters) {
     document.addEventListener('pointerdown', event => {
       if (filters.open && !filters.contains(event.target)) filters.open = false;
+    });
+    filters.addEventListener('focusout', event => {
+      if (filters.open && event.relatedTarget && !filters.contains(event.relatedTarget)) filters.open = false;
     });
     filters.addEventListener('keydown', event => {
       if (event.key === 'Escape' && filters.open) {

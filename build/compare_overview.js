@@ -1,5 +1,11 @@
   const overview = document.getElementById('benchmark-overview');
   const profile = document.querySelector('.benchmark-profile');
+  const profileToggle = document.getElementById('profile-toggle');
+  const profileCalculation = document.getElementById('profile-calculation');
+  profileToggle?.addEventListener('click', () => {
+    profileCalculation.hidden = !profileCalculation.hidden;
+    profileToggle.setAttribute('aria-expanded', String(!profileCalculation.hidden));
+  });
 
   function drawProfile(leaders, byBudget, scope) {
     const sample = [...leaders.values()].slice(0, 3);
@@ -9,10 +15,33 @@
       : '每月 ' + scope.amount.toLocaleString('zh-CN') + ' 条的首期实付';
     document.getElementById('profile-scope').textContent = scope.specName + ' · ' + scope.cycle[0];
     const evidence = document.getElementById('profile-evidence');
-    evidence.hidden = !sample.length;
-    if (sample.length) evidence.href = data.recordsPage + '#' + sample[0].plan.anchor;
-    const rows = document.getElementById('profile-rows');
+    const first = sample[0];
     const formatCount = value => value.toLocaleString('zh-CN');
+    profileToggle.hidden = evidence.hidden = !first;
+    if (first) {
+      evidence.href = data.recordsPage + '#' + first.plan.anchor;
+      const count = byBudget ? first.capacity : scope.amount;
+      const used = count * first.creditsPerClip;
+      const measurements = [
+        ['每月生成', formatCount(count) + ' 条'],
+        ['每条扣分', formatCount(first.creditsPerClip) + ' 分'],
+        ['预计使用', formatCount(used) + ' 分'],
+        ['本月剩余', formatCount(first.monthlyCredits - used) + ' 分'],
+      ];
+      document.getElementById('profile-metrics').replaceChildren(...measurements.map(([key, value]) => {
+        const pair = document.createElement('div');
+        const label = document.createElement('dt');
+        const metric = document.createElement('dd');
+        label.textContent = key;
+        metric.textContent = value;
+        pair.append(label, metric);
+        return pair;
+      }));
+    } else {
+      profileCalculation.hidden = true;
+      profileToggle.setAttribute('aria-expanded', 'false');
+    }
+    const rows = document.getElementById('profile-rows');
     rows.replaceChildren(...sample.map((offer, index) => {
       const value = byBudget ? formatCount(offer.capacity) : money.format(offer.pay);
       const label = '查看 ' + planName(offer) + '，' + value + (byBudget ? ' 条/月' : '');
@@ -83,8 +112,10 @@
       item.className = 'overview-case';
       item.setAttribute('aria-pressed', String(scope.amount === amount));
       const header = document.createElement('span');
+      header.className = 'overview-case-label';
       header.textContent = byBudget ? money.format(amount) + ' 以内' : '每月 ' + amount + ' 条';
       const metric = document.createElement('strong');
+      if (!best) metric.className = 'overview-case-empty';
       metric.textContent = best ? resultFor(best) : '暂无档位';
       const detail = document.createElement('span');
       detail.className = 'overview-case-detail';
@@ -96,35 +127,45 @@
         rankView.querySelector('[value=table]').checked = true;
         render();
         result.focus({preventScroll:true});
-        document.getElementById('benchmark-board').scrollIntoView({behavior:'instant'});
+        document.getElementById('benchmark-board').scrollIntoView();
       });
       return item;
     }));
 
     const providers = [...leaders.keys(), ...Object.keys(data.readings).filter(platform => !leaders.has(platform))]
       .filter(matchesPlatform);
-    providerList.replaceChildren(...providers.map(platform => {
+    const availability = document.createElement('div');
+    availability.className = 'overview-availability';
+    providerList.replaceChildren();
+    for (const platform of providers) {
       const leader = leaders.get(platform);
       const reading = data.readings[platform][scope.spec];
       const available = offers.filter(offer => offer.plan.platform === platform);
-      const item = document.createElement(leader ? 'button' : 'div');
-      item.className = 'overview-platform';
+      const item = document.createElement(leader ? 'button' : 'a');
+      item.className = leader ? 'overview-platform' : 'overview-platform overview-platform-unavailable';
       const heading = document.createElement('span');
       heading.className = 'overview-platform-name';
       heading.append(platformLogo({plan: {platform}}), nameOf(platform));
-      const metric = document.createElement('strong');
-      metric.textContent = leader ? resultFor(leader) : '—';
       const detail = document.createElement('small');
       detail.textContent = leader
         ? leader.plan.tier + (leader.sourceDate ? ' · 留档' : '')
         : (typeof reading === 'string' ? reading : available.length
           ? (scope.issue ? '请输入有效' + measure : byBudget ? '预算内暂无可出片档位' : '暂无达标档位') : '无此周期');
+      item.append(heading);
       if (leader) {
+        const metric = document.createElement('strong');
+        metric.textContent = resultFor(leader);
+        item.append(metric);
         item.type = 'button';
         item.addEventListener('click', () => revealRank(leader));
+        providerList.append(item);
+      } else {
+        const quote = data.plans.find(plan => plan.platform === platform);
+        item.href = data.recordsPage + '#' + (quote?.anchor ?? 'membership-prices');
+        availability.append(item);
       }
-      item.append(heading, metric, detail);
-      return item;
-    }));
+      item.append(detail);
+    }
+    if (availability.childElementCount) providerList.append(availability);
     if (!providers.length) providerList.textContent = '没有匹配的平台。';
   }

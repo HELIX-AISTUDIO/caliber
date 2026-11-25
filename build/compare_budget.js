@@ -9,6 +9,8 @@
   const amount = document.getElementById('member-amount');
   const rows = document.getElementById('member-plans');
   const chart = document.getElementById('member-bars');
+  const chartHint = document.getElementById('member-chart-hint');
+  const chartHelp = chartHint.textContent;
   const status = document.getElementById('member-status');
   const priceFilters = document.getElementById('member-bands');
   const providers = document.getElementById('member-providers');
@@ -52,6 +54,7 @@
 
   function drawChart() {
     const byUnit = metric.value === 'unit';
+    chartHint.textContent = chartHelp;
     document.getElementById('member-chart-title').textContent = byUnit ? '三种预算下的单条均价' : '三种预算下能做多少条';
     document.getElementById('member-figure-note').textContent = byUnit
       ? '每档预算取单条均价最低的三家平台。柱条越短，平均每条花费越低。'
@@ -71,17 +74,23 @@
         column.dataset.memberProvider = key;
         column.style.setProperty('--series', data.colors[key]);
         column.style.setProperty('--bar-height', measure(offer) / max * 100 + '%');
-        const value = byUnit ? cents.format(unit(offer)) + '/条' : offer.capacity + ' 条/月';
-        column.title = nameOf(key) + ' ' + offer.plan.tier + ' · ' + money.format(offer.pay) + ' 首期';
+        const brief = nameOf(key) + ' ' + offer.plan.tier + ' · ' + money.format(offer.pay) + ' 首期 · '
+          + offer.capacity + ' 条/月 · ' + cents.format(unit(offer)) + '/条';
+        column.dataset.memberBrief = brief;
+        column.setAttribute('aria-label', brief + ' · 按 ' + money.format(cap) + ' 预算筛选');
         const track = element('span', 'member-column-track');
-        track.append(element('span', 'member-column-fill'), element('strong', 'member-column-value', value));
+        const value = element('strong', 'member-column-value', byUnit ? cents.format(unit(offer)) : String(offer.capacity));
+        value.append(element('small', 'member-column-unit', byUnit ? '/条' : ' 条/月'));
+        track.append(element('span', 'member-column-fill'), value);
         const identity = element('span', 'member-column-name');
         identity.append(logoFor(key), element('span', '', nameOf(key)), element('small', '', offer.plan.tier));
         column.append(track, identity);
         columns.append(column);
       }
       if (!offersAtPrice.length) columns.append(element('p', 'member-no-bars', '暂无可出片档位'));
-      group.append(element('h3', 'member-band-title', money.format(cap) + ' 以内'), columns);
+      group.setAttribute('role','group');
+      group.setAttribute('aria-label', money.format(cap) + ' 以内');
+      group.append(columns, element('h3', 'member-band-title', money.format(cap) + ' 以内'));
       return group;
     }));
   }
@@ -206,8 +215,22 @@
     amount.value = column.dataset.memberCap;
     drawPicker();
     amount.focus({preventScroll:true});
-    document.getElementById('member-picker').scrollIntoView({behavior:'instant'});
+    document.getElementById('member-picker').scrollIntoView();
   });
+  for (const eventType of ['pointerover', 'focusin']) {
+    chart.addEventListener(eventType, event => {
+      const column = event.target.closest('[data-member-brief]');
+      if (column) chartHint.textContent = column.dataset.memberBrief;
+    });
+  }
+  for (const eventType of ['pointerout', 'focusout']) {
+    chart.addEventListener(eventType, event => {
+      const column = event.target.closest('[data-member-brief]');
+      if (column && !column.contains(event.relatedTarget) && (eventType !== 'pointerout' || !column.matches(':focus-visible'))) {
+        chartHint.textContent = chartHelp;
+      }
+    });
+  }
   rows.addEventListener('click', event => {
     const button = event.target.closest('[data-member-pick]');
     if (!button) return;
@@ -223,9 +246,9 @@
   });
   if (location.hash === '#member-picker') {
     const saved = new URLSearchParams(location.search);
-    for (const [key, select] of [['model', model], ['res', resolution], ['period', period]]) {
+    for (const [key, choices] of [['model', model], ['res', resolution], ['period', period]]) {
       const value = saved.get(key);
-      if ([...select.options].some(option => option.value === value)) select.value = value;
+      if ([...choices].some(input => input.value === value)) choices.value = value;
     }
     if (saved.has('amount')) {
       amount.value = saved.get('amount');

@@ -146,6 +146,34 @@ chk(re.findall(r'data-canvas-cost="([\d.]+)"', cost_h) == prices_expected, "分�
 chk(len(re.findall(r'data-membership=', cost_h)) == sum(len(p["credits"]) for p in C["plans"]),
     "会员价格表档位缺失")
 
+quotes_expected = {}
+for plan in C["plans"]:
+    plat, tier = plan["platform"], plan["tier"]
+    rate = Decimal(str(RATE)) if P[plat]["currency"] == "USD" else Decimal(1)
+    for option in plan["credits"]:
+        if option.get("modelUnsupported"):
+            continue
+        monthly = option["credits"]
+        periods = {}
+        for key, price_key in PAYF.items():
+            raw = option.get(price_key)
+            if raw is not None:
+                pay = (Decimal(str(raw)) * rate).quantize(Decimal(".01"), rounding=ROUND_HALF_UP)
+                periods[key] = [float(pay), option.get(key + "Cr", monthly)]
+        quotes_expected[f"{plat}/{tier}/{monthly}"] = periods
+
+for filename in ("index.html", "compare.html"):
+    source = read_html(filename)
+    data_match = re.search(r"^  const data = (\{[^\n]+\});$", source, re.M)
+    chk(data_match is not None, f"{filename} 缺少对比数据")
+    if data_match:
+        data = json.loads(data_match[1])
+        quotes_actual = {p["key"]: p["periods"] for p in data["plans"]}
+        chk(len(quotes_actual) == len(data["plans"]), f"{filename} 存在重复档位 ID")
+        chk(quotes_actual == quotes_expected, f"{filename} 报价或周期积分不一致")
+        chk(data["readings"] == readings, f"{filename} 画布状态或扣分不一致")
+print(f"  核对首页和方案对比的 {len(quotes_expected)} 个档位实付及各周期积分")
+
 bonus_expected = []
 for offer in C.get("offerBenefits", []):
     if offer["platform"] not in CPV:

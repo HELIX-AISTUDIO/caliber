@@ -2,6 +2,7 @@
   const pickerPlatforms = document.getElementById('workspace-platforms');
   const pickerGrid = document.getElementById('workspace-plan-grid');
   const pickerMore = document.getElementById('workspace-plan-more');
+  const pickerClear = document.getElementById('workspace-search-clear');
   const pickerShortcuts = document.getElementById('workspace-shortcuts');
   const pickerPageSize = 12;
   let pickerPlatform = '';
@@ -40,7 +41,7 @@
   }
 
   function drawPickerPlans() {
-    const normal = text => text.normalize('NFKC').toLowerCase().replace(/[\s,]+/g, '');
+    const normal = text => text.normalize('NFKC').toLowerCase().replace(/[\s,，·]+/g, '');
     const keyword = normal(pickerSearch.value);
     const matching = pickerCatalog.filter(({plan, quote}) => {
       if (pickerPlatform && plan.platform !== pickerPlatform) return false;
@@ -52,6 +53,7 @@
       ? (visible.length < matching.length ? '显示 ' + visible.length + ' / ' : '') + matching.length + ' 个档位'
       : '没有匹配档位。可以更换关键词或选择全部平台。';
     pickerMore.hidden = matching.length <= pickerPageSize;
+    pickerClear.hidden = !keyword || matching.length > 0;
     pickerMore.textContent = pickerExpanded ? '收起档位列表' : '显示全部 ' + matching.length + ' 个档位';
     pickerMore.setAttribute('aria-expanded', String(pickerExpanded && !pickerMore.hidden));
     pickerGrid.replaceChildren(...visible.map(({plan, quote, reading}) => {
@@ -91,9 +93,14 @@
     const upgrade = eligible.find(item => item.plan.platform === first.plan.platform && item.plan.id !== first.plan.id);
     for (const [label, next] of [['比两家平台', other], ['比同平台两档', upgrade]]) {
       if (!next) continue;
-      const button = pickerNode('button', 'workspace-shortcut', label);
+      const button = pickerNode('button', 'workspace-shortcut');
       button.dataset.workspacePair = first.plan.id + ',' + next.plan.id;
-      button.title = '选择 ' + planName(first.offer) + ' 与 ' + planName(next.offer);
+      const firstName = planName(first.offer);
+      const nextName = planName(next.offer);
+      const description = firstName === nextName
+        ? firstName + ' · ' + first.quote[1].toLocaleString('zh-CN') + ' / ' + next.quote[1].toLocaleString('zh-CN') + ' 分/月'
+        : firstName + ' / ' + nextName;
+      button.append(pickerNode('b', '', label), pickerNode('span', '', description));
       button.disabled = picked.size > 0;
       pickerShortcuts.append(button);
     }
@@ -126,6 +133,17 @@
     pickerMore.addEventListener('click', () => {
       pickerExpanded = !pickerExpanded;
       drawPickerPlans();
+    });
+    pickerClear.addEventListener('click', () => {
+      pickerSearch.value = '';
+      pickerExpanded = false;
+      drawPickerPlans();
+      pickerSearch.focus();
+    });
+    document.querySelector('.workspace-edit').addEventListener('click', event => {
+      event.preventDefault();
+      pickerSearch.focus({preventScroll:true});
+      document.getElementById('workspace-picker').scrollIntoView({block:'start'});
     });
     pickerShortcuts.addEventListener('click', event => {
       const shortcut = event.target.closest('[data-workspace-pair]');

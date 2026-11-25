@@ -205,6 +205,30 @@ for r in ROWS:
                                    "longPay": r["byP"][_lk]["pay"], "shortPay": r["byP"][_sk]["pay"]})
     r["qTrap"] = next((t["pct"] for t in r["traps"] if t["long"] == "季付"), None)
 
+
+def comparison_rows():
+    """保留没有基准扣分的平台报价，供手动对比和其他已核规格使用。"""
+    result = list(ROWS)
+    for plan in COST["plans"]:
+        plat = plan["platform"]
+        if plat in CPV:
+            continue
+        rate = RATE if PLATFORMS[plat]["currency"] == "USD" else 1
+        for option in plan["credits"]:
+            if option.get("modelUnsupported"):
+                continue
+            by_period = {}
+            for key, price_key, credits_key in (("m", "m", "mCr"), ("q", "q", "qCr"), ("y", "price", "credits")):
+                pay = option.get(price_key)
+                if pay is not None:
+                    by_period[key] = {"payCNY": convert_cny(pay, rate),
+                                       "cr": option.get(credits_key, option["credits"])}
+            result.append({"plat": plat, "tier": plan["tier"], "monthly": option["credits"], "byP": by_period})
+    return result
+
+
+COMPARISON_ROWS = comparison_rows()
+
 # 同（平台,档位）只保留产能最大者 —— 用于阶梯与边际，避免同档多选项中低配产生 Δ=0
 BY_TIER = {}
 for r in ROWS:
@@ -341,51 +365,21 @@ for _p in PLATFORMS:
 PLAT_SUM.sort(key=lambda x: x["lo"])
 
 PLAT_LG = {"libtv": "lg-libtv", "Neowow": "lg-neowow", "即梦": "lg-jimeng",
-           "小云雀": "lg-xiaoyunque", "Higgsfield": "lg-higgsfield", "Tapnow": "lg-tapnow", "Seko": "lg-seko"}
-
-# 标识底座由 CSS 绘制。原始图形用各自的裁切框和颜色通道去掉旧底色。
-PLATFORM_MARKS = {
-    "lg-libtv": ("7 7 58 58", "light",
-        "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"),
-    "lg-neowow": ("11 9 50 50", "light",
-        "iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAABgFBMVEX////+/v/+/v79/f79/f39/fz8/P38/Pz7+/z7+/v7+/r6+vv6+vr5+fr5+fn5+Pn4+Pn4+Pj39/f09PTz8/Py8vLx8fHw8PHw8PDv7+/u7u7q6urm5ubi4uLh4eHf39/b29va2trZ2dnY2NjX19fW1tbU1NTS0tLQ0NDNzc3KysrJycnIyMjHx8fFxcW/v7+9vb26urq2traysrKtra2pqamlpaWhoaGfn6Cenp2cnJyampqXl5eVlZWTk5OSkpKPj4+NjY2Li4uKioqJiYmHh4eFhYWCg4OAgIB9fX18fHx4eHh1dXV0dHRycnJxcXFubm5ra2tmZmZhYWFfX19bW1tWVlZSUlJOTk5ISUhFRUVDQ0NCQkI+Pj47Ozs5OTk1NTU0NDQvLy8sLCwpKSkoKCgkJCQgICAfHx8eHh8dHR0cHBwaGhoZGRkYGBkXFxcSEhIPDw8ODg4NDQ0LCwsKCgoJCQkHBwcGBgYFBQUEBAQEAwMDAwMCAgIBAQEAAAA7iml9AAADw0lEQVR42u2X+1cTRxTHr+u047TbrUGlKY/yUFAoIm8DgoAiRVAEY8SgiDaAKA8fVNxsZ+b+694hOcV9kvTwi+dkftlk9+Qz33u/d+7eAJ7SghqoBqqBTgck1f8DSR26pU5HUX4zkRQNIjXPD/BIk5ImJoXb1/vWk0iRIC1xomsZpcGUo9LrC29697SuDiRx9s7uPboQZic7mpeuh8/mMXsXZVUghYU+/DCmSNjbiQaAR3TPm1rTX4Y+oK4G5OH0E1SZDYVPG8ESrfvPJvvaByTdXovPUhRI6+FtxNxdfATgCKuzGwDYa3T1/IpXrAKk8ePwoXLdiWlggjEGYKfqV1BKfe8lxmYpGjTyma5LYHPiMC5seIweiRnoWdzBGOciky1H3+8u9loljkGxy1lSslsP0LgQQ4pSpHC8u5HScrw4QPdfS73gOACZf4ueFz5AEBGZN+mYLH8DYkJQwoEU8hQsR55FCOspDgH7L6pjlFNCC97ycO7Byt6JiiTeghRLWkbbpaaZoj9XEOLkwEnkCOh8UdxfbZvwVwIEa/FjsyWSONxqOvg0e6013SZ95wWCp2PxBEEcmpabTXQ9SaFp/aUjLIjzYI4ckYI7tGssSOK68ZgJ+xvbxFmwfVx6xnkq0DAhENl9Exk30o9jYXUQrAYjSCbYr7CfdhfQnn1wkfGySb2vt26BCDjXc6h0PEij2wqCs/pNpBZil0xKv6MnnT4SZ3/uBd9OAdB+A3AbBvFQbv1KPUTQwR9Az8Vpv5fOsouYoEjhVgq4A7dVEXd+ozSRPzCqpKfmAkUBbY8DJPCb9upHTqCbpOhvfqX5THsXg34sujgSAJEdQ//o2IJUesDk2mqhvjYL82tQGAdxoYC43WAFfBN1MOXzDXyCVktVBIOrCzZLd1vXOH1peZLrgFCVpmAkAZSxnLJwsJjJkVUuqlBX+RnSG1pFg8j8K+WdyS2qXsFKHci2w6cGfn8eW9kl81klS1gdW4FXnA+0m64QxHnjK5UA+twC5yoCMRu6vPiCVDhoOazCxQvxp1/iU3Aqi8wWkABC5d2AupM5limIm/E5MrHtdMBPdmzCfxAO9QZ2/sKlqw9l0qEl0vth2s12bBGk0QTgmC5rnbeuvnnrnfTKJrn5obSRbnHbOV62OIrn+ujlXwBmooZeCM1GiO9yk31/OOBf55r752iqcTfyL7VSuoIhotT6DjZf5JbmpsbHMpmx2zML2XzhU8nYqmZIKaMmF2VmEE0PqxrYzQ88Gl+OlvmgdO1vVg1UA9VA3wfoKy1N1tY01xhTAAAAAElFTkSuQmCC"),
-    "lg-jimeng": ("15 15 42 42", "color",
-        "iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAABgFBMVEXx/v/6/rvU/v7F/P24/f6r/v+g/v6Z/f3S9vj794Gr9/ub9/vd03342gqh3N6M/f+N9/x5+f139v199f1u9vxo9v1g9v5U9v1I9/5u9Ptq7fdO8/1K6vM89v028v448f4o9/8r8v0s8f4w8P0o8P0k7/0m6/4j7P4k6fsi7P0h6vwk5f0h5vwk4/0k4fwi4Psl3fgi3vsk2/sk2Pwh2fkj1vgh1/kq0fQjz/Yi0vgmzPkmyPohyPQkw+8kwPbjnCOYn3d2mpx3hFors+0spuQqmb0xg68ksO0jofEjl/gkmdAhivkfjeEfffkifbhsWDk8Tk0gYaQqQEUaYJoYTGAYQW4WPksrLisjHx0SMFgNHiocFxULExYHExwNCw0GCg0FBgkEBQcEBAQEBAICBgcDBAQCBAMFAwMDAwMCAwMBAwQCAgQCAgICAgABAgMBAgIAAgIBAgEDAQIBAQMBAQEBAQAAAQIAAQEAAQADAAUDAAABAAIBAAAAAAMAAAEAAADtKFzNAAADaUlEQVR42u3X3VfaaBAH4BRiUDx8CH6uVRShgBAoKq1ogY0bKJRFqAZwEVDDYgGjVHhZIqbMv943292bnuM5ScMlc8nFc36ZGSZAwISKmEJTaApNoZ9qIE0GGoEkTQJ6Hte/DEXt0GB8mcj3BEkzhOAikchDQ/uj9XsJU+JChfQS1IC8yZSod++1QvdQNmHpqXGPtEEDqGPIlIcbQeMePfYTprm5uRNodrVBzW/5OYIgXv0OwA80QZB/Reh0BMHUgUcaoBaUCUJP6mcJ8xkOJfwyJGBIR1JGo1GvZy4xzDdbwnCIEBJaLaQKupjVU1a71Wo1kGamLP1qoi6GSMPi8tKizW63UPPMSeGiet3g65flQoEHpAqasS6tr66vYGxtwUJR82a5ZuUBjHk1PSLnbSub284dx8bqiqwtWCwGipohjXpzX3miNpyRONC2z+Nxu5ybGJOjrdlw0wwzBbh9Vr5HBdK2vOHyBQJer8fndm07N39gC/YCdEUVC8lQS+s7vkAoFKT9Ae8bnMzt2nE4Vl+X4Iuo4vjfmC1yIDq8txcOBYM0Tft3vV7XVqoKt6Ly8bfRmQG32uMN7kWi794dyFooTG+95/BuSir2qA0MDuT00OFI9BBXNII1/9tUVbrBeSTFUBdV5Nn7AvRe5PADLmztB5MlGPE9pGazcastv606d+nQAXbisVjsaJ/lnqB6PX7hdUe8tETU4orDHQjKgWKxj/FjlqvCM8f1eqKoHBKgarbg2Xv84YPoYRwXe14DqZJM/n2Hht8UQ0i4ZWZsyw73Lm714YejY7ZYk+CqyB6XoCMqh5AADGldW3fiQJHo/lGSw8w19ykeT911+jBWCiH0zOjm7csb7t0A7X+fLF0BXHGn6XT6jyJ0hsrvUZdnCCP+uu64XW9i5xX8SaX4KZ3JpNNsRepLiiH5xJJyoK23Sa4OUOVSbDydyWYymdPWYAySUgihy1kdtfD63840Sin26PhjGkPZbOZ81FFzah+hfFIo48aMmvxNtVLiPrP4wbLZXBa3SBRV3Owfb9Z2s43++31U404z2Zx6CAS+3f1/OsOvna94asU/c7mcaujnGjZHUDmVoTvQBMHgn6ZU+5z7Cx40QrjuRte1p5EkaobQw6P0eC9OAJL6DwhNAJr+O5pCU2gKvVDfAf9WRwpR8cqOAAAAAElFTkSuQmCC"),
-    "lg-xiaoyunque": ("16 14 42 42", "light",
-        "iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAABQVBMVEX////+/v79/f38/Pz7+/v6+vr5+fn4+Pj39/f19fXz8/Pw8PDv7+/u7u7p6enn5+fm5ubk5OTj4+Pi4uLh4eHg4ODf39/e3t7d3d3X19fU1NTT09PQ0NDMzMzKysq8vLy5ubm2traurq6tra2rq6uqqqqnp6empqakpKSgoKCfn5+dnZ2ZmZmXl5eWlpaVlZWTk5OQkJCOjo6IiIiDg4N+fn59fX18fHx7e3t6enp5eXl4eHh1dXVzc3Nvb29ubm5sbGxqampoaGhnZ2dhYWFgYGBcXFxZWVlYWFhXV1dWVlZPT09OTk5NTU1KSkpJSUlGRkZFRUVDQ0NAQEA8PDw7Ozs3Nzc0NDQyMjIjIyMYGBgTExMODg4MDAwLCwsKCgoJCQkICAgHBwcGBgYFBQUEBAQDAwMCAgMCAgIBAQEAAAAnvg7lAAAB/ElEQVR42u3X+1MTMRAH8E0uByrWF6Ioaq3gW8D3E0EB5aEo4BvhqrQXk+///we4d70Zp6U3Q3L3i8zttJ20M/uZ3TRJU0JJQRVUQRV0sCDbL5whE5syKrKaX3ajZk9Ev6KmE8QN/HhWP3OyN4aHj32C3j9k0X54hPrGPMz+K7J2u06kAtkdIggOv+/n5ELaNmhA7K1G0iraDpOtMU9hlqo4ZOYoutHfyYGs3Tkl0mQRZJzICvpitAOksUYdh2j07qvX98fSIT9rP2EdoBgPhEoTw5dR8kH7TS2RJI38doI0rvN0cF/hGqtp5rcad+cBXSGenIAeo6Xx/dpb28Yyv/WAxjlN0IkdwxvlA1GjaXCRpCek6CaPNDbUIS4NT0h5Q89tzON1CuVYnPTmDb3IICVGmlgqAN1KW1unQaoDj7xbE3Q8SiZ7g9fmpsEl74r48RStGB9pdBVY4S/fFxIyfMcLcmtzG/h61G9BphAJEcykW2R3cchzi3SgJPns1OzcvfOdTesP9RwjBaDug60Q1H3QVtD/CJ0uCzqnS4EC0YBBCZCiWf7NKw4JObSV05kbNMAFaRSGZEgTuU4udFUNqu7gc+R2y1hX6PLexi4sA9bxVmuwcGd68l9MTU7PfNbIr8ft5q997tk67g1tq39HHvHHlgTZarIr6MBDfwGWlxz1MHo2pgAAAABJRU5ErkJggg=="),
-    "lg-higgsfield": ("8 8 56 56", "lime",
-        "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"),
-    "lg-tapnow": ("6 6 60 60", "plain",
-        "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"),
-    "lg-seko": ("0 0 72 72", "olive",
-        "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"),
-}
-
+           "小云雀": "lg-xiaoyunque", "Higgsfield": "lg-higgsfield", "Tapnow": "lg-tapnow", "Seko": "lg-seko",
+           "updream": "lg-updream", "RunningHub RHTV": "lg-rhtv", "PixTV": "lg-pixtv"}
 
 def platform_mark_css():
-    ink = "0 0 0 0 .07  0 0 0 0 .08  0 0 0 0 .09"
-    transforms = {
-        "light": ink + "  0 1.08 0 0 -.04",
-        "lime": ink + "  0 -1.19 0 0 1.09",
-        "color": "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  1.6 1.6 1.6 0 -.15",
-        "olive": "0 0 0 0 .231  0 0 0 0 .243  0 0 0 0 .176  0 -1.34 0 0 1.31",
-    }
     rules = []
-    for name, (view, kind, original) in PLATFORM_MARKS.items():
-        matrix = transforms.get(kind)
-        artwork = ""
-        if matrix:
-            artwork = (f'<filter id="symbol" color-interpolation-filters="sRGB">'
-                       f'<feColorMatrix values="{matrix}"/></filter>')
-        use_filter = ' filter="url(#symbol)"' if matrix else ''
-        artwork += f'<image width="72" height="72" href="data:image/png;base64,{original}"{use_filter}/>'
-        svg = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{view}">{artwork}</svg>'
-        encoded = base64.b64encode(svg.encode()).decode()
-        rules.append(f'.{name}{{background-image:url("data:image/svg+xml;base64,{encoded}")}}')
-    classes = ",".join("." + name for name in PLATFORM_MARKS)
+    for name in PLAT_LG.values():
+        stem = name.removeprefix("lg-")
+        with open(os.path.join(ROOT, "img", "platform-marks", "generated", stem + ".png"), "rb") as asset:
+            encoded = base64.b64encode(asset.read()).decode()
+        rules.append(f'.{name}{{background-image:url("data:image/png;base64,{encoded}")}}')
+    classes = ",".join("." + name for name in PLAT_LG.values())
     rules.append(f'i:is({classes}){{border:0;border-radius:50%;background-color:#fff;'
-                 'background-size:68%;background-position:center;background-repeat:no-repeat;'
+                 'background-size:74%;background-position:center;background-repeat:no-repeat;'
                  'box-shadow:inset 0 0 0 1px #6c77862b}')
+    rules.append('i.lg-rhtv{background-size:68%}')
     return "\n".join(rules)
 
 
@@ -806,10 +800,10 @@ input[type=number]{width:110px;background:rgba(255,255,255,.06);
   color:#C9CDD2;font-size:13px;line-height:1;cursor:pointer;font-family:inherit;
   display:flex;align-items:center;justify-content:center}
 .ix:hover{background:rgba(255,255,255,.11)}
-.ieyebrow{font-family:__MONO__;font-size:10.5px;letter-spacing:.14em;color:#6E747C}
+.ieyebrow{font-family:__MONO__;font-size:12px;letter-spacing:.05em;color:var(--studio-muted)}
 .is{display:none}
 .is.on{display:block}
-.is h3{font-size:19px;line-height:1.5;color:#fff;font-weight:600;margin:12px 0 0;
+.is h2{font-size:19px;line-height:1.5;color:var(--studio-ink);font-weight:650;margin:12px 0 0;
   letter-spacing:-.01em}
 .is p{font-size:13px;line-height:1.85;color:#A8AEB5;margin:13px 0 0}
 .is ul{margin:14px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:11px}
@@ -833,7 +827,7 @@ input[type=number]{width:110px;background:rgba(255,255,255,.06);
 @media (max-width:520px){
   #intro{padding:14px;align-items:flex-end}
   .icard{max-width:none;border-radius:20px 20px 16px 16px;padding:22px 18px 16px}
-  .is h3{font-size:17px}
+  .is h2{font-size:17px}
 }
 .glist{display:flex;flex-direction:column;gap:0;border-top:1px solid rgba(255,255,255,.08)}
 .gterm{padding:20px 2px;border-bottom:1px solid rgba(255,255,255,.08);scroll-margin-top:76px}
@@ -1338,6 +1332,7 @@ document.addEventListener('DOMContentLoaded', function(){
   var next = el.querySelector('.inext');
   var x = el.querySelector('.ix');
   var i = 0;
+  var returnFocus;
 
   function show(n){
     i = Math.max(0, Math.min(slides.length - 1, n));
@@ -1345,17 +1340,22 @@ document.addEventListener('DOMContentLoaded', function(){
     Array.prototype.forEach.call(dots, function(d, k){ d.classList.toggle('on', k <= i); });
     prev.style.visibility = i ? 'visible' : 'hidden';
     next.textContent = (i === slides.length - 1) ? '开始看' : '下一步';
+    if (!i && document.activeElement === prev) next.focus();
   }
   function close(){
     el.classList.remove('on');
     document.body.classList.remove('ibody');
     try{ localStorage.setItem(KEY, '1'); }catch(e){}
+    if (returnFocus instanceof HTMLElement) returnFocus.focus({preventScroll:true});
   }
   function open(){
+    if (el.classList.contains('on')) return;
+    returnFocus = document.activeElement;
     el.classList.add('on');
     /* ⚠ 只在弹窗打开期间锁滚动，关闭立刻解除 —— 本项目有过「忘了解锁、页面滑不动」的事故 */
     document.body.classList.add('ibody');
     show(0);
+    x.focus({preventScroll:true});
   }
 
   prev.addEventListener('click', function(){ show(i - 1); });
@@ -1366,7 +1366,21 @@ document.addEventListener('DOMContentLoaded', function(){
   el.addEventListener('click', function(e){ if(e.target === el) close(); });
   document.addEventListener('keydown', function(e){
     if(!el.classList.contains('on')) return;
-    if(e.key === 'Escape') close();
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      close();
+    }
+    if (e.key === 'Tab') {
+      const first = x;
+      const last = next;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
     if(e.key === 'ArrowRight') next.click();
     if(e.key === 'ArrowLeft' && i) prev.click();
   });
@@ -1447,6 +1461,13 @@ var GLOS = __GLOS__;
     if(nv.classList.contains('open') && !nv.contains(e.target)) closeMobileMenu();
     for(const group of groups){
       if(!group.contains(e.target) || e.target.closest('a')) group.open = false;
+    }
+  });
+  nv.addEventListener('focusout', function(e){
+    if(!e.relatedTarget) return;
+    if(nv.classList.contains('open') && !nv.contains(e.relatedTarget)) closeMobileMenu();
+    for(const group of groups){
+      if(group.open && group.contains(e.target) && !group.contains(e.relatedTarget)) group.open = false;
     }
   });
   document.addEventListener('keydown', function(e){
@@ -2539,11 +2560,11 @@ def nav(active):
         cls = ' class="active" aria-current="page"' if it["key"] == active else ""
         label = "首页总览" if it["key"] == "home" else it["label"]
         items[it["key"]] = f'<a href="{it["href"]}"{cls}>{label}</a>'
-    cost_group = " current" if active in {"home", "cycles"} else ""
+    cost_group = " current" if active == "home" else ""
     resource_group = " current" if active in {"glossary", "prompts"} else ""
     desktop = (f'<details class="nav-group{cost_group}"><summary>成本榜</summary>'
                f'<div class="nav-submenu">{items["home"]}<a href="index.html#benchmark-board">完整榜单</a>'
-               f'{items["cycles"]}</div></details>{items["compare"]}{items["cost"]}'
+               f'</div></details>{items["compare"]}{items["cost"]}{items["cycles"]}'
                f'<details class="nav-group{resource_group}"><summary>资料</summary>'
                f'<div class="nav-submenu">{items["glossary"]}{items["prompts"]}</div></details>')
     mobile = "".join(items.values())
@@ -2692,6 +2713,12 @@ def membership_price(option, currency, price_key, renewal_key, period):
         extra.insert(0, f'页面原价 {cash(list_price, currency)}')
     if period == "y" and option.get("yearOneOff"):
         extra = ["一次性购买"]
+    if period == "m" and option.get("mOneOff"):
+        extra = ["一次性购买"]
+        if list_price is not None:
+            extra.insert(0, f'页面原价 {cash(list_price, currency)}')
+    if period == "m" and option.get("monthOneOffPrice"):
+        extra.append(f'单月一次性 {cash(option["monthOneOffPrice"], currency)}')
     if period == "y" and option.get("annualMonthlyRate"):
         extra.insert(0, f'页面月均 {cash(option["annualMonthlyRate"], currency)}')
     if period == "y" and option.get("annualCoupon"):
@@ -2733,7 +2760,7 @@ def membership_details(back_href=None):
     back_link = f'\n      <a href="{escape(back_href, quote=True)}">返回当前榜单</a>' if back_href else ""
     return f"""
 <details id="membership-prices" style="margin:14px 0">
-  <summary>7 家平台会员价格与积分档<span class="chev">›</span></summary>
+  <summary>{len(PLATFORMS)} 家平台会员价格与积分档<span class="chev">›</span></summary>
   <div class="dbody">
     <p>月付、季付和年付均显示整个周期的首期价格。¥ 为人民币，$ 为美元。首购、优惠券和续费条件见各平台活动及截图。</p>
     <div class="record-tools">
@@ -2785,8 +2812,9 @@ for plat, readings in CANVAS["rows"].items():
                 note = f'<small class="canvas-meta">留档 · {escape(reading["sourceDate"])}</small>'
         cells.append(f'<td {column} data-canvas-credit="{credits}"><strong>{credits:,}</strong>{note}</td>')
     canvas_rows += f'<tr><th scope="row">{platform_label}</th>{"".join(cells)}</tr>'
-    for key, label, _, _ in PERIODS:
-        prices = [r["byP"][key]["perVideo"] / r["per"] for r in ROWS if r["plat"] == plat and key in r["byP"]]
+    for key, label, months, _ in PERIODS:
+        quotes = [r["byP"][key] for r in COMPARISON_ROWS if r["plat"] == plat and key in r["byP"]]
+        prices = [quote["payCNY"] / (quote["cr"] * months) for quote in quotes]
         per_credit = min(prices, default=None)
         cells = []
         for i, reading in enumerate(readings):
@@ -2807,7 +2835,7 @@ CANVAS_DETAILS = f"""
 <details id="canvas-comparison">
   <summary>画布扣分与单条成本<span class="chev">›</span></summary>
   <div class="dbody" id="canvas-data">
-    <p class="canvas-context">Seedance 2.5 · 30 秒 · 16:9 · 全能参考 · {CANVAS["date"]} 采集</p>
+    <p class="canvas-context">Seedance 2.5 · 30 秒 · 16:9 · 全能参考 · 更新于 {CANVAS["date"]}，各平台核对日期见活动栏。</p>
     <div class="canvas-controls" hidden>
       <label class="record-filter">模型<select id="canvas-model">
         {"".join(f'<option value="{i}">{name}</option>' for i, name in enumerate(canvas_model_names))}
@@ -2837,13 +2865,19 @@ src_rows = "".join(
     f'<tr><td>{source_link(x["page"], x.get("url"))}</td><td style="white-space:normal">{escape(x["data"])}</td></tr>'
     for x in COST["sources"])
 
-offer_rows = "".join(
-    f'<tr><td>{source_link(plat, review["url"])}</td>'
-    f'<td style="white-space:normal">{escape(review["offer"])}</td>'
-    f'<td class="num">{format(CPV[plat], ",") if plat in CPV else "会员解锁"}'
-    f'<br><small>{review["creditDate"]}{" 留档" if review.get("creditPending") else ""}</small></td></tr>'
-    for plat, review in REVIEW.items()
-)
+offer_rows = ""
+for plat, review in REVIEW.items():
+    state = CANVAS["rows"][plat][1]
+    reading_label = f'{CPV[plat]:,}' if plat in CPV else canvas_states.get(state, state)
+    archived = " 留档" if plat in CPV and review.get("creditPending") else ""
+    note = review.get("creditNote", "")
+    offer_rows += (
+        f'<tr><td>{source_link(plat, review["url"])}'
+        f'<br><small>报价 {review["priceDate"]}</small></td>'
+        f'<td style="white-space:normal">{escape(review["offer"])}'
+        + (f'<br><small>{escape(note)}</small>' if note else "")
+        + f'</td><td class="num">{reading_label}<br><small>{review["creditDate"]}{archived}</small></td></tr>'
+    )
 offer_benefit_rows = ""
 for benefit in COST.get("offerBenefits", []):
     if benefit["platform"] not in CPV:
@@ -3095,30 +3129,27 @@ INTRO = """
 
     <div class="is on">
       <div class="ieyebrow">01 / 这是什么</div>
-      <h3>把各平台的积分，<br>换算成同一种钱</h3>
-      <p>各平台用自己的积分计价，币值互不相同 —— 同一条 30 秒视频，小云雀扣 600 分、
-      Neowow 扣 7,500 分。直接比积分没有意义。</p>
-      <p>本站在把它们压平到同一口径之后，再折算成人民币。
-      <b style="color:#D1FE17">不采信宣传数字，只给可复核的结果。</b></p>
+      <h2>用统一规格比较视频成本</h2>
+      <p>各平台的积分价值不同。先选模型、画质和用量，再按实付金额、每月积分和画布扣分计算。</p>
     </div>
 
     <div class="is">
       <div class="ieyebrow">02 / 怎么看</div>
-      <h3>三步拿到你要的答案</h3>
+      <h2>从成本榜找到合适的档位</h2>
       <ul>
-        <li><b>先看结论</b> —— 数据页顶部有结论条，不必自己算</li>
-        <li><b>看你的场景</b> —— 拖动「月产量」，表格与排名即时重算</li>
-        <li><b>看不懂某个词</b> —— 带虚线的词点一下就有解释，也可去「术语表」</li>
+        <li>打开「筛选」，填写每月用量或预算。</li>
+        <li>用榜单比较首期实付、月产能和每条成本。</li>
+        <li>点档位旁的加号，把两到四档放在一起比。</li>
       </ul>
     </div>
 
     <div class="is">
       <div class="ieyebrow">03 / 看之前请知道</div>
-      <h3>三个前提</h3>
+      <h2>核对价格和扣分依据</h2>
       <ul>
-        <li>价格是采集当日的<b>限时活动价</b>，活动退坡后排名会变</li>
-        <li>排名按<b>单账号单平台</b>口径；需要多账号时归入「组合订阅」另算</li>
-        <li>数据来源、算法与风险说明<b>全部公开</b>，页面底部可查</li>
+        <li>在会员报价页查看采集日期和活动条件。</li>
+        <li>成本榜按单账号和基础积分计算。</li>
+        <li>画布扣分待核实时，可先比较报价和每月积分。</li>
       </ul>
     </div>
 
@@ -3152,7 +3183,7 @@ THEME_SCRIPT = """
   const browserColor = document.querySelector('meta[name="theme-color"]');
   function applyTheme(theme){
     root.dataset.theme = theme;
-    browserColor.content = theme === 'light' ? '#ffffff' : '#141516';
+    browserColor.content = theme === 'light' ? '#ffffff' : '#0f1113';
   }
   try {
     applyTheme(localStorage.getItem('caliber.theme') === 'dark' ? 'dark' : 'light');
@@ -3551,11 +3582,11 @@ cycles_body = f"""
 {foot()}
 """
 
-HOME_VIEW, HOME_JS = compare_view(ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR, PLAT_LG, records_page="cost.html")
+HOME_VIEW, HOME_JS = compare_view(COMPARISON_ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR, PLAT_LG, records_page="cost.html")
 WORKSPACE_VIEW, WORKSPACE_JS = compare_view(
-    ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR, PLAT_LG, records_page="cost.html", workspace=True
+    COMPARISON_ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR, PLAT_LG, records_page="cost.html", workspace=True
 )
-MEMBERSHIP_VIEW, MEMBERSHIP_JS = membership_budget_view(ROWS, CANVAS["rows"], PERIODS, COLOR, PLAT_LG)
+MEMBERSHIP_VIEW, MEMBERSHIP_JS = membership_budget_view(COMPARISON_ROWS, CANVAS["rows"], PERIODS, COLOR, PLAT_LG)
 RECORD_PANELS = [
     ("membership-prices", "会员价格", membership_details('index.html#compare-results')),
     ("canvas-comparison", "画布扣分", CANVAS_DETAILS),
@@ -4249,12 +4280,14 @@ def write_all():
         txt = io.open(src, encoding="utf-8").read()
         # 任何旧指纹（含 HX-CLB-XXXX / HX-CLB-WORK-XXXX）统一替换为当前作品指纹
         txt = re.sub(r"HX-CLB-[0-9A-Za-z-]+", FP_WORK, txt)
+        comment = "# " if extra in ("_headers", "_redirects", "robots.txt") else ""
+        edition_line = comment + "版本指纹 (Edition): " + FP_EDITION
         if "版本指纹" not in txt:
             txt = re.sub(r"(溯源指纹[^\n]*\n)",
-                         r"\1版本指纹 (Edition): " + FP_EDITION + "\n", txt, count=1)
+                         r"\1" + edition_line + "\n", txt, count=1)
         else:
-            txt = re.sub(r"版本指纹 \(Edition\): HX-CLB-[0-9A-Za-z-]+",
-                         "版本指纹 (Edition): " + FP_EDITION, txt, count=1)
+            txt = re.sub(r"(?m)^(?:# )?版本指纹 \(Edition\): HX-CLB-[0-9A-Za-z-]+$",
+                         edition_line, txt, count=1)
         io.open(src, "w", encoding="utf-8").write(txt)
         for d in _usable_dirs():
             shutil.copy2(src, os.path.join(d, extra))
@@ -4465,7 +4498,7 @@ write_all()
 
 print("=" * 78)
 print(f"{BRAND} · {BRAND_CN}　指纹 {FP}")
-print(f"口径 {SPEC}　|　汇率 1 USD = {RATE} CNY ({UPDATED})")
+print(f"口径 {SPEC}　|　汇率 1 USD = {RATE} CNY ({COST['fx']['asOf']})")
 print("=" * 78)
 print(f"{'#':>3}  {'平台':<11}{'档位':<10}{'积分档':<10}{'年费':>10}{'单条CNY':>9}{'元/秒':>7}{'月产能':>8}{'相对':>7}")
 print("-" * 78)
