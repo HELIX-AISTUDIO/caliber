@@ -576,36 +576,27 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   color:#9AA0A8;font-size:13px;font-weight:600;padding:7px 12px;border-radius:999px;flex:0 0 auto;
   transition:color .22s,background .22s}.menu a:hover{color:#fff;background:rgba(255,255,255,.065)}.menu a.active{color:#D1FE17}.nav .spec{margin-left:auto;font-family:__MONO__;font-size:11.5px;font-weight:500;color:#D1FE17;
   border:1px solid rgba(209,254,23,.35);border-radius:999px;padding:6px 13px;flex:0 0 auto}.wrap{max-width:1280px;margin:0 auto;padding:0 24px;position:relative;z-index:1}/* ── Hero 光场：lime 从「涂料」变「光源」── */
-.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
-  color:#D1FE17;margin-bottom:15px;font-family:__MONO__}h1{font-family:__DISP__;font-size:clamp(31px,5.3vw,60px);font-weight:800;color:#fff;
+h1{font-family:__DISP__;font-size:clamp(31px,5.3vw,60px);font-weight:800;color:#fff;
   letter-spacing:-.038em;line-height:1.07}h1 em{font-style:normal;color:#D1FE17}
-.lead{color:#8A9099;font-size:14.5px;max-width:720px;margin-top:18px;line-height:1.75}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
 .btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
   text-decoration:none;white-space:nowrap;
-  transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s}.btn-white{background:#fff;color:#0B0B0B}.btn-white:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,255,255,.2)}.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.2)}.btn-ghost:hover{border-color:rgba(255,255,255,.45);transform:translateY(-2px)}h2{font-family:__DISP__;font-size:20px;font-weight:750;color:#fff;letter-spacing:-.025em;line-height:1.3}h2 .ey{display:inline-block;font-family:__MONO__;font-size:12px;font-weight:600;color:#D1FE17;
+  transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s}.btn-white{background:#fff;color:#0B0B0B}.btn-white:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,255,255,.2)}h2{font-family:__DISP__;font-size:20px;font-weight:750;color:#fff;letter-spacing:-.025em;line-height:1.3}h2 .ey{display:inline-block;font-family:__MONO__;font-size:12px;font-weight:600;color:var(--studio-accent);
   margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:__DISP__;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.note, .legal, details{
-  background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 46%,rgba(0,0,0,.30));
-  -webkit-backdrop-filter:blur(28px) saturate(150%);backdrop-filter:blur(28px) saturate(150%);
-  border:1px solid rgba(255,255,255,.12);border-radius:18px;
-  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.07),inset 0 1px 0 rgba(255,255,255,.05),
-             0 1px 2px rgba(0,0,0,.45),0 10px 24px rgba(0,0,0,.4),0 30px 60px rgba(0,0,0,.48)}
-@supports not ((-webkit-backdrop-filter:blur(2px)) or (backdrop-filter:blur(2px))){.note, .legal, details, .nav{
-    background:linear-gradient(158deg,#161B18,#0D110F)}
+  background:var(--studio-panel);border:1px solid var(--studio-line);border-radius:14px;
 }table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
-  background:linear-gradient(158deg,rgba(22,27,24,.86),rgba(10,13,11,.92));
-  border:1px solid rgba(255,255,255,.12);border-radius:18px;overflow:hidden;
-  box-shadow:inset 0 0 0 .61px rgba(255,255,255,.06),0 1px 2px rgba(0,0,0,.5),
-             0 8px 20px rgba(0,0,0,.42),0 26px 56px rgba(0,0,0,.46)}th{background:transparent;color:#767C85;font-weight:700;font-size:10.5px;text-align:left;
+  background:var(--studio-panel);border:1px solid var(--studio-line);border-radius:12px;overflow:hidden}
+th{background:var(--studio-control);color:var(--studio-muted);font-weight:700;font-size:11.5px;text-align:left;
   padding:10px 14px;white-space:nowrap;letter-spacing:.095em;text-transform:uppercase;
-  border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer;user-select:none;transition:color .2s}th:hover{color:#D1FE17}th.ctr,td.ctr{text-align:center}td{padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap;
-  vertical-align:middle}tbody tr{transition:background .18s}tbody tr:last-child td{border-bottom:none}tbody tr:hover{background:rgba(255,255,255,.032)}tbody tr.top{background:rgba(209,254,23,.055)}tbody tr.top td:first-child{box-shadow:inset 3px 0 0 #D1FE17}.num{text-align:right;font-variant-numeric:tabular-nums;font-family:__MONO__;font-weight:500;
+  border-bottom:1px solid var(--studio-line);cursor:pointer;user-select:none;transition:color .2s}th:hover{color:var(--studio-accent)}th.ctr,td.ctr{text-align:center}td{padding:8px 14px;border-bottom:1px solid var(--studio-line);white-space:nowrap;
+  vertical-align:middle}tbody tr{transition:background .18s}tbody tr:last-child td{border-bottom:none}tbody tr:hover{background:var(--studio-control)}tbody tr.top{background:var(--studio-select)}.num{text-align:right;font-variant-numeric:tabular-nums;font-family:__MONO__;font-weight:500;
   letter-spacing:-.022em}.strong{color:#D1FE17;font-weight:600}.neg{color:#FF6B6B;font-weight:600}.nm{color:#E4E7EA;font-weight:600}.rk b{display:block;font-family:__MONO__;font-size:15px;color:#fff;font-weight:700}.rk s{text-decoration:none;font-size:10px;color:#5A6069;font-family:__MONO__}.cell2{line-height:1.25}.cell2>*{display:block}.cell2 s{text-decoration:none;font-size:10.5px;color:#6E747D;display:block}.cell2 b{font-weight:600;color:#E4E7EA}.dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;vertical-align:middle}.vlabel{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;font-size:10px;
   font-weight:600;color:#9AA0A8;background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.14);white-space:nowrap}.tagu{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:999px;font-size:9.5px;
   font-weight:700;color:#FF4D8D;border:1px solid rgba(255,77,141,.45)}.mini{height:5px;border-radius:999px;background:rgba(255,255,255,.07);margin-top:6px;overflow:hidden}.mini i{display:block;height:100%;border-radius:999px;background:rgba(255,255,255,.20);
-  transition:width .9s cubic-bezier(.22,1,.36,1)}.js .reveal .mini i{width:0!important}.js .reveal.in .mini i{width:var(--w)!important}.mini.m2 i{background:rgba(255,255,255,.13)}.mini.m3 i{background:rgba(255,255,255,.09)}/* lime 只标最重要的一件事 —— 强调色一旦满地都是，就等于没有强调 */
-tr.top .mini i{background:#D1FE17}.tag{display:inline-block;padding:3px 11px;border-radius:999px;font-size:10.5px;font-weight:700}.v-good{background:#D1FE17;color:#0B0B0B}.v-warn{background:transparent;color:#C9CDD2;border:1px solid rgba(255,255,255,.18)}.v-bad{background:transparent;color:#FF6B6B;border:1px solid rgba(255,107,107,.32)}.note{padding:18px 22px;font-size:13px;line-height:1.78}.note.warn{border-left:2px solid rgba(255,201,60,.55)}.note.good{border-left:2px solid rgba(209,254,23,.5)}ul{margin:8px 0 0 19px}li{margin:7px 0;font-size:13px;line-height:1.72}li::marker{color:#D1FE17}code{background:rgba(209,254,23,.09);border:1px solid rgba(209,254,23,.2);padding:2px 7px;
-  border-radius:6px;font-family:__MONO__;font-size:12.5px;color:#D1FE17;font-weight:500}details{margin-bottom:12px;overflow:hidden;border-radius:16px;transition:border-color .25s}details:hover{border-color:rgba(209,254,23,.28)}summary{cursor:pointer;padding:16px 22px;font-size:13.5px;font-weight:650;color:#E4E7EA;
+  transition:width .25s ease}.mini.m2 i{background:var(--studio-rule)}.mini.m3 i{background:var(--studio-rule)}
+tr.top .mini i{background:var(--studio-accent)}.tag{display:inline-block;padding:3px 11px;border-radius:999px;font-size:10.5px;font-weight:700}.v-good{background:var(--studio-select);color:var(--studio-accent)}.v-warn{background:transparent;color:var(--studio-muted);border:1px solid var(--studio-line)}.v-bad{background:transparent;color:#FF6B6B;border:1px solid rgba(255,107,107,.32)}.note{padding:18px 22px;font-size:13px;line-height:1.78}.note.warn{border-left-color:#c38e4d}.note.good{border-left-color:var(--studio-accent)}ul{margin:8px 0 0 19px}li{margin:7px 0;font-size:13px;line-height:1.72}li::marker{color:var(--studio-accent)}code{background:var(--studio-control);border:1px solid var(--studio-line);padding:2px 7px;
+  border-radius:6px;font-family:__MONO__;font-size:12.5px;color:var(--studio-text);font-weight:500}details{margin-bottom:12px;overflow:hidden;border-radius:14px;transition:border-color .25s}details:hover{border-color:var(--studio-rule)}summary{cursor:pointer;padding:16px 22px;font-size:13.5px;font-weight:650;color:var(--studio-text);
   list-style:none;display:flex;align-items:center;gap:11px}summary::-webkit-details-marker{display:none}summary:hover{color:#fff}summary .chev{margin-left:auto;color:#767C85;font-size:12px;
   transition:transform .3s cubic-bezier(.22,1,.36,1)}details[open] summary .chev{transform:rotate(90deg);color:#D1FE17}.dbody{padding:0 22px 22px;font-size:13px;line-height:1.78}.dbody>*+*{margin-top:12px}.dbody h3{margin:18px 0 10px}.tw{overflow-x:auto;border-radius:18px}.tw table{min-width:760px}/* 内层滚动容器【不能】用 overscroll-behavior:contain：
    手指/滚轮停在容器上时，Chrome 会把手势吃掉而不传给页面，
@@ -795,7 +786,6 @@ input[type=number]{width:110px;background:rgba(255,255,255,.06);
 .glist{display:flex;flex-direction:column;gap:0;border-top:1px solid rgba(255,255,255,.08)}
 .gterm{padding:20px 2px;border-bottom:1px solid rgba(255,255,255,.08);scroll-margin-top:76px}
 .gterm:target{background:rgba(209,254,23,.05)}
-.gt b{font-size:15px;color:#fff;font-weight:600}
 .gs{font-size:13px;color:#C9CDD2;line-height:1.75;margin-top:6px}
 .gl{font-size:12.5px;color:#8A9098;line-height:1.85;margin-top:9px;max-width:860px}
 .tmx a{color:#D1FE17}.vmeta b{color:#C9CDD2;font-weight:600}/* KPI 条三套（年/季/月），同一时刻只显示当前周期那套 */
@@ -937,12 +927,10 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   border-radius:20px;color:#0B0B0B;font-size:12px;line-height:1.8;backdrop-filter:none;
   -webkit-backdrop-filter:none}.legal-t{font-size:16px;font-weight:800;letter-spacing:-.025em;margin-bottom:9px}.legal-b{color:#1F2A00;max-width:1000px}.legal-f{margin-top:14px;font-family:__MONO__;font-size:11px;color:#1F2A00}.legal-f .fp{background:#0B0B0B;color:#D1FE17;padding:2.5px 9px;border-radius:6px;font-weight:600}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}.reveal{opacity:0;transform:translateY(16px);
-  transition:opacity .62s cubic-bezier(.22,1,.36,1),transform .62s cubic-bezier(.22,1,.36,1)}.reveal.in{opacity:1;transform:none}@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}
-}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.mini i,.cbar i{transition:none}}
 @media print{body{background:#fff!important;color:#000!important;padding:0}body::before,body::after{display:none!important}.note, .legal, details, .nav, table{
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
-    box-shadow:none!important;background:#fff!important}.nav{position:static!important}.promo{background:#D1FE17!important;color:#000!important}.brand .bw b, .menu a, h1, h2, h3, td, th, li, .lead{color:#000!important}.legal{background:#F2FFB8!important}.legal-t,.legal-b,.legal-f{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
+    box-shadow:none!important;background:#fff!important}.nav{position:static!important}.brand .bw b, .menu a, h1, h2, h3, td, th, li{color:#000!important}.legal-t,.legal-b,.legal-f{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
 }
 @media (max-width:820px){.promo{font-size:11.5px;padding:9px 14px;gap:9px}.nav .inner{padding:10px 15px;gap:11px;flex-wrap:wrap}
   /* ⚠ 原先这里是 .nav .spec{display:none} —— 手机端把「测试口径」整个藏掉，
@@ -1232,16 +1220,6 @@ document.documentElement.classList.add('js');
   window.addEventListener('resize', sync, {passive:true});
   window.addEventListener('orientationchange', sync, {passive:true});
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(sync);
-})();
-
-/* ── 滚动入场 ── */
-(function(){
-  var els = document.querySelectorAll('.reveal');
-  if(!('IntersectionObserver' in window)){ els.forEach(function(e){e.classList.add('in');}); return; }
-  var io = new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
-  }, {rootMargin:'0px 0px -8% 0px', threshold:.06});
-  els.forEach(function(e){ io.observe(e); });
 })();
 
 /* ── 子导航高亮 ──
@@ -2503,15 +2481,17 @@ def promo():
 def nav(active):
     items = ""
     for it in NAV:
-        cls = ' class="active"' if it["key"] == active else ""
+        cls = ' class="active" aria-current="page"' if it["key"] == active else ""
         items += f'<a href="{it["href"]}"{cls}>{it["label"]}</a>'
     # 窄屏下横向菜单必然放不下（「视觉理解模型排行榜」一个字就是 14px），
     # 与其硬裁或让它横向滚动，不如收进汉堡菜单 —— 三项导航的标准做法。
     return (f'<div class="nav"><div class="inner">'
             f'<a class="brand" href="index.html"><i></i>'
             f'<span class="bw"><b>{BRAND}</b><s>{STUDIO}</s></span></a>'
-            f'<nav class="menu">{items}</nav>'
+            f'<nav class="menu" aria-label="主导航">{items}</nav>'
             f'<span class="spec">{SPEC}</span>'
+            f'<button type="button" id="theme-toggle" class="theme-toggle" hidden>'
+            f'<i class="theme-icon" aria-hidden="true"></i><span>浅色</span></button>'
             f'<button type="button" class="nburger" id="nBurger" aria-label="导航菜单" '
             f'aria-expanded="false" aria-controls="nDrop"><i></i><i></i><i></i></button>'
             f'</div>'
@@ -2525,15 +2505,15 @@ def legal():
             f'{BRAND} · {BRAND_CN}　·　{STUDIO} 出品　·　数据采集 {UPDATED}</div></div>')
 
 
-def foot(text):
-    # 误关之后要有路回来 —— 引导弹窗只在首次自动出现
-    # 反馈入口指向 GitHub Issues：仓库已存在，零成本、可追踪、不需要后端
-    return (f'<div class="foot">{text}'
-            f'\u3000|\u3000<a href="{SITE.get("issues", "#")}" target="_blank" rel="noopener" '
-            f'style="color:#9AA85E;border-bottom:1px dashed rgba(209,254,23,.35)">'
-            f'\u95ee\u9898\u53cd\u9988</a>'
-            f'\u3000|\u3000<a href="#" id="introAgain" style="color:#8A9098;'
-            f'border-bottom:1px dashed rgba(255,255,255,.3)">\u65b0\u624b\u5f15\u5bfc</a></div>')
+def foot(text=""):
+    links = "".join(f'<a href="{item["href"]}">{item["label"]}</a>' for item in NAV if item["key"] != "home")
+    note = f'<p class="foot">{text}</p>' if text else ""
+    return (f'<footer class="site-footer"><div class="footer-main">'
+            f'<a class="footer-brand" href="index.html"><strong>{BRAND}</strong><span>{STUDIO}</span></a>'
+            f'<nav aria-label="站点导航">{links}</nav><nav aria-label="帮助与反馈">'
+            f'<a href="#" id="introAgain">新手引导</a>'
+            f'<a href="{SITE.get("issues", "#")}" target="_blank" rel="noopener">问题反馈</a></nav></div>'
+            f'{note}{legal()}</footer>')
 
 
 
@@ -2848,15 +2828,14 @@ for shot in EVIDENCE:
     caption = escape(f'{shot["platform"]} · {shot["label"]} · {shot["date"]}')
     src = f'img/pricing/{escape(name, quote=True)}'
     evidence_cards[shot["platform"]].append(
-        f'<figure style="margin:0"><a href="{src}" target="_blank" rel="noopener">'
-        f'<img src="{src}" alt="{caption}" loading="lazy" decoding="async" '
-        f'style="display:block;width:100%;aspect-ratio:16/9;object-fit:contain;background:#141414"></a>'
-        f'<figcaption style="margin-top:8px">{caption}</figcaption></figure>'
+        f'<figure class="proof-shot"><a href="{src}" target="_blank" rel="noopener">'
+        f'<img src="{src}" alt="{caption}" loading="lazy" decoding="async"></a>'
+        f'<figcaption>{caption}</figcaption></figure>'
     )
 evidence_groups = "".join(
-    f'<details id="evidence-{index}"><summary>{escape(plat)} · {len(cards)} 张<span class="chev">›</span></summary>'
-    f'<div class="dbody"><p>{source_link("官方会员或活动入口", REVIEW[plat]["url"])}</p>'
-    f'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px">'
+    f'<details class="proof-group" id="evidence-{index}"><summary>{plogo(plat, "comparison-mark")}'
+    f'{escape(canvas_display_names.get(plat, plat))}<small>{len(cards)} 张</small><span class="chev">›</span></summary>'
+    f'<div class="dbody"><p>{source_link("官方会员或活动入口", REVIEW[plat]["url"])}</p><div class="proof-grid">'
     f'{"".join(cards)}</div></div></details>'
     for index, (plat, cards) in enumerate(evidence_cards.items(), 1) if cards
 )
@@ -3110,6 +3089,37 @@ GUIDE = """
 """
 
 
+THEME_SCRIPT = """
+(function(){
+  const root = document.documentElement;
+  const browserColor = document.querySelector('meta[name="theme-color"]');
+  function applyTheme(theme){
+    root.dataset.theme = theme;
+    browserColor.content = theme === 'light' ? '#f7f8fb' : '#10141c';
+  }
+  try {
+    if (localStorage.getItem('caliber.theme') === 'light') applyTheme('light');
+  } catch (_) {}
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.getElementById('theme-toggle');
+    const label = toggle.querySelector('span');
+    function updateToggle(){
+      label.textContent = root.dataset.theme === 'light' ? '深色' : '浅色';
+      toggle.setAttribute('aria-label', '切换到' + label.textContent + '模式');
+    }
+    toggle.addEventListener('click', () => {
+      const theme = root.dataset.theme === 'light' ? 'dark' : 'light';
+      applyTheme(theme);
+      try { localStorage.setItem('caliber.theme', theme); } catch (_) {}
+      updateToggle();
+    });
+    updateToggle();
+    toggle.hidden = false;
+  });
+})();
+"""
+
+
 def page(title, desc, nav_html, body, cost_js=False, canon=None, extra_css="", extra_js="", self_imgs=False):
     js = JS.replace("__COST__", COST_JS) if cost_js else JS.replace("__COST__", "")
     js = js.replace("__GLOS__", GLOS_JSON).replace("__DEFK__", _DEFAULT_K).replace("__SECCLIP__", str(SEC_PER_CLIP))
@@ -3158,14 +3168,14 @@ def page(title, desc, nav_html, body, cost_js=False, canon=None, extra_css="", e
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="format-detection" content="telephone=no,email=no,address=no">
-<meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#10141c">
+<meta name="color-scheme" content="dark light">
 <meta name="description" content="{desc}">
 <meta property="og:title" content="{BRAND} · {title}">
 <meta property="og:description" content="{desc}">
 {og_extra}<title>{BRAND} · {title}</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23D1FE17'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23D1FE17'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23293351'/%3E%3Cpath d='M9 22v-5m7 5V13m7 9V9' stroke='%23bcc8ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23293351'/%3E%3Cpath d='M9 22v-5m7 5V13m7 9V9' stroke='%23bcc8ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <!-- ============================================================
      {FP_WORK}　|　{FP_EDITION}
      {COPY}
@@ -3183,12 +3193,12 @@ def page(title, desc, nav_html, body, cost_js=False, canon=None, extra_css="", e
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:{imgsrc}; font-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
-<style>{sub_css(CSS)}{extra_css}</style></head><body>
+<script>{THEME_SCRIPT}</script>
+<style>{sub_css(CSS)}{extra_css}{DISPLAY_FONT_CSS}</style></head><body>
 
 {promo()}
 {nav_html}
 {body}
-<div class="wrap">{legal()}</div>
 
 {INTRO}
 <script>{js}{extra_js}</script>
@@ -3332,6 +3342,7 @@ cycles_body = f"""
     </div>
   </div>
 
+  <div class="cycle-rank-board">
   <details class="rank-filters" id="rank-filters">
     <summary>筛选详细排名<span class="chev">›</span></summary>
     <div class="rank-controls">
@@ -3376,6 +3387,7 @@ cycles_body = f"""
     <span>平台与档位</span><span>相对表现 · 越长越好</span><span id="cycMetricColumn">单条成本</span>
   </div>
   <div class="chart" id="chart">{chart_rows("cost", "y")}</div>
+  </div>
   {pareto_block("y")}
   <p class="cycle-source-note">{COST["liveNote"]}</p>
 
@@ -3472,30 +3484,14 @@ cycles_body = f"""
 {EVIDENCE_DETAILS}
   </div>
 </main>
-{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　{len(ROWS)} 个可选积分档 × 3 个周期')}
+{foot(f'{len(ROWS)} 个可选积分档，覆盖月付、季付和年付')}
 """
 
 COMPARE_VIEW, COMPARE_JS = compare_view(ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR, PLAT_LG)
 cost_body = f"""
-<div class="report-layout">
-  <aside class="report-rail" aria-label="成本榜目录">
-    <nav>
-      <a class="report-current" href="#compare-tool">视频生成成本榜</a>
-      <a href="#compare-results">总览与排名</a>
-      <a href="#compare-frontier">价格与产能</a>
-    </nav>
-    <nav aria-label="可核对的数据">
-      <a href="#membership-prices">会员价格</a>
-      <a href="#canvas-comparison">画布扣分</a>
-      <a href="#pricing-evidence">来源截图</a>
-    </nav>
-    <a class="report-rail-link" href="cycles.html">详细排名</a>
-  </aside>
-  <div class="report-content">
 {COMPARE_VIEW}
 <section class="compare-records" aria-labelledby="compare-records-title">
-  <h2 id="compare-records-title">价格与折算依据</h2>
-  <p>{COST["liveNote"]}</p>
+  <header class="records-header"><h2 id="compare-records-title">价格与数据来源</h2><p>{COST["liveNote"]}</p></header>
   {membership_details('#compare-results').strip()}
   {CANVAS_DETAILS.strip()}
   {OFFER_DETAILS.strip()}
@@ -3504,6 +3500,10 @@ cost_body = f"""
 <details id="more" class="compare-advanced">
   <summary>进阶对比与多账号方案<span class="chev">›</span></summary>
   <div class="dbody"><a href="cycles.html">查看动态排名及完整计算方法</a></div>
+  <div class="mobar">
+    <span class="mosum" id="moSum">全档位对比 · 年付 · 30 条/月 · 6/6 平台</span>
+    <button type="button" id="moOpen" aria-label="调整周期、月产量与平台筛选"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M1 4.2h7M11.6 4.2H14M1 10.8h2.4M7 10.8h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="9.8" cy="4.2" r="1.9" stroke="currentColor" stroke-width="1.7"/><circle cx="5.2" cy="10.8" r="1.9" stroke="currentColor" stroke-width="1.7"/></svg>调整</button>
+  </div>
 <div class="app">
 <aside class="side">
   {SHEET_HEAD}
@@ -3651,15 +3651,9 @@ cost_body = f"""
 </div>
   <div class="scrim" id="scrim"></div>
 </div>
-<div class="mobar">
-  <span class="mosum" id="moSum">全档位对比 · 年付 · 30 条/月 · 6/6 平台</span>
-  <button type="button" id="moOpen" aria-label="调整周期、月产量与平台筛选"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M1 4.2h7M11.6 4.2H14M1 10.8h2.4M7 10.8h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="9.8" cy="4.2" r="1.9" stroke="currentColor" stroke-width="1.7"/><circle cx="5.2" cy="10.8" r="1.9" stroke="currentColor" stroke-width="1.7"/></svg>调整</button>
-</div>
 
 </details>
-</div>
-</div>
-{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　数据采集 {UPDATED}　·　全部数值按统一口径重算，非平台宣传数字')}
+{foot(f'基准数据采集于 {UPDATED} · 按统一规格折算')}
 """
 
 # ── 首页 ──────────────────────────────────────────────────────────
@@ -3670,7 +3664,7 @@ DISPLAY_FONT_CSS = '''
   font-style: normal;
   font-weight: 900;
   font-display: swap;
-  unicode-range: U+4ED8,U+51C6,U+5355,U+53EF,U+540D,U+5468,U+57FA,U+5B9E,U+6210,U+6392,U+6570,U+671F,U+672C,U+6761,U+699C,U+6BCF,U+751F,U+79D2,U+89C6,U+9891;
+  unicode-range: U+4E0D,U+4E0E,U+4E2A,U+4ED8,U+51C6,U+5355,U+53EF,U+540D,U+5468,U+5728,U+57FA,U+5B58,U+5B9E,U+5E93,U+5F71,U+6210,U+6280,U+6392,U+63D0,U+6570,U+671F,U+672C,U+672F,U+6761,U+699C,U+6BCF,U+6CD5,U+751F,U+7535,U+793A,U+79D2,U+8868,U+89C6,U+8BCD,U+8BED,U+8FD9,U+9762,U+9875,U+9891;
 }
 '''
 home_monthly = [(r, r["byP"]["m"], int(r["byP"]["m"]["cap"]))
@@ -3693,13 +3687,13 @@ home_body = f"""
     <div>
       <header id="cost" class="compare-heading">
         <h1>视频生成<br><em>成本基准</em></h1>
-        <p>用同一规格比较各家画布的会员价格、月产能与单条成本。</p>
+        <p>同一规格，比较各家画布的会员价格、月产能和单条成本。</p>
       </header>
       <div class="btns compare-home-actions">
-        <a class="btn btn-white" href="cost.html">查看完整榜单</a>
-        <a href="cost.html?mode=budget">按预算估算</a>
+        <a class="btn btn-white" href="cost.html">查看成本榜<i aria-hidden="true"></i></a>
+        <a class="home-budget-link" href="cost.html?mode=budget">按预算估算</a>
       </div>
-      <p class="home-report-meta">{len(PLATFORMS)} 家平台 · {len(ROWS)} 个可参与对比的会员档位 · <time datetime="{UPDATED}">{UPDATED}</time></p>
+      <p class="home-report-meta"><span><b>{len(PLATFORMS)}</b> 家平台</span><span><b>{len(ROWS)}</b> 个可比较档位</span><time datetime="{UPDATED}">采集于 {UPDATED}</time></p>
     </div>
     <section class="home-benchmark-block" aria-labelledby="home-benchmark-title">
       <div class="compare-result-head">
@@ -3708,7 +3702,7 @@ home_body = f"""
       </div>
       <div class="home-preview-columns"><span>平台与档位</span><span>首期实付</span></div>
       <ul class="home-ranking-preview">{home_preview_rows}</ul>
-      <p class="home-chart-caption">各平台满足用量的最低实付 · <a href="cost.html#canvas-comparison">查看画布扣分</a></p>
+      <p class="home-chart-caption">各平台满足用量的最低实付<a href="cost.html#canvas-comparison">查看画布扣分</a></p>
     </section>
   </div>
   <div class="home-resources">
@@ -3740,131 +3734,106 @@ home_body = f"""
     </nav>
   </div>
 </main>
-{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　数据采集 {UPDATED}　·　全部数值按统一口径重算，非平台宣传数字')}
+{foot(f'基准数据采集于 {UPDATED} · 按统一规格折算')}
 """
 
 
 # ── 术语表页 ──────────────────────────────────────────────────────
 GLOS_ROW = "".join(
-    f'<div class="gterm" id="{x["k"]}">'
-    f'<div class="gt"><b>{x["t"]}</b></div>'
-    f'<div class="gs">{x["s"]}</div>'
-    f'<div class="gl">{x["l"]}</div></div>'
+    f'<article class="gterm" id="{x["k"]}">'
+    f'<h2>{x["t"]}</h2><p class="gs">{x["s"]}</p>'
+    f'<p class="gl">{x["l"]}</p></article>'
     for x in GLOSSARY["terms"])
+GLOS_INDEX = "".join(f'<a href="#{x["k"]}">{x["t"]}</a>' for x in GLOSSARY["terms"])
 
 glossary_body = f"""
-<div class="wrap">
-<section class="reveal" style="margin-top:34px">
-  <div class="sechead">
-    <h2><span class="ey">术语</span>术语表</h2>
-    <div class="sd">{GLOSSARY["intro"]}</div>
+<main class="compare-page glossary-page" data-skip-intro>
+  <header class="compare-heading"><div><h1>术语表</h1><p>{GLOSSARY["intro"]}</p></div></header>
+  <div class="glossary-layout">
+    <nav class="glossary-index" aria-label="术语目录">
+      <strong>术语目录</strong><div>{GLOS_INDEX}</div>
+    </nav>
+    <div class="glist">{GLOS_ROW}</div>
   </div>
-  <div class="glist">{GLOS_ROW}</div>
-  <div class="sub" style="margin-top:22px">
-    点击页面中带虚线的术语，可就地展开该词的简要解释；每条都锚定到本页对应条目。
-  </div>
-</section>
-</div>
-{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　术语 {len(GLOSSARY["terms"])} 条')}
+</main>
+{foot(f'{len(GLOSSARY["terms"])} 条术语与计算口径')}
 """
 
 
 # ── 404 页 ────────────────────────────────────────────────────────
 NOTFOUND_BODY = f"""
-<div class="wrap">
-<section class="reveal" style="margin-top:56px">
-  <div class="eyebrow">{BRAND}</div>
-  <h1>这个页面<br><em>不存在</em></h1>
-  <p class="lead">地址可能输错了，或者这个页面已经下线。<br>
-     本站现在只有五页：首页、平台成本对比、三周期全清单、术语表、提示词库。</p>
-  <div class="btns">
-    <a class="btn btn-white" href="index.html">回到首页</a>
-    <a class="btn btn-ghost" href="cost.html">平台成本对比</a>
-    <a class="btn btn-ghost" href="cycles.html">三周期全清单</a>
+<main class="compare-page notfound-page" data-skip-intro>
+  <header class="compare-heading"><div>
+    <h1>这个页面不存在</h1>
+    <p>请检查网址，或从首页进入要找的页面。</p>
+  </div></header>
+  <div class="btns compare-home-actions">
+    <a class="btn btn-white" href="index.html">回到首页<i aria-hidden="true"></i></a>
+    <a class="home-budget-link" href="cost.html">查看成本榜</a>
   </div>
-</section>
-</div>
-{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品')}
+</main>
+{foot()}
 """
 
 
 # ═══════════════════════════════════════════════════════════════════
 # 5b. 提示词库（Cinematique）
-#
-# 设计与其余页面同一套 token：lime 只做「当前分类 + 主行动 + 计数强调」三件事，
-# 卡片用实心 #0B0B0B 而非玻璃面 —— 2309 张卡片若都带 backdrop-filter，
-# 移动端滚动会直接卡死（首页只有 6 张卡片，玻璃面在那里才成立）。
 # ═══════════════════════════════════════════════════════════════════
 CINE_CSS = r"""
-.libkpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:14px;margin-top:20px}
-.libkpi{background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px 20px}
-.libkpi .t{font-size:10.5px;font-weight:700;letter-spacing:.095em;text-transform:uppercase;color:#767C85}
-.libkpi .v{font-family:__MONO__;font-size:26px;font-weight:700;letter-spacing:-.032em;color:#fff;margin-top:5px}
-.libkpi.hi{border-color:rgba(209,254,23,.45)}
-.libkpi.hi .v{color:#D1FE17}
-.libguide{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:12px;margin-top:16px}
-.libgcard{background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:15px 17px}
-.libgcard strong{display:block;font-family:__MONO__;font-size:11px;font-weight:700;letter-spacing:.15em;color:#D1FE17;margin-bottom:7px}
-.libgcard span{font-size:12.5px;color:#767C85;line-height:1.7}
-.libbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:20px}
-.libbar input{background:#0B0B0B;border:1px solid rgba(255,255,255,.14);border-radius:999px;
-  padding:11px 17px;color:#fff;font:inherit;font-size:13.5px;outline:none;width:100%}
-.libbar input:focus{border-color:rgba(209,254,23,.55)}
-.libbar input::placeholder{color:#5A6069}
-.libq{flex:1 1 300px;min-width:220px}
-.libsb{flex:1 1 240px;min-width:200px}
-.libcnt{font-family:__MONO__;font-size:12px;color:#8A9099;white-space:nowrap}
-.libbtn{background:transparent;border:1px solid rgba(255,255,255,.2);color:#C9CDD2;
-  border-radius:999px;padding:10px 17px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap}
-.libbtn:hover{border-color:rgba(255,255,255,.42);color:#fff}
-.libbtn.on{background:#D1FE17;border-color:#D1FE17;color:#0B0B0B}
-.libwrap2{display:grid;grid-template-columns:238px 1fr;gap:20px;align-items:start;margin-top:18px}
-.libside{position:sticky;top:calc(var(--navh) + 16px);background:#0B0B0B;
-  border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:13px;
-  max-height:calc(100vh - var(--navh) - 46px);overflow-y:auto}
-.libside .st{font-size:10.5px;font-weight:700;letter-spacing:.095em;text-transform:uppercase;
-  color:#767C85;padding:6px 9px 10px}
-.libcat{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;
-  background:transparent;border:0;color:#8A9099;font:inherit;font-size:13px;
-  padding:8px 10px;border-radius:10px;cursor:pointer;text-align:left}
-.libcat:hover{background:rgba(255,255,255,.06);color:#fff}
-.libcat.on{background:rgba(209,254,23,.1);color:#D1FE17;font-weight:700}
-.libcat .n{font-family:__MONO__;font-size:11px;color:#5A6069;flex:0 0 auto}
-.libcat.on .n{color:rgba(209,254,23,.75)}
+.libbar{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) auto;gap:8px 14px;
+  align-items:end;padding:14px 16px;background:var(--studio-panel);border:1px solid var(--studio-line);border-radius:14px}
+.libbar label{display:grid;gap:4px;min-width:0;font-size:13px;font-weight:700}
+.libbar input{width:100%;min-height:44px;padding:8px 11px;border:1px solid var(--studio-rule);border-radius:8px;
+  background:var(--studio-bg);color:var(--studio-text);font:inherit;font-weight:500}
+.libbar input::placeholder{color:var(--studio-muted);opacity:1}
+.libactions{display:flex;gap:6px;flex-wrap:wrap}
+.libbar .lib-note{grid-column:1/-1;margin:0;color:var(--studio-muted);font-size:12px}
+.libcnt{display:block;margin-bottom:9px;color:var(--studio-muted);font-size:13px;font-variant-numeric:tabular-nums}
+.libbtn,.pcbtn{min-height:40px;background:var(--studio-panel);border:1px solid var(--studio-rule);color:var(--studio-text);
+  border-radius:8px;padding:6px 11px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.libactions .libbtn{min-height:44px;white-space:nowrap}
+.libbtn:hover,.pcbtn:hover{background:var(--studio-control);border-color:var(--studio-accent)}
+.libbtn.on,.pcbtn.fv.on{background:var(--studio-select);color:var(--studio-accent);border-color:var(--studio-rule)}
+.libwrap2{display:grid;grid-template-columns:196px minmax(0,1fr);gap:14px 20px;align-items:start;margin-top:18px}
+.libside{position:sticky;top:calc(var(--navh) + 12px);max-height:calc(100vh - var(--navh) - 32px);overflow:auto;
+  background:var(--studio-panel);border:1px solid var(--studio-line);border-radius:14px;padding:10px}
+.libside strong{display:block;padding:3px 8px 6px;font-size:13px}
+.libcat{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;min-height:34px;
+  background:transparent;border:0;color:var(--studio-muted);font:inherit;font-size:13px;
+  padding:5px 8px;border-radius:7px;cursor:pointer;text-align:left}
+.libcat:hover{background:var(--studio-control);color:var(--studio-text)}
+.libcat.on{background:var(--studio-select);color:var(--studio-accent);font-weight:700}
+.libcat .n{color:inherit;font-size:12px;font-variant-numeric:tabular-nums;flex:none}
 .libmain{min-width:0}
-.libcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
-.pcard{background:#0B0B0B;border:1px solid rgba(255,255,255,.08);border-radius:18px;
-  padding:20px 22px;display:flex;flex-direction:column;gap:10px;min-width:0}
-.pcard:hover{border-color:rgba(255,255,255,.17)}
-.pcimg{width:100%;height:auto;display:block;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#070707}
-.pchead{display:flex;align-items:baseline;gap:9px;min-width:0}
-.pcnum{font-family:__MONO__;font-size:11px;color:#5A6069;flex:0 0 auto}
-.pctitle{font-family:__DISP__;font-size:16.5px;font-weight:750;color:#fff;letter-spacing:-.02em;min-width:0}
-.pccat{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:#767C85}
-.pcdesc{font-size:13px;line-height:1.7;color:#8A9099}
-.pcp{font-family:__MONO__;font-size:12.5px;line-height:1.75;color:#C9CDD2;
-  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);border-radius:12px;
-  padding:12px 14px;white-space:pre-wrap;word-break:break-word;max-height:168px;overflow:auto}
-.pcp .sb{color:#D1FE17;font-weight:700}
-.pcact{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
-.pcbtn{background:transparent;border:1px solid rgba(255,255,255,.18);color:#C9CDD2;
-  border-radius:999px;padding:7px 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
-.pcbtn:hover{border-color:rgba(255,255,255,.42);color:#fff}
-.pcbtn.pri{background:#D1FE17;border-color:#D1FE17;color:#0B0B0B}
-.pcbtn.pri:hover{background:#DCFF4A;border-color:#DCFF4A;color:#0B0B0B}
-.pcbtn.fv.on{color:#D1FE17;border-color:rgba(209,254,23,.5)}
+.libcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:13px}
+.pcard{background:var(--studio-panel);border:1px solid var(--studio-line);border-radius:14px;
+  padding:15px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.pcimg{width:100%;aspect-ratio:16/10;object-fit:contain;display:block;border-radius:8px;background:var(--studio-bg)}
+.pctitle{margin:0;color:var(--studio-text);font-size:17px;font-weight:750;line-height:1.35;overflow-wrap:anywhere}
+.pccat{font-size:12px;color:var(--studio-muted)}
+.pcdesc{font-size:14px;line-height:1.6;color:var(--studio-text)}
+.pcp{font-family:__MONO__;font-size:13px;line-height:1.6;color:var(--studio-muted);
+  background:var(--studio-bg);border:1px solid var(--studio-line);border-radius:8px;
+  padding:9px 11px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:156px;overflow:auto}
+.pcp .sb{color:var(--studio-accent);font-weight:700}
+.pcact{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:4px}
+.pcbtn.pri{background:var(--studio-action);border-color:var(--studio-action);color:var(--studio-on-action)}
+.pcbtn.pri:hover{filter:brightness(.92)}
 .libmore{display:flex;justify-content:center;margin-top:20px}
-.libempty{color:#767C85;font-size:13px;text-align:center;padding:40px 0}
-.libsrc{margin-top:28px;border-left:2px solid rgba(255,201,60,.55);background:#0B0B0B;
-  border-top:1px solid rgba(255,255,255,.08);border-right:1px solid rgba(255,255,255,.08);
-  border-bottom:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 20px;
-  font-size:12.5px;line-height:1.8;color:#8A9099}
-.libsrc b{color:#C9CDD2}
-.libsrc a{color:#A8AEB5;border-bottom:1px dashed rgba(255,255,255,.3);text-decoration:none}
-@media(max-width:900px){
-  .libwrap2{grid-template-columns:1fr}
-  .libside{position:static;max-height:none}
-  .libcards{grid-template-columns:1fr}
+.libempty{grid-column:1/-1;color:var(--studio-muted);font-size:14px;text-align:center;padding:35px 0}
+.libsrc{margin-top:28px;padding-top:15px;border-top:1px solid var(--studio-line);
+  color:var(--studio-muted);font-size:13px;line-height:1.8;overflow-wrap:anywhere}
+@media(max-width:780px){
+  .libbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .libactions{grid-column:1/-1}
+  .libwrap2{grid-template-columns:minmax(0,1fr)}
+  .libside{position:static;max-height:none;padding:8px}
+  .libcategories{display:flex;gap:4px;overflow:auto;padding:3px}
+  .libcat{width:auto;flex:0 0 auto;min-height:36px}
+}
+@media(max-width:460px){
+  .libbar{grid-template-columns:minmax(0,1fr);padding:10px}
+  .pcard{padding:12px}
 }
 """
 
@@ -3891,8 +3860,7 @@ CINE_JS = r"""
       moreEl = $('libMore'), qEl = $('libQ'), sEl = $('libS'), favBtn = $('libFav'), clrBtn = $('libClr');
 
   /* 分类按钮 */
-  var html = '<div class="st">板块 · ' + ALL.length + ' 条目</div>';
-  html += '<button type="button" class="libcat on" data-c="">全部<span class="n">' + ALL.length + '</span></button>';
+  var html = '<button type="button" class="libcat" data-c="">全部<span class="n">' + ALL.length + '</span></button>';
   for (var i=0;i<order.length;i++){
     html += '<button type="button" class="libcat" data-c="' + esc(order[i]) + '">' + esc(order[i])
           + '<span class="n">' + cnt[order[i]] + '</span></button>';
@@ -3948,22 +3916,28 @@ CINE_JS = r"""
     if (reset) shown = STEP;
     cur = match();
     cntEl.textContent = cur.length + ' / ' + ALL.length + ' 条目';
+    favBtn.classList.toggle('on', state.favOnly);
+    favBtn.setAttribute('aria-pressed', String(state.favOnly));
+    sideEl.querySelectorAll('.libcat').forEach(function(button){
+      var active = button.getAttribute('data-c') === state.cat;
+      button.classList.toggle('on', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
     var n = Math.min(shown, cur.length);
     var h = '';
     for (var i=0;i<n;i++){
       var r = cur[i];
       h += '<article class="pcard" data-id="' + esc(r.i) + '">'
          + (r.im ? '<img class="pcimg" src="' + esc(r.im) + '" alt="' + esc(r.t) + '" loading="lazy" decoding="async" onerror="this.remove()">' : '')
-         + '<div class="pchead"><span class="pcnum">' + esc(r.n) + '</span>'
-         + '<span class="pctitle">' + esc(r.t) + '</span></div>'
+         + '<h2 class="pctitle">' + esc(r.t) + '</h2>'
          + '<div class="pccat">' + esc(r.c) + '</div>'
          + '<div class="pcdesc">' + esc(r.d) + '</div>'
          + '<div class="pcp">' + hl(r.p) + '</div>'
          + '<div class="pcact">'
          + '<button type="button" class="pcbtn pri" data-a="copy">复制提示词</button>'
          + '<button type="button" class="pcbtn" data-a="core">复制核心</button>'
-         + '<button type="button" class="pcbtn fv' + (fav[r.i] ? ' on' : '') + '" data-a="fav">'
-         + (fav[r.i] ? '★ 已收藏' : '☆ 收藏') + '</button>'
+         + '<button type="button" class="pcbtn fv' + (fav[r.i] ? ' on' : '') + '" data-a="fav" aria-pressed="' + Boolean(fav[r.i]) + '">'
+         + (fav[r.i] ? '已收藏' : '收藏') + '</button>'
          + '</div></article>';
     }
     cardsEl.innerHTML = h || '<div class="libempty">没有匹配的条目，换个词或清空筛选。</div>';
@@ -3978,9 +3952,6 @@ CINE_JS = r"""
   sideEl.addEventListener('click', function(e){
     var b = e.target.closest ? e.target.closest('.libcat') : null;
     if (!b) return;
-    var all = sideEl.querySelectorAll('.libcat');
-    for (var i=0;i<all.length;i++) all[i].classList.remove('on');
-    b.classList.add('on');
     state.cat = b.getAttribute('data-c');
     try { location.hash = state.cat ? 'cat=' + encodeURIComponent(state.cat) : ''; } catch(err){}
     render(true);
@@ -3998,7 +3969,8 @@ CINE_JS = r"""
       if (fav[id]) delete fav[id]; else fav[id] = 1;
       saveFav();
       b.classList.toggle('on', !!fav[id]);
-      b.textContent = fav[id] ? '★ 已收藏' : '☆ 收藏';
+      b.setAttribute('aria-pressed', String(Boolean(fav[id])));
+      b.textContent = fav[id] ? '已收藏' : '收藏';
       if (state.favOnly) render(false);
     }
   });
@@ -4032,15 +4004,11 @@ CINE_JS = r"""
   sEl.addEventListener('input', function(){ state.sub = this.value.trim(); });
   favBtn.addEventListener('click', function(){
     state.favOnly = !state.favOnly;
-    favBtn.classList.toggle('on', state.favOnly);
     render(true);
   });
   clrBtn.addEventListener('click', function(){
+    clearTimeout(timer);
     qEl.value = ''; state.q = ''; state.cat = ''; state.favOnly = false;
-    favBtn.classList.remove('on');
-    var all = sideEl.querySelectorAll('.libcat');
-    for (var i=0;i<all.length;i++) all[i].classList.remove('on');
-    all[0].classList.add('on');
     try { location.hash = ''; } catch(e){}
     render(true);
   });
@@ -4058,8 +4026,7 @@ CINE_JS = r"""
     var all = sideEl.querySelectorAll('.libcat');
     for (var i=0;i<all.length;i++){
       if (all[i].getAttribute('data-c') === c){
-        for (var j=0;j<all.length;j++) all[j].classList.remove('on');
-        all[i].classList.add('on'); state.cat = c; return;
+        state.cat = c; return;
       }
     }
   })();
@@ -4082,38 +4049,23 @@ CINE_JSON = json.dumps({"source": CINEMATIQUE["source"], "sourceUrl": CINEMATIQU
                        ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
 
 cine_body = f"""
-<div class="wrap">
-<section class="reveal" style="margin-top:34px">
-  <div class="sechead">
-    <h2><span class="ey">提示词</span>电影技法与提示词库</h2>
-    <div class="sd">{CINE_N} 条可直接复制的提示词模板：摄影机运动、灯光、构图、剪辑、胶片、镜头、类型风格与大师肖像。
-      检索、按板块筛选、把 [Subject] 换成你的角色或场景，复制后直接投喂图像 / 视频生成器。</div>
-  </div>
-
-  <div class="libkpis">
-    <div class="libkpi hi"><div class="t">Entries</div><div class="v">{CINE_N}</div></div>
-    <div class="libkpi"><div class="t">Sections</div><div class="v">{CINE_CATS}</div></div>
-    <div class="libkpi"><div class="t">Copy-ready</div><div class="v">100%</div></div>
-  </div>
-
-  <div class="libguide">
-    <div class="libgcard"><strong>01 / SEARCH</strong><span>按技法名、描述、提示词关键词检索，支持多词与中英混搜。</span></div>
-    <div class="libgcard"><strong>02 / FILTER</strong><span>左侧按板块筛选；点分类即写入地址栏，可直接分享筛选结果。</span></div>
-    <div class="libgcard"><strong>03 / SUBJECT</strong><span>模板保留 [Subject] 占位。填入主体后才替换，不填则原样复制。</span></div>
-    <div class="libgcard"><strong>04 / COPY</strong><span>「复制提示词」取整条，「复制核心」只取首句主干。按 / 聚焦搜索。</span></div>
-  </div>
-
+<main class="compare-page prompt-page" data-skip-intro>
+  <header class="compare-heading"><div><h1>电影技法与提示词库</h1>
+    <p>{CINE_N:,} 条可复制的提示词，覆盖摄影机运动、灯光、构图、剪辑和镜头等 {CINE_CATS} 类技法。</p>
+  </div></header>
   <div class="libbar">
-    <div class="libq"><input type="search" id="libQ" placeholder="搜索词条：close-up / lighting / noir / dolly..." aria-label="搜索提示词"></div>
-    <div class="libsb"><input type="text" id="libS" placeholder="输入角色或场景（可选）" aria-label="替换 Subject"></div>
-    <button type="button" class="libbtn" id="libFav">☆ 只看收藏</button>
-    <button type="button" class="libbtn" id="libClr">清空条件</button>
-    <span class="libcnt" id="libCnt">{CINE_N} / {CINE_N} 条目</span>
+    <label>搜索提示词<input type="search" id="libQ" placeholder="例如 逆光、close-up"></label>
+    <label>替换主体（可选）<input type="text" id="libS" placeholder="输入角色或场景" aria-describedby="lib-subject-note"></label>
+    <div class="libactions">
+      <button type="button" class="libbtn" id="libFav" aria-pressed="false">只看收藏</button>
+      <button type="button" class="libbtn" id="libClr">清空筛选</button>
+    </div>
+    <p class="lib-note" id="lib-subject-note">填入主体后，复制时会替换模板里的 [Subject]。</p>
   </div>
-
   <div class="libwrap2">
-    <aside class="libside" id="libSide" aria-label="板块筛选"></aside>
+    <aside class="libside"><strong>技法分类</strong><nav class="libcategories" id="libSide" aria-label="技法分类"></nav></aside>
     <div class="libmain">
+      <span class="libcnt" id="libCnt" role="status">{CINE_N} / {CINE_N} 条目</span>
       <div class="libcards" id="libCards"></div>
       <div class="libmore" id="libMore" style="display:none"></div>
     </div>
@@ -4125,9 +4077,8 @@ cine_body = f"""
     采集时点 {CINEMATIQUE["capturedAt"]}，来源：<a href="{CINEMATIQUE["sourceUrl"]}" target="_blank" rel="noopener">{CINEMATIQUE["sourceUrl"]}</a>。
     本站仅作个人检索与索引用途；收藏与最近使用只存于当前浏览器。若原站调整内容或提出下架要求，请以原站为准。
   </div>
-</section>
-</div>
-{foot(f'{BRAND} · {BRAND_CN}　|　{STUDIO} 出品　|　提示词 {CINE_N} 条 / {CINE_CATS} 个板块')}
+</main>
+{foot()}
 """
 
 # ═══════════════════════════════════════════════════════════════════
@@ -4138,14 +4089,14 @@ cine_body = f"""
 # ═══════════════════════════════════════════════════════════════════
 PAGES = {
     "index.html": page("首页", f"{BRAND} — {SITE['tagline']}。AI 视频生成平台的成本对比，统一口径折算，只给可复核的结果。",
-                       nav("home"), home_body, cost_js=True, canon="", extra_css=COMPARE_CSS + DISPLAY_FONT_CSS,
+                       nav("home"), home_body, cost_js=True, canon="", extra_css=COMPARE_CSS,
                        extra_js=DISCLOSURE_JS),
     "cost.html": page("平台成本对比", f"{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本，含达标阶梯、边际成本与跨平台组合最省。",
-                      nav("cost"), cost_body, cost_js=True, canon="cost", extra_css=COMPARE_CSS + DISPLAY_FONT_CSS,
+                      nav("cost"), cost_body, cost_js=True, canon="cost", extra_css=COMPARE_CSS,
                       extra_js=COMPARE_JS + DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
     "cycles.html": page("三周期全清单", f"{len(ROWS)} 个可选积分档 × 年付/季付/月付三周期，按指标动态排名，附全部原始数据与计算方法。",
                         nav("cycles"), cycles_body, cost_js=True, canon="cycles",
-                        extra_css=COMPARE_CSS + DISPLAY_FONT_CSS, extra_js=DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
+                        extra_css=COMPARE_CSS, extra_js=DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
     # ⚠ Cloudflare Pages 的 SPA 回落：输出目录里【有 404.html 就用它】，
     #   没有才回落到 index.html 并返回 200。`_redirects` 那条实测没拦住，
     #   404.html 是更可靠的开关。不挂进 nav，也不参与任何导航高亮。
@@ -4260,7 +4211,7 @@ def selfcheck():
             errs.append(f"{name}: 文档首尾不完整")
         if html.count("<style>") != 1 or html.count("</style>") != 1:
             errs.append(f"{name}: style 标签数异常")
-        if html.count("<script>") != 1 or html.count("</script>") != 1:
+        if html.count("<script>") != 2 or html.count("</script>") != 2:
             errs.append(f"{name}: script 标签数异常")
         for tok in ("__PLANS__", "__PTN__", "__CDATA__", "__COST__", "__SANS__", "__DISP__", "__MONO__", "{f2(", "None"):
             if tok in html:
@@ -4365,7 +4316,7 @@ def selfcheck():
             errs.append(f"残留过期口径文案「{_stale}」")
 
     # ── 死引用检查：防止后续改动留下指向已删元素的 JS / CSS ──
-    js_all = re.search(r"<script>(.*?)</script>", cost, re.S).group(1)
+    js_all = "\n".join(re.findall(r"<script>(.*?)</script>", cost, re.S))
     ids_html = set(re.findall(r'id="([\w-]+)"', _ALLHTML))
     for eid in sorted(set(re.findall(r"getElementById\('([\w-]+)'\)", js_all))):
         if eid not in ids_html:
@@ -4403,11 +4354,10 @@ def selfcheck():
         if len(re.findall(r"\b" + fn + r"\s*\(", _src)) <= 1:
             errs.append(f"build_site.py: 死函数 {fn}()")
 
-    js = re.search(r"<script>(.*?)</script>", cost, re.S).group(1)
     tmp = os.path.join(os.path.dirname(ROOT), "harvest", "_selfcheck.js")
     os.makedirs(os.path.dirname(tmp), exist_ok=True)
     with io.open(tmp, "w", encoding="utf-8") as f:
-        f.write(js)
+        f.write(js_all)
     if NODE:
         r = subprocess.run([NODE, "--check", tmp], capture_output=True, text=True)
         if r.returncode != 0:

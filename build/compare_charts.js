@@ -48,7 +48,7 @@
   function revealRank(offer) {
     const selector = '[data-chart-plan="' + offer.plan.id + '"]';
     const pendingRow = !rows.querySelector(selector);
-    if (chartView.checked || pendingRow) {
+    if (table.hidden || pendingRow) {
       rankView.querySelector('[value=table]').checked = true;
       if (pendingRow) includeAll = true;
       render();
