@@ -1,6 +1,47 @@
   const overview = document.getElementById('benchmark-overview');
+  const profile = document.querySelector('.benchmark-profile');
+
+  function drawProfile(leaders, byBudget, scope) {
+    const sample = [...leaders.values()].slice(0, 3);
+    document.getElementById('profile-title').textContent = scope.issue
+      ? '调整榜单条件'
+      : byBudget ? money.format(scope.amount) + ' 内的月产能'
+      : '每月 ' + scope.amount.toLocaleString('zh-CN') + ' 条的首期实付';
+    document.getElementById('profile-scope').textContent = scope.specName + ' · ' + scope.cycle[0]
+      + (sample.length ? ' · 前 ' + sample.length + ' 家平台' : '');
+    const scale = document.getElementById('profile-scale');
+    const rows = document.getElementById('profile-rows');
+    const measure = offer => byBudget ? offer.capacity : offer.pay;
+    const top = axisMax(Math.max(1, ...sample.map(measure)));
+    const format = byBudget ? value => value.toLocaleString('zh-CN') : value => money.format(value);
+    rows.replaceChildren(...sample.map(offer => {
+      const value = format(measure(offer)) + (byBudget ? ' 条/月' : '');
+      const button = chartButton(offer, 'profile-row', '查看 ' + planName(offer) + '，' + value, revealRank);
+      const name = document.createElement('span');
+      name.className = 'profile-name';
+      name.append(platformLogo(offer), nameOf(offer.plan.platform));
+      const tier = document.createElement('small');
+      tier.textContent = offer.plan.tier + (offer.sourceDate ? ' · 扣分留档' : '');
+      const amount = document.createElement('strong');
+      amount.textContent = value;
+      const track = document.createElement('span');
+      track.className = 'profile-track';
+      track.style.setProperty('--fill', measure(offer) / top * 100 + '%');
+      button.append(name, tier, amount, track);
+      return button;
+    }));
+    if (!sample.length) rows.textContent = scope.issue || '当前条件下暂无可比较的档位。';
+    scale.hidden = !sample.length;
+    scale.replaceChildren(...[0, top / 2, top].map(value => {
+      const tick = document.createElement('span');
+      tick.textContent = format(value);
+      return tick;
+    }));
+    profile.hidden = false;
+  }
 
   function drawOverview(offers, leaders, rankBy, byBudget, scope) {
+    drawProfile(leaders, byBudget, scope);
     const caseList = document.getElementById('overview-cases');
     const providerList = document.getElementById('overview-platforms');
     const measure = byBudget ? '预算' : '用量';

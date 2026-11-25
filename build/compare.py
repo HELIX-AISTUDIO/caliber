@@ -42,9 +42,13 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
         for key, label, _, _ in periods
     )
     mode_choices = """
-          <label><input type="radio" name="mode" value="target" checked><span>视频生成成本榜</span></label>
-          <label><input type="radio" name="mode" value="budget"><span>预算产能榜</span></label>
+          <label><input type="radio" name="mode" value="target" checked><span>按月用量</span></label>
+          <label><input type="radio" name="mode" value="budget"><span>按预算</span></label>
 """
+    platform_marks = "".join(
+        f'<i class="comparison-mark {escape(logos[name])}" title="{escape(DISPLAY_NAMES.get(name, name))}"></i>'
+        for name in platforms
+    )
     mode_fields = """<fieldset class="compare-choice">
       <legend>计算方式</legend>
       <div><label><input type="radio" name="mode" value="target" checked><span>按月用量</span></label>
@@ -64,27 +68,30 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
   </header>
 """ if workspace else f"""
   <header id="cost" class="benchmark-heading">
-    <p class="compare-snapshot">数据快照 <time datetime="{updated}">{updated}</time></p>
-    <h1 class="compare-sr-only">视频生成成本榜</h1>
-    <fieldset class="benchmark-tabs">
-      <legend class="compare-sr-only">榜单类型</legend>
-{mode_choices}
-      <a href="cycles.html">周期排名</a>
-    </fieldset>
-    <div class="benchmark-heading-bottom">
-    <div>
-      <p>同一视频规格，比较各平台的实付与产能。</p>
-      <p class="compare-date">Seedance 2.5 · 30 秒 · 16:9 · 全能参考 <a href="{records_page}#compare-records-title">计算依据</a></p>
+    <div class="benchmark-intro">
+      <h1>视频生成的<br>会员成本怎么算</h1>
+      <p class="benchmark-intro-copy">在相同的视频规格下，比较各平台要付多少钱、每月能做多少条。</p>
+      <nav class="benchmark-intro-links" aria-label="开始比较">
+        <a class="benchmark-primary" href="#benchmark-board">查看完整榜单</a>
+        <a href="{records_page}#member-budgets">按预算选会员</a>
+      </nav>
+      <div class="benchmark-sample">
+        <div class="benchmark-platform-marks" aria-hidden="true">{platform_marks}</div>
+        <p><b>{len(platforms)} 家平台</b> · {len(plans)} 个会员档位 · <time datetime="{updated}">{updated}</time> 采集</p>
+      </div>
     </div>
-    <nav class="compare-jump-links" aria-label="成本榜目录">
-      <a href="#benchmark-board">查看完整榜单</a>
-      <a href="{records_page}#member-budgets">按预算选会员</a>
-      <button type="button" data-share="table">复制榜单链接</button>
-    </nav>
-    </div>
+    <figure class="benchmark-profile" aria-labelledby="profile-title" hidden>
+      <figcaption>
+        <h2 id="profile-title">每月 30 条的首期实付</h2>
+        <p id="profile-scope"></p>
+      </figcaption>
+      <div id="profile-rows" class="profile-rows"></div>
+      <div id="profile-scale" class="profile-scale" aria-hidden="true"></div>
+      <p class="profile-note">Seedance 2.5 · 30 秒 · 16:9 · 全能参考 <a href="{records_page}#compare-records-title">计算依据</a></p>
+    </figure>
   </header>
 """
-    overview = "" if workspace else """
+    overview = "" if workspace else f"""
   <section class="benchmark-overview" id="benchmark-overview" aria-label="成本总览">
     <div class="overview-panel overview-usage">
       <header><h2 id="overview-usage-title">常用月用量</h2><p id="overview-scope"></p></header>
@@ -97,8 +104,15 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
   </section>
   <header class="benchmark-board-title" id="benchmark-board">
     <div><h2>会员档位榜</h2><p>按规格和周期筛选，点列名排序，点 ＋ 加入对比。</p></div>
-    <a href="#compare-frontier">价格与产能分析</a>
+    <div class="compare-jump-links">
+      <a href="#compare-frontier">价格与产能分析</a>
+      <button type="button" data-share="table">复制榜单链接</button>
+    </div>
   </header>
+  <fieldset class="compare-choice compare-mode-choice">
+    <legend>计算方式</legend>
+    <div>{mode_choices}</div>
+  </fieldset>
 """
     summary = "" if workspace else """
     <div class="benchmark-summary">
@@ -672,7 +686,6 @@ COMPARE_JS = r"""
     }
     const pageTitle = byBudget ? '预算产能榜' : '视频生成成本榜';
     title.textContent = pageTitle;
-    root.querySelector('h1').textContent = pageTitle;
     if (table.dataset.mode !== mode.value) sort = null;
     table.dataset.mode = mode.value;
     const sortKey = sort?.key ?? (byBudget ? 'capacity' : 'pay');
