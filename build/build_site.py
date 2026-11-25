@@ -91,7 +91,12 @@ SCOPE = COST["scope"]
 # 数据层改成三周期后页面仍写「月度／季度会员后续补充」，两处文案互相矛盾。
 SCOPE_COVERED = "、".join(x["label"] for x in SCOPE["items"] if x["done"])
 SCOPE_PENDING = "、".join(x["label"] for x in SCOPE["items"] if not x["done"])
-COLOR = {k: v["color"] for k, v in PLATFORMS.items()}
+# 图表色用于区分平台。按品牌色系调整明度，保证浅底上的条和点可见。
+CHART_PALETTE = {
+    "libtv": "#227589", "Neowow": "#62666e", "即梦": "#2568c9",
+    "小云雀": "#986400", "Higgsfield": "#657b08", "Tapnow": "#7652b8", "Seko": "#46513b",
+}
+COLOR = {key: CHART_PALETTE.get(key, value["color"]) for key, value in PLATFORMS.items()}
 CU = {"CNY": "¥", "USD": "$"}
 
 # ═══════════════════════════════════════════════════════════════════
@@ -599,12 +604,8 @@ FP = FP_WORK   # 兼容旧引用
 # ═══════════════════════════════════════════════════════════════════
 # 3. 样式与脚本
 # ═══════════════════════════════════════════════════════════════════
-F_SANS = ('"Inter","Inter Display","SN Pro","Space Grotesk",ui-sans-serif,system-ui,'
-          '-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif')
-F_DISP = ('"Space Grotesk","Inter Display","Inter","SN Pro",ui-sans-serif,system-ui,'
-          '"PingFang SC","Microsoft YaHei",sans-serif')
-F_MONO = ('"IBM Plex Mono","JetBrains Mono","Geist Mono",ui-monospace,SFMono-Regular,'
-          'Menlo,Consolas,monospace')
+F_UI = ('"Caliber UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",'
+        'system-ui,sans-serif')
 
 CSS = r"""*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{-webkit-text-size-adjust:100%;overflow-x:clip;scroll-behavior:smooth}:root{--navh:57px;--subh:50px;--gap:18px}/* ⚠️ 必须是 clip 而非 hidden：overflow-x:hidden 会让 html/body 变成滚动容器，
    使子元素的 position:sticky 失效（实测导航会跟随内容滚走）。 */
@@ -2519,7 +2520,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 def sub_css(s):
-    return s.replace("__SANS__", F_SANS).replace("__DISP__", F_DISP).replace("__MONO__", F_MONO)
+    return s.replace("__SANS__", F_UI).replace("__DISP__", F_UI).replace("__MONO__", F_UI)
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -3151,7 +3152,7 @@ THEME_SCRIPT = """
   const browserColor = document.querySelector('meta[name="theme-color"]');
   function applyTheme(theme){
     root.dataset.theme = theme;
-    browserColor.content = theme === 'light' ? '#ffffff' : '#10141c';
+    browserColor.content = theme === 'light' ? '#ffffff' : '#141516';
   }
   try {
     applyTheme(localStorage.getItem('caliber.theme') === 'dark' ? 'dark' : 'light');
@@ -3250,7 +3251,7 @@ def page(title, desc, nav_html, body, cost_js=False, canon=None, extra_css="", e
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
 <script>{THEME_SCRIPT}</script>
-<style>{sub_css(CSS)}{extra_css}{PLATFORM_MARK_CSS}{DISPLAY_FONT_CSS}</style></head><body>
+<style>{sub_css(CSS)}{extra_css}{PLATFORM_MARK_CSS}{TYPE_FONT_CSS}</style></head><body>
 
 {promo()}
 {nav_html}
@@ -3742,14 +3743,22 @@ cost_body = f"""
 """
 
 # ── 首页 ──────────────────────────────────────────────────────────
-DISPLAY_FONT_CSS = '''
+TYPE_FONT_CSS = '''
 @font-face {
-  font-family: "Caliber Noto Sans SC";
-  src: url("fonts/caliber-title.woff2") format("woff2");
+  font-family: "Caliber UI";
+  src: url("fonts/caliber-han.woff2") format("woff2");
   font-style: normal;
-  font-weight: 900;
+  font-weight: 100 900;
   font-display: swap;
-  unicode-range: U+4E0D,U+4E0E,U+4E2A,U+4ED8,U+51C6,U+5355,U+53EF,U+540D,U+5468,U+5728,U+57FA,U+5B58,U+5B9E,U+5E93,U+5F71,U+6210,U+6280,U+6392,U+63D0,U+6570,U+671F,U+672C,U+672F,U+6761,U+699C,U+6BCF,U+6CD5,U+751F,U+7535,U+793A,U+79D2,U+8868,U+89C6,U+8BCD,U+8BED,U+8FD9,U+9762,U+9875,U+9891;
+  unicode-range: U+2E80-9FFF,U+F900-FAFF,U+FE10-FFEF,U+20000-2FA1F;
+}
+@font-face {
+  font-family: "Caliber UI";
+  src: url("fonts/caliber-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0020-024F,U+1E00-22FF,U+2600-26FF;
 }
 '''
 home_body = f"""
@@ -4259,7 +4268,7 @@ def write_all():
         for d in _usable_dirs():
             shutil.copy2(src, os.path.join(d, extra_bin))
     for d in dirs:
-        for font_asset in ("caliber-title.woff2", "OFL-NotoSansSC.txt"):
+        for font_asset in ("caliber-han.woff2", "caliber-latin.woff2", "OFL-NotoSansSC.txt", "OFL-Inter.txt"):
             target = os.path.join(d, "fonts")
             os.makedirs(target, exist_ok=True)
             shutil.copy2(os.path.join(ROOT, "fonts", font_asset), target)
