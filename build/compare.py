@@ -82,11 +82,13 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
     </div>
     <figure class="benchmark-profile" aria-labelledby="profile-title" hidden>
       <figcaption>
-        <h2 id="profile-title">每月 30 条的首期实付</h2>
-        <p id="profile-scope"></p>
+        <div>
+          <h2 id="profile-title">每月 30 条的首期实付</h2>
+          <p id="profile-scope"></p>
+        </div>
+        <a id="profile-evidence" class="profile-link" hidden>报价明细</a>
       </figcaption>
       <div id="profile-rows" class="profile-rows"></div>
-      <div id="profile-scale" class="profile-scale" aria-hidden="true"></div>
       <p class="profile-note">Seedance 2.5 · 30 秒 · 16:9 · 全能参考 <a href="{records_page}#compare-records-title">计算依据</a></p>
     </figure>
   </header>
@@ -109,10 +111,12 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
       <button type="button" data-share="table">复制榜单链接</button>
     </div>
   </header>
-  <fieldset class="compare-choice compare-mode-choice">
-    <legend>计算方式</legend>
-    <div>{mode_choices}</div>
-  </fieldset>
+"""
+    board_mode = "" if workspace else f"""
+      <fieldset class="compare-choice compare-mode-choice">
+        <legend>计算方式</legend>
+        <div>{mode_choices}</div>
+      </fieldset>
 """
     summary = "" if workspace else """
     <div class="benchmark-summary">
@@ -159,6 +163,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
 {overview}
     <div class="benchmark-controls">
     <div class="compare-specs">
+{board_mode}
       <fieldset id="compare-model" class="compare-choice compare-axis">
         <legend>生成模式</legend>
         <div>

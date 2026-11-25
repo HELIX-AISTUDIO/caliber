@@ -7,36 +7,59 @@
       ? '调整榜单条件'
       : byBudget ? money.format(scope.amount) + ' 内的月产能'
       : '每月 ' + scope.amount.toLocaleString('zh-CN') + ' 条的首期实付';
-    document.getElementById('profile-scope').textContent = scope.specName + ' · ' + scope.cycle[0]
-      + (sample.length ? ' · 前 ' + sample.length + ' 家平台' : '');
-    const scale = document.getElementById('profile-scale');
+    document.getElementById('profile-scope').textContent = scope.specName + ' · ' + scope.cycle[0];
+    const evidence = document.getElementById('profile-evidence');
+    evidence.hidden = !sample.length;
+    if (sample.length) evidence.href = data.recordsPage + '#' + sample[0].plan.anchor;
     const rows = document.getElementById('profile-rows');
-    const measure = offer => byBudget ? offer.capacity : offer.pay;
-    const top = axisMax(Math.max(1, ...sample.map(measure)));
-    const format = byBudget ? value => value.toLocaleString('zh-CN') : value => money.format(value);
-    rows.replaceChildren(...sample.map(offer => {
-      const value = format(measure(offer)) + (byBudget ? ' 条/月' : '');
-      const button = chartButton(offer, 'profile-row', '查看 ' + planName(offer) + '，' + value, revealRank);
+    const formatCount = value => value.toLocaleString('zh-CN');
+    rows.replaceChildren(...sample.map((offer, index) => {
+      const value = byBudget ? formatCount(offer.capacity) : money.format(offer.pay);
+      const label = '查看 ' + planName(offer) + '，' + value + (byBudget ? ' 条/月' : '');
+      const button = chartButton(offer, 'profile-row', label, revealRank);
+      const identity = document.createElement('span');
+      identity.className = 'profile-identity';
       const name = document.createElement('span');
       name.className = 'profile-name';
       name.append(platformLogo(offer), nameOf(offer.plan.platform));
       const tier = document.createElement('small');
       tier.textContent = offer.plan.tier + (offer.sourceDate ? ' · 扣分留档' : '');
+      identity.append(name, tier);
       const amount = document.createElement('strong');
       amount.textContent = value;
-      const track = document.createElement('span');
-      track.className = 'profile-track';
-      track.style.setProperty('--fill', measure(offer) / top * 100 + '%');
-      button.append(name, tier, amount, track);
+      const unit = document.createElement('span');
+      unit.textContent = byBudget ? '条/月' : '';
+      if (index > 0) {
+        button.classList.add('profile-alternative');
+        const rank = document.createElement('span');
+        rank.className = 'profile-rank';
+        rank.textContent = String(index + 1).padStart(2, '0');
+        const metric = document.createElement('span');
+        metric.className = 'profile-alt-metric';
+        metric.append(amount, unit);
+        button.append(rank, identity, metric);
+        return button;
+      }
+      button.classList.add('profile-feature');
+      const caption = document.createElement('span');
+      caption.className = 'profile-caption';
+      caption.textContent = byBudget ? '预算内最多可生成 · 条/月' : '达标最低实付';
+      const used = (byBudget ? offer.capacity : scope.amount) * offer.creditsPerClip;
+      const tape = document.createElement('span');
+      tape.className = 'profile-credit-meter';
+      tape.setAttribute('aria-hidden', 'true');
+      tape.style.setProperty('--fill', used / offer.monthlyCredits * 100 + '%');
+      const credits = document.createElement('span');
+      credits.className = 'profile-credit-labels';
+      const consumed = document.createElement('span');
+      consumed.textContent = '预计用 ' + formatCount(used) + ' 分';
+      const granted = document.createElement('span');
+      granted.textContent = '每月发放 ' + formatCount(offer.monthlyCredits) + ' 分';
+      credits.append(consumed, granted);
+      button.append(amount, caption, tape, credits, identity);
       return button;
     }));
     if (!sample.length) rows.textContent = scope.issue || '当前条件下暂无可比较的档位。';
-    scale.hidden = !sample.length;
-    scale.replaceChildren(...[0, top / 2, top].map(value => {
-      const tick = document.createElement('span');
-      tick.textContent = format(value);
-      return tick;
-    }));
     profile.hidden = false;
   }
 
@@ -63,8 +86,10 @@
       header.textContent = byBudget ? money.format(amount) + ' 以内' : '每月 ' + amount + ' 条';
       const metric = document.createElement('strong');
       metric.textContent = best ? resultFor(best) : '暂无档位';
-      const detail = document.createElement('small');
-      detail.textContent = best ? planName(best) : '查看这一' + measure + '的覆盖情况';
+      const detail = document.createElement('span');
+      detail.className = 'overview-case-detail';
+      if (best) detail.append(platformLogo(best), planName(best));
+      else detail.textContent = '查看这一' + measure + '的覆盖情况';
       item.append(header, metric, detail);
       item.addEventListener('click', () => {
         (byBudget ? budget : target).value = amount;
