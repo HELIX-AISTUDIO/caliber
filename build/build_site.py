@@ -65,9 +65,10 @@ BRAND, BRAND_CN = SITE["brand"], SITE["brandCn"]
 STUDIO, OWNER, YEAR = SITE["studio"], SITE["owner"], SITE["year"]
 NAV_OVERRIDES = {
     "home": {"label": "成本榜"},
-    "cost": {"label": "数据来源", "href": "cost.html#compare-records-title"},
+    "cost": {"label": "会员报价", "href": "cost.html"},
 }
 NAV = [{**item, **NAV_OVERRIDES.get(item["key"], {})} for item in SITE["nav"]]
+NAV.insert(1, {"key": "compare", "label": "方案对比", "href": "compare.html"})
 # 站点公开地址 —— 只用于 og:url / og:image 这类【同源绝对地址】。
 # ⚠ og 规范要求绝对 URL（部分抓取器不解析相对路径），但这**不算外部依赖**：
 #   它指向本站自己的资源，不产生任何跨域请求。自检里另有断言锁死这一点。
@@ -582,11 +583,8 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   border:1px solid rgba(209,254,23,.35);border-radius:999px;padding:6px 13px;flex:0 0 auto}.wrap{max-width:1280px;margin:0 auto;padding:0 24px;position:relative;z-index:1}/* ── Hero 光场：lime 从「涂料」变「光源」── */
 h1{font-family:__DISP__;font-size:clamp(31px,5.3vw,60px);font-weight:800;color:#fff;
   letter-spacing:-.038em;line-height:1.07}h1 em{font-style:normal;color:#D1FE17}
-.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
-.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-size:13px;font-weight:700;
-  text-decoration:none;white-space:nowrap;
-  transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s}.btn-white{background:#fff;color:#0B0B0B}.btn-white:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,255,255,.2)}h2{font-family:__DISP__;font-size:20px;font-weight:750;color:#fff;letter-spacing:-.025em;line-height:1.3}h2 .ey{display:inline-block;font-family:__MONO__;font-size:12px;font-weight:600;color:var(--studio-accent);
-  margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:__DISP__;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.note, .legal, details{
+h2{font-family:__DISP__;font-size:20px;font-weight:750;color:#fff;letter-spacing:-.025em;line-height:1.3}h2 .ey{display:inline-block;font-family:__MONO__;font-size:12px;font-weight:600;color:var(--studio-accent);
+  margin-right:12px}.sechead{margin-bottom:18px}.sechead .sd{color:#767C85;font-size:12.5px;line-height:1.7;max-width:860px}section{margin-top:60px}h3{font-family:__DISP__;font-size:14.5px;font-weight:700;color:#fff;margin:26px 0 12px}.note, details{
   background:var(--studio-panel);border:1px solid var(--studio-line);border-radius:14px;
 }table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
   background:var(--studio-panel);border:1px solid var(--studio-line);border-radius:12px;overflow:hidden}
@@ -650,7 +648,7 @@ input[type=number]{width:110px;background:rgba(255,255,255,.06);
    Apple 建议 44、Google 48；本站控件密集，30px 是收益与不破版的平衡点。 */
 @media (max-width:1020px){
   .cqp{min-height:30px;min-width:40px;padding:6px 11px}
-  .foot a,.scopenote a,.budtip a{display:inline-block;padding:6px 1px;margin:-6px 0}
+  .scopenote a,.budtip a{display:inline-block;padding:6px 1px;margin:-6px 0}
   /* 滑块触控目标已改：不再「只放大拇指」，而是把盒子撑到 32px
      （轨道视觉仍是 4px，靠 background-clip:content-box 保持细线）。
      ⚠ 拇指的放大规则必须写在基础 .cqr 规则【之后】才生效 —— 本块位于基础规则之前，
@@ -926,15 +924,12 @@ input[type=number]{width:110px;background:rgba(255,255,255,.06);
 .chips{display:flex;gap:10px;flex-wrap:wrap}.chip{display:inline-flex;align-items:baseline;gap:9px;padding:10px 15px;border-radius:12px;
   background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
   font-family:__MONO__;font-size:15px;font-weight:700;color:#EDEFF2;letter-spacing:-.02em}.chip b{font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.09em;color:#D1FE17}.chip s{font-family:__SANS__;font-size:11.5px;font-weight:400;text-decoration:none;color:#8A9098}/* 计算器里的极简折叠块：不占视觉重量，只承载口径说明 */
-details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}details.tiny summary{padding:6px 0;font-size:11.5px;font-weight:600;color:#6E747C}details.tiny summary:hover{color:#C9CDD2}details.tiny .dbody{padding:8px 0 0;font-size:12px;color:#8A9098}.combo-plus{color:#5A6069;margin:0 5px;font-weight:700}.sub{color:#767C85;font-size:12px;line-height:1.7}.mono{font-family:__MONO__}.foot{margin-top:44px;color:#5A6069;font-size:11.5px;text-align:center;
-  border-top:1px solid rgba(255,255,255,.08);padding-top:20px}.legal{margin-top:22px;padding:26px 28px;background:#D1FE17 !important;border-color:#D1FE17;
-  border-radius:20px;color:#0B0B0B;font-size:12px;line-height:1.8;backdrop-filter:none;
-  -webkit-backdrop-filter:none}.legal-t{font-size:16px;font-weight:800;letter-spacing:-.025em;margin-bottom:9px}.legal-b{color:#1F2A00;max-width:1000px}.legal-f{margin-top:14px;font-family:__MONO__;font-size:11px;color:#1F2A00}.legal-f .fp{background:#0B0B0B;color:#D1FE17;padding:2.5px 9px;border-radius:6px;font-weight:600}
+details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}details.tiny summary{padding:6px 0;font-size:11.5px;font-weight:600;color:#6E747C}details.tiny summary:hover{color:#C9CDD2}details.tiny .dbody{padding:8px 0 0;font-size:12px;color:#8A9098}.combo-plus{color:#5A6069;margin:0 5px;font-weight:700}.sub{color:#767C85;font-size:12px;line-height:1.7}.mono{font-family:__MONO__}
 
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.mini i,.cbar i{transition:none}}
-@media print{body{background:#fff!important;color:#000!important;padding:0}body::before,body::after{display:none!important}.note, .legal, details, .nav, table{
+@media print{body{background:#fff!important;color:#000!important;padding:0}body::before,body::after{display:none!important}.note, details, .nav, table{
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
-    box-shadow:none!important;background:#fff!important}.nav{position:static!important}.brand .bw b, .menu a, h1, h2, h3, td, th, li{color:#000!important}.legal-t,.legal-b,.legal-f{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
+    box-shadow:none!important;background:#fff!important}.nav{position:static!important}.brand .bw b, .menu a, h1, h2, h3, td, th, li{color:#000!important}.tw{overflow:visible!important}.tw table{min-width:0!important}details:not([open]) .dbody{display:block!important}
 }
 @media (max-width:820px){.promo{font-size:11.5px;padding:9px 14px;gap:9px}.nav .inner{padding:10px 15px;gap:11px;flex-wrap:wrap}
   /* ⚠ 原先这里是 .nav .spec{display:none} —— 手机端把「测试口径」整个藏掉，
@@ -948,7 +943,7 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
      ⚠ 必须落在这里：本块在基础 .cqr 规则之后，同权重靠顺序决胜；
        放到前面的媒体查询里会被基础规则盖掉，等于没写。 */
   .cqr::-webkit-slider-thumb{width:24px;height:24px}
-  .cqr::-moz-range-thumb{width:24px;height:24px}.note, .legal, table, details{border-radius:15px}.legal{padding:21px 18px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}
+  .cqr::-moz-range-thumb{width:24px;height:24px}.note, table, details{border-radius:15px}td,th{padding:7px 11px}summary{padding:14px 17px;font-size:13px}.dbody{padding:0 17px 18px}
   /* ── 反查表：套用与「全部档位排名」同一套卡片节奏 ──
      5 列在手机上必然横滑；上一版做成「标签在上、值在下」的纵向大卡，占太高、看着散。
      用户要求跟排名卡一样大小，故复用同一套：1fr + auto 两列、11px 内边距、圆角 13。 */
@@ -2196,7 +2191,7 @@ function cycSync(){
     Array.prototype.forEach.call(document.querySelectorAll('#' + kv[0] + ' button'), function(b){
       var active = b.dataset[kv[1]] === CT[kv[1]];
       b.classList.toggle('on', active);
-      if (kv[0] === 'metricSeg') b.setAttribute('aria-pressed', String(active));
+      if (kv[0] === 'metricSeg' || kv[0] === 'cycSeg') b.setAttribute('aria-pressed', String(active));
     });
   });
   var n = document.querySelectorAll('#cycPlat .pfb.on').length;
@@ -2504,22 +2499,14 @@ def nav(active):
             f'<div class="ndrop" id="nDrop"><nav>{items}</nav></div></header>')
 
 
-def legal():
-    return (f'<div class="legal"><div class="legal-t">{COPY}</div>'
-            f'<div class="legal-b">{TERMS}</div>'
-            f'<div class="legal-f">溯源指纹 <span class="fp">{FP_WORK}</span>　·　版本 <span class="fp">{FP_EDITION}</span>　·　'
-            f'{BRAND} · {BRAND_CN}　·　{STUDIO} 出品　·　数据采集 {UPDATED}</div></div>')
-
-
-def foot(text=""):
-    links = "".join(f'<a href="{item["href"]}">{item["label"]}</a>' for item in NAV if item["key"] != "home")
-    note = f'<p class="foot">{text}</p>' if text else ""
+def foot():
     return (f'<footer class="site-footer"><div class="footer-main">'
-            f'<a class="footer-brand" href="index.html"><strong>{BRAND}</strong><span>{STUDIO}</span></a>'
-            f'<nav aria-label="站点导航">{links}</nav><nav aria-label="帮助与反馈">'
+            f'<span class="footer-credit">© {YEAR} {STUDIO}</span>'
+            f'<nav aria-label="页脚导航"><a href="index.html">成本榜</a>'
+            f'<a href="cost.html">会员报价</a>'
             f'<a href="#" id="introAgain">新手引导</a>'
-            f'<a href="{SITE.get("issues", "#")}" target="_blank" rel="noopener">问题反馈</a></nav></div>'
-            f'{note}{legal()}</footer>')
+            f'<a href="{SITE.get("issues", "#")}" target="_blank" rel="noopener">问题反馈</a></nav>'
+            f'</div></footer>')
 
 
 
@@ -3339,14 +3326,19 @@ cycles_body = f"""
 <main class="cycle-report" data-skip-intro>
   <header class="compare-heading">
     <div>
-    <p class="compare-snapshot">数据采集 <time datetime="{UPDATED}">{UPDATED}</time></p>
-    <h1 id="cycTitle">单条成本排名</h1>
-    <div class="vsub" id="cycSub">按用满订阅积分时的平均单条成本排名，越低越省。</div>
+    <p class="compare-snapshot">数据快照 <time datetime="{UPDATED}">{UPDATED}</time></p>
+    <h1>会员周期排名</h1>
+    <p>{SPEC}</p>
     </div>
     <nav class="compare-jump-links" aria-label="详细排名目录">
       <a href="index.html">规格成本榜</a><a href="cost.html#compare-records-title">数据来源</a>
     </nav>
   </header>
+  <div class="cycle-periods" id="cycSeg" role="group" aria-label="会员周期">
+    <button type="button" class="on" data-k="m" aria-pressed="true"><b>月付</b><span>1 个月</span></button>
+    <button type="button" data-k="q" aria-pressed="false"><b>季付</b><span>3 个月</span></button>
+    <button type="button" data-k="y" aria-pressed="false"><b>年付</b><span>12 个月</span></button>
+  </div>
   <div class="cycle-rank-board">
     <div class="cycle-toolbar">
       <div class="cycle-axis">
@@ -3360,14 +3352,6 @@ cycles_body = f"""
       <details class="rank-filters" id="rank-filters">
         <summary><span class="compare-filter-mark" aria-hidden="true"></span>筛选</summary>
         <div class="rank-controls">
-  <div class="sgroup" id="sgPeriod">
-    <div class="sgt">{T("chengnuoQi", "会员周期")}<span class="sgchip" id="cycChip">{len(ROWS)} 档</span></div>
-    <div class="segv segk" id="cycSeg" role="tablist" aria-label="会员周期">
-      <button type="button" class="on" data-k="m" role="tab">月付<s>随时可停</s></button>
-      <button type="button" data-k="q" role="tab">季付<s>锁 3 个月</s></button>
-      <button type="button" data-k="y" role="tab">年付<s>锁 12 个月</s></button>
-    </div>
-  </div>
   <div class="sgroup">
     <div class="sgt">产能显示单位</div>
     <div class="segv" id="capSeg2" role="tablist" aria-label="产能口径">
@@ -3389,10 +3373,11 @@ cycles_body = f"""
         </div>
       </details>
     </div>
-    <div class="vmeta">
-      <span><b>{len(PLAT_SUM)}</b> 平台 · <b>{NTIER}</b> 会员档 · <b>{len(ROWS)}</b> 积分档</span>
-      <span>当前 <b id="cycNow">单条成本 · 月付 · 最优在前</b></span>
-    </div>
+    <header class="cycle-board-head">
+      <div><h2 id="cycTitle">单条成本排名</h2><p class="vsub" id="cycSub">用满订阅积分时的平均单条成本。</p></div>
+      <span id="cycChip">{len(ROWS)} 档</span>
+      <span id="cycNow">单条成本 · 月付 · 最优在前</span>
+    </header>
   <div class="cycle-columns">
     <span>平台与档位</span><span>相对表现 · 越长越好</span><span id="cycMetricColumn">单条成本</span>
   </div>
@@ -3401,9 +3386,14 @@ cycles_body = f"""
   {pareto_block("y")}
   <p class="cycle-source-note">{COST["liveNote"]}</p>
 
-{CANVAS_DETAILS}
-{membership_details()}
-{OFFER_DETAILS}
+<details class="cycle-records">
+  <summary>会员报价与实测资料<span class="chev">›</span></summary>
+  <div class="dbody">
+    {membership_details().strip()}
+    {CANVAS_DETAILS.strip()}
+    {OFFER_DETAILS.strip()}
+  </div>
+</details>
 
   <div class="wrap" style="padding:0">
   <div class="sechead">
@@ -3494,20 +3484,39 @@ cycles_body = f"""
 {EVIDENCE_DETAILS}
   </div>
 </main>
-{foot(f'{len(ROWS)} 个可选积分档，覆盖月付、季付和年付')}
+{foot()}
 """
 
-COMPARE_VIEW, COMPARE_JS = compare_view(ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR, PLAT_LG)
 HOME_VIEW, HOME_JS = compare_view(ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR, PLAT_LG, records_page="cost.html")
+WORKSPACE_VIEW, WORKSPACE_JS = compare_view(
+    ROWS, CANVAS["rows"], UPDATED, PERIODS, COLOR, PLAT_LG, records_page="cost.html", workspace=True
+)
+RECORD_PANELS = [
+    ("membership-prices", "会员价格", membership_details('index.html#compare-results')),
+    ("canvas-comparison", "画布扣分", CANVAS_DETAILS),
+    ("offers", "活动优惠", OFFER_DETAILS),
+    ("pricing-evidence", "采集截图", EVIDENCE_DETAILS),
+]
+RECORD_TABS = "".join(f'<a href="#{key}">{name}</a>' for key, name, content in RECORD_PANELS if content)
+RECORD_CONTENT = "\n".join(content.strip() for _, _, content in RECORD_PANELS if content)
 cost_body = f"""
-{COMPARE_VIEW}
-<section class="compare-records" aria-labelledby="compare-records-title">
-  <header class="records-header"><h2 id="compare-records-title">价格与数据来源</h2><p>{COST["liveNote"]}</p></header>
-  {membership_details('#compare-results').strip()}
-  {CANVAS_DETAILS.strip()}
-  {OFFER_DETAILS.strip()}
-  {EVIDENCE_DETAILS.strip()}
-</section>
+<main id="cost" class="compare-records records-page" data-skip-intro>
+  <header class="compare-heading records-heading">
+    <div><p class="compare-snapshot">数据快照 <time datetime="{UPDATED}">{UPDATED}</time></p>
+    <h1 id="compare-records-title">会员报价与来源</h1>
+    <p>查询月付、季付与年付的实付和积分，复核画布扣分与活动。</p></div>
+    <nav class="compare-jump-links" aria-label="价格页导航">
+      <a href="index.html">查看成本榜</a><a href="compare.html">方案对比</a>
+    </nav>
+  </header>
+  <nav class="record-sections" aria-label="价格资料" id="record-sections">
+    {RECORD_TABS}
+  </nav>
+  <div class="record-panels" id="record-panels">
+{RECORD_CONTENT}
+  </div>
+  <p class="records-note">{COST["liveNote"]}</p>
+</main>
 <details id="more" class="compare-advanced">
   <summary>进阶对比与多账号方案<span class="chev">›</span></summary>
   <div class="dbody"><a href="cycles.html">查看动态排名及完整计算方法</a></div>
@@ -3664,7 +3673,7 @@ cost_body = f"""
 </div>
 
 </details>
-{foot(f'基准数据采集于 {UPDATED} · 按统一规格折算')}
+{foot()}
 """
 
 # ── 首页 ──────────────────────────────────────────────────────────
@@ -3708,43 +3717,70 @@ home_body = f"""
       <a href="cost.html#pricing-evidence">数据来源和截图</a>
     </nav>
   </aside>
-{foot(f'基准数据采集于 {UPDATED} · 按统一规格折算')}
+{foot()}
 """
 
 
 # ── 术语表页 ──────────────────────────────────────────────────────
 GLOS_ROW = "".join(
     f'<article class="gterm" id="{x["k"]}">'
-    f'<h2>{x["t"]}</h2><p class="gs">{x["s"]}</p>'
-    f'<p class="gl">{x["l"]}</p></article>'
+    f'<h2>{x["t"]}</h2><div><p class="gs">{x["s"]}</p>'
+    f'<p class="gl">{x["l"]}</p></div></article>'
     for x in GLOSSARY["terms"])
 GLOS_INDEX = "".join(f'<a href="#{x["k"]}">{x["t"]}</a>' for x in GLOSSARY["terms"])
+
+GLOS_JS = r"""
+(function(){
+  const search = document.getElementById('glossary-search');
+  const count = document.getElementById('glossary-count');
+  const empty = document.getElementById('glossary-empty');
+  const terms = [...document.querySelectorAll('.gterm')];
+  const index = document.querySelectorAll('.glossary-index a');
+  search.addEventListener('input', () => {
+    const keyword = search.value.trim().toLowerCase();
+    let matches = 0;
+    terms.forEach((term, i) => {
+      const match = term.textContent.toLowerCase().includes(keyword);
+      term.hidden = index[i].hidden = !match;
+      if (match) matches++;
+    });
+    count.textContent = matches + ' 个术语';
+    empty.hidden = matches > 0;
+  });
+})();
+"""
 
 glossary_body = f"""
 <main class="compare-page glossary-page" data-skip-intro>
   <header class="compare-heading"><div><h1>术语表</h1><p>{GLOSSARY["intro"]}</p></div></header>
+  <div class="glossary-tools">
+    <label class="compare-search"><input type="search" id="glossary-search" placeholder="搜索术语" aria-label="搜索术语"></label>
+    <span id="glossary-count" role="status">{len(GLOSSARY["terms"])} 个术语</span>
+  </div>
   <div class="glossary-layout">
     <nav class="glossary-index" aria-label="术语目录">
       <strong>术语目录</strong>{GLOS_INDEX}
     </nav>
-    <div class="glist">{GLOS_ROW}</div>
+    <div class="glist">{GLOS_ROW}<p id="glossary-empty" hidden>未找到相关术语。</p></div>
   </div>
 </main>
-{foot(f'{len(GLOSSARY["terms"])} 条术语与计算口径')}
+{foot()}
 """
 
 
 # ── 404 页 ────────────────────────────────────────────────────────
 NOTFOUND_BODY = f"""
 <main class="compare-page notfound-page" data-skip-intro>
-  <header class="compare-heading"><div>
-    <h1>这个页面不存在</h1>
-    <p>请检查网址，或从首页进入要找的页面。</p>
-  </div></header>
-  <div class="btns compare-home-actions">
-    <a class="btn btn-white" href="index.html">回到首页<i aria-hidden="true"></i></a>
-    <a class="home-budget-link" href="cost.html">查看成本榜</a>
-  </div>
+  <header class="compare-heading">
+    <div><span class="notfound-code">404</span>
+    <h1>找不到这个页面</h1>
+    <p>请检查网址，或前往下方入口。</p></div>
+  </header>
+  <nav class="notfound-links" aria-label="可访问页面">
+    <a href="index.html">视频生成成本榜</a>
+    <a href="cost.html">会员报价与来源</a>
+    <a href="prompts.html">提示词库</a>
+  </nav>
 </main>
 {foot()}
 """
@@ -3768,22 +3804,29 @@ CINE_CSS = r"""
 .libactions .libbtn{min-height:44px;white-space:nowrap}
 .libbtn:hover,.pcbtn:hover{background:var(--studio-control);border-color:var(--studio-accent)}
 .libbtn.on,.pcbtn.fv.on{background:var(--studio-select);color:var(--studio-accent);border-color:var(--studio-rule)}
-.libcategories{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:6px;margin-bottom:15px;
-  background:var(--studio-control);border-radius:10px}
+.library-layout{display:grid;grid-template-columns:184px minmax(0,1fr);gap:25px;margin-top:19px;align-items:start}
+.library-index{position:sticky;top:calc(var(--navh) + 12px);min-width:0}
+.library-index strong{display:block;margin:0 0 8px 9px;font-size:14px}
+.libcategories{display:flex;flex-direction:column;gap:2px;max-height:calc(100vh - var(--navh) - 52px);overflow:auto;scrollbar-width:thin}
 .libcat{display:flex;flex:none;align-items:center;gap:6px;min-height:34px;
   background:transparent;border:0;color:var(--studio-muted);font:inherit;font-size:13px;
-  padding:5px 8px;border-radius:7px;cursor:pointer;text-align:left}
-.libcat:hover{background:var(--studio-panel);color:var(--studio-text)}
+  justify-content:space-between;padding:5px 9px;border-radius:7px;cursor:pointer;text-align:left}
+.libcat:hover{background:var(--studio-control);color:var(--studio-text)}
 .libcat.on{background:var(--studio-ink);color:var(--studio-bg);font-weight:700}
 .libcat .n{color:inherit;font-size:12px;font-variant-numeric:tabular-nums;flex:none}
-.libmain{min-width:0;margin-top:13px}
-.libcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:13px}
-.pcard{background:var(--studio-panel);border:1px solid var(--studio-line);border-radius:14px;
-  padding:15px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
-.pcimg{width:100%;aspect-ratio:16/10;object-fit:contain;display:block;border-radius:8px;background:var(--studio-bg)}
+.libmain{min-width:0}
+.libcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,265px),1fr));gap:24px 17px}
+.pcard{display:flex;flex-direction:column;gap:7px;min-width:0;padding-bottom:12px;border-bottom:1px solid var(--studio-line)}
+.pcimg{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;border-radius:10px;background:var(--studio-control)}
+.pcard:has(.pcimg) .pctitle{margin-top:4px}
 .pctitle{margin:0;color:var(--studio-text);font-size:17px;font-weight:750;line-height:1.35;overflow-wrap:anywhere}
 .pccat{font-size:12px;color:var(--studio-muted)}
 .pcdesc{font-size:14px;line-height:1.6;color:var(--studio-text)}
+.pcprompt{margin:3px 0 0;border-width:1px 0 0 !important;border-radius:0}
+.pcprompt summary{padding:6px 0;min-height:30px;color:var(--studio-muted);font-size:12px}
+.pcprompt summary::after{content:"";height:6px;width:6px;margin-right:3px;border:solid currentColor;
+  border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+.pcprompt[open] summary::after{transform:rotate(225deg)}
 .pcp{font-family:__MONO__;font-size:13px;line-height:1.6;color:var(--studio-muted);
   background:var(--studio-bg);border:1px solid var(--studio-line);border-radius:8px;
   padding:9px 11px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:156px;overflow:auto}
@@ -3798,12 +3841,13 @@ CINE_CSS = r"""
 @media(max-width:780px){
   .libbar{grid-template-columns:repeat(2,minmax(0,1fr))}
   .libactions{grid-column:1/-1}
-  .libcategories{flex-wrap:nowrap;overflow-x:auto}
+  .library-layout{grid-template-columns:minmax(0,1fr);gap:11px}
+  .library-index{position:static}
+  .libcategories{flex-direction:row;max-height:none;overflow-x:auto;padding:5px;background:var(--studio-control);border-radius:9px}
   .libcat{min-height:36px}
 }
 @media(max-width:460px){
   .libbar{grid-template-columns:minmax(0,1fr);padding-bottom:10px}
-  .pcard{padding:12px}
 }
 """
 
@@ -3902,7 +3946,7 @@ CINE_JS = r"""
          + '<h2 class="pctitle">' + esc(r.t) + '</h2>'
          + '<div class="pccat">' + esc(r.c) + '</div>'
          + '<div class="pcdesc">' + esc(r.d) + '</div>'
-         + '<div class="pcp">' + hl(r.p) + '</div>'
+         + '<details class="pcprompt"><summary>查看提示词</summary><div class="pcp">' + hl(r.p) + '</div></details>'
          + '<div class="pcact">'
          + '<button type="button" class="pcbtn pri" data-a="copy">复制提示词</button>'
          + '<button type="button" class="pcbtn" data-a="core">复制核心</button>'
@@ -4023,7 +4067,6 @@ cine_body = f"""
   <header class="compare-heading"><div><h1>电影技法与提示词库</h1>
     <p>{CINE_N:,} 条可复制的提示词，覆盖摄影机运动、灯光、构图、剪辑和镜头等 {CINE_CATS} 类技法。</p>
   </div></header>
-  <nav class="libcategories" id="libSide" aria-label="技法分类"></nav>
   <div class="libbar">
     <label>搜索提示词<input type="search" id="libQ" placeholder="例如 逆光、close-up"></label>
     <label>替换主体（可选）<input type="text" id="libS" placeholder="输入角色或场景" aria-describedby="lib-subject-note"></label>
@@ -4033,10 +4076,16 @@ cine_body = f"""
     </div>
     <p class="lib-note" id="lib-subject-note">填入主体后，复制时会替换模板里的 [Subject]。</p>
   </div>
-  <div class="libmain">
-    <span class="libcnt" id="libCnt" role="status">{CINE_N} / {CINE_N} 条目</span>
-    <div class="libcards" id="libCards"></div>
-    <div class="libmore" id="libMore" style="display:none"></div>
+  <div class="library-layout">
+    <aside class="library-index">
+      <strong>技法分类</strong>
+      <nav class="libcategories" id="libSide" aria-label="技法分类"></nav>
+    </aside>
+    <div class="libmain">
+      <span class="libcnt" id="libCnt" role="status">{CINE_N} / {CINE_N} 条目</span>
+      <div class="libcards" id="libCards"></div>
+      <div class="libmore" id="libMore" style="display:none"></div>
+    </div>
   </div>
 
   <div class="libsrc">
@@ -4059,9 +4108,12 @@ PAGES = {
     "index.html": page("视频生成成本榜", f"{BRAND} — {SITE['tagline']}。AI 视频生成平台的成本对比，统一口径折算，只给可复核的结果。",
                        nav("home"), home_body, cost_js=True, canon="", extra_css=COMPARE_CSS,
                        extra_js=HOME_JS + DISCLOSURE_JS),
-    "cost.html": page("平台成本对比", f"{len(ROWS)} 个可选档位，按「{SPEC}」统一口径折算单条现金成本，含达标阶梯、边际成本与跨平台组合最省。",
+    "cost.html": page("会员报价与来源", f"{len(ROWS)} 个可比较的会员档位，附实测画布扣分、平台活动、采集截图与进阶对比。",
                       nav("cost"), cost_body, cost_js=True, canon="cost", extra_css=COMPARE_CSS,
-                      extra_js=COMPARE_JS + DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
+                      extra_js=DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
+    "compare.html": page("会员方案对比", "按统一规格并排比较会员方案的实付、月产能、单条成本和画布积分。",
+                         nav("compare"), WORKSPACE_VIEW + foot(), canon="compare",
+                         extra_css=COMPARE_CSS, extra_js=WORKSPACE_JS + DISCLOSURE_JS),
     "cycles.html": page("三周期全清单", f"{len(ROWS)} 个可选积分档 × 年付/季付/月付三周期，按指标动态排名，附全部原始数据与计算方法。",
                         nav("cycles"), cycles_body, cost_js=True, canon="cycles",
                         extra_css=COMPARE_CSS, extra_js=DISCLOSURE_JS, self_imgs=bool(EVIDENCE)),
@@ -4071,7 +4123,7 @@ PAGES = {
     #   canon=None —— 不发分享卡片，不给错误页做分享预览。
     "404.html": page("页面不存在", "你要找的页面不存在。", nav(""), NOTFOUND_BODY, extra_css=COMPARE_CSS),
     "glossary.html": page("术语表", f"{len(GLOSSARY['terms'])} 条口径与指标定义：口径、单条成本、承诺期、倒挂、组合订阅等。",
-                          nav("glossary"), glossary_body, canon="glossary", extra_css=COMPARE_CSS),
+                          nav("glossary"), glossary_body, canon="glossary", extra_css=COMPARE_CSS, extra_js=GLOS_JS),
     "prompts.html": page("提示词库", f"{CINE_N} 条电影技法与提示词模板：摄影机运动、灯光、构图、剪辑、胶片、镜头与大师肖像，可直接复制投喂 AI 生成器。",
                          nav("prompts"), cine_body, canon="prompts",
                          extra_css=sub_css(CINE_CSS) + COMPARE_CSS,

@@ -252,7 +252,7 @@
     }
   }
 
-  frontier.addEventListener('change', () => drawFrontier(data.periods[period.value][1]));
+  frontier?.addEventListener('change', () => drawFrontier(data.periods[period.value][1]));
   for (const eventType of ['pointerover', 'focusin']) {
     chartRoot.addEventListener(eventType, event => {
       const item = event.target.closest('[data-chart-plan]');
