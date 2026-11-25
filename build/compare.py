@@ -58,12 +58,14 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
   <header class="compare-heading workspace-heading">
     <div>
       <a class="workspace-back" id="compare-selection-back" href="index.html">返回成本榜</a>
-      <h1>会员方案对比</h1>
-      <p>按相同规格和周期查看实付、月产能与画布扣分。</p>
+      <div class="workspace-title">
+        <h1>会员方案对比</h1>
+        <span id="compare-picked-count" class="workspace-count" role="status">已选 0 / 4</span>
+      </div>
+      <p>选 2 至 4 档，比较实付、月产能和单条成本。</p>
     </div>
     <nav class="compare-jump-links" aria-label="对比页操作">
       <a href="{records_page}#membership-prices">会员报价</a>
-      <button type="button" data-share="selected" hidden>复制对比链接</button>
     </nav>
   </header>
 """ if workspace else f"""
@@ -141,12 +143,12 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
           <select id="compare-platform"><option value="">全部平台</option>{platform_options}</select>
         </label>
 """
-    picked = """
+    picked_status = "" if workspace else '      <span id="compare-picked-count" role="status"></span>\n'
+    picked = f"""
     <div id="compare-picked" class="compare-picked" hidden>
       <div id="compare-picked-plans" class="compare-picked-plans" aria-label="已选档位"></div>
-      <span id="compare-picked-count" role="status"></span>
-      <button type="button" id="compare-picked-clear">清空</button>
-      <button type="button" id="compare-picked-open">并排比较</button>
+{picked_status}      <button type="button" id="compare-picked-clear">清空</button>
+      <button type="button" id="compare-picked-open">{"查看对比" if workspace else "并排比较"}</button>
     </div>
 """
     record_links = f"""
@@ -285,22 +287,43 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
   </section>
 """
     selection = f"""
-  <section id="compare-selection" class="compare-selection" aria-labelledby="compare-selection-title">
+  <section id="workspace-picker" class="workspace-picker" aria-labelledby="workspace-picker-title">
+    <header class="workspace-picker-heading">
+      <div>
+        <h2 id="workspace-picker-title">选择会员档位</h2>
+        <p id="workspace-picker-scope"></p>
+      </div>
+      <div id="workspace-shortcuts" class="workspace-shortcuts" aria-label="快速选择"></div>
+    </header>
+    <p id="workspace-picker-error" class="workspace-picker-error" role="status" hidden></p>
+    <div class="workspace-catalog">
+      <div id="workspace-platforms" class="workspace-platforms" role="group" aria-label="按平台筛选"></div>
+      <div class="workspace-candidates">
+        <label class="compare-search workspace-search">
+          <input id="workspace-search" type="search" aria-label="搜索平台、档位或积分" placeholder="搜索平台、档位或积分" autocomplete="off">
+        </label>
+        <div class="workspace-list-head">
+          <p id="workspace-plan-status" class="workspace-plan-status" role="status"></p>
+          <button type="button" id="workspace-plan-more" class="workspace-plan-more" aria-controls="workspace-plan-grid" aria-expanded="false" hidden>显示全部档位</button>
+        </div>
+        <div id="workspace-plan-grid" class="workspace-plan-grid" aria-label="可选档位"></div>
+      </div>
+    </div>
+{picked}
+    <noscript><p>启用 JavaScript 后可选择档位。<a href="cycles.html#allperiod">查看会员档位表</a></p></noscript>
+  </section>
+  <section id="compare-selection" class="compare-selection" aria-labelledby="compare-selection-title" hidden>
     <header>
       <div>
-        <h2 id="compare-selection-title" tabindex="-1">档位明细</h2>
+        <h2 id="compare-selection-title" tabindex="-1">对比结果</h2>
         <p id="compare-selection-scope"></p>
       </div>
-      <label class="workspace-add">
-        <span class="compare-sr-only">添加会员档位</span>
-        <select id="compare-add-plan">
-          <option value="">添加会员档位</option>
-        </select>
-      </label>
+      <div class="workspace-result-actions">
+        <a class="workspace-edit" href="#workspace-picker">调整所选档位</a>
+        <button type="button" data-share="selected" hidden>复制对比链接</button>
+      </div>
     </header>
-{picked}
-    <p id="compare-selection-empty" role="status">添加至少两个会员档位，即可并排比较。</p>
-    <div id="compare-selection-table" class="compare-selection-scroll" role="region" aria-label="所选档位的费用与积分" tabindex="0" hidden></div>
+    <div id="compare-selection-table" class="compare-selection-scroll" role="region" aria-label="所选档位的费用与积分" tabindex="0"></div>
     <p id="compare-calc-note" class="compare-calc-note"></p>
 {record_links}
   </section>
@@ -314,6 +337,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
 """
     js = (COMPARE_JS.replace("__COMPARE_CHARTS__", COMPARE_CHARTS)
           .replace("__COMPARE_OVERVIEW__", COMPARE_OVERVIEW)
+          .replace("__COMPARE_PICKER__", COMPARE_PICKER)
           .replace("__COMPARE_OFFER__", COMPARE_OFFER)
           .replace("__COMPARE_DATA__", data))
     return html, js
@@ -371,6 +395,7 @@ def membership_budget_view(rows, readings, periods, colors, logos):
 COMPARE_CSS = Path(__file__).with_name("compare_style.css").read_text(encoding="utf-8")
 COMPARE_CHARTS = Path(__file__).with_name("compare_charts.js").read_text(encoding="utf-8")
 COMPARE_OVERVIEW = Path(__file__).with_name("compare_overview.js").read_text(encoding="utf-8")
+COMPARE_PICKER = Path(__file__).with_name("compare_picker.js").read_text(encoding="utf-8")
 COMPARE_BUDGET = Path(__file__).with_name("compare_budget.js").read_text(encoding="utf-8")
 COMPARE_OFFER = r"""
   function offerAt(plan, spec, periodKey) {
@@ -416,10 +441,8 @@ COMPARE_JS = r"""
   const workspace = Boolean(selection);
   const selectionTitle = document.getElementById('compare-selection-title');
   const selectionScope = document.getElementById('compare-selection-scope');
-  const selectionEmpty = document.getElementById('compare-selection-empty');
   const selectionTable = document.getElementById('compare-selection-table');
   const selectionBack = document.getElementById('compare-selection-back');
-  const addPlan = document.getElementById('compare-add-plan');
   const shareSelection = root.querySelector('[data-share=selected]');
   const shareStatus = document.getElementById('compare-share-status');
   const pickedBar = document.getElementById('compare-picked');
@@ -445,6 +468,7 @@ COMPARE_JS = r"""
   __COMPARE_CHARTS__
   __COMPARE_OVERVIEW__
   __COMPARE_OFFER__
+  __COMPARE_PICKER__
   mode.value = defaultMode;
   for (const [key, group] of [['model', model], ['res', resolution], ['period', period]]) {
     const value = query.get(key);
@@ -503,6 +527,7 @@ COMPARE_JS = r"""
           ? budget.value : budget.defaultValue);
       }
     }
+    if (workspace && toWorkspace) link.hash = location.hash;
     return link;
   }
 
@@ -514,6 +539,7 @@ COMPARE_JS = r"""
 
   async function copyLink(button) {
     const link = stateLink(workspace, workspace);
+    if (workspace) link.hash = 'compare-selection';
     try {
       await navigator.clipboard.writeText(link.href);
       shareStatus.textContent = button.textContent = '链接已复制';
@@ -559,9 +585,8 @@ COMPARE_JS = r"""
 
   function syncPicks(){
     pickedBar.hidden = picked.size === 0;
-    pickedCount.textContent = '已选 ' + picked.size + ' / ' + pickLimit + ' 个档位';
-    pickedOpen.disabled = picked.size < 2;
-    pickedOpen.hidden = workspace;
+    pickedCount.textContent = '已选 ' + picked.size + ' / ' + pickLimit + (workspace ? '' : ' 个档位');
+    pickedOpen.disabled = picked.size < 2 || (workspace && selection.hidden);
     pickedPlans.replaceChildren();
     for (const id of picked) {
       const plan = data.plans[id];
@@ -570,7 +595,8 @@ COMPARE_JS = r"""
       remove.type = 'button';
       remove.dataset.removePlan = id;
       remove.textContent = label + ' ×';
-      remove.setAttribute('aria-label', '移除 ' + label + '，' + plan.periods.y[1].toLocaleString('zh-CN') + ' 分档');
+      const credits = plan.periods[period.value]?.[1] ?? Object.values(plan.periods)[0][1];
+      remove.setAttribute('aria-label', '移除 ' + label + '，' + credits.toLocaleString('zh-CN') + ' 分档');
       pickedPlans.append(remove);
     }
     for (const button of rows?.querySelectorAll('[data-pick-plan]') || []) {
@@ -578,30 +604,17 @@ COMPARE_JS = r"""
       button.setAttribute('aria-pressed', String(active));
       button.disabled = !active && picked.size >= pickLimit;
     }
-    if (addPlan) {
-      addPlan.disabled = picked.size >= pickLimit;
-      addPlan.options[0].textContent = addPlan.disabled ? '已选满 4 个档位' : '添加会员档位';
-      for (const option of [...addPlan.options].slice(1)) {
-        const plan = data.plans[Number(option.value)];
-        const credits = plan.periods[period.value]?.[1];
-        const tier = plan.tier + ' · ' + (credits ?? plan.periods.y[1]).toLocaleString('zh-CN') + ' 分';
-        option.textContent = tier + (credits === undefined ? '（无' + data.periods[period.value][0] + '）' : '/月');
-        option.disabled = picked.has(plan.id);
-      }
-    }
   }
 
   function renderSelection(spec, scope, fits, unitCost, reasonFor, issue){
     selectionScope.textContent = scope;
     const ready = picked.size >= 2 && !issue;
-    selectionEmpty.hidden = ready;
-    selectionEmpty.textContent = issue || '添加至少两个会员档位，即可并排比较。';
-    selectionTable.hidden = !ready;
+    selection.hidden = !ready;
     shareSelection.hidden = !ready;
     selectionTable.replaceChildren();
     if (!ready) return;
 
-    const choices = [...picked].map(id => ({plan:data.plans[id], offer:offerAt(data.plans[id], spec, period.value)}));
+    const choices = [...picked].map(id => workspacePlan(data.plans[id], spec));
     const grid = document.createElement('table');
     grid.setAttribute('aria-label', '档位并排对比');
     grid.style.setProperty('--comparison-width', (78 + choices.length * 112) + 'px');
@@ -610,33 +623,33 @@ COMPARE_JS = r"""
     metricHead.scope = 'col';
     metricHead.textContent = '指标';
     header.append(metricHead);
-    for (const {plan, offer} of choices) {
+    for (const {plan, quote, reading, offer} of choices) {
       const cell = document.createElement('th');
       cell.scope = 'col';
       const name = document.createElement('a');
       name.href = data.recordsPage + '#' + plan.anchor;
       name.textContent = nameOf(plan.platform);
       const tier = document.createElement('small');
-      tier.textContent = plan.tier + (offer?.sourceDate ? ' · 留档' : '');
+      tier.textContent = plan.tier + (reading?.sourceDate ? ' · 留档' : '');
       const status = document.createElement('small');
-      status.textContent = offer
-        ? (fits(offer) ? '' : reasonFor(offer))
-        : '当前规格或周期缺数据';
+      if (!quote) status.textContent = '无' + data.periods[period.value][0];
+      else if (offer && !fits(offer)) status.textContent = reasonFor(offer);
       cell.append(platformLogo({plan}), name, tier);
-      if (offer) {
+      if (quote) {
         const credits = document.createElement('small');
-        credits.textContent = offer.monthlyCredits.toLocaleString('zh-CN') + ' 分/月';
+        credits.textContent = quote[1].toLocaleString('zh-CN') + ' 分/月';
         cell.append(credits);
       }
       if (status.textContent) cell.append(status);
       header.append(cell);
     }
     const metrics = [
-      ['首期实付', offer => money.format(offer.pay)],
-      ['月产能', offer => offer.capacity + ' 条'],
-      ['每条成本', offer => fits(offer) ? perClip.format(unitCost(offer)) : reasonFor(offer)],
-      ['每月积分', offer => offer.monthlyCredits.toLocaleString('zh-CN')],
-      ['画布扣分', offer => offer.creditsPerClip.toLocaleString('zh-CN') + ' 分/条'],
+      ['首期实付', ({quote}) => quote ? money.format(quote[0]) : '—'],
+      ['月产能', ({offer}) => offer ? offer.capacity + ' 条' : '—'],
+      ['每条成本', ({offer}) => offer ? (fits(offer) ? perClip.format(unitCost(offer)) : reasonFor(offer)) : '—'],
+      ['每月积分', ({quote}) => quote ? quote[1].toLocaleString('zh-CN') : '—'],
+      ['画布扣分', ({reading}) => typeof reading === 'string' ? reading
+        : (reading.credits ?? reading).toLocaleString('zh-CN') + ' 分/条'],
     ];
     const body = grid.createTBody();
     for (const [label, format] of metrics) {
@@ -645,7 +658,7 @@ COMPARE_JS = r"""
       heading.scope = 'row';
       heading.textContent = label;
       row.append(heading);
-      for (const {offer} of choices) row.insertCell().textContent = offer ? format(offer) : '—';
+      for (const choice of choices) row.insertCell().textContent = format(choice);
     }
     selectionTable.append(grid);
   }
@@ -681,7 +694,9 @@ COMPARE_JS = r"""
     if (workspace) {
       selectionBack.href = stateLink(false, true);
       if (returningToBudget) selectionBack.textContent = '返回按预算选会员';
-      renderSelection(spec, specName + ' · ' + cycle[0] + (issue ? '' : ' · ' + scenario), fits, unitCost, reasonFor, issue);
+      const scope = specName + ' · ' + cycle[0] + (issue ? '' : ' · ' + scenario);
+      renderSelection(spec, scope, fits, unitCost, reasonFor, issue);
+      renderWorkspacePicker(spec, scope, byBudget, fits, issue);
       syncPicks();
       if (!issue) {
         const link = stateLink(true, true);
@@ -909,36 +924,25 @@ COMPARE_JS = r"""
     syncPicks();
   });
   pickedOpen.addEventListener('click', () => {
-    if (picked.size >= 2) location.assign(stateLink(true, true));
+    if (picked.size < 2) return;
+    if (workspace) {
+      selectionTitle.focus({preventScroll:true});
+      selection.scrollIntoView({behavior:'instant'});
+    } else location.assign(stateLink(true, true));
   });
   pickedClear.addEventListener('click', () => {
     picked.clear();
     render();
-    (workspace ? addPlan : result).focus();
+    (workspace ? pickerSearch : result).focus();
   });
   pickedPlans.addEventListener('click', event => {
     const button = event.target.closest('[data-remove-plan]');
     if (!button) return;
     picked.delete(Number(button.dataset.removePlan));
     render();
-    (workspace ? addPlan : (pickedBar.hidden ? result : pickedClear)).focus({preventScroll:true});
+    (workspace ? pickerSearch : (pickedBar.hidden ? result : pickedClear)).focus({preventScroll:true});
   });
-  if (addPlan) {
-    for (const platformName of Object.keys(data.readings)) {
-      const group = document.createElement('optgroup');
-      group.label = nameOf(platformName);
-      for (const plan of data.plans.filter(item => item.platform === platformName)) {
-        group.append(new Option(plan.tier, plan.id));
-      }
-      addPlan.append(group);
-    }
-    addPlan.addEventListener('change', () => {
-      if (addPlan.value && picked.size < pickLimit) picked.add(Number(addPlan.value));
-      addPlan.value = '';
-      render();
-      if (addPlan.disabled) selectionTitle.focus({preventScroll:true});
-    });
-  }
+  if (workspace) bindWorkspacePicker();
   showAll?.addEventListener('click', () => {
     includeAll = !includeAll;
     render();
@@ -960,6 +964,7 @@ COMPARE_JS = r"""
     render();
   });
   render();
+  if (workspace && !selection.hidden && !location.hash) selection.scrollIntoView({behavior:'instant'});
 })();
 """
 

@@ -1023,19 +1023,59 @@ body :is(a,button,input,select,summary,[tabindex]):focus-visible { outline: 2px 
 .compare-picked-plans { display: flex; flex-wrap: wrap; gap: 4px; }
 .compare-picked-plans button { min-height: 27px; max-width: 21ch; overflow: hidden; text-overflow: ellipsis; }
 .compare-picked #compare-picked-open { color: var(--studio-on-action); background: var(--studio-action); border-color: var(--studio-action); font-weight: 750; }
-.compare-workspace { padding-top: clamp(30px,4vw,57px); }
-.workspace-back { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 12px; color: var(--studio-muted); font-size: 13px; font-weight: 650; text-decoration: none; }
+.compare-workspace { padding-top: clamp(25px,3vw,43px); }
+.workspace-back { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; margin: 0 0 9px; color: var(--studio-muted); font-size: var(--type-label); font-weight: 540; text-decoration: none; }
 .workspace-back::before { content: ""; width: 6px; height: 6px; border: solid currentColor; border-width: 0 0 1.5px 1.5px; transform: rotate(45deg); }
+.workspace-back:hover { text-decoration: underline; }
+.workspace-title { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 13px; margin-bottom: 8px; }
+.workspace-title h1 { margin: 0; }
+.workspace-count { display: inline-flex; align-items: center; min-height: 30px; padding: 3px 11px; border-radius: 16px; background: var(--studio-control); color: var(--studio-muted); font-size: var(--type-caption); font-weight: 620; }
 .compare-workspace .benchmark-controls { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
 .compare-workspace .compare-toolbar { position: static; }
-.compare-workspace .compare-picked { position: static; margin: 10px 0 13px; }
-.compare-selection { margin: 20px 0; padding: 16px 0 0; border-top: 1px solid var(--studio-line); }
+.workspace-picker { margin-top: 19px; padding: clamp(15px,2.1vw,30px); border-radius: 20px; background: var(--studio-control); scroll-margin-top: calc(var(--navh) + 14px); }
+.workspace-picker-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 9px 17px; margin-bottom: 19px; }
+.workspace-picker-heading h2, .compare-selection h2 { margin: 0; font-size: var(--type-section); font-weight: 750; letter-spacing: -.018em; }
+.workspace-picker-heading p, .workspace-plan-status { margin: 4px 0 0; color: var(--studio-muted); font-size: var(--type-label); }
+.workspace-shortcuts { display: flex; flex-wrap: wrap; gap: 6px; }
+.workspace-shortcut, .workspace-plan-more { min-height: 35px; padding: 5px 12px; border: 1px solid var(--studio-line); border-radius: 9px; background: var(--studio-panel); color: var(--studio-text); font: inherit; font-size: var(--type-caption); font-weight: 630; cursor: pointer; }
+.workspace-shortcut:not(:disabled):hover, .workspace-plan-more:hover { border-color: var(--studio-rule); }
+.workspace-shortcut:disabled { color: var(--studio-muted); cursor: default; }
+.workspace-picker-error { margin: 0 0 11px; padding: 7px 10px; border: 1px solid var(--studio-rule); border-radius: 8px; background: var(--studio-panel); font-size: var(--type-label); }
+.workspace-catalog { display: grid; grid-template-columns: minmax(146px,.23fr) minmax(0,1fr); align-items: start; gap: 19px; }
+.workspace-platforms { display: grid; gap: 3px; padding-right: 12px; border-inline-end: 1px solid var(--studio-line); }
+.workspace-platform { display: flex; align-items: center; gap: 6px; width: 100%; min-height: 38px; padding: 5px 8px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--studio-text); font: inherit; font-size: var(--type-label); text-align: left; cursor: pointer; }
+.workspace-platform .comparison-mark { flex: none; width: 21px; height: 21px; margin: 0; }
+.workspace-platform small { margin-left: auto; color: inherit; font-size: .75rem; }
+.workspace-platform:hover { background: var(--studio-select); }
+.workspace-platform[aria-pressed=true] { background: var(--studio-action); color: var(--studio-on-action); font-weight: 650; }
+.workspace-candidates { min-width: 0; }
+.workspace-search { display: block; width: 100%; }
+.compare-workspace .workspace-search input { min-height: 43px; border-color: var(--studio-line); background: var(--studio-panel); font-size: var(--type-label); }
+.workspace-list-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 8px; margin: 7px 0; }
+.workspace-plan-status { margin: 0; }
+.workspace-plan-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+.workspace-plan { display: grid; grid-template-columns: auto minmax(0,1fr) auto auto; align-items: center; gap: 8px; width: 100%; min-width: 0; min-height: 62px; padding: 8px 10px; border: 1px solid var(--studio-line); border-radius: 10px; background: var(--studio-panel); color: var(--studio-text); font: inherit; line-height: 1.4; text-align: left; cursor: pointer; }
+.workspace-plan:hover:not(:disabled), .workspace-plan[aria-pressed=true] { border-color: var(--studio-accent); }
+.workspace-plan[aria-pressed=true] { background: var(--studio-select); }
+.workspace-plan:disabled { color: var(--studio-muted); cursor: default; }
+.workspace-plan > .comparison-mark { width: 33px; height: 33px; margin: 0; }
+.workspace-plan-label { display: grid; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+.workspace-plan-label b { font-size: var(--type-label); font-weight: 660; }
+.workspace-plan-label small { color: var(--studio-muted); font-size: var(--type-caption); }
+.workspace-plan-price { font-size: 1rem; font-weight: 560; white-space: nowrap; }
+.workspace-pick-icon { position: relative; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--studio-control); color: var(--studio-ink); }
+.workspace-pick-icon::before { content: ""; width: 11px; height: 11px; background: linear-gradient(currentColor,currentColor) center / 11px 1.5px no-repeat, linear-gradient(currentColor,currentColor) center / 1.5px 11px no-repeat; }
+.workspace-plan[aria-pressed=true] .workspace-pick-icon { background: var(--studio-action); color: var(--studio-on-action); }
+.workspace-plan[aria-pressed=true] .workspace-pick-icon::before { width: 9px; height: 5px; border: solid currentColor; border-width: 0 0 1.5px 1.5px; background: none; transform: translateY(-1px) rotate(-45deg); }
+.workspace-plan-more { min-height: 30px; padding: 2px 8px; }
+.compare-workspace .compare-picked { width: 100%; margin: 13px 0 0; background: var(--studio-panel); }
+.compare-workspace #compare-picked-open { margin-inline-start: auto; }
+.compare-selection { margin: 26px 0; padding-top: 15px; border-top: 1px solid var(--studio-line); scroll-margin-top: calc(var(--navh) + 14px); }
 .compare-selection header { display: flex; align-items: start; justify-content: space-between; flex-wrap: wrap; gap: 5px 14px; margin-bottom: 10px; }
 .compare-selection header > div:first-child { flex: 1; min-width: 0; }
-.compare-selection h2 { margin: 0; font-size: 20px; scroll-margin-top: 94px; }
-.workspace-add { width: min(230px,100%); }
-.compare-page .workspace-add select { background: var(--studio-control); border-color: var(--studio-line); font-size: 14px; font-weight: 650; cursor: pointer; }
-.compare-selection #compare-selection-empty { margin-block: 15px; padding: 17px 13px; border-radius: 10px; background: var(--studio-control); }
+.workspace-result-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.workspace-result-actions button { font: inherit; font-size: var(--type-caption); font-weight: 630; }
+.workspace-edit { align-self: center; font-size: var(--type-caption); font-weight: 630; }
 .compare-selection p { margin: 0; color: var(--studio-muted); font-size: 13px; }
 .compare-selection-scroll { overflow-x: auto; border: 1px solid var(--studio-line); border-radius: 10px; }
 .compare-selection-scroll table { min-width: var(--comparison-width); table-layout: fixed; border: 0; border-collapse: separate; border-spacing: 0; }
@@ -1137,6 +1177,7 @@ body :is(a,button,input,select,summary,[tabindex]):focus-visible { outline: 2px 
 @media (max-width: 900px) {
   .benchmark-page { --type-display: clamp(2.375rem,5.8vw,3.25rem); }
   .benchmark-heading { grid-template-columns: minmax(0,1fr); gap: 23px; }
+  .workspace-plan-grid { grid-template-columns: minmax(0,1fr); }
 }
 @media (max-width: 650px) {
   .canvas-table .comparison-mark { display: none; }
@@ -1488,9 +1529,17 @@ body :is(.budtip,.vptitle span,.scopenote,.pjh span,.pjnote,.note.warn b,.intro 
   .compare-page .compare-pick { width: 30px; height: 34px; }
   .compare-selection :is(th,td) { padding-inline: 7px; font-size: 13px; }
   .compare-selection th:first-child { width: 78px; font-size: 12px; }
-  .compare-selection header { align-items: end; }
-  .workspace-add { width: min(145px,100%); }
-  .compare-page .workspace-add select { font-size: 12px; }
+  .compare-selection header > div:first-child { flex-basis: 100%; }
+  .workspace-catalog { grid-template-columns: minmax(0,1fr); gap: 11px; }
+  .workspace-platforms { display: flex; flex-wrap: wrap; gap: 4px; padding: 0; border: 0; }
+  .workspace-platform { flex: none; width: auto; min-height: 34px; white-space: nowrap; font-size: var(--type-caption); }
+  .workspace-picker { margin-top: 14px; padding: 12px; border-radius: 14px; }
+  .workspace-picker-heading { margin-bottom: 10px; }
+  .workspace-plan { gap: 5px; padding-inline: 6px; }
+  .workspace-plan > .comparison-mark { width: 27px; height: 27px; }
+  .workspace-plan-price { font-size: var(--type-label); }
+  .workspace-pick-icon { width: 24px; height: 24px; }
+  .compare-workspace .compare-picked-plans { flex-basis: 100%; }
   .compare-picked { gap: 4px; padding: 5px 6px 5px 8px; font-size: 12px; }
   .compare-picked-plans { flex-basis: 100%; }
   .compare-meter { height: 3px; }
@@ -1562,6 +1611,16 @@ body :is(.budtip,.vptitle span,.scopenote,.pjh span,.pjnote,.note.warn b,.intro 
   .compare-results .compare-result-head { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: start; }
 }
 @media (max-width: 360px) {
+  .compare-workspace { padding-top: 12px; }
+  .workspace-title { gap: 5px 8px; margin-bottom: 5px; }
+  .workspace-title h1 { font-size: 27px; }
+  .workspace-count { padding-inline: 7px; }
+  .compare-workspace .compare-specs { gap: 4px; }
+  .compare-workspace .compare-choice span { padding-inline: 6px; }
+  .compare-workspace .compare-resolution span { min-width: 35px; }
+  .workspace-platform { gap: 4px; padding-inline: 5px; }
+  .workspace-list-head { gap: 4px; }
+  .workspace-plan-status, .workspace-plan-more { font-size: .75rem; }
   .benchmark-page .compare-specs .compare-axis span { padding-inline: 7px; }
   .compare-toolbar .compare-search { min-width: 0; }
   #compare-grid :is(thead,tbody,table) { display: block; }
@@ -1629,12 +1688,14 @@ i:is(.lg-libtv,.lg-neowow,.lg-jimeng,.lg-xiaoyunque,.lg-higgsfield,.lg-tapnow,.l
   <header class="compare-heading workspace-heading">
     <div>
       <a class="workspace-back" id="compare-selection-back" href="index.html">返回成本榜</a>
-      <h1>会员方案对比</h1>
-      <p>按相同规格和周期查看实付、月产能与画布扣分。</p>
+      <div class="workspace-title">
+        <h1>会员方案对比</h1>
+        <span id="compare-picked-count" class="workspace-count" role="status">已选 0 / 4</span>
+      </div>
+      <p>选 2 至 4 档，比较实付、月产能和单条成本。</p>
     </div>
     <nav class="compare-jump-links" aria-label="对比页操作">
       <a href="cost.html#membership-prices">会员报价</a>
-      <button type="button" data-share="selected" hidden>复制对比链接</button>
     </nav>
   </header>
 
@@ -1708,29 +1769,49 @@ i:is(.lg-libtv,.lg-neowow,.lg-jimeng,.lg-xiaoyunque,.lg-higgsfield,.lg-tapnow,.l
   </form>
 
 
-  <section id="compare-selection" class="compare-selection" aria-labelledby="compare-selection-title">
-    <header>
+  <section id="workspace-picker" class="workspace-picker" aria-labelledby="workspace-picker-title">
+    <header class="workspace-picker-heading">
       <div>
-        <h2 id="compare-selection-title" tabindex="-1">档位明细</h2>
-        <p id="compare-selection-scope"></p>
+        <h2 id="workspace-picker-title">选择会员档位</h2>
+        <p id="workspace-picker-scope"></p>
       </div>
-      <label class="workspace-add">
-        <span class="compare-sr-only">添加会员档位</span>
-        <select id="compare-add-plan">
-          <option value="">添加会员档位</option>
-        </select>
-      </label>
+      <div id="workspace-shortcuts" class="workspace-shortcuts" aria-label="快速选择"></div>
     </header>
+    <p id="workspace-picker-error" class="workspace-picker-error" role="status" hidden></p>
+    <div class="workspace-catalog">
+      <div id="workspace-platforms" class="workspace-platforms" role="group" aria-label="按平台筛选"></div>
+      <div class="workspace-candidates">
+        <label class="compare-search workspace-search">
+          <input id="workspace-search" type="search" aria-label="搜索平台、档位或积分" placeholder="搜索平台、档位或积分" autocomplete="off">
+        </label>
+        <div class="workspace-list-head">
+          <p id="workspace-plan-status" class="workspace-plan-status" role="status"></p>
+          <button type="button" id="workspace-plan-more" class="workspace-plan-more" aria-controls="workspace-plan-grid" aria-expanded="false" hidden>显示全部档位</button>
+        </div>
+        <div id="workspace-plan-grid" class="workspace-plan-grid" aria-label="可选档位"></div>
+      </div>
+    </div>
 
     <div id="compare-picked" class="compare-picked" hidden>
       <div id="compare-picked-plans" class="compare-picked-plans" aria-label="已选档位"></div>
-      <span id="compare-picked-count" role="status"></span>
       <button type="button" id="compare-picked-clear">清空</button>
-      <button type="button" id="compare-picked-open">并排比较</button>
+      <button type="button" id="compare-picked-open">查看对比</button>
     </div>
 
-    <p id="compare-selection-empty" role="status">添加至少两个会员档位，即可并排比较。</p>
-    <div id="compare-selection-table" class="compare-selection-scroll" role="region" aria-label="所选档位的费用与积分" tabindex="0" hidden></div>
+    <noscript><p>启用 JavaScript 后可选择档位。<a href="cycles.html#allperiod">查看会员档位表</a></p></noscript>
+  </section>
+  <section id="compare-selection" class="compare-selection" aria-labelledby="compare-selection-title" hidden>
+    <header>
+      <div>
+        <h2 id="compare-selection-title" tabindex="-1">对比结果</h2>
+        <p id="compare-selection-scope"></p>
+      </div>
+      <div class="workspace-result-actions">
+        <a class="workspace-edit" href="#workspace-picker">调整所选档位</a>
+        <button type="button" data-share="selected" hidden>复制对比链接</button>
+      </div>
+    </header>
+    <div id="compare-selection-table" class="compare-selection-scroll" role="region" aria-label="所选档位的费用与积分" tabindex="0"></div>
     <p id="compare-calc-note" class="compare-calc-note"></p>
 
     <nav class="compare-record-links compare-result-links" aria-label="核对价格与来源">
@@ -2044,10 +2125,8 @@ var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分�
   const workspace = Boolean(selection);
   const selectionTitle = document.getElementById('compare-selection-title');
   const selectionScope = document.getElementById('compare-selection-scope');
-  const selectionEmpty = document.getElementById('compare-selection-empty');
   const selectionTable = document.getElementById('compare-selection-table');
   const selectionBack = document.getElementById('compare-selection-back');
-  const addPlan = document.getElementById('compare-add-plan');
   const shareSelection = root.querySelector('[data-share=selected]');
   const shareStatus = document.getElementById('compare-share-status');
   const pickedBar = document.getElementById('compare-picked');
@@ -2482,6 +2561,144 @@ var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分�
     return {plan, pay, capacity:Math.floor(monthlyCredits / credits), monthlyCredits,
       creditsPerClip:credits, sourceDate:reading.sourceDate};
   }
+    const pickerSearch = document.getElementById('workspace-search');
+  const pickerPlatforms = document.getElementById('workspace-platforms');
+  const pickerGrid = document.getElementById('workspace-plan-grid');
+  const pickerMore = document.getElementById('workspace-plan-more');
+  const pickerShortcuts = document.getElementById('workspace-shortcuts');
+  const pickerPageSize = 12;
+  let pickerPlatform = '';
+  let pickerExpanded = false;
+  let pickerCatalog = [];
+
+  function workspacePlan(plan, spec) {
+    return {
+      plan,
+      quote: plan.periods[period.value],
+      reading: data.readings[plan.platform][spec],
+      offer: offerAt(plan, spec, period.value),
+    };
+  }
+
+  function pickerNode(tag, className, label) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (label != null) node.textContent = label;
+    if (tag === 'button') node.type = 'button';
+    return node;
+  }
+
+  function drawPickerPlatforms() {
+    const counts = new Map();
+    for (const {plan} of pickerCatalog) counts.set(plan.platform, (counts.get(plan.platform) || 0) + 1);
+    pickerPlatforms.replaceChildren(...['', ...Object.keys(data.readings)].map(key => {
+      const filter = pickerNode('button', 'workspace-platform');
+      filter.dataset.workspacePlatform = key;
+      filter.setAttribute('aria-pressed', String(key === pickerPlatform));
+      if (key) filter.append(platformLogo({plan:{platform:key}}));
+      filter.append(pickerNode('span', '', key ? nameOf(key) : '全部平台'),
+        pickerNode('small', '', key ? counts.get(key) || 0 : pickerCatalog.length));
+      return filter;
+    }));
+  }
+
+  function drawPickerPlans() {
+    const normal = text => text.normalize('NFKC').toLowerCase().replace(/[\s,]+/g, '');
+    const keyword = normal(pickerSearch.value);
+    const matching = pickerCatalog.filter(({plan, quote}) => {
+      if (pickerPlatform && plan.platform !== pickerPlatform) return false;
+      const credits = quote?.[1] ?? Object.values(plan.periods)[0][1];
+      return normal(nameOf(plan.platform) + plan.tier + credits).includes(keyword);
+    });
+    const visible = pickerExpanded ? matching : matching.slice(0, pickerPageSize);
+    document.getElementById('workspace-plan-status').textContent = matching.length
+      ? (visible.length < matching.length ? '显示 ' + visible.length + ' / ' : '') + matching.length + ' 个档位'
+      : '没有匹配档位。可以更换关键词或选择全部平台。';
+    pickerMore.hidden = matching.length <= pickerPageSize;
+    pickerMore.textContent = pickerExpanded ? '收起档位列表' : '显示全部 ' + matching.length + ' 个档位';
+    pickerMore.setAttribute('aria-expanded', String(pickerExpanded && !pickerMore.hidden));
+    pickerGrid.replaceChildren(...visible.map(({plan, quote, reading}) => {
+      const active = picked.has(plan.id);
+      const card = pickerNode('button', 'workspace-plan');
+      card.dataset.workspacePlan = plan.id;
+      card.setAttribute('aria-pressed', String(active));
+      card.disabled = !active && picked.size >= pickLimit;
+      const label = pickerNode('span', 'workspace-plan-label');
+      label.append(pickerNode('b', '', nameOf(plan.platform) + ' · ' + plan.tier));
+      const availability = quote ? quote[1].toLocaleString('zh-CN') + ' 分/月' : '无' + data.periods[period.value][0];
+      label.append(pickerNode('small', '', availability + (quote && typeof reading === 'string' ? ' · ' + reading : '')));
+      const price = pickerNode('span', 'workspace-plan-price', quote ? money.format(quote[0]) : '—');
+      const action = pickerNode('i', 'workspace-pick-icon');
+      action.setAttribute('aria-hidden', 'true');
+      card.append(platformLogo({plan}), label, price, action);
+      return card;
+    }));
+  }
+
+  function renderWorkspacePicker(spec, scope, byBudget, fits, issue) {
+    pickerCatalog = data.plans.map(plan => workspacePlan(plan, spec))
+      .sort((a,b) => (a.quote?.[0] ?? Infinity) - (b.quote?.[0] ?? Infinity) || a.plan.id - b.plan.id);
+    document.getElementById('workspace-picker-scope').textContent = scope;
+    const pickerError = document.getElementById('workspace-picker-error');
+    pickerError.hidden = !issue;
+    pickerError.textContent = issue;
+    drawPickerPlatforms();
+    drawPickerPlans();
+    pickerShortcuts.replaceChildren();
+    if (issue) return;
+    const eligible = pickerCatalog.filter(item => item.offer && fits(item.offer));
+    if (byBudget) eligible.sort((a,b) => b.offer.capacity - a.offer.capacity || a.quote[0] - b.quote[0]);
+    const first = eligible[0];
+    if (!first) return;
+    const other = eligible.find(item => item.plan.platform !== first.plan.platform);
+    const upgrade = eligible.find(item => item.plan.platform === first.plan.platform && item.plan.id !== first.plan.id);
+    for (const [label, next] of [['比两家平台', other], ['比同平台两档', upgrade]]) {
+      if (!next) continue;
+      const button = pickerNode('button', 'workspace-shortcut', label);
+      button.dataset.workspacePair = first.plan.id + ',' + next.plan.id;
+      button.title = '选择 ' + planName(first.offer) + ' 与 ' + planName(next.offer);
+      button.disabled = picked.size > 0;
+      pickerShortcuts.append(button);
+    }
+  }
+
+  function bindWorkspacePicker() {
+    pickerSearch.addEventListener('input', () => {
+      pickerExpanded = false;
+      drawPickerPlans();
+    });
+    pickerPlatforms.addEventListener('click', event => {
+      const filter = event.target.closest('[data-workspace-platform]');
+      if (!filter) return;
+      pickerPlatform = filter.dataset.workspacePlatform;
+      pickerExpanded = false;
+      for (const button of pickerPlatforms.querySelectorAll('button')) {
+        button.setAttribute('aria-pressed', String(button === filter));
+      }
+      drawPickerPlans();
+    });
+    pickerGrid.addEventListener('click', event => {
+      const card = event.target.closest('[data-workspace-plan]');
+      if (!card) return;
+      const id = Number(card.dataset.workspacePlan);
+      if (picked.has(id)) picked.delete(id);
+      else if (picked.size < pickLimit) picked.add(id);
+      render();
+      pickerGrid.querySelector('[data-workspace-plan="' + id + '"]')?.focus({preventScroll:true});
+    });
+    pickerMore.addEventListener('click', () => {
+      pickerExpanded = !pickerExpanded;
+      drawPickerPlans();
+    });
+    pickerShortcuts.addEventListener('click', event => {
+      const shortcut = event.target.closest('[data-workspace-pair]');
+      if (!shortcut || picked.size) return;
+      for (const id of shortcut.dataset.workspacePair.split(',')) picked.add(Number(id));
+      render();
+      pickedOpen.click();
+    });
+  }
+
   mode.value = defaultMode;
   for (const [key, group] of [['model', model], ['res', resolution], ['period', period]]) {
     const value = query.get(key);
@@ -2540,6 +2757,7 @@ var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分�
           ? budget.value : budget.defaultValue);
       }
     }
+    if (workspace && toWorkspace) link.hash = location.hash;
     return link;
   }
 
@@ -2551,6 +2769,7 @@ var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分�
 
   async function copyLink(button) {
     const link = stateLink(workspace, workspace);
+    if (workspace) link.hash = 'compare-selection';
     try {
       await navigator.clipboard.writeText(link.href);
       shareStatus.textContent = button.textContent = '链接已复制';
@@ -2596,9 +2815,8 @@ var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分�
 
   function syncPicks(){
     pickedBar.hidden = picked.size === 0;
-    pickedCount.textContent = '已选 ' + picked.size + ' / ' + pickLimit + ' 个档位';
-    pickedOpen.disabled = picked.size < 2;
-    pickedOpen.hidden = workspace;
+    pickedCount.textContent = '已选 ' + picked.size + ' / ' + pickLimit + (workspace ? '' : ' 个档位');
+    pickedOpen.disabled = picked.size < 2 || (workspace && selection.hidden);
     pickedPlans.replaceChildren();
     for (const id of picked) {
       const plan = data.plans[id];
@@ -2607,7 +2825,8 @@ var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分�
       remove.type = 'button';
       remove.dataset.removePlan = id;
       remove.textContent = label + ' ×';
-      remove.setAttribute('aria-label', '移除 ' + label + '，' + plan.periods.y[1].toLocaleString('zh-CN') + ' 分档');
+      const credits = plan.periods[period.value]?.[1] ?? Object.values(plan.periods)[0][1];
+      remove.setAttribute('aria-label', '移除 ' + label + '，' + credits.toLocaleString('zh-CN') + ' 分档');
       pickedPlans.append(remove);
     }
     for (const button of rows?.querySelectorAll('[data-pick-plan]') || []) {
@@ -2615,30 +2834,17 @@ var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分�
       button.setAttribute('aria-pressed', String(active));
       button.disabled = !active && picked.size >= pickLimit;
     }
-    if (addPlan) {
-      addPlan.disabled = picked.size >= pickLimit;
-      addPlan.options[0].textContent = addPlan.disabled ? '已选满 4 个档位' : '添加会员档位';
-      for (const option of [...addPlan.options].slice(1)) {
-        const plan = data.plans[Number(option.value)];
-        const credits = plan.periods[period.value]?.[1];
-        const tier = plan.tier + ' · ' + (credits ?? plan.periods.y[1]).toLocaleString('zh-CN') + ' 分';
-        option.textContent = tier + (credits === undefined ? '（无' + data.periods[period.value][0] + '）' : '/月');
-        option.disabled = picked.has(plan.id);
-      }
-    }
   }
 
   function renderSelection(spec, scope, fits, unitCost, reasonFor, issue){
     selectionScope.textContent = scope;
     const ready = picked.size >= 2 && !issue;
-    selectionEmpty.hidden = ready;
-    selectionEmpty.textContent = issue || '添加至少两个会员档位，即可并排比较。';
-    selectionTable.hidden = !ready;
+    selection.hidden = !ready;
     shareSelection.hidden = !ready;
     selectionTable.replaceChildren();
     if (!ready) return;
 
-    const choices = [...picked].map(id => ({plan:data.plans[id], offer:offerAt(data.plans[id], spec, period.value)}));
+    const choices = [...picked].map(id => workspacePlan(data.plans[id], spec));
     const grid = document.createElement('table');
     grid.setAttribute('aria-label', '档位并排对比');
     grid.style.setProperty('--comparison-width', (78 + choices.length * 112) + 'px');
@@ -2647,33 +2853,33 @@ var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分�
     metricHead.scope = 'col';
     metricHead.textContent = '指标';
     header.append(metricHead);
-    for (const {plan, offer} of choices) {
+    for (const {plan, quote, reading, offer} of choices) {
       const cell = document.createElement('th');
       cell.scope = 'col';
       const name = document.createElement('a');
       name.href = data.recordsPage + '#' + plan.anchor;
       name.textContent = nameOf(plan.platform);
       const tier = document.createElement('small');
-      tier.textContent = plan.tier + (offer?.sourceDate ? ' · 留档' : '');
+      tier.textContent = plan.tier + (reading?.sourceDate ? ' · 留档' : '');
       const status = document.createElement('small');
-      status.textContent = offer
-        ? (fits(offer) ? '' : reasonFor(offer))
-        : '当前规格或周期缺数据';
+      if (!quote) status.textContent = '无' + data.periods[period.value][0];
+      else if (offer && !fits(offer)) status.textContent = reasonFor(offer);
       cell.append(platformLogo({plan}), name, tier);
-      if (offer) {
+      if (quote) {
         const credits = document.createElement('small');
-        credits.textContent = offer.monthlyCredits.toLocaleString('zh-CN') + ' 分/月';
+        credits.textContent = quote[1].toLocaleString('zh-CN') + ' 分/月';
         cell.append(credits);
       }
       if (status.textContent) cell.append(status);
       header.append(cell);
     }
     const metrics = [
-      ['首期实付', offer => money.format(offer.pay)],
-      ['月产能', offer => offer.capacity + ' 条'],
-      ['每条成本', offer => fits(offer) ? perClip.format(unitCost(offer)) : reasonFor(offer)],
-      ['每月积分', offer => offer.monthlyCredits.toLocaleString('zh-CN')],
-      ['画布扣分', offer => offer.creditsPerClip.toLocaleString('zh-CN') + ' 分/条'],
+      ['首期实付', ({quote}) => quote ? money.format(quote[0]) : '—'],
+      ['月产能', ({offer}) => offer ? offer.capacity + ' 条' : '—'],
+      ['每条成本', ({offer}) => offer ? (fits(offer) ? perClip.format(unitCost(offer)) : reasonFor(offer)) : '—'],
+      ['每月积分', ({quote}) => quote ? quote[1].toLocaleString('zh-CN') : '—'],
+      ['画布扣分', ({reading}) => typeof reading === 'string' ? reading
+        : (reading.credits ?? reading).toLocaleString('zh-CN') + ' 分/条'],
     ];
     const body = grid.createTBody();
     for (const [label, format] of metrics) {
@@ -2682,7 +2888,7 @@ var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分�
       heading.scope = 'row';
       heading.textContent = label;
       row.append(heading);
-      for (const {offer} of choices) row.insertCell().textContent = offer ? format(offer) : '—';
+      for (const choice of choices) row.insertCell().textContent = format(choice);
     }
     selectionTable.append(grid);
   }
@@ -2718,7 +2924,9 @@ var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分�
     if (workspace) {
       selectionBack.href = stateLink(false, true);
       if (returningToBudget) selectionBack.textContent = '返回按预算选会员';
-      renderSelection(spec, specName + ' · ' + cycle[0] + (issue ? '' : ' · ' + scenario), fits, unitCost, reasonFor, issue);
+      const scope = specName + ' · ' + cycle[0] + (issue ? '' : ' · ' + scenario);
+      renderSelection(spec, scope, fits, unitCost, reasonFor, issue);
+      renderWorkspacePicker(spec, scope, byBudget, fits, issue);
       syncPicks();
       if (!issue) {
         const link = stateLink(true, true);
@@ -2946,36 +3154,25 @@ var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分�
     syncPicks();
   });
   pickedOpen.addEventListener('click', () => {
-    if (picked.size >= 2) location.assign(stateLink(true, true));
+    if (picked.size < 2) return;
+    if (workspace) {
+      selectionTitle.focus({preventScroll:true});
+      selection.scrollIntoView({behavior:'instant'});
+    } else location.assign(stateLink(true, true));
   });
   pickedClear.addEventListener('click', () => {
     picked.clear();
     render();
-    (workspace ? addPlan : result).focus();
+    (workspace ? pickerSearch : result).focus();
   });
   pickedPlans.addEventListener('click', event => {
     const button = event.target.closest('[data-remove-plan]');
     if (!button) return;
     picked.delete(Number(button.dataset.removePlan));
     render();
-    (workspace ? addPlan : (pickedBar.hidden ? result : pickedClear)).focus({preventScroll:true});
+    (workspace ? pickerSearch : (pickedBar.hidden ? result : pickedClear)).focus({preventScroll:true});
   });
-  if (addPlan) {
-    for (const platformName of Object.keys(data.readings)) {
-      const group = document.createElement('optgroup');
-      group.label = nameOf(platformName);
-      for (const plan of data.plans.filter(item => item.platform === platformName)) {
-        group.append(new Option(plan.tier, plan.id));
-      }
-      addPlan.append(group);
-    }
-    addPlan.addEventListener('change', () => {
-      if (addPlan.value && picked.size < pickLimit) picked.add(Number(addPlan.value));
-      addPlan.value = '';
-      render();
-      if (addPlan.disabled) selectionTitle.focus({preventScroll:true});
-    });
-  }
+  if (workspace) bindWorkspacePicker();
   showAll?.addEventListener('click', () => {
     includeAll = !includeAll;
     render();
@@ -2997,6 +3194,7 @@ var GLOS = {"koujing": {"t": "口径", "s": "把各平台互不相通的积分�
     render();
   });
   render();
+  if (workspace && !selection.hidden && !location.hash) selection.scrollIntoView({behavior:'instant'});
 })();
 
 (function(){
