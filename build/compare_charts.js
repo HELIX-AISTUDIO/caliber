@@ -74,7 +74,6 @@
     button.dataset.chartPlan = offer.plan.id;
     button.setAttribute('aria-label', label);
     button.setAttribute('aria-pressed', 'false');
-    tint(button, offer);
     button.addEventListener('click', () => action(offer));
     return button;
   }
@@ -84,6 +83,7 @@
     barFeedback.textContent = barHelp;
     const leading = ranked.slice(0, 10);
     if (!chartView.checked || !leading.length) return;
+    bars.dataset.barMetric = byBudget ? 'capacity' : 'pay';
     const valueOf = byBudget ? offer => offer.capacity : offer => offer.pay;
     const format = byBudget ? value => value.toLocaleString('zh-CN') + ' 条' : value => money.format(value);
     const top = axisMax(Math.max(...leading.map(valueOf)) * 1.06);
@@ -271,6 +271,7 @@
       const peers = coincidentPoints.get(offer.plan.id);
       const label = planName(offer) + '，约 ' + offer.capacity + ' 条/月' + (peers ? '，与其他档位重合' : '');
       const dot = chartButton(offer, 'compare-plot-point', label, select);
+      tint(dot, offer);
       if (peers) dot.dataset.coincident = peers.length;
       dot.classList.toggle('compare-on-frontier', onFrontier.has(offer));
       dot.style.left = xPosition(xValue(offer)) + '%';
@@ -279,6 +280,7 @@
     }
     for (const offer of sorted) {
       const row = chartButton(offer, 'compare-frontier-item', planName(offer) + '，约 ' + offer.capacity + ' 条/月', select);
+      tint(row, offer);
       const name = document.createElement('span');
       name.textContent = planName(offer);
       const values = document.createElement('span');

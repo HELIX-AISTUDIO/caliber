@@ -62,6 +62,7 @@
     const groups = budgets.map(value => uniqueOffers(within(value)).slice(0, 3));
     const measure = offer => byUnit ? unit(offer) : offer.capacity;
     const max = Math.max(1, ...groups.flat().map(measure));
+    chart.dataset.barMetric = byUnit ? 'unit' : 'capacity';
     chart.replaceChildren(...groups.map((offersAtPrice, index) => {
       const cap = budgets[index];
       const group = element('div', 'member-bar-group');
@@ -72,7 +73,6 @@
         column.type = 'button';
         column.dataset.memberCap = cap;
         column.dataset.memberProvider = key;
-        column.style.setProperty('--series', data.colors[key]);
         column.style.setProperty('--bar-height', measure(offer) / max * 100 + '%');
         const brief = nameOf(key) + ' ' + offer.plan.tier + ' · ' + money.format(offer.pay) + ' 首期 · '
           + offer.capacity + ' 条/月 · ' + cents.format(unit(offer)) + '/条';
@@ -148,7 +148,6 @@
     rows.replaceChildren(...visible.map(offer => {
       const key = offer.plan.platform;
       const row = element('article', 'member-plan');
-      row.style.setProperty('--series', data.colors[key]);
       row.dataset.memberPlan = offer.plan.id;
       const info = element('div', 'member-identity');
       const name = element('strong', '', nameOf(key) + ' · ' + offer.plan.tier);
@@ -161,6 +160,7 @@
       const value = element('strong', '', offer.capacity + ' 条/月');
       first.append(value, element('span', '', cents.format(unit(offer)) + '/条'));
       const meter = element('div', 'member-plan-meter');
+      meter.dataset.barMetric = 'capacity';
       meter.setAttribute('aria-hidden', 'true');
       meter.append(element('i'));
       meter.style.setProperty('--capacity-share', offer.capacity / max * 100 + '%');

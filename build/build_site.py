@@ -24,7 +24,8 @@ import subprocess
 from decimal import Decimal, ROUND_HALF_UP
 from html import escape
 
-from compare import COMPARE_CSS, DISCLOSURE_JS, compare_view, membership_anchor, membership_budget_view
+from compare import (COMPARE_CSS, DEFAULT_RESOLUTION, DISCLOSURE_JS, DISPLAY_NAMES, RESOLUTIONS,
+                     compare_view, membership_anchor, membership_budget_view)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # site/
 DATA = os.path.join(ROOT, "data")
@@ -81,11 +82,21 @@ TERMS = ("本页内容（含全部价格数据、归一化模型、边际成本�
          "允许：转发原始链接、引用结论并注明出处。")
 
 RATE = COST["fx"]["rate"]
-SPEC = COST["spec"]["text"]
+SPEC = re.sub(r"\b\d+p\b", DEFAULT_RESOLUTION, COST["spec"]["text"], count=1)
 SEC_PER_CLIP = COST["spec"]["secondsPerClip"]
 UPDATED = COST["updatedAt"]
 REVIEW = COST.get("platformReview", {})
-CPV = COST["creditsPerVideo"]
+CANVAS = COST["canvasTests"]
+BASELINE_LABEL = "标准版 " + DEFAULT_RESOLUTION
+BASELINE_COLUMN = CANVAS["columns"].index(BASELINE_LABEL)
+BASELINE_READINGS = {name: readings[BASELINE_COLUMN] for name, readings in CANVAS["rows"].items()}
+CPV = {name: value["credits"] if isinstance(value, dict) else value
+       for name, value in BASELINE_READINGS.items() if not isinstance(value, str)}
+PENDING_BASELINE = "、".join(DISPLAY_NAMES.get(name, name) for name in BASELINE_READINGS if name not in CPV)
+BASELINE_NOTE = f"{BASELINE_LABEL} 共有 {len(CPV)} 家平台具备画布扣分记录。"
+if PENDING_BASELINE:
+    BASELINE_NOTE += f"{PENDING_BASELINE} 的扣分待核实，会员报价和月积分可查。"
+BASELINE_NOTE += "RunningHub RHTV 使用画布基础预估，活动优惠另列。"
 SCOPE = COST["scope"]
 # 数据范围文案一律由 SCOPE["items"] 推导 —— 曾因页面上两处各自硬编码、
 # 数据层改成三周期后页面仍写「月度／季度会员后续补充」，两处文案互相矛盾。
@@ -213,7 +224,9 @@ def comparison_rows():
         plat = plan["platform"]
         if plat in CPV:
             continue
-        rate = RATE if PLATFORMS[plat]["currency"] == "USD" else 1
+        currency = PLATFORMS[plat]["currency"]
+        rate = RATE if currency == "USD" else 1
+        multi = len(plan["credits"]) > 1
         for option in plan["credits"]:
             if option.get("modelUnsupported"):
                 continue
@@ -221,9 +234,11 @@ def comparison_rows():
             for key, price_key, credits_key in (("m", "m", "mCr"), ("q", "q", "qCr"), ("y", "price", "credits")):
                 pay = option.get(price_key)
                 if pay is not None:
-                    by_period[key] = {"payCNY": convert_cny(pay, rate),
+                    by_period[key] = {"pay": pay, "payCNY": convert_cny(pay, rate),
                                        "cr": option.get(credits_key, option["credits"])}
-            result.append({"plat": plat, "tier": plan["tier"], "monthly": option["credits"], "byP": by_period})
+            monthly = option["credits"]
+            result.append({"plat": plat, "tier": plan["tier"], "monthly": monthly, "byP": by_period, "cur": currency,
+                           "label": option.get("label") or (auto_label(monthly) if multi else ""), "multi": multi})
     return result
 
 
@@ -439,7 +454,7 @@ def chart_rows(metric, period):
             f'<span class="crk{" top3" if i <= 3 else ""}">{i}</span>'
             f'{plogo(r["plat"])}'
             f'<span class="cname">{r["plat"]} {r["tier"]}{lbl}</span>'
-            f'<span class="cbar"><i style="width:{w:.1f}%;--series:{r["color"]}"></i></span>'
+            f'<span class="cbar"><i style="width:{w:.1f}%"></i></span>'
             f'<span class="cval">{fmt(v)}<s>{rel:.2f}×</s></span>'
             f'</div>')
     return out
@@ -559,7 +574,6 @@ def main_rows_for(key):
         vl = f'<span class="vlabel">{r["label"]}</span>' if r["multi"] else ""
         usd = '<span class="tagu">USD</span>' if r["cur"] == "USD" else ""
         w = best / p["perVideo"] * 100
-        mc = "" if p["perVideo"] <= best * 1.06 else (" m2" if p["perVideo"] <= best * 2.2 else " m3")
         top = "top" if p["rank"] == 1 else ""
         rows += (
             f'<tr class="{top}" data-plat="{r["plat"]}" data-v="{p["perVideo"]:.4f}" '
@@ -576,7 +590,7 @@ def main_rows_for(key):
             f'style="background:rgba(209,254,23,{ca:.3f})">'
             f'<span class="{"strong" if p["rank"]==1 else "nm"}">¥{f2(p["perVideo"])}</span>'
             f'<s data-capmax="{p["cap"]:.4f}">{_sub_deliver(r, key)}</s>'
-            f'<div class="mini{mc}"><i style="--w:{w:.1f}%;width:{w:.1f}%"></i></div></td>'
+            f'<div class="mini"><i style="width:{w:.1f}%"></i></div></td>'
             f'<td class="num cell2" data-l="元/秒"><b>{p["perVideo"]/SEC_PER_CLIP:.3f}</b><s>元/秒</s></td></tr>')
     return rows
 
@@ -639,9 +653,8 @@ th{background:var(--studio-control);color:var(--studio-muted);font-weight:700;fo
   letter-spacing:-.022em}.strong{color:#D1FE17;font-weight:600}.neg{color:#FF6B6B;font-weight:600}.nm{color:#E4E7EA;font-weight:600}.rk b{display:block;font-family:__MONO__;font-size:15px;color:#fff;font-weight:700}.rk s{text-decoration:none;font-size:10px;color:#5A6069;font-family:__MONO__}.cell2{line-height:1.25}.cell2>*{display:block}.cell2 s{text-decoration:none;font-size:10.5px;color:#6E747D;display:block}.cell2 b{font-weight:600;color:#E4E7EA}.dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;vertical-align:middle}.vlabel{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;font-size:10px;
   font-weight:600;color:#9AA0A8;background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.14);white-space:nowrap}.tagu{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:999px;font-size:9.5px;
-  font-weight:700;color:#FF4D8D;border:1px solid rgba(255,77,141,.45)}.mini{height:5px;border-radius:999px;background:rgba(255,255,255,.07);margin-top:6px;overflow:hidden}.mini i{display:block;height:100%;border-radius:999px;background:rgba(255,255,255,.20);
-  transition:width .25s ease}.mini.m2 i{background:var(--studio-rule)}.mini.m3 i{background:var(--studio-rule)}
-tr.top .mini i{background:var(--studio-accent)}.tag{display:inline-block;padding:3px 11px;border-radius:999px;font-size:10.5px;font-weight:700}.v-good{background:var(--studio-select);color:var(--studio-accent)}.v-warn{background:transparent;color:var(--studio-muted);border:1px solid var(--studio-line)}.v-bad{background:transparent;color:#FF6B6B;border:1px solid rgba(255,107,107,.32)}.note{padding:18px 22px;font-size:13px;line-height:1.78}.note.warn{border-left-color:#c38e4d}.note.good{border-left-color:var(--studio-accent)}ul{margin:8px 0 0 19px}li{margin:7px 0;font-size:13px;line-height:1.72}li::marker{color:var(--studio-accent)}code{background:var(--studio-control);border:1px solid var(--studio-line);padding:2px 7px;
+  font-weight:700;color:#FF4D8D;border:1px solid rgba(255,77,141,.45)}.mini{height:5px;border-radius:999px;margin-top:6px;overflow:hidden}.mini i{display:block;height:100%;border-radius:999px;transition:width .25s ease}
+.tag{display:inline-block;padding:3px 11px;border-radius:999px;font-size:10.5px;font-weight:700}.v-good{background:var(--studio-select);color:var(--studio-accent)}.v-warn{background:transparent;color:var(--studio-muted);border:1px solid var(--studio-line)}.v-bad{background:transparent;color:#FF6B6B;border:1px solid rgba(255,107,107,.32)}.note{padding:18px 22px;font-size:13px;line-height:1.78}.note.warn{border-left-color:#c38e4d}.note.good{border-left-color:var(--studio-accent)}ul{margin:8px 0 0 19px}li{margin:7px 0;font-size:13px;line-height:1.72}li::marker{color:var(--studio-accent)}code{background:var(--studio-control);border:1px solid var(--studio-line);padding:2px 7px;
   border-radius:6px;font-family:__MONO__;font-size:12.5px;color:var(--studio-text);font-weight:500}details{margin-bottom:12px;overflow:hidden;border-radius:14px;transition:border-color .25s}details:hover{border-color:var(--studio-rule)}summary{cursor:pointer;padding:16px 22px;font-size:13.5px;font-weight:650;color:var(--studio-text);
   list-style:none;display:flex;align-items:center;gap:11px}summary::-webkit-details-marker{display:none}summary:hover{color:#fff}summary .chev{margin-left:auto;color:#767C85;font-size:12px;
   transition:transform .3s cubic-bezier(.22,1,.36,1)}details[open] summary .chev{transform:rotate(90deg);color:#D1FE17}.dbody{padding:0 22px 22px;font-size:13px;line-height:1.78}.dbody>*+*{margin-top:12px}.dbody h3{margin:18px 0 10px}.tw{overflow-x:auto;border-radius:18px}.tw table{min-width:760px}/* 内层滚动容器【不能】用 overscroll-behavior:contain：
@@ -934,7 +947,7 @@ input[type=number]{width:110px;background:rgba(255,255,255,.06);
 .cname{font-size:13px;font-weight:600;color:#E4E7EA;min-width:0;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
 .cname s{text-decoration:none;font-size:10.5px;font-weight:400;color:#7A8088;margin-left:6px}
-.cbar{height:9px;border-radius:5px;background:rgba(255,255,255,.085);overflow:hidden}
+.cbar{height:9px;border-radius:5px;overflow:hidden}
 .cbar i{display:block;height:100%;border-radius:5px;transition:width .35s cubic-bezier(.22,1,.36,1)}
 .cval{font-family:__MONO__;font-size:13.5px;font-weight:700;color:#EDEFF2;text-align:right;
   white-space:nowrap}
@@ -2124,6 +2137,7 @@ var CP = {};
 function renderChart(){
   var box = document.getElementById('chart');
   if(!box) return;
+  box.dataset.barMetric = CT.m === 'cap' ? 'capacity' : CT.m;
   var metricColumn = document.getElementById('cycMetricColumn');
   if(metricColumn) metricColumn.textContent = CM[CT.m].lb;
   var idx = MI[CT.m], low = CM[CT.m].low, fmt = CM[CT.m].f;
@@ -2161,7 +2175,7 @@ function renderChart(){
       +  '<span class="crk' + (rows[j].rk <= 3 ? ' top3' : '') + '">' + rows[j].rk + '</span>'
       +  mkI('clogo', d)
       +  '<span class="cname">' + d.p + ' ' + d.t + (d.l ? '<s>' + d.l + '</s>' : '') + '</span>'
-      +  '<span class="cbar"><i style="width:' + w.toFixed(1) + '%;--series:' + d.c + '"></i></span>'
+      +  '<span class="cbar"><i style="width:' + w.toFixed(1) + '%"></i></span>'
       /* 倍率一律写成「相对最优值的比」：成本 5.51× 读作「贵 5.51 倍」，
          产能 0.01× 读作「只有最优的 1%」—— 两个方向都能正确读。 */
       +  '<span class="cval">' + fmt(v) + '<s>'
@@ -2266,7 +2280,7 @@ function cycSync(){
     Array.prototype.forEach.call(document.querySelectorAll('#' + kv[0] + ' button'), function(b){
       var active = b.dataset[kv[1]] === CT[kv[1]];
       b.classList.toggle('on', active);
-      if (kv[0] === 'metricSeg' || kv[0] === 'cycSeg') b.setAttribute('aria-pressed', String(active));
+      b.setAttribute('aria-pressed', String(active));
     });
   });
   var n = document.querySelectorAll('#cycPlat .pfb.on').length;
@@ -2776,16 +2790,14 @@ def membership_details(back_href=None):
 </details>
 """
 
-CANVAS = COST["canvasTests"]
 canvas_model_names = ("标准版", "Flash", "样片")
 canvas_states = {"会员解锁": "需会员", "画布未显示": "画布未显示", "仅 480p": "仅 480p"}
-canvas_display_names = {"libtv": "LibTV", "Tapnow": "TapNow"}
 
 
 def canvas_table(rows, label):
     headers = "".join(
         f'<th scope="col" data-canvas-column="{i // 2}">'
-        f'<span class="canvas-all-label">{canvas_model_names[i // 2]} </span>{480 if i % 2 == 0 else 720}p</th>'
+        f'<span class="canvas-all-label">{canvas_model_names[i // 2]} </span>{RESOLUTIONS[i % 2]}</th>'
         for i in range(6)
     )
     return (f'<div class="tw records-table canvas-table"><table aria-label="{label}">'
@@ -2795,7 +2807,7 @@ def canvas_table(rows, label):
 canvas_rows = ""
 canvas_cost_rows = ""
 for plat, readings in CANVAS["rows"].items():
-    display = canvas_display_names.get(plat, plat)
+    display = DISPLAY_NAMES.get(plat, plat)
     platform_label = f'{plogo(plat, "comparison-mark")}{display}'
     cells = []
     for i, reading in enumerate(readings):
@@ -2867,41 +2879,47 @@ src_rows = "".join(
 
 offer_rows = ""
 for plat, review in REVIEW.items():
-    state = CANVAS["rows"][plat][1]
+    state = BASELINE_READINGS[plat]
     reading_label = f'{CPV[plat]:,}' if plat in CPV else canvas_states.get(state, state)
-    archived = " 留档" if plat in CPV and review.get("creditPending") else ""
+    reading_date = state.get("sourceDate") if isinstance(state, dict) else None
+    date_label = (f'<br><small>{reading_date or review["creditDate"]}'
+                  f'{" 留档" if reading_date else ""}</small>' if plat in CPV else "")
     note = review.get("creditNote", "")
     offer_rows += (
         f'<tr><td>{source_link(plat, review["url"])}'
         f'<br><small>报价 {review["priceDate"]}</small></td>'
         f'<td style="white-space:normal">{escape(review["offer"])}'
         + (f'<br><small>{escape(note)}</small>' if note else "")
-        + f'</td><td class="num">{reading_label}<br><small>{review["creditDate"]}{archived}</small></td></tr>'
+        + f'</td><td class="num">{reading_label}{date_label}</td></tr>'
     )
 offer_benefit_rows = ""
 for benefit in COST.get("offerBenefits", []):
-    if benefit["platform"] not in CPV:
-        continue
-    r = next(r for r in ROWS if r["plat"] == benefit["platform"] and r["monthly"] == benefit["credits"])
     key = benefit["period"]
+    r = next(r for r in COMPARISON_ROWS if r["plat"] == benefit["platform"] and
+             r["monthly"] == benefit["credits"] and key in r["byP"])
     p = r["byP"][key]
     extra_credits = benefit.get("bonusCredits", 0)
     extra_clips = benefit.get("bonusClips", 0)
-    baseline_clips = p["cap"] * MONTHOF[key]
-    cost_with_bonus = p["payCNY"] / (baseline_clips + extra_credits / r["per"] + extra_clips)
     gift = f"{extra_credits:,} 积分" if extra_credits else f"{extra_clips} 条"
+    bonus_attr = ""
+    costs = '<td class="num">扣分待核实</td><td class="num">—</td>'
+    if "per" in r:
+        baseline_clips = p["cap"] * MONTHOF[key]
+        cost_with_bonus = p["payCNY"] / (baseline_clips + extra_credits / r["per"] + extra_clips)
+        bonus_attr = f' data-bonus-cost="{cost_with_bonus:.2f}"'
+        costs = f'<td class="num">¥{f2(p["perVideo"])}</td><td class="num strong">¥{f2(cost_with_bonus)}</td>'
     offer_benefit_rows += (
-        f'<tr data-bonus-cost="{cost_with_bonus:.2f}"><td>{r["plat"]} {tname(r)}</td>'
+        f'<tr{bonus_attr}><td>{r["plat"]} {tname(r)}</td>'
         f'<td>{"年付" if key == "y" else "季付"}</td>'
         f'<td class="num">{CU[r["cur"]]}{p["pay"]:,}</td><td>{gift}</td>'
-        f'<td class="num">¥{f2(p["perVideo"])}</td><td class="num strong">¥{f2(cost_with_bonus)}</td></tr>'
+        f'{costs}</tr>'
     )
 
 OFFER_DETAILS = f"""
 <details id="offers" style="margin:14px 0">
   <summary>平台活动、生成积分与数据出处<span class="chev">›</span></summary>
   <div class="dbody">
-    {table([("平台官网", None), ("活动与订阅政策", None), ("基准积分 / 30 秒", None)], offer_rows, "tw")}
+    {table([("平台官网", None), ("活动与订阅政策", None), (BASELINE_LABEL + " / 30 秒", None)], offer_rows, "tw")}
     <h3>可量化赠送对首期成本的影响</h3>
     <p>用基础积分加上已核对数量的赠分或赠送条数重新折算。结果假设在有效期内用完这些权益，沿用基准扣分。赠送会员月数、限时扣分折扣和不限次数权益见上表。</p>
     {table([("平台与档位", None), ("周期", None), ("首期实付", None), ("已核对赠送", None),
@@ -2925,7 +2943,7 @@ for shot in EVIDENCE:
     )
 evidence_groups = "".join(
     f'<details class="proof-group" id="evidence-{index}"><summary>{plogo(plat, "comparison-mark")}'
-    f'{escape(canvas_display_names.get(plat, plat))}<small>{len(cards)} 张</small><span class="chev">›</span></summary>'
+    f'{escape(DISPLAY_NAMES.get(plat, plat))}<small>{len(cards)} 张</small><span class="chev">›</span></summary>'
     f'<div class="dbody"><p>{source_link("官方会员或活动入口", REVIEW[plat]["url"])}</p><div class="proof-grid">'
     f'{"".join(cards)}</div></div></details>'
     for index, (plat, cards) in enumerate(evidence_cards.items(), 1) if cards
@@ -3445,8 +3463,13 @@ cycles_body = f"""
         </div>
       </div>
       <details class="rank-filters" id="rank-filters">
-        <summary><span class="compare-filter-mark" aria-hidden="true"></span>筛选</summary>
-        <div class="rank-controls">
+        <summary aria-controls="rank-filter-panel"><span class="compare-filter-mark" aria-hidden="true"></span>筛选</summary>
+        <div id="rank-filter-panel" class="filter-popover" role="region" aria-labelledby="rank-filter-title">
+          <header class="filter-popover-heading">
+            <h2 id="rank-filter-title">排名筛选</h2>
+            <button type="button" class="filter-popover-close" aria-label="关闭筛选"></button>
+          </header>
+          <div class="rank-controls">
   <div class="sgroup">
     <div class="sgt">产能显示单位</div>
     <div class="segv" id="capSeg2" role="tablist" aria-label="产能口径">
@@ -3456,15 +3479,16 @@ cycles_body = f"""
   </div>
   <div class="sgroup" id="sgOrder">
     <div class="sgt">排序</div>
-    <div class="segv segk" id="ordSeg" role="tablist" aria-label="排序">
-      <button type="button" class="on" data-o="best" role="tab">最优在前</button>
-      <button type="button" data-o="worst" role="tab">最差在前</button>
+    <div class="segv segk" id="ordSeg" role="group" aria-label="排序">
+      <button type="button" class="on" data-o="best" aria-pressed="true">最优在前<span class="filter-order-mark" aria-hidden="true"></span></button>
+      <button type="button" data-o="worst" aria-pressed="false">最差在前<span class="filter-order-mark" aria-hidden="true"></span></button>
     </div>
   </div>
   <div class="sgroup" id="sgPlat">
     <div class="sgt">平台<span class="sgchip" id="cycPlatN">{len(PLAT_SUM)}/{len(PLAT_SUM)}</span></div>
     <div class="pf" id="cycPlat">{SIDE_PLAT}</div>
   </div>
+          </div>
         </div>
       </details>
     </div>
@@ -3479,7 +3503,7 @@ cycles_body = f"""
   <div class="chart" id="chart">{chart_rows("cost", _DEFAULT_K)}</div>
   </div>
   {pareto_block("y")}
-  <p class="cycle-source-note">{COST["liveNote"]}</p>
+  <p class="cycle-source-note">{BASELINE_NOTE}</p>
 
 <details class="cycle-records">
   <summary>会员报价与实测资料<span class="chev">›</span></summary>
@@ -3551,15 +3575,15 @@ cycles_body = f"""
              "".join(f'<tr><td>{x["label"]}</td>'
                      f'<td class="ctr"><span class="tag {"v-good" if x["done"] else "v-warn"}">{x["status"]}</span></td>'
                      f'<td style="white-space:normal">{x["note"]}</td></tr>' for x in SCOPE["items"]), "tw")}
-      <div class="sub" style="margin-top:10px">{SCOPE["impact"]}</div>
+      <div class="sub" style="margin-top:10px">{BASELINE_NOTE}</div>
     </div>
   </details>
   <details>
     <summary>单条积分消耗与规格<span class="chev">›</span></summary>
     <div class="dbody">
-      {table([("平台", None), ("生成页规格", None), ("单条积分", None)],
+      <p>{SPEC}</p>
+      {table([("平台", None), ("单条积分", None)],
              "".join(f'<tr><td><span class="dot" style="background:{COLOR[p]}"></span>{p}</td>'
-                     f'<td style="white-space:normal">{COST["creditsSource"][p]}</td>'
                      f'<td class="num strong">{CPV[p]:,}</td></tr>' for p in CPV), "tw")}
     </div>
   </details>
@@ -3612,7 +3636,7 @@ cost_body = f"""
   <div class="record-panels" id="record-panels">
 {RECORD_CONTENT}
   </div>
-  <p class="records-note">{COST["liveNote"]}</p>
+  <p class="records-note">{BASELINE_NOTE}</p>
 </main>
 <details id="more" class="compare-advanced">
   <summary>进阶对比与多账号方案<span class="chev">›</span></summary>
@@ -3700,7 +3724,7 @@ cost_body = f"""
     <button type="button" data-v="period" role="tab">先别急着下单<s>看懂周期与倒挂</s></button>
   </div>
   <div class="vhead">
-    <h2>标准版 720p · 进阶对比</h2>
+    <h2>{BASELINE_LABEL} · 进阶对比</h2>
     <div class="vmeta">
       <span><svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1" y="2.2" width="10" height="9" rx="1.6" stroke="currentColor" stroke-width="1.1"/><path d="M1 5h10M4 1v2.4M8 1v2.4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>数据时点 <b>{UPDATED}</b></span>
       <span><svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.1"/><path d="M3.4 8.4V6.2M6 8.4V3.8M8.6 8.4V5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg><b>{len(PLAT_SUM)}</b> 平台 · <b>{NTIER}</b> 会员档 · <b>{len(ROWS)}</b> 积分档</span>
@@ -3712,7 +3736,7 @@ cost_body = f"""
   {GUIDE}
     {KPI_BARS}
 
-  <div class="vnote"><b>首期订阅成本</b> · {COST["priceRule"]}<br>{COST["liveNote"]}</div>
+  <div class="vnote"><b>首期订阅成本</b> · {COST["priceRule"]}<br>{BASELINE_NOTE}</div>
 <div class="vpanel" data-view="period" id="period">
   <div class="vptitle">先别急着下单<span>承诺越久越便宜？全场有 {len(TRAPS)} 处例外 —— 先看懂倒挂，再决定充哪个周期</span></div>
   <div class="chips">
@@ -3776,6 +3800,14 @@ cost_body = f"""
 # ── 首页 ──────────────────────────────────────────────────────────
 TYPE_FONT_CSS = '''
 @font-face {
+  font-family: "Caliber Wordmark";
+  src: url("fonts/caliber-wordmark.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  unicode-range: U+41-43,U+45,U+49,U+4C,U+52;
+}
+@font-face {
   font-family: "Caliber UI";
   src: url("fonts/caliber-han.woff2") format("woff2");
   font-style: normal;
@@ -3813,7 +3845,7 @@ home_body = f"""
     <input type="range" id="hbudR" class="cqr budr" min="0" max="1000" step="1"
       value="450" aria-label="预算滑块">   <!-- 450 → ¥3,000，与数字框默认值一致 -->
     <div class="budout budbig" id="hbudOut" role="status">—</div>
-    <div class="budtip">{COST["liveNote"]}</div>
+    <div class="budtip">{BASELINE_NOTE}</div>
   </div>
     </div>
     </details>
@@ -4301,7 +4333,8 @@ def write_all():
         for d in _usable_dirs():
             shutil.copy2(src, os.path.join(d, extra_bin))
     for d in dirs:
-        for font_asset in ("caliber-han.woff2", "caliber-latin.woff2", "OFL-NotoSansSC.txt", "OFL-Inter.txt"):
+        for font_asset in ("caliber-han.woff2", "caliber-latin.woff2", "caliber-wordmark.woff2",
+                           "OFL-NotoSansSC.txt", "OFL-Inter.txt", "OFL-ArchivoBlack.txt"):
             target = os.path.join(d, "fonts")
             os.makedirs(target, exist_ok=True)
             shutil.copy2(os.path.join(ROOT, "fonts", font_asset), target)

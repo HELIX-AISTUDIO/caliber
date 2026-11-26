@@ -10,6 +10,8 @@ def membership_anchor(platform):
 
 
 DISPLAY_NAMES = {"libtv": "LibTV", "Tapnow": "TapNow"}
+RESOLUTIONS = ("480p", "720p")
+DEFAULT_RESOLUTION = RESOLUTIONS[0]
 
 
 def compare_dataset(rows, readings, periods, colors, logos, records_page):
@@ -36,6 +38,11 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
     platform_options = "".join(
         f'<option value="{escape(name)}">{escape(DISPLAY_NAMES.get(name, name))}</option>'
         for name in platforms
+    )
+    resolution_options = "".join(
+        f'<label><input type="radio" name="resolution" value="{index}"'
+        f'{" checked" if label == DEFAULT_RESOLUTION else ""}><span>{label}</span></label>'
+        for index, label in enumerate(RESOLUTIONS)
     )
     period_options = "".join(
         f'<label><input type="radio" name="period" value="{key}"{" checked" if key == "m" else ""}>'
@@ -73,7 +80,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
   <header id="cost" class="benchmark-heading">
     <div class="benchmark-intro">
       <h1>同一套视频规格<br>比较各平台会员成本</h1>
-      <p class="benchmark-intro-copy">按月用量或预算，查看首期实付、月产能和每条成本。</p>
+      <p class="benchmark-intro-copy">按月用量或预算，<span>查看首期实付、月产能和每条成本。</span></p>
       <nav class="benchmark-intro-links" aria-label="开始比较">
         <a class="benchmark-primary" href="#benchmark-board">查看完整榜单</a>
         <a href="{records_page}#member-budgets">按预算选会员</a>
@@ -182,17 +189,19 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
       </fieldset>
       <fieldset class="compare-choice compare-resolution">
         <legend>分辨率</legend>
-        <div>
-          <label><input type="radio" name="resolution" value="0"><span>480p</span></label>
-          <label><input type="radio" name="resolution" value="1" checked><span>720p</span></label>
-        </div>
+        <div>{resolution_options}</div>
       </fieldset>
     </div>
     <div class="compare-toolbar">
 {rank_toolbar}
       <details id="compare-options" class="compare-options">
-        <summary><span class="compare-filter-mark" aria-hidden="true"></span>{'调整条件' if workspace else '筛选'}<span id="compare-filter-scope"></span></summary>
-        <div class="compare-option-fields">
+        <summary aria-controls="compare-filter-panel"><span class="compare-filter-mark" aria-hidden="true"></span>{'调整条件' if workspace else '筛选'}<span id="compare-filter-scope"></span></summary>
+        <div id="compare-filter-panel" class="filter-popover" role="region" aria-labelledby="compare-filter-title">
+          <header class="filter-popover-heading">
+            <h2 id="compare-filter-title">{'调整对比条件' if workspace else '筛选会员档位'}</h2>
+            <button type="button" class="filter-popover-close" aria-label="关闭筛选"></button>
+          </header>
+          <div class="compare-option-fields">
 {mode_fields}
       <fieldset class="compare-choice">
         <legend>会员周期</legend>
@@ -225,7 +234,10 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
         </div>
       </div>
 {platform_fields}
-        <button id="compare-reset" type="button" aria-label="重置所有榜单条件">重置</button>
+            <div class="filter-popover-footer">
+              <button id="compare-reset" type="button" aria-label="重置所有榜单条件">重置条件</button>
+            </div>
+          </div>
         </div>
       </details>
     </div>
@@ -366,7 +378,8 @@ def membership_budget_view(rows, readings, periods, colors, logos):
                 f'<legend>{caption}</legend><div>{radios}</div></fieldset>')
 
     model_choice = choices("model", "生成模式", [("0", "标准版"), ("2", "Flash"), ("4", "样片模式")], "0")
-    resolution_choice = choices("res", "分辨率", [("0", "480p"), ("1", "720p")], "1")
+    resolution_choice = choices("res", "分辨率", [(str(i), label) for i, label in enumerate(RESOLUTIONS)],
+                                str(RESOLUTIONS.index(DEFAULT_RESOLUTION)))
     period_choice = choices("period", "会员周期", [(key, label) for key, label, _, _ in periods], "m")
     metric_choice = choices("metric", "比较指标", [("capacity", "月产能"), ("unit", "单条均价")], "capacity")
     html = f"""
@@ -592,10 +605,11 @@ COMPARE_JS = r"""
     result.append(button);
   }
 
-  function addMetric(row, label, value, max, primary) {
+  function addMetric(row, key, label, value, max, primary) {
     const cell = row.insertCell();
     const metric = document.createElement('span');
     metric.className = 'compare-metric';
+    metric.dataset.barMetric = key;
     const number = document.createElement('span');
     number.textContent = label;
     metric.append(number);
@@ -1017,10 +1031,10 @@ COMPARE_JS = r"""
       identity.append(rank, brand, provider);
       title.append(identity);
       const matchedOffer = index < ranked.length;
-      addMetric(tr, money.format(offer.pay), offer.pay, payMax, matchedOffer && sortKey === 'pay');
-      addMetric(tr, offer.capacity + ' 条', offer.capacity, volumeMax, matchedOffer && sortKey === 'capacity');
+      addMetric(tr, 'pay', money.format(offer.pay), offer.pay, payMax, matchedOffer && sortKey === 'pay');
+      addMetric(tr, 'capacity', offer.capacity + ' 条', offer.capacity, volumeMax, matchedOffer && sortKey === 'capacity');
       const unit = matchedOffer ? unitCost(offer) : null;
-      addMetric(tr, matchedOffer ? perClip.format(unit) : reasonFor(offer), unit, unitMax, matchedOffer && sortKey === 'unit');
+      addMetric(tr, 'unit', matchedOffer ? perClip.format(unit) : reasonFor(offer), unit, unitMax, matchedOffer && sortKey === 'unit');
       const pickCell = tr.insertCell();
       pickCell.className = 'compare-pick-column';
       pickCell.append(planPick(offer));
@@ -1171,6 +1185,36 @@ DISCLOSURE_JS = r"""
   }
   const filters = document.querySelector('details.compare-options, details.rank-filters');
   if (filters) {
+    const trigger = filters.querySelector('summary');
+    const panel = filters.querySelector('.filter-popover');
+    const nav = document.querySelector('.nav');
+    function alignFilterPanel() {
+      if (!filters.open) return;
+      const frame = panel.offsetParent;
+      if (!frame) return;
+      const anchor = trigger.getBoundingClientRect();
+      const bounds = frame.getBoundingClientRect();
+      const right = anchor.right - bounds.left;
+      const width = panel.offsetWidth;
+      const left = Math.max(0, Math.min(right - width, frame.clientWidth - width));
+      const gap = 8;
+      const below = window.innerHeight - anchor.bottom - 2 * gap;
+      const above = anchor.top - Math.max(0, nav?.getBoundingClientRect().bottom ?? 0) - 2 * gap;
+      const opensAbove = below < 220 && above > below;
+      panel.style.left = left + 'px';
+      panel.style.top = opensAbove ? 'auto' : (anchor.bottom - bounds.top + gap) + 'px';
+      panel.style.bottom = opensAbove ? (bounds.bottom - anchor.top + gap) + 'px' : 'auto';
+      panel.style.setProperty('--filter-space', Math.max(160, opensAbove ? above : below) + 'px');
+    }
+    function closeFilterPanel() {
+      filters.open = false;
+      trigger.focus({preventScroll: true});
+    }
+    filters.addEventListener('toggle', alignFilterPanel);
+    window.addEventListener('resize', alignFilterPanel);
+    window.addEventListener('scroll', alignFilterPanel, {passive: true});
+    new ResizeObserver(alignFilterPanel).observe(trigger);
+    panel.querySelector('.filter-popover-close').addEventListener('click', closeFilterPanel);
     document.addEventListener('pointerdown', event => {
       if (filters.open && !filters.contains(event.target)) filters.open = false;
     });
@@ -1179,8 +1223,8 @@ DISCLOSURE_JS = r"""
     });
     filters.addEventListener('keydown', event => {
       if (event.key === 'Escape' && filters.open) {
-        filters.open = false;
-        filters.querySelector('summary').focus();
+        event.preventDefault();
+        closeFilterPanel();
       }
     });
   }

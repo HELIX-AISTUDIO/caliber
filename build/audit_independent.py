@@ -16,7 +16,15 @@ DAT = os.path.join(ROOT, "data")
 C = json.load(io.open(os.path.join(DAT, "cost-seedance25.json"), encoding="utf-8"))
 P = json.load(io.open(os.path.join(DAT, "platforms.json"), encoding="utf-8"))
 
-CPV = C["creditsPerVideo"]
+readings = C["canvasTests"]["rows"]
+columns = C["canvasTests"]["columns"]
+base_column = columns.index("标准版 480p")
+archive_column = columns.index("标准版 720p")
+CPV = {}
+for platform, cells in readings.items():
+    reading = cells[base_column]
+    if not isinstance(reading, str):
+        CPV[platform] = reading["credits"] if isinstance(reading, dict) else reading
 RATE = C["fx"]["rate"]
 SEC = C["spec"]["secondsPerClip"]
 MONTHS = {"y": 12, "q": 3, "m": 1}
@@ -33,23 +41,22 @@ def chk(cond, msg, extra=""):
 # ══ ① 基础常量体检 ══
 print("═══ ① 基础常量 ═══")
 print("  汇率 1 USD = %.4f CNY（来自 %s）" % (RATE, C["fx"].get("note", "?")))
-print("  单条时长 %d 秒 ｜ 单条积分消耗：" % SEC)
+print("  标准版 480p ｜ 单条时长 %d 秒 ｜ 单条积分消耗：" % SEC)
 for k in sorted(CPV):
     print("     %-12s %d" % (k, CPV[k]))
 chk(0 < RATE < 20, "汇率超出合理区间", RATE)
 chk(SEC == 30, "单条时长不是 30 秒", SEC)
-readings = C["canvasTests"]["rows"]
 chk(set(readings) == set(P), "画布对比未覆盖全部平台")
 for plat, cells in readings.items():
     chk(len(cells) == 6, f"{plat} 画布对比规格数量不为 6")
-    base = cells[1]
+    base = cells[archive_column]
     if isinstance(base, dict):
         if "sourceDate" in base:
             review = C["platformReview"][plat]
             chk(review.get("creditPending") and base["sourceDate"] == review["creditDate"] < C["canvasTests"]["date"],
                 f"{plat} 留档扣分日期或待复测状态错误")
         base = base["credits"]
-    chk(CPV.get(plat) == (None if isinstance(base, str) else base), f"{plat} 标准 720p 读数不一致")
+    chk(C["creditsPerVideo"].get(plat) == (None if isinstance(base, str) else base), f"{plat} 标准 720p 留档读数不一致")
 for k, v in CPV.items():
     chk(0 < v < 100000, "%s 单条积分异常" % k, v)
 
@@ -129,22 +136,9 @@ def read_html(fn):
 
 cost_h = read_html("cost.html")
 cyc_h = read_html("cycles.html")
-
-prices_expected = []
-credits_expected = []
-for plat, cells in readings.items():
-    observed = [cell["credits"] if isinstance(cell, dict) else cell
-                for cell in cells if not isinstance(cell, str)]
-    credits_expected.extend(str(n) for n in observed)
-    for key in "mqy":
-        subset = [r for r in recs if r["plat"] == plat and r["key"] == key]
-        if subset:
-            unit = min(r["pay"] / (r["credits"] * r["months"]) for r in subset)
-            prices_expected.extend("%.2f" % (unit * n) for n in observed)
-chk(re.findall(r'data-canvas-credit="(\d+)"', cost_h) == credits_expected, "画布积分与数据不一致")
-chk(re.findall(r'data-canvas-cost="([\d.]+)"', cost_h) == prices_expected, "分规格单条成本与重算不一致")
-chk(len(re.findall(r'data-membership=', cost_h)) == sum(len(p["credits"]) for p in C["plans"]),
-    "会员价格表档位缺失")
+chk('<input type="radio" name="res" value="0" checked><span>480p</span>' in cost_h, "会员报价未默认 480p")
+chk("标准版 480p · 进阶对比" in cost_h and "Seedance 2.5 · 480p · 16:9" in cyc_h,
+    "进阶对比或详细排名未标明 480p 基准")
 
 quotes_expected = {}
 for plan in C["plans"]:
@@ -162,8 +156,27 @@ for plan in C["plans"]:
                 periods[key] = [float(pay), option.get(key + "Cr", monthly)]
         quotes_expected[f"{plat}/{tier}/{monthly}"] = periods
 
+prices_expected = []
+credits_expected = []
+for plat, cells in readings.items():
+    observed = [cell["credits"] if isinstance(cell, dict) else cell
+                for cell in cells if not isinstance(cell, str)]
+    credits_expected.extend(str(n) for n in observed)
+    for key in "mqy":
+        offers = [periods[key] for plan, periods in quotes_expected.items()
+                  if plan.startswith(plat + "/") and key in periods]
+        if offers:
+            unit = min(pay / (credits * MONTHS[key]) for pay, credits in offers)
+            prices_expected.extend("%.2f" % (unit * n) for n in observed)
+chk(re.findall(r'data-canvas-credit="(\d+)"', cost_h) == credits_expected, "画布积分与数据不一致")
+chk(re.findall(r'data-canvas-cost="([\d.]+)"', cost_h) == prices_expected, "分规格单条成本与重算不一致")
+chk(len(re.findall(r'data-membership=', cost_h)) == sum(len(p["credits"]) for p in C["plans"]),
+    "会员价格表档位缺失")
+
 for filename in ("index.html", "compare.html"):
     source = read_html(filename)
+    chk('<input type="radio" name="resolution" value="0" checked><span>480p</span>' in source,
+        f"{filename} 未默认 480p")
     data_match = re.search(r"^  const data = (\{[^\n]+\});$", source, re.M)
     chk(data_match is not None, f"{filename} 缺少对比数据")
     if data_match:
