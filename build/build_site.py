@@ -3800,6 +3800,13 @@ cost_body = f"""
 # ── 首页 ──────────────────────────────────────────────────────────
 TYPE_FONT_CSS = '''
 @font-face {
+  font-family: "Geist";
+  src: url("fonts/Geist-Variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
   font-family: "Caliber Wordmark";
   src: url("fonts/caliber-wordmark.woff2") format("woff2");
   font-style: normal;
@@ -4334,7 +4341,7 @@ def write_all():
             shutil.copy2(src, os.path.join(d, extra_bin))
     for d in dirs:
         for font_asset in ("caliber-han.woff2", "caliber-latin.woff2", "caliber-wordmark.woff2",
-                           "OFL-NotoSansSC.txt", "OFL-Inter.txt", "OFL-ArchivoBlack.txt"):
+                           "OFL-NotoSansSC.txt", "OFL-Inter.txt", "OFL-ArchivoBlack.txt", "Geist-Variable.woff2", "OFL-Geist.txt"):
             target = os.path.join(d, "fonts")
             os.makedirs(target, exist_ok=True)
             shutil.copy2(os.path.join(ROOT, "fonts", font_asset), target)

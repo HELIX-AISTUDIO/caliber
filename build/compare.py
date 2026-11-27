@@ -49,9 +49,20 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
         f'<span>{label}</span></label>'
         for key, label, _, _ in periods
     )
-    mode_choices = """
-          <label><input type="radio" name="mode" value="target" checked><span>按月用量</span></label>
-          <label><input type="radio" name="mode" value="budget"><span>按预算</span></label>
+    # Icons belong to the comparison criteria. View tabs use text alone.
+    def criterion(path, label):
+        return (f'<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+                f'stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" '
+                f'aria-hidden="true"><path d="{path}"/></svg>{label}</span>')
+
+    volume = criterion("M4 20v-5m5 5v-9m5 9V8m5 12V4", "按月用量")
+    budget = criterion("M3 7h18v12H3z M3 7V5l15-2v4 M16 11h5v4h-5z", "按预算")
+    standard = criterion("M3 6h18v12H3z M3 10h18 M8 6l-3 4m9-4-3 4m9-4-3 4", "标准版")
+    flash = criterion("m14 2-10 12h7l-1 8 10-13h-7z", "Flash")
+    sample = criterion("M6 3H3v4m15-4h3v4M3 17v4h4m14-4v4h-4 M9 8l7 4-7 4z", "样片模式")
+    mode_choices = f"""
+          <label><input type="radio" name="mode" value="target" checked>{volume}</label>
+          <label><input type="radio" name="mode" value="budget">{budget}</label>
 """
     platform_marks = "".join(
         f'<i class="comparison-mark {escape(logos[name])}" title="{escape(DISPLAY_NAMES.get(name, name))}"></i>'
@@ -77,13 +88,13 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
       <h1>同一套视频规格<br>比较各平台会员成本</h1>
       <p class="benchmark-intro-copy">按月用量或预算，<span>查看首期实付、月产能和每条成本。</span></p>
       <nav class="benchmark-intro-links" aria-label="开始比较">
-        <a class="benchmark-primary" href="#benchmark-board">查看完整榜单</a>
+        <a class="benchmark-primary" href="#benchmark-board">查看完整榜单<i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg></i></a>
         <a href="{records_page}#member-budgets">按预算选会员</a>
         <a href="glossary.html#scope">计算口径</a>
       </nav>
       <div class="benchmark-sample">
         <div class="benchmark-platform-marks" aria-hidden="true">{platform_marks}</div>
-        <p><span><b>{len(platforms)}</b> 家平台</span><span><b>{len(plans)}</b> 个会员档位</span><time datetime="{updated}">{updated} 更新</time></p>
+        <p><span>{len(platforms)} 家平台</span><span> · {len(plans)} 个会员档位</span><span> · <time datetime="{updated}">{updated} 更新</time></span></p>
       </div>
     </div>
     <figure class="benchmark-profile" aria-labelledby="profile-title" hidden>
@@ -115,7 +126,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
     </div>
   </section>
   <header class="benchmark-board-title" id="benchmark-board">
-    <div><h2>会员档位榜</h2><p>默认展示每家平台的达标档位，可切换档位或加入对比。</p></div>
+    <div><h2>会员档位榜</h2></div>
     <div class="compare-jump-links">
       <a href="#compare-frontier">价格与产能分析</a>
       <button type="button" data-share="table">复制榜单链接</button>
@@ -146,6 +157,23 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
         <input type="search" id="compare-search" aria-label="搜索平台" placeholder="搜索平台" autocomplete="off">
       </label>
 """
+    board_note = "" if workspace else """
+      <div class="board-guide"><span>默认展示每家平台的达标档位，可切换档位或加入对比。</span>
+        <a href="glossary.html#scope">计算口径说明 <span aria-hidden="true">→</span></a></div>"""
+    sort_options = "".join(
+        f'<button type="button" data-order="{key}" data-direction="{direction}" aria-pressed="false">{label}{order}</button>'
+        for key, label in (("pay", "首期实付"), ("capacity", "月产能"), ("unit", "每条成本"))
+        for direction, order in (("asc", "从低到高"), ("desc", "从高到低"))
+    )
+    sort_menu = "" if workspace else f"""
+      <details class="compare-options board-sort" id="board-sort">
+        <summary aria-controls="board-sort-panel">排名 <b id="board-sort-label">按实付</b></summary>
+        <div class="filter-popover" id="board-sort-panel" role="region" aria-labelledby="board-sort-title">
+          <header class="filter-popover-heading"><h2 id="board-sort-title">排名方式</h2>
+            <button class="filter-popover-close" type="button" aria-label="关闭排名方式"></button></header>
+          <div class="board-sort-options">{sort_options}</div>
+        </div>
+      </details>"""
     platform_fields = "" if workspace else f"""
         <label class="compare-field" for="compare-platform"><span class="filter-caption">平台</span>
           <select id="compare-platform"><option value="">全部平台</option>{platform_options}</select>
@@ -190,9 +218,9 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
       <fieldset id="compare-model" class="compare-choice compare-axis">
         <legend>生成模式</legend>
         <div>
-          <label><input type="radio" name="model" value="0" checked><span>标准版</span></label>
-          <label><input type="radio" name="model" value="2"><span>Flash</span></label>
-          <label><input type="radio" name="model" value="4"><span>样片模式</span></label>
+          <label><input type="radio" name="model" value="0" checked>{standard}</label>
+          <label><input type="radio" name="model" value="2">{flash}</label>
+          <label><input type="radio" name="model" value="4">{sample}</label>
         </div>
       </fieldset>
       <fieldset class="compare-choice compare-resolution">
@@ -200,6 +228,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
         <div>{resolution_options}</div>
       </fieldset>
     </div>
+{board_note}
     <div class="compare-toolbar">
 {rank_toolbar}
       <details id="compare-options" class="compare-options">
@@ -249,6 +278,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
           </div>
         </div>
       </details>
+{sort_menu}
     </div>
     </div>
 {summary}
@@ -510,6 +540,9 @@ COMPARE_JS = r"""
   const nameOf = platformName => data.names[platformName] || platformName;
   const matchesPlatform = name => (!platform.value || platform.value === name)
     && nameOf(name).toLowerCase().includes(search.value.trim().toLowerCase());
+  const sortMenu = document.getElementById('board-sort');
+  const sortLabel = document.getElementById('board-sort-label');
+  const orderChoices = sortMenu?.querySelectorAll('[data-order]');
   const sortLabels = {pay:'实付', capacity:'产能', unit:'每条成本'};
   let includeAll = false;
   let sort = null;
@@ -894,6 +927,11 @@ COMPARE_JS = r"""
     table.dataset.mode = mode.value;
     const sortKey = sort?.key ?? (byBudget ? 'capacity' : 'pay');
     const descending = sort?.descending ?? byBudget;
+    sortLabel.textContent = '按' + sortLabels[sortKey];
+    for (const button of orderChoices) {
+      button.setAttribute('aria-pressed', String(button.dataset.order === sortKey &&
+        (button.dataset.direction === 'desc') === descending));
+    }
     for (const button of sortButtons) {
       const th = button.closest('th');
       if (button.dataset.sort === sortKey) th.setAttribute('aria-sort', descending ? 'descending' : 'ascending');
@@ -1082,6 +1120,14 @@ COMPARE_JS = r"""
   }
   form.addEventListener('submit', event => event.preventDefault());
   form.addEventListener('change', render);
+  sortMenu?.addEventListener('click', event => {
+    const option = event.target.closest('[data-order]');
+    if (!option) return;
+    sort = {key:option.dataset.order, descending:option.dataset.direction === 'desc'};
+    sortMenu.open = false;
+    render();
+    sortMenu.querySelector('summary').focus({preventScroll:true});
+  });
   table?.addEventListener('click', event => {
     const button = event.target.closest('[data-sort]');
     if (!button) return;
@@ -1212,8 +1258,7 @@ DISCLOSURE_JS = r"""
       activateRecord(document.getElementById(link.hash.slice(1)));
     });
   }
-  const filters = document.querySelector('details.compare-options, details.rank-filters');
-  if (filters) {
+  for (const filters of document.querySelectorAll('details.compare-options, details.rank-filters')) {
     const trigger = filters.querySelector('summary');
     const panel = filters.querySelector('.filter-popover');
     const nav = document.querySelector('.nav');

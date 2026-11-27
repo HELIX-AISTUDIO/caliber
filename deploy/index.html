@@ -704,6 +704,11 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   --studio-bg: #fff;
   --studio-panel: #fff;
   --studio-control: #f4f4f4;
+  --toolbar-bg: #f6f8fa;
+  --toolbar-ink: #1f2328;
+  --toolbar-muted: #59636e;
+  --toolbar-selected: #eef2ff;
+  --toolbar-font: "Geist", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --studio-line: #e2e2e2;
   --studio-rule: #858585;
   --studio-text: #252525;
@@ -750,6 +755,10 @@ details.tiny{margin:12px 0 0;background:transparent;border:0;box-shadow:none}det
   --studio-bg: #0f1113;
   --studio-panel: #1b1d1f;
   --studio-control: #222426;
+  --toolbar-bg: var(--studio-control);
+  --toolbar-ink: var(--studio-text);
+  --toolbar-muted: var(--studio-muted);
+  --toolbar-selected: var(--studio-select);
   --studio-line: #35383b;
   --studio-rule: #7b8086;
   --studio-text: #f7f7f8;
@@ -777,7 +786,7 @@ body :is(h1,h2,h3,p,summary) { color: var(--studio-text); }
 ::selection { background: var(--studio-action); color: var(--studio-on-action); }
 body :is(a,button,input,select,summary,[tabindex]):focus-visible { outline: 2px solid var(--studio-accent); outline-offset: 2px; }
 .nav { background: var(--studio-bg); border: 0; box-shadow: none; backdrop-filter: none; padding-block: 11px; }
-.nav .inner { width: var(--studio-frame); max-width: none; min-height: 64px; padding: 6px 10px 6px 19px; gap: 12px; flex-wrap: nowrap; border-radius: 32px; background: var(--studio-control); }
+.nav .inner { width: var(--studio-frame); max-width: none; min-height: 64px; padding: 6px 10px 6px 19px; gap: 12px; flex-wrap: nowrap; border-radius: 32px; background: var(--toolbar-bg); }
 .nav .brand { gap: 8px; }
 .nav .brand i { position: relative; width: 40px; height: 40px; flex-basis: 40px; background: transparent; color: var(--studio-ink); box-shadow: none; }
 .nav .brand:hover i { transform: none; }
@@ -790,15 +799,17 @@ body :is(a,button,input,select,summary,[tabindex]):focus-visible { outline: 2px 
 .nav .brand .bw { gap: 3px; }
 .nav .bw b { color: var(--studio-ink); font-family: "Caliber Wordmark","Caliber UI",sans-serif; font-size: clamp(1.75rem,2.5vw,2rem); font-weight: 900; line-height: .94; letter-spacing: -.035em; }
 .nav .bw s { color: var(--studio-muted); font-size: .6875rem; line-height: 1.1; letter-spacing: .045em; }
-.nav .menu { flex: 1 1 0; max-width: 46rem; margin-inline-start: clamp(12px,2.1vw,30px); justify-content: space-between; gap: 8px; overflow: visible; }
+.nav .menu { flex: 1 1 0; margin-inline: clamp(8px,2.5vw,36px); justify-content: center; gap: clamp(8px,2.5vw,36px); overflow: visible; }
 .nav-group { position: relative; margin: 0; border: 0; background: none; overflow: visible; }
-.nav .menu > a, .nav-group > summary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 96px; min-height: var(--control-height); padding: 7px 13px; border: 0; border-radius: 999px; color: var(--studio-text); background: transparent; font-size: 15px; font-weight: 520; line-height: 1.2; cursor: pointer; white-space: nowrap; }
+.nav .menu > a, .nav-group > summary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 0; min-height: var(--control-height); padding: 7px 12px; border: 0; border-radius: 999px; color: var(--toolbar-ink); background: transparent; font-family: var(--toolbar-font); font-size: 15px; font-weight: 500; line-height: 1.2; cursor: pointer; white-space: nowrap; }
 .nav-group > summary::marker { content: ""; }
 .nav-group > summary::-webkit-details-marker { display: none; }
 .nav-group > summary::after { content: ""; width: 6px; height: 6px; margin: -3px 1px 0 0; border: solid currentColor; border-width: 0 1.4px 1.4px 0; transform: rotate(45deg); }
 .nav-group[open] > summary::after { margin-top: 3px; transform: rotate(225deg); }
 .nav .menu > a:hover, .nav-group > summary:hover { color: var(--studio-ink); background: var(--studio-panel); }
-.nav .menu > a.active, .nav-group:is(.current,[open]) > summary { color: var(--studio-accent); background: var(--studio-panel); font-weight: 690; }
+.nav .menu > a.active, .nav-group.current > summary { color: var(--studio-accent); font-weight: 600; }
+.nav-group[open] > summary { color: var(--studio-accent); background: var(--studio-panel); }
+.nav .ndrop a { font-family: var(--toolbar-font); }
 .nav-submenu { position: absolute; z-index: 10; top: calc(100% + 7px); left: 0; display: grid; min-width: 148px; padding: 5px; border: 1px solid var(--studio-line); border-radius: 13px; background: var(--studio-panel); box-shadow: 0 8px 20px var(--studio-shadow); }
 .nav .nav-submenu a { min-height: 38px; padding: 5px 10px; border-radius: 8px; color: var(--studio-text); font-size: 14px; font-weight: 530; }
 .nav :is(.nav-submenu,.ndrop) a:is(:hover,.active) { color: var(--studio-ink); background: var(--studio-select); }
@@ -839,19 +850,20 @@ body :is(a,button,input,select,summary,[tabindex]):focus-visible { outline: 2px 
 .benchmark-intro h1 { max-width: 9em; margin: 0; color: var(--studio-ink); font-size: var(--type-display); font-weight: 800; line-height: 1.12; letter-spacing: -.034em; }
 .benchmark-intro-copy { max-width: 30em; margin: 22px 0 0; color: var(--studio-muted); font-size: clamp(1rem,1.35vw,1.125rem); line-height: 1.6; text-wrap: pretty; }
 .benchmark-intro-copy > span { display: inline-block; max-inline-size: 100%; }
-.benchmark-intro-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 21px; margin-top: 24px; }
-.benchmark-intro-links a { display: inline-flex; align-items: center; gap: 9px; min-height: 48px; font-size: 15px; font-weight: 520; text-decoration: none; }
-.benchmark-intro-links a:not(.benchmark-primary) { color: var(--studio-muted); }
+.benchmark-intro-links { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 24px; margin-top: 28px; font-family: var(--toolbar-font); }
+.benchmark-intro-links a { display: inline-flex; align-items: center; gap: 9px; min-height: 52px; font-size: 16px; font-weight: 400; text-decoration: none; }
+.benchmark-intro-links a:not(.benchmark-primary) { color: var(--toolbar-muted); }
 .benchmark-intro-links a:not(.benchmark-primary):hover { color: var(--studio-ink); text-decoration: underline; }
-.benchmark-intro-links .benchmark-primary { gap: 18px; padding: 8px 19px; border-radius: 999px; color: var(--studio-on-action); background: var(--studio-action); font-weight: 690; }
+.benchmark-intro-links .benchmark-primary { gap: 16px; padding: 7px 7px 7px 20px; border-radius: 999px; color: var(--studio-on-action); background: var(--toolbar-ink); font-weight: 600; }
 .benchmark-intro-links .benchmark-primary:hover { color: var(--studio-on-action); opacity: .87; }
-.benchmark-intro-links a::after { content: ""; width: 15px; height: 12px; background: currentColor; clip-path: polygon(0 44%,74% 44%,47% 12%,56% 0,100% 50%,56% 100%,47% 88%,74% 56%,0 56%); }
+.benchmark-primary i { display: grid; flex: none; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--studio-panel); color: var(--toolbar-ink); font: 500 21px/1 var(--toolbar-font); }
+[data-theme=dark] .benchmark-intro-links .benchmark-primary { background: var(--studio-action); }
+.benchmark-intro-links a:not(.benchmark-primary)::after { content: "→" / ""; font: 400 18px/1 Arial,sans-serif; }
 .benchmark-sample { display: grid; justify-items: start; gap: 8px; margin-top: 30px; }
 .benchmark-platform-marks { display: flex; flex-wrap: wrap; gap: 5px; }
 .benchmark-platform-marks .comparison-mark { flex: none; width: 38px; height: 38px; margin: 0; }
-.benchmark-sample p { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 12px; color: var(--studio-muted); font-size: var(--type-label); }
-.benchmark-sample b { color: var(--studio-ink); font-size: 1.25em; font-weight: var(--weight-figure); }
-.benchmark-sample time { font-size: var(--type-caption); }
+.benchmark-sample p { margin: 0; color: var(--toolbar-muted); font: 400 18px/1.5 var(--toolbar-font); }
+.benchmark-sample p span { display: inline-block; white-space: pre; }
 .benchmark-profile { min-width: 0; margin: 0; padding: var(--surface-inset); border-radius: var(--surface-radius); background: var(--studio-control); }
 .benchmark-profile > figcaption { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: 6px 12px; }
 .benchmark-profile h2 { margin: 0; color: var(--studio-ink); font-size: clamp(1.0625rem,1.45vw,1.25rem); font-weight: 720; line-height: 1.35; letter-spacing: -.014em; }
@@ -929,9 +941,37 @@ body :is(a,button,input,select,summary,[tabindex]):focus-visible { outline: 2px 
 .compare-answer-context { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 8px; }
 .compare-answer-context b { color: var(--studio-text); font-size: 14px; }
 .benchmark-summary-link { flex: none; font-size: 13px; font-weight: 650; }
-.benchmark-controls { display: grid; gap: 14px; }
-.benchmark-page .compare-specs :is(.compare-axis,.compare-mode-choice) span { min-height: 42px; padding-inline: 18px; font-size: 15px; }
-.benchmark-page .compare-specs .compare-resolution span { min-height: 42px; min-width: 66px; font-size: 14px; }
+.benchmark-controls { display: grid; gap: 16px; }
+.benchmark-controls, .compare-table-head, #compare-grid th { font-family: var(--toolbar-font); }
+.benchmark-controls .compare-specs, .benchmark-page .compare-toolbar { --studio-control: var(--toolbar-bg); }
+.compare-specs .compare-choice > div { padding: 4px; }
+.compare-specs .compare-choice span { display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--toolbar-muted); font-weight: 500; }
+.compare-specs .compare-choice svg { flex: none; width: 15px; height: 15px; }
+.compare-specs .compare-choice input:checked + span { color: var(--studio-on-action); background: var(--toolbar-ink); font-weight: 600; }
+[data-theme=dark] .compare-specs .compare-choice input:checked + span { background: var(--studio-action); }
+.board-guide { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 3px 16px; padding: 2px 8px 8px; color: var(--toolbar-muted); font-size: 13px; }
+.board-guide a { color: inherit; text-decoration: none; }
+.board-guide a:hover { text-decoration: underline; }
+.benchmark-page .compare-toolbar { --control-height: 52px; gap: 10px; }
+.benchmark-page .compare-search { flex-basis: 300px; }
+.benchmark-page .compare-toolbar .compare-search input { padding-inline-start: 47px; font: 400 15px/1.45 var(--toolbar-font); }
+.benchmark-page .compare-search::before { top: calc(50% - 7px); left: 22px; }
+.benchmark-page .compare-search::after { top: calc(50% + 4px); left: 32px; }
+.benchmark-page .compare-options > summary { padding-inline: 18px; font-family: var(--toolbar-font); }
+.benchmark-page .compare-rank-view > div { padding: 5px; }
+.benchmark-page .compare-rank-view span { min-height: 42px; padding-inline: 18px; font: 500 14px/1.4 var(--toolbar-font); }
+.benchmark-page .compare-rank-view input:checked + span { background: var(--studio-panel); color: var(--toolbar-ink); font-weight: 600; box-shadow: 0 1px 4px var(--studio-shadow); }
+.benchmark-page .board-sort > summary { color: var(--toolbar-muted); font-weight: 400; }
+.board-sort summary b { color: var(--toolbar-ink); font-weight: 600; }
+.board-sort .filter-popover { width: min(19rem,100%); }
+.board-sort-options { display: grid; overflow-y: auto; }
+.board-sort-options button { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 8px 14px; border: 0; border-radius: 15px; background: transparent; font-size: 14px; cursor: pointer; }
+.board-sort-options button::after { content: ""; display: grid; place-items: center; width: 19px; height: 19px; border-radius: 50%; background: var(--toolbar-bg); }
+.board-sort-options button:hover { background: var(--toolbar-bg); }
+.board-sort-options button[aria-pressed=true] { background: var(--toolbar-selected); font-weight: 600; }
+.board-sort-options button[aria-pressed=true]::after { content: "✓" / ""; background: var(--data-blue); color: var(--studio-bg); }
+.benchmark-page .compare-specs :is(.compare-axis,.compare-mode-choice) span { min-height: 44px; padding-inline: 18px; font-size: 15px; }
+.benchmark-page .compare-specs .compare-resolution span { min-height: 44px; min-width: 66px; font-size: 14px; }
 .compare-specs, .compare-toolbar, .cycle-toolbar { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 .compare-toolbar, .cycle-toolbar { position: relative; }
 .compare-options, .rank-filters { margin: 0; border: 0; background: transparent; overflow: visible; }
@@ -1011,7 +1051,7 @@ body :is(a,button,input,select,summary,[tabindex]):focus-visible { outline: 2px 
 .compare-table-head h2 { margin: 0; font-size: 15px; }
 .compare-table-head .compare-order, .compare-table-count { margin: 0; color: var(--studio-muted); font-size: 13px; }
 .compare-table-count { padding-right: 13px; border-right: 1px solid var(--studio-line); color: var(--studio-muted); font-variant-numeric: tabular-nums; }
-.compare-table-count b { color: var(--studio-text); font-weight: 700; }
+.compare-table-count b { color: var(--toolbar-ink); font-weight: 550; }
 
 .compare-bar-figure { margin: 12px 0 24px; padding: var(--surface-inset); background: var(--studio-control); border-radius: var(--surface-radius); }
 .compare-bar-figure figcaption { color: var(--studio-ink); font-size: var(--type-section); font-weight: var(--weight-section); line-height: 1.28; }
@@ -1039,10 +1079,10 @@ body :is(a,button,input,select,summary,[tabindex]):focus-visible { outline: 2px 
 #compare-grid :is(th,td) { text-align: left; padding: 13px 10px; line-height: 1.4; font-variant-numeric: tabular-nums; border-bottom-color: var(--studio-line); }
 #compare-grid th { padding-block: 8px; background: var(--studio-panel); color: var(--studio-muted); font-size: 13px; font-weight: 500; letter-spacing: normal; vertical-align: middle; white-space: normal; cursor: default; }
 #compare-grid th button { display: inline-flex; align-items: center; flex-wrap: nowrap; gap: 6px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
-#compare-grid th button::after { content: ""; width: 5px; height: 5px; border: solid currentColor; border-width: 0 1px 1px 0; transform: rotate(45deg); opacity: .6; flex: none; }
-#compare-grid th[aria-sort] { color: var(--studio-accent); font-weight: 660; }
-#compare-grid th[aria-sort] button::after { opacity: 1; }
-#compare-grid th[aria-sort=ascending] button::after { transform: rotate(225deg); }
+#compare-grid th button::after { content: "↕" / ""; font: 400 1em/1 Arial,sans-serif; opacity: .55; flex: none; }
+#compare-grid th[aria-sort] { color: var(--data-blue); font-weight: 660; }
+#compare-grid th[aria-sort] button::after { content: "↓" / ""; opacity: 1; }
+#compare-grid th[aria-sort=ascending] button::after { content: "↑" / ""; }
 .compare-unit-short { display: none; }
 #compare-grid :is(th,td):first-child { width: 38%; }
 #compare-grid td { color: var(--studio-text); font-size: 1rem; white-space: normal; }
@@ -1298,7 +1338,7 @@ body :is(a,button,input,select,summary,[tabindex]):focus-visible { outline: 2px 
 .compare-records .records-header p { max-width: 75ch; margin: 6px 0 0; color: var(--studio-muted); }
 .compare-records h2 { margin: 0 0 11px; font-size: 22px; }
 .compare-records > p { color: var(--studio-muted); line-height: 1.65; }
-:is(.compare-records details,.compare-home-budget,.compare-advanced,.note,details:not(.nav-group),table,.kpi,.side,.mobar) { background: var(--studio-panel) !important; border-color: var(--studio-line); box-shadow: none; backdrop-filter: none; }
+:is(.compare-records details,.compare-home-budget,.compare-advanced,.note,details:not(.nav-group,.compare-options,.rank-filters),table,.kpi,.side,.mobar) { background: var(--studio-panel) !important; border-color: var(--studio-line); box-shadow: none; backdrop-filter: none; }
 .tip { border-color: var(--studio-line); background: var(--studio-panel); color: var(--studio-text); box-shadow: 0 6px 18px var(--studio-shadow); transition-duration: var(--studio-feedback); }
 .compare-records [id], #compare-records-title { scroll-margin-top: calc(var(--navh) + 10px); }
 .compare-records [hidden] { display: none !important; }
@@ -1676,7 +1716,20 @@ body :is(.budtip,.vptitle span,.scopenote,.pjh span,.pjnote,.note.warn b,.intro 
   .benchmark-intro-copy { margin-top: 11px; font-size: .9375rem; text-wrap: balance; }
   .benchmark-intro-links { margin-top: 11px; }
   .benchmark-intro-links a { min-height: 44px; font-size: 13px; }
-  .benchmark-intro-links .benchmark-primary { gap: 9px; padding-inline: 12px; }
+  .benchmark-intro-links .benchmark-primary { gap: 9px; padding: 5px 5px 5px 14px; }
+  .benchmark-primary i { width: 32px; height: 32px; font-size: 18px; }
+  .benchmark-sample p { font-size: 14px; }
+  .board-guide { padding: 0 3px; font-size: 12px; }
+  .benchmark-page .compare-toolbar { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 7px; --control-height: 44px; }
+  .benchmark-page .compare-toolbar .compare-options { justify-self: start; }
+  .benchmark-page .compare-options > summary { padding-inline: 13px; }
+  .benchmark-page .compare-rank-view span { min-height: 36px; padding-inline: 10px; font-size: 13px; }
+  .benchmark-page .compare-rank-view > div { padding: 4px; }
+  .benchmark-page .compare-toolbar .compare-search input { padding-inline-start: 34px; font-size: 13px; }
+  .benchmark-page .compare-search::before { left: 10px; }
+  .benchmark-page .compare-search::after { left: 20px; }
+  .compare-specs .compare-choice span { gap: 5px; }
+  .compare-specs .compare-choice svg { width: 13px; height: 13px; }
   .benchmark-sample { margin-top: 14px; }
   .benchmark-platform-marks { gap: 4px; }
   .benchmark-platform-marks .comparison-mark { width: clamp(25px,7.1vw,29px); height: clamp(25px,7.1vw,29px); }
@@ -1750,7 +1803,6 @@ body :is(.budtip,.vptitle span,.scopenote,.pjh span,.pjnote,.note.warn b,.intro 
   .compare-unit-label { display: none; }
   .compare-unit-short { display: inline; }
   #compare-grid th button { gap: 3px; }
-  #compare-grid th button::after { width: 4px; height: 4px; }
   #compare-grid th:nth-child(2) { width: 20%; }
   #compare-grid th:nth-child(3) { width: 16%; }
   #compare-grid .compare-pick-column { width: 34px; padding-inline: 0; }
@@ -1864,7 +1916,7 @@ body :is(.budtip,.vptitle span,.scopenote,.pjh span,.pjnote,.note.warn b,.intro 
 }
 @media (max-width: 360px) {
   .benchmark-intro-links { column-gap: 8px; }
-  .benchmark-intro-links .benchmark-primary { padding-inline: 10px; }
+  .benchmark-intro-links .benchmark-primary { padding-left: 11px; }
   .benchmark-intro-links a:last-child::after { content: none; }
   .compare-workspace { padding-top: 12px; }
   .workspace-heading h1 { font-size: 28px; }
@@ -1937,6 +1989,13 @@ body :is(.budtip,.vptitle span,.scopenote,.pjh span,.pjnote,.note.warn b,.intro 
 i:is(.lg-libtv,.lg-neowow,.lg-jimeng,.lg-xiaoyunque,.lg-higgsfield,.lg-tapnow,.lg-seko,.lg-updream,.lg-rhtv,.lg-pixtv){border:0;border-radius:50%;background-color:#fff;background-size:74%;background-position:center;background-repeat:no-repeat;box-shadow:inset 0 0 0 1px #6c77862b}
 i.lg-rhtv{background-size:68%}
 @font-face {
+  font-family: "Geist";
+  src: url("fonts/Geist-Variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
   font-family: "Caliber Wordmark";
   src: url("fonts/caliber-wordmark.woff2") format("woff2");
   font-style: normal;
@@ -1975,13 +2034,13 @@ i.lg-rhtv{background-size:68%}
       <h1>同一套视频规格<br>比较各平台会员成本</h1>
       <p class="benchmark-intro-copy">按月用量或预算，<span>查看首期实付、月产能和每条成本。</span></p>
       <nav class="benchmark-intro-links" aria-label="开始比较">
-        <a class="benchmark-primary" href="#benchmark-board">查看完整榜单</a>
+        <a class="benchmark-primary" href="#benchmark-board">查看完整榜单<i aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg></i></a>
         <a href="cost.html#member-budgets">按预算选会员</a>
         <a href="glossary.html#scope">计算口径</a>
       </nav>
       <div class="benchmark-sample">
         <div class="benchmark-platform-marks" aria-hidden="true"><i class="comparison-mark lg-libtv" title="LibTV"></i><i class="comparison-mark lg-neowow" title="Neowow"></i><i class="comparison-mark lg-jimeng" title="即梦"></i><i class="comparison-mark lg-xiaoyunque" title="小云雀"></i><i class="comparison-mark lg-higgsfield" title="Higgsfield"></i><i class="comparison-mark lg-tapnow" title="TapNow"></i><i class="comparison-mark lg-seko" title="Seko"></i><i class="comparison-mark lg-updream" title="updream"></i><i class="comparison-mark lg-rhtv" title="RunningHub RHTV"></i><i class="comparison-mark lg-pixtv" title="PixTV"></i></div>
-        <p><span><b>10</b> 家平台</span><span><b>64</b> 个会员档位</span><time datetime="2026-11-25">2026-11-25 更新</time></p>
+        <p><span>10 家平台</span><span> · 64 个会员档位</span><span> · <time datetime="2026-11-25">2026-11-25 更新</time></span></p>
       </div>
     </div>
     <figure class="benchmark-profile" aria-labelledby="profile-title" hidden>
@@ -2013,7 +2072,7 @@ i.lg-rhtv{background-size:68%}
     </div>
   </section>
   <header class="benchmark-board-title" id="benchmark-board">
-    <div><h2>会员档位榜</h2><p>默认展示每家平台的达标档位，可切换档位或加入对比。</p></div>
+    <div><h2>会员档位榜</h2></div>
     <div class="compare-jump-links">
       <a href="#compare-frontier">价格与产能分析</a>
       <button type="button" data-share="table">复制榜单链接</button>
@@ -2026,17 +2085,17 @@ i.lg-rhtv{background-size:68%}
       <fieldset class="compare-choice compare-mode-choice">
         <legend>计算方式</legend>
         <div>
-          <label><input type="radio" name="mode" value="target" checked><span>按月用量</span></label>
-          <label><input type="radio" name="mode" value="budget"><span>按预算</span></label>
+          <label><input type="radio" name="mode" value="target" checked><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20v-5m5 5v-9m5 9V8m5 12V4"/></svg>按月用量</span></label>
+          <label><input type="radio" name="mode" value="budget"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v12H3z M3 7V5l15-2v4 M16 11h5v4h-5z"/></svg>按预算</span></label>
 </div>
       </fieldset>
 
       <fieldset id="compare-model" class="compare-choice compare-axis">
         <legend>生成模式</legend>
         <div>
-          <label><input type="radio" name="model" value="0" checked><span>标准版</span></label>
-          <label><input type="radio" name="model" value="2"><span>Flash</span></label>
-          <label><input type="radio" name="model" value="4"><span>样片模式</span></label>
+          <label><input type="radio" name="model" value="0" checked><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v12H3z M3 10h18 M8 6l-3 4m9-4-3 4m9-4-3 4"/></svg>标准版</span></label>
+          <label><input type="radio" name="model" value="2"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 2-10 12h7l-1 8 10-13h-7z"/></svg>Flash</span></label>
+          <label><input type="radio" name="model" value="4"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3H3v4m15-4h3v4M3 17v4h4m14-4v4h-4 M9 8l7 4-7 4z"/></svg>样片模式</span></label>
         </div>
       </fieldset>
       <fieldset class="compare-choice compare-resolution">
@@ -2044,6 +2103,9 @@ i.lg-rhtv{background-size:68%}
         <div><label><input type="radio" name="resolution" value="0" checked><span>480p</span></label><label><input type="radio" name="resolution" value="1"><span>720p</span></label></div>
       </fieldset>
     </div>
+
+      <div class="board-guide"><span>默认展示每家平台的达标档位，可切换档位或加入对比。</span>
+        <a href="glossary.html#scope">计算口径说明 <span aria-hidden="true">→</span></a></div>
     <div class="compare-toolbar">
 
       <fieldset class="compare-choice compare-rank-view" id="compare-rank-view">
@@ -2106,6 +2168,15 @@ i.lg-rhtv{background-size:68%}
               <button id="compare-reset" type="button" aria-label="重置所有榜单条件">重置条件</button>
             </div>
           </div>
+        </div>
+      </details>
+
+      <details class="compare-options board-sort" id="board-sort">
+        <summary aria-controls="board-sort-panel">排名 <b id="board-sort-label">按实付</b></summary>
+        <div class="filter-popover" id="board-sort-panel" role="region" aria-labelledby="board-sort-title">
+          <header class="filter-popover-heading"><h2 id="board-sort-title">排名方式</h2>
+            <button class="filter-popover-close" type="button" aria-label="关闭排名方式"></button></header>
+          <div class="board-sort-options"><button type="button" data-order="pay" data-direction="asc" aria-pressed="false">首期实付从低到高</button><button type="button" data-order="pay" data-direction="desc" aria-pressed="false">首期实付从高到低</button><button type="button" data-order="capacity" data-direction="asc" aria-pressed="false">月产能从低到高</button><button type="button" data-order="capacity" data-direction="desc" aria-pressed="false">月产能从高到低</button><button type="button" data-order="unit" data-direction="asc" aria-pressed="false">每条成本从低到高</button><button type="button" data-order="unit" data-direction="desc" aria-pressed="false">每条成本从高到低</button></div>
         </div>
       </details>
     </div>
@@ -3625,6 +3696,9 @@ document.addEventListener('DOMContentLoaded', function(){
   const nameOf = platformName => data.names[platformName] || platformName;
   const matchesPlatform = name => (!platform.value || platform.value === name)
     && nameOf(name).toLowerCase().includes(search.value.trim().toLowerCase());
+  const sortMenu = document.getElementById('board-sort');
+  const sortLabel = document.getElementById('board-sort-label');
+  const orderChoices = sortMenu?.querySelectorAll('[data-order]');
   const sortLabels = {pay:'实付', capacity:'产能', unit:'每条成本'};
   let includeAll = false;
   let sort = null;
@@ -4718,6 +4792,11 @@ document.addEventListener('DOMContentLoaded', function(){
     table.dataset.mode = mode.value;
     const sortKey = sort?.key ?? (byBudget ? 'capacity' : 'pay');
     const descending = sort?.descending ?? byBudget;
+    sortLabel.textContent = '按' + sortLabels[sortKey];
+    for (const button of orderChoices) {
+      button.setAttribute('aria-pressed', String(button.dataset.order === sortKey &&
+        (button.dataset.direction === 'desc') === descending));
+    }
     for (const button of sortButtons) {
       const th = button.closest('th');
       if (button.dataset.sort === sortKey) th.setAttribute('aria-sort', descending ? 'descending' : 'ascending');
@@ -4906,6 +4985,14 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   form.addEventListener('submit', event => event.preventDefault());
   form.addEventListener('change', render);
+  sortMenu?.addEventListener('click', event => {
+    const option = event.target.closest('[data-order]');
+    if (!option) return;
+    sort = {key:option.dataset.order, descending:option.dataset.direction === 'desc'};
+    sortMenu.open = false;
+    render();
+    sortMenu.querySelector('summary').focus({preventScroll:true});
+  });
   table?.addEventListener('click', event => {
     const button = event.target.closest('[data-sort]');
     if (!button) return;
@@ -5033,8 +5120,7 @@ document.addEventListener('DOMContentLoaded', function(){
       activateRecord(document.getElementById(link.hash.slice(1)));
     });
   }
-  const filters = document.querySelector('details.compare-options, details.rank-filters');
-  if (filters) {
+  for (const filters of document.querySelectorAll('details.compare-options, details.rank-filters')) {
     const trigger = filters.querySelector('summary');
     const panel = filters.querySelector('.filter-popover');
     const nav = document.querySelector('.nav');
