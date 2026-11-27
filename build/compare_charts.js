@@ -140,7 +140,7 @@
       + perClip.format(offer.pay / (offer.capacity * months)) + '/条'
       + ' · ' + offer.monthlyCredits.toLocaleString('zh-CN') + ' 积分/月'
       + ' · ' + offer.creditsPerClip.toLocaleString('zh-CN') + ' 积分/条'
-      + (offer.sourceDate ? ' · 扣分沿用 ' + offer.sourceDate + ' 留档' : '');
+      + (offer.sourceLabel ? ' · ' + offer.sourceLabel + ' ' + offer.sourceDate : '');
     const link = document.createElement('button');
     link.type = 'button';
     link.textContent = '在榜单中查看';

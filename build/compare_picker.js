@@ -15,7 +15,7 @@
     return {
       plan,
       quote: plan.periods[period.value],
-      reading: data.readings[plan.platform][spec],
+      reading: readingFor(plan, spec, period.value),
       offer: offerAt(plan, spec, period.value),
     };
   }

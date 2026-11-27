@@ -3,7 +3,7 @@
   "type": "cost",
   "title": "平台成本对比",
   "eyebrow": "Cost Benchmark · Seedance 2.5",
-  "updatedAt": "2026-11-25",
+  "updatedAt": "2026-11-27",
   "spec": {
     "text": "Seedance 2.5 · 720p · 16:9 · 30s · 全能参考",
     "secondsPerClip": 30,
@@ -926,7 +926,7 @@
   "scope": {
     "current": "年费 / 季付 / 月付 三周期",
     "currentShort": "年付 · 季付 · 月付",
-    "impact": "覆盖十家平台的会员报价，八家具备标准版 720p 计算依据。即梦和 TapNow 沿用 9 月 21 日留档扣分。美元统一使用 11 月 20 日人民币中间价。",
+    "impact": "覆盖十家平台。标准版 480p 的 updream 费率仅适用于 Ultra 年付；PixTV 可查会员报价及第三方样本。美元按 11 月 20 日人民币中间价折算。",
     "promoRule": "限时生成折扣、赠积分、赠时长和免费条数以本页活动栏为准，排名以基础配置计算。",
     "items": [
       {
@@ -955,8 +955,8 @@
       }
     ]
   },
-  "priceRule": "按所选周期的首期价格 ÷ 基础订阅积分 × 画布预估扣分折算；赠送积分和会员月数见活动。",
-  "liveNote": "即梦和 TapNow 的标准版 720p 成本使用 2026-09-21 站内留档扣分，搭配本轮会员价格计算。其余缺少画布读数的规格保留待核实状态。 RHTV 使用画布基础预估，活动优惠另列。updream 与 PixTV 可比较官方报价和积分，画布扣分待核实。",
+  "priceRule": "单条成本按首期实付 ÷ 当期基础订阅积分 × 该规格单条积分折算。数据来源及活动权益分别见扣分与活动明细。",
+  "liveNote": "标准版 720p 的即梦、TapNow 使用 9 月 21 日留档。Higgsfield 已核对官方询价；TapNow 480p 使用官方公开费率。即梦 480p 和 updream Ultra 年付使用历史用户费率。其他参考条件和时长的样本见画布扣分明细。",
   "recurringNote": "连续订阅到期会自动续费。首期和续费是两次扣款，表内分别列出。一次性付费档到期后按平台规则处理。",
   "retryPolicy": [
     {
@@ -1119,7 +1119,7 @@
       "creditDate": "2026-11-25",
       "offer": "已核个人会员三档的连续包月、一次性单月及年付。部分年付活动加送 1 个月，邀请码赠分需满足活动条件。720p 会员卡的示例时长为约 102、332、674 秒。",
       "creditPending": true,
-      "creditNote": "视频节点有标准、Flash、样片入口。采集账号选择标准版时弹出会员解锁。"
+      "creditNote": "Ultra 年付的标准版 480p、720p 采用用户提供的历史费率。采集账号未解锁会员，其他规格待核实。"
     },
     "RunningHub RHTV": {
       "url": "https://www.runninghub.cn/vip-rights",
@@ -1135,7 +1135,7 @@
       "creditDate": "2026-11-25",
       "offer": "已核个人会员四档的月付、年费实付和月积分。官方列出的 Seedance 2.5 720p 低至 $0.048/秒为限时示例。",
       "creditPending": true,
-      "creditNote": "画布标准版与 Flash 已试 480p、720p，均可设 16:9、30 秒、全能参考。生成前界面没有显示扣分，样片规格待核实。"
+      "creditNote": "标准版与 Flash 可设 480p 或 720p、16:9、30 秒、全能参考；画布未显示扣分。第三方竖屏模板与未注明规格的费率单列为样本。"
     }
   },
   "offerBenefits": [
@@ -1245,29 +1245,33 @@
       "platform": "即梦",
       "period": "q",
       "credits": 12320,
+      "resolution": "720p",
       "bonusClips": 5
     },
     {
       "platform": "即梦",
       "period": "q",
       "credits": 18480,
+      "resolution": "720p",
       "bonusClips": 15
     },
     {
       "platform": "即梦",
       "period": "q",
       "credits": 27720,
+      "resolution": "720p",
       "bonusClips": 30
     },
     {
       "platform": "即梦",
       "period": "q",
       "credits": 54600,
+      "resolution": "720p",
       "bonusClips": 60
     }
   ],
   "canvasTests": {
-    "date": "2026-11-25",
+    "date": "2026-11-27",
     "columns": [
       "标准版 480p",
       "标准版 720p",
@@ -1294,7 +1298,13 @@
         "仅 480p"
       ],
       "即梦": [
-        "会员解锁",
+        {
+          "credits": 360,
+          "label": "用户费率折算",
+          "date": "2026-09-15",
+          "url": "https://seedance.cymruera.com/",
+          "detail": "常规 12 分/秒 × 30 秒，未计带视频优惠。"
+        },
         {
           "credits": 600,
           "sourceDate": "2026-09-21"
@@ -1319,15 +1329,51 @@
         "仅 480p"
       ],
       "Higgsfield": [
-        90,
-        210,
-        "画布未显示",
-        "画布未显示",
-        "画布未显示",
-        "画布未显示"
+        {
+          "credits": 90,
+          "label": "官方询价",
+          "date": "2026-11-27",
+          "url": "https://higgsfield.ai/blog/higgsfield-cli",
+          "detail": "30 秒、16:9、全能参考、标准码率；询价未附素材。"
+        },
+        {
+          "credits": 210,
+          "label": "官方询价",
+          "date": "2026-11-27",
+          "url": "https://higgsfield.ai/blog/higgsfield-cli",
+          "detail": "30 秒、16:9、全能参考、标准码率；询价未附素材。"
+        },
+        {
+          "credits": 60,
+          "label": "官方询价",
+          "date": "2026-11-27",
+          "url": "https://higgsfield.ai/blog/higgsfield-cli",
+          "detail": "30 秒、16:9、全能参考、标准码率；询价未附素材。"
+        },
+        {
+          "credits": 150,
+          "label": "官方询价",
+          "date": "2026-11-27",
+          "url": "https://higgsfield.ai/blog/higgsfield-cli",
+          "detail": "30 秒、16:9、全能参考、标准码率；询价未附素材。"
+        },
+        {
+          "credits": 90,
+          "label": "官方询价",
+          "date": "2026-11-27",
+          "url": "https://higgsfield.ai/blog/higgsfield-cli",
+          "detail": "30 秒、16:9、全能参考、标准码率；询价未附素材。"
+        },
+        "仅 480p"
       ],
       "Tapnow": [
-        "会员解锁",
+        {
+          "credits": 600,
+          "label": "官方费率折算",
+          "date": "2026-11-27",
+          "url": "https://app.tapnow.ai/pricing",
+          "detail": "20 Tapies/秒 × 30 秒。需会员；价目表未区分参考素材。"
+        },
         {
           "credits": 1200,
           "sourceDate": "2026-09-21"
@@ -1335,7 +1381,7 @@
         "待核实",
         "待核实",
         "待核实",
-        "待核实"
+        "仅 480p"
       ],
       "Seko": [
         270,
@@ -1346,8 +1392,24 @@
         "仅 480p"
       ],
       "updream": [
-        "会员解锁",
-        "会员解锁",
+        {
+          "credits": 2550,
+          "label": "用户费率折算",
+          "date": "2026-09-15",
+          "url": "https://seedance.cymruera.com/assets/data.js?v=24e50d39af",
+          "detail": "仅 Ultra 年付。85 分/秒 × 30 秒，参考素材未注明。产能按本站收录的基础月积分折算。",
+          "tier": "Ultra",
+          "period": "y"
+        },
+        {
+          "credits": 5850,
+          "label": "用户费率折算",
+          "date": "2026-09-15",
+          "url": "https://seedance.cymruera.com/assets/data.js?v=24e50d39af",
+          "detail": "仅 Ultra 年付。195 分/秒 × 30 秒，参考素材未注明。产能按本站收录的基础月积分折算。",
+          "tier": "Ultra",
+          "period": "y"
+        },
         "会员解锁",
         "会员解锁",
         "会员解锁",
@@ -1369,7 +1431,95 @@
         "待核实",
         "待核实"
       ]
-    }
+    },
+    "samples": [
+      {
+        "platform": "即梦",
+        "spec": "标准版 · 480p · 30 秒",
+        "value": "288 分",
+        "id": "jimeng-reference",
+        "relatedSpecs": ["标准版 480p"],
+        "kind": "用户费率折算 · 2026-09-15",
+        "detail": "上传 2 秒参考视频，9 × 30 + 18。常规条件按 360 分。",
+        "url": "https://seedance.cymruera.com/"
+      },
+      {
+        "platform": "即梦",
+        "spec": "标准版 · 720p · 30 秒",
+        "value": "384 分",
+        "id": "jimeng-reference-hd",
+        "relatedSpecs": ["标准版 720p"],
+        "kind": "用户费率折算 · 2026-09-15",
+        "detail": "上传 2 秒参考视频，12 × 30 + 24。",
+        "url": "https://seedance.cymruera.com/"
+      },
+      {
+        "platform": "即梦",
+        "spec": "样片 · 480p · 30 秒",
+        "value": "270 分（原 360）",
+        "id": "jimeng-draft",
+        "relatedSpecs": ["样片 480p"],
+        "kind": "画布截图 · 2026-09-28",
+        "detail": "21:9、全能参考，截图显示生成前报价。",
+        "url": "https://image.woshipm.com/wp-files/sha256/f3/0b/f30b9bd2972945b9093628d19ff9cd9807f690394dac4ef7797247785952112b.png"
+      },
+      {
+        "platform": "即梦",
+        "spec": "标准版 / Flash · 720p · 30 秒",
+        "value": "960 / 660 分",
+        "id": "jimeng-flash",
+        "relatedSpecs": ["标准版 720p", "Flash 720p"],
+        "kind": "用户演示",
+        "detail": "同一人物图和动作视频切换模型，参考视频时长与会员档位未披露。",
+        "url": "https://aipick.news/items/gwmhw89q5rp3x64m23x8swj9m"
+      },
+      {
+        "platform": "updream",
+        "spec": "标准版 · 720p · 15 秒",
+        "value": "3,525 分",
+        "id": "updream-video",
+        "relatedSpecs": ["标准版 720p"],
+        "kind": "作者报告实扣 · 2026-08-17",
+        "detail": "16:9、全能参考；输入 15 秒白模视频和场景图。",
+        "url": "https://www.huasheng.ai/insights/wechat-2247491605-1/"
+      },
+      {
+        "platform": "PixTV",
+        "spec": "竖屏舞蹈模板 · 4 秒",
+        "value": "160 分",
+        "id": "pixtv-dance",
+        "kind": "第三方记录 · 2026-10-08",
+        "detail": "仅限该模板，未注明分辨率。",
+        "url": "https://m.php.cn/faq/3248143.html"
+      },
+      {
+        "platform": "PixTV",
+        "spec": "Seedance 2.5 · 规格未披露",
+        "value": "42 分/秒",
+        "id": "pixtv-rate",
+        "kind": "第三方记录",
+        "detail": "未披露分辨率、参考素材及档位。",
+        "url": "https://www.php.cn/faq/3277927.html"
+      },
+      {
+        "platform": "Seko",
+        "spec": "Seedance 2.5 · 10 / 15 秒",
+        "value": "180 / 270 分",
+        "id": "seko-usage",
+        "kind": "第三方记录",
+        "detail": "折合 18 分/秒，未指明 Flash 或样片。",
+        "url": "https://qngsvipai.com/handson/seko-hands-on"
+      },
+      {
+        "platform": "Seko",
+        "spec": "常规 / 普惠",
+        "value": "18 / 约 9 分/秒",
+        "id": "seko-rates",
+        "kind": "第三方横评 · 2026-11-11",
+        "detail": "按常规、普惠区分；未指明 Flash 或样片。",
+        "url": "https://sz.ifeng.com/c/8xxjUmqQTtN"
+      }
+    ]
   },
   "evidence": [
     {

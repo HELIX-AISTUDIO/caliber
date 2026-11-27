@@ -496,14 +496,23 @@ COMPARE_OVERVIEW = Path(__file__).with_name("compare_overview.js").read_text(enc
 COMPARE_PICKER = Path(__file__).with_name("compare_picker.js").read_text(encoding="utf-8")
 COMPARE_BUDGET = Path(__file__).with_name("compare_budget.js").read_text(encoding="utf-8")
 COMPARE_OFFER = r"""
-  function offerAt(plan, spec, periodKey) {
+  function readingFor(plan, spec, periodKey) {
     const reading = data.readings[plan.platform][spec];
+    if ((reading.tier && reading.tier !== plan.tier) || (reading.period && reading.period !== periodKey)) {
+      return '该档位及周期的扣分待核实';
+    }
+    return reading;
+  }
+
+  function offerAt(plan, spec, periodKey) {
+    const reading = readingFor(plan, spec, periodKey);
     const pricing = plan.periods[periodKey];
     if (!pricing || typeof reading === 'string') return null;
     const [pay, monthlyCredits] = pricing;
     const credits = typeof reading === 'number' ? reading : reading.credits;
     return {plan, pay, capacity:Math.floor(monthlyCredits / credits), monthlyCredits,
-      creditsPerClip:credits, sourceDate:reading.sourceDate};
+      creditsPerClip:credits, sourceDate:reading.date || reading.sourceDate,
+      sourceLabel:reading.label || (reading.sourceDate ? '留档' : ''), sourceDetail:reading.detail || ''};
   }
 """.strip("\n")
 
@@ -853,7 +862,7 @@ COMPARE_JS = r"""
       name.href = data.recordsPage + '#' + plan.anchor;
       name.textContent = nameOf(plan.platform);
       const tier = document.createElement('small');
-      tier.textContent = plan.tier + (reading?.sourceDate ? ' · 留档' : '');
+      tier.textContent = plan.tier + (offer?.sourceLabel ? ' · ' + offer.sourceLabel : '');
       const status = document.createElement('small');
       if (!quote) status.textContent = '无' + data.periods[period.value][0];
       else if (offer && !fits(offer)) status.textContent = reasonFor(offer);
@@ -872,7 +881,7 @@ COMPARE_JS = r"""
       ['capacity', '月产能', ({offer}) => offer ? offer.capacity + ' 条' : '—', ({offer}) => offer?.capacity],
       ['unit', '每条成本', ({offer}) => offer ? (fits(offer) ? perClip.format(unitCost(offer)) : reasonFor(offer)) : '—'],
       ['credits', '每月积分', ({quote}) => quote ? quote[1].toLocaleString('zh-CN') : '—'],
-      ['reading', '画布扣分', ({reading}) => typeof reading === 'string' ? reading
+      ['reading', '每条积分', ({reading}) => typeof reading === 'string' ? reading
         : (reading.credits ?? reading).toLocaleString('zh-CN') + ' 分/条'],
     ];
     const body = grid.createTBody();
@@ -1004,7 +1013,10 @@ COMPARE_JS = r"""
     }
     const providers = new Set(offers.map(offer => offer.plan.platform));
     for (const name of available.keys()) {
-      if (!providers.has(name)) excluded.push(nameOf(name) + '（无' + cycle[0] + '）');
+      if (!providers.has(name)) {
+        const restriction = data.readings[name][spec].period;
+        excluded.push(nameOf(name) + (restriction ? '（仅' + data.periods[restriction][0] + '有参考价）' : '（无' + cycle[0] + '）'));
+      }
     }
     const rankBy = byBudget ? (a,b) => b.capacity - a.capacity || a.pay - b.pay
       : (a,b) => a.pay - b.pay || b.capacity - a.capacity;
@@ -1034,7 +1046,7 @@ COMPARE_JS = r"""
       const caption = document.createElement('small');
       caption.textContent = nameOf(best.plan.platform) + ' ' + best.plan.tier
         + (byBudget ? ' · 实付 ' + money.format(best.pay) : '')
-        + (best.sourceDate ? ' · 扣分留档' : '');
+        + (best.sourceLabel ? ' · ' + best.sourceLabel : '');
       context.append(scope, caption);
       result.append(lead, context);
       answerLink.href = data.recordsPage + '#' + best.plan.anchor;
@@ -1129,8 +1141,8 @@ COMPARE_JS = r"""
       if (offer.sourceDate) {
         const archive = document.createElement('span');
         archive.className = 'compare-archive-detail';
-        archive.textContent = '留档';
-        archive.title = '画布扣分沿用 ' + offer.sourceDate + ' 留档';
+        archive.textContent = offer.sourceLabel;
+        archive.title = [offer.sourceLabel, offer.sourceDate, offer.sourceDetail].filter(Boolean).join(' · ');
         archive.setAttribute('aria-label', archive.title);
         provider.append(archive);
       }

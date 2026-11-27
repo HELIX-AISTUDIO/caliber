@@ -93,7 +93,7 @@ BASELINE_READINGS = {name: readings[BASELINE_COLUMN] for name, readings in CANVA
 CPV = {name: value["credits"] if isinstance(value, dict) else value
        for name, value in BASELINE_READINGS.items() if not isinstance(value, str)}
 PENDING_BASELINE = "、".join(DISPLAY_NAMES.get(name, name) for name in BASELINE_READINGS if name not in CPV)
-BASELINE_NOTE = f"{BASELINE_LABEL} 共有 {len(CPV)} 家平台具备画布扣分记录。"
+BASELINE_NOTE = f"{BASELINE_LABEL} 有 {len(CPV)} 家平台可估算积分消耗。即梦使用历史常规费率，updream 仅收录 Ultra 年付费率。TapNow 按公开秒价折算。"
 if PENDING_BASELINE:
     BASELINE_NOTE += f"{PENDING_BASELINE} 的扣分待核实，会员报价和月积分可查。"
 BASELINE_NOTE += "RunningHub RHTV 使用画布基础预估，活动优惠另列。"
@@ -126,12 +126,18 @@ def auto_label(m):
     return "%g 档" % m
 
 
+def applies_to(reading, tier, period):
+    return not isinstance(reading, dict) or (
+        reading.get("tier", tier) == tier and reading.get("period", period) == period
+    )
+
+
 def build_rows():
     """展开为「档位 × 积分选项」行，并算出全部派生量"""
     out = []
     for p in COST["plans"]:
         plat = p["platform"]
-        if plat not in CPV:
+        if plat not in CPV or not applies_to(BASELINE_READINGS[plat], p["tier"], "y"):
             continue
         cur = PLATFORMS[plat]["currency"]
         k = RATE if cur == "USD" else 1.0
@@ -193,7 +199,7 @@ for r in ROWS:
     r["byP"] = {}
     for key, _lbl, months, field in PERIODS:
         pay = r[field]
-        if pay is None:
+        if pay is None or not applies_to(BASELINE_READINGS[r["plat"]], r["tier"], key):
             continue
         # ⚠ 三周期各自的月积分：年付用 credits，季付用 qCr，月付用 mCr（缺省同年付）。
         # 原实现把年付与季付绑在同一个值上 —— 若平台按周期给不同积分就会算错。
@@ -219,11 +225,11 @@ for r in ROWS:
 
 def comparison_rows():
     """保留没有基准扣分的平台报价，供手动对比和其他已核规格使用。"""
-    result = list(ROWS)
+    indexed = {(r["plat"], r["tier"], r["monthly"]): r for r in ROWS}
+    result = []
     for plan in COST["plans"]:
         plat = plan["platform"]
-        if plat in CPV:
-            continue
+
         currency = PLATFORMS[plat]["currency"]
         rate = RATE if currency == "USD" else 1
         multi = len(plan["credits"]) > 1
@@ -237,7 +243,9 @@ def comparison_rows():
                     by_period[key] = {"pay": pay, "payCNY": convert_cny(pay, rate),
                                        "cr": option.get(credits_key, option["credits"])}
             monthly = option["credits"]
-            result.append({"plat": plat, "tier": plan["tier"], "monthly": monthly, "byP": by_period, "cur": currency,
+            priced = indexed.get((plat, plan["tier"], monthly), {})
+            by_period.update(priced.get("byP", {}))
+            result.append({**priced, "plat": plat, "tier": plan["tier"], "monthly": monthly, "byP": by_period, "cur": currency,
                            "label": option.get("label") or (auto_label(monthly) if multi else ""), "multi": multi})
     return result
 
@@ -488,6 +496,8 @@ for _p in PLATFORMS:
            for r in _rs if "y" in r["byP"] and "m" in r["byP"]]
     _qm = [r["byP"]["q"]["perVideo"] / r["byP"]["m"]["perVideo"]
            for r in _rs if "q" in r["byP"] and "m" in r["byP"]]
+    if not _ym:
+        continue
     PERIOD_PLAT.append({
         "plat": _p, "color": COLOR[_p], "hasQ": bool(_qm),
         "yLo": min(_ym), "yHi": max(_ym),
@@ -2806,14 +2816,27 @@ def canvas_table(rows, label):
 
 canvas_rows = ""
 canvas_cost_rows = ""
+sample_rows = "".join(
+    f'<tr id="sample-{escape(s["id"])}"><td>{escape(s["platform"])}</td><td>{escape(s["spec"])}</td><td>{escape(s["value"])}</td>'
+    f'<td style="white-space:normal">{escape(s["detail"])}</td><td>{source_link(s["kind"], s["url"])}</td></tr>'
+    for s in CANVAS["samples"]
+)
 for plat, readings in CANVAS["rows"].items():
     display = DISPLAY_NAMES.get(plat, plat)
     platform_label = f'{plogo(plat, "comparison-mark")}{display}'
+    samples = [s for s in CANVAS["samples"] if s["platform"] == plat]
+    if samples:
+        platform_label += (f'<small class="canvas-meta"><a href="#sample-{samples[0]["id"]}">'
+                           f'{len(samples)} 条样本</a></small>')
     cells = []
     for i, reading in enumerate(readings):
         column = f'data-canvas-column="{i // 2}"'
+        links = "".join(
+            f'<small class="canvas-meta"><a href="#sample-{s["id"]}">样本 · {escape(s["value"])}</a></small>'
+            for s in samples if CANVAS["columns"][i] in s.get("relatedSpecs", [])
+        )
         if isinstance(reading, str):
-            cells.append(f'<td {column}><span class="canvas-state">{escape(canvas_states.get(reading, reading))}</span></td>')
+            cells.append(f'<td {column}><span class="canvas-state">{escape(canvas_states.get(reading, reading))}</span>{links}</td>')
             continue
         credits = reading["credits"] if isinstance(reading, dict) else reading
         note = ""
@@ -2822,15 +2845,21 @@ for plat, readings in CANVAS["rows"].items():
                 note = f'<small class="canvas-meta">原 <s>{reading["original"]:,}</s></small>'
             if "sourceDate" in reading:
                 note = f'<small class="canvas-meta">留档 · {escape(reading["sourceDate"])}</small>'
-        cells.append(f'<td {column} data-canvas-credit="{credits}"><strong>{credits:,}</strong>{note}</td>')
+            if "label" in reading:
+                note = (f'<small class="canvas-meta">{source_link(reading["label"], reading["url"])}'
+                        f' · {escape(reading["date"])}</small><small class="canvas-meta">{escape(reading["detail"])}</small>')
+        cells.append(f'<td {column} data-canvas-credit="{credits}"><strong>{credits:,}</strong>{note}{links}</td>')
     canvas_rows += f'<tr><th scope="row">{platform_label}</th>{"".join(cells)}</tr>'
     for key, label, months, _ in PERIODS:
-        quotes = [r["byP"][key] for r in COMPARISON_ROWS if r["plat"] == plat and key in r["byP"]]
-        prices = [quote["payCNY"] / (quote["cr"] * months) for quote in quotes]
-        per_credit = min(prices, default=None)
+        options = [r for r in COMPARISON_ROWS if r["plat"] == plat and key in r["byP"]]
         cells = []
         for i, reading in enumerate(readings):
             column = f'data-canvas-column="{i // 2}"'
+            quotes = [r["byP"][key] for r in options if applies_to(reading, r["tier"], key)]
+            per_credit = min((q["payCNY"] / (q["cr"] * months) for q in quotes), default=None)
+            if options and not quotes:
+                cells.append(f'<td {column}><span class="canvas-state">该周期缺少适用费率</span></td>')
+                continue
             if isinstance(reading, str) or per_credit is None:
                 status = f'无{label}' if per_credit is None else canvas_states.get(reading, reading)
                 cells.append(f'<td {column}><span class="canvas-state">{escape(status)}</span></td>')
@@ -2838,6 +2867,8 @@ for plat, readings in CANVAS["rows"].items():
             credits = reading["credits"] if isinstance(reading, dict) else reading
             price = per_credit * credits
             provenance = '<small class="canvas-meta">扣分沿用留档</small>' if isinstance(reading, dict) and "sourceDate" in reading else ""
+            if isinstance(reading, dict) and "label" in reading:
+                provenance = f'<small class="canvas-meta">{escape(reading["label"])} · {escape(reading["detail"])}</small>'
             cells.append(f'<td {column} data-canvas-cost="{price:.2f}"><strong>¥{f2(price)}</strong>{provenance}</td>')
         canvas_cost_rows += (
             f'<tr data-canvas-period="{key}"><th scope="row">{platform_label}'
@@ -2847,7 +2878,7 @@ CANVAS_DETAILS = f"""
 <details id="canvas-comparison">
   <summary>画布扣分与单条成本<span class="chev">›</span></summary>
   <div class="dbody" id="canvas-data">
-    <p class="canvas-context">Seedance 2.5 · 30 秒 · 16:9 · 全能参考 · 更新于 {CANVAS["date"]}，各平台核对日期见活动栏。</p>
+    <p class="canvas-context">比较基准为 Seedance 2.5、30 秒、16:9、全能参考。费率折算的适用条件见各格，补证更新于 {CANVAS["date"]}。</p>
     <div class="canvas-controls" hidden>
       <label class="record-filter">模型<select id="canvas-model">
         {"".join(f'<option value="{i}">{name}</option>' for i, name in enumerate(canvas_model_names))}
@@ -2865,8 +2896,11 @@ CANVAS_DETAILS = f"""
     </div>
     <div data-canvas-view="cost">
       {canvas_table(canvas_cost_rows, "各平台各周期最低单条成本")}
-      <p class="canvas-footnote">每个平台按所选周期单位积分最便宜的档位估算，金额为人民币。</p>
+      <p class="canvas-footnote">仅在费率适用的档位内，按所选周期最低单位积分成本估算。金额为人民币。</p>
     </div>
+    <h3>其他规格与用户样本</h3>
+    <p>以下记录保留原始时长、画幅和参考素材条件，仅供查阅。</p>
+    {table([("平台", None), ("任务规格", None), ("积分", None), ("适用条件", None), ("来源", None)], sample_rows, "tw records-table")}
     <a class="canvas-proof" href="#pricing-evidence">查看会员页与画布截图</a>
   </div>
 </details>
@@ -2884,6 +2918,8 @@ for plat, review in REVIEW.items():
     reading_date = state.get("sourceDate") if isinstance(state, dict) else None
     date_label = (f'<br><small>{reading_date or review["creditDate"]}'
                   f'{" 留档" if reading_date else ""}</small>' if plat in CPV else "")
+    if isinstance(state, dict) and "label" in state:
+        date_label = f'<br><small>{escape(state["date"])} · {escape(state["label"])}</small>'
     note = review.get("creditNote", "")
     offer_rows += (
         f'<tr><td>{source_link(plat, review["url"])}'
@@ -2903,11 +2939,13 @@ for benefit in COST.get("offerBenefits", []):
     gift = f"{extra_credits:,} 积分" if extra_credits else f"{extra_clips} 条"
     bonus_attr = ""
     costs = '<td class="num">扣分待核实</td><td class="num">—</td>'
-    if "per" in r:
+    if "per" in r and (not extra_clips or benefit.get("resolution") == DEFAULT_RESOLUTION):
         baseline_clips = p["cap"] * MONTHOF[key]
         cost_with_bonus = p["payCNY"] / (baseline_clips + extra_credits / r["per"] + extra_clips)
         bonus_attr = f' data-bonus-cost="{cost_with_bonus:.2f}"'
         costs = f'<td class="num">¥{f2(p["perVideo"])}</td><td class="num strong">¥{f2(cost_with_bonus)}</td>'
+    elif extra_clips:
+        costs = '<td class="num" colspan="2">赠送条数仅适用 720p</td>'
     offer_benefit_rows += (
         f'<tr{bonus_attr}><td>{r["plat"]} {tname(r)}</td>'
         f'<td>{"年付" if key == "y" else "季付"}</td>'
@@ -2921,7 +2959,7 @@ OFFER_DETAILS = f"""
   <div class="dbody">
     {table([("平台官网", None), ("活动与订阅政策", None), (BASELINE_LABEL + " / 30 秒", None)], offer_rows, "tw")}
     <h3>可量化赠送对首期成本的影响</h3>
-    <p>用基础积分加上已核对数量的赠分或赠送条数重新折算。结果假设在有效期内用完这些权益，沿用基准扣分。赠送会员月数、限时扣分折扣和不限次数权益见上表。</p>
+    <p>同规格赠送计入首期估算，假设积分和赠送条数均在有效期内用完。即梦 720p 赠片单独列示。</p>
     {table([("平台与档位", None), ("周期", None), ("首期实付", None), ("已核对赠送", None),
             ("基础成本 / 条", None), ("计入该赠送 / 条", None)], offer_benefit_rows, "tw")}
   </div>
@@ -2952,7 +2990,7 @@ EVIDENCE_DETAILS = f"""
 <details id="pricing-evidence" style="margin:14px 0">
   <summary>会员页与画布截图 · {len(EVIDENCE)} 张<span class="chev">›</span></summary>
   <div class="dbody">
-    <p>采集于 {UPDATED}。点击平台展开，点击图片可查看原尺寸。</p>
+    <p>采集日期见各截图图注。点击平台展开，点击图片可查看原尺寸。</p>
     {evidence_groups}
   </div>
 </details>
@@ -3285,7 +3323,7 @@ def page(title, desc, nav_html, body, cost_js=False, canon=None, extra_css="", e
 <!-- ============================================================
      {FP_WORK}　|　{FP_EDITION}
      {COPY}
-     数据采集时点：{UPDATED}　作者：{OWNER}
+     数据更新日期：{UPDATED}　作者：{OWNER}
      {TERMS}
      ============================================================ -->
 <meta name="author" content="{OWNER}">
@@ -3548,7 +3586,7 @@ cycles_body = f"""
 </div>
 
 <div id="allperiod">
-  {sec_head("", "三周期全清单（表）", "每个档位在月付 / 季付 / 年付三种承诺期下的单条成本。加粗＝该档三种周期里最省的那个；「—」＝该平台不提供该周期。")}
+  {sec_head("", "三周期全清单（表）", "各档在月付 / 季付 / 年付下的单条成本。加粗表示该档最低成本；「—」表示缺少该周期的报价或适用扣分。")}
   {table([("平台", None), ("档位", None), ("月付 / 条", None), ("季付 / 条", None),
           ("年付 / 条", None), ("最优周期", None)], ap2_rows, "tw")}
 </div>

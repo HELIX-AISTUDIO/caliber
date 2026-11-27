@@ -52,7 +52,7 @@
       name.className = 'profile-name';
       name.append(platformLogo(offer), nameOf(offer.plan.platform));
       const tier = document.createElement('small');
-      tier.textContent = offer.plan.tier + (offer.sourceDate ? ' · 扣分留档' : '');
+      tier.textContent = offer.plan.tier + (offer.sourceLabel ? ' · ' + offer.sourceLabel : '');
       identity.append(name, tier);
       const amount = document.createElement('strong');
       amount.textContent = value;
@@ -148,9 +148,10 @@
       heading.append(platformLogo({plan: {platform}}), nameOf(platform));
       const detail = document.createElement('small');
       detail.textContent = leader
-        ? leader.plan.tier + (leader.sourceDate ? ' · 留档' : '')
+        ? leader.plan.tier + (leader.sourceLabel ? ' · ' + leader.sourceLabel : '')
         : (typeof reading === 'string' ? reading : available.length
-          ? (scope.issue ? '请输入有效' + measure : byBudget ? '预算内暂无可出片档位' : '暂无达标档位') : '无此周期');
+          ? (scope.issue ? '请输入有效' + measure : byBudget ? '预算内暂无可出片档位' : '暂无达标档位')
+          : reading.period ? '仅' + data.periods[reading.period][0] + '有参考价' : '无此周期');
       item.append(heading);
       if (leader) {
         const metric = document.createElement('strong');

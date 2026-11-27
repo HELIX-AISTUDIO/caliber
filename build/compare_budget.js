@@ -165,7 +165,7 @@
       meter.append(element('i'));
       meter.style.setProperty('--capacity-share', offer.capacity / max * 100 + '%');
       const label = element('small', '', offer.monthlyCredits.toLocaleString('zh-CN') + ' 积分/月 · '
-        + offer.creditsPerClip.toLocaleString('zh-CN') + ' 分/条' + (offer.sourceDate ? ' · 扣分留档' : ''));
+        + offer.creditsPerClip.toLocaleString('zh-CN') + ' 分/条' + (offer.sourceLabel ? ' · ' + offer.sourceLabel : ''));
       metrics.append(first, meter, label);
       const actions = element('div', 'member-plan-actions');
       const pick = element('button', 'member-plan-pick');

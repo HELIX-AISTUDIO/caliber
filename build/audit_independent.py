@@ -56,7 +56,9 @@ for plat, cells in readings.items():
             chk(review.get("creditPending") and base["sourceDate"] == review["creditDate"] < C["canvasTests"]["date"],
                 f"{plat} 留档扣分日期或待复测状态错误")
         base = base["credits"]
-    chk(C["creditsPerVideo"].get(plat) == (None if isinstance(base, str) else base), f"{plat} 标准 720p 留档读数不一致")
+    archived = C["creditsPerVideo"].get(plat)
+    tier_limited = isinstance(cells[archive_column], dict) and "tier" in cells[archive_column]
+    chk(archived == (None if isinstance(base, str) or tier_limited else base), f"{plat} 标准 720p 通用读数不一致")
 for k, v in CPV.items():
     chk(0 < v < 100000, "%s 单条积分异常" % k, v)
 
@@ -64,6 +66,7 @@ for k, v in CPV.items():
 print("\n═══ ② 逐选项独立重算 ═══")
 # 独立实现：本币每积分 → 单条成本；产能；元/秒
 recs = []
+n_options = 0
 for plan in C["plans"]:
     plat = plan["platform"]
     if plat not in CPV:
@@ -71,9 +74,14 @@ for plan in C["plans"]:
     cur = P[plat]["currency"]
     fx = RATE if cur == "USD" else 1.0
     chk(cur in ("CNY", "USD"), "%s 币种异常" % plat, cur)
+    basis = readings[plat][base_column]
+    limits = basis if isinstance(basis, dict) else {}
+    if limits.get("tier", plan["tier"]) != plan["tier"]:
+        continue
     for c in plan["credits"]:
         if c.get("modelUnsupported"):
             continue
+        n_options += 1
         m_credit = c["credits"]                      # 年付口径的月积分
         mcr = c.get("mCr", m_credit)
         qcr = c.get("qCr", m_credit)
@@ -83,7 +91,7 @@ for plan in C["plans"]:
                          % (plat, plan["tier"], c["mCr"], m_credit))
         for key in "yqm":
             raw = c.get(PAYF[key])
-            if raw is None:
+            if raw is None or limits.get("period", key) != key:
                 continue
             credit = {"y": m_credit, "q": qcr, "m": mcr}[key]
             mo = MONTHS[key]
@@ -101,8 +109,7 @@ for plan in C["plans"]:
                 "pay": pay_cny, "per": per_clip, "cap": cap_month,
                 "capp": cap_period, "persec": per_clip / SEC,
             })
-n_options = sum(not opt.get("modelUnsupported") for plan in C["plans"] if plan["platform"] in CPV
-                for opt in plan["credits"])
+
 print("  共重算 %d 条（%d 档 × 可用周期）" % (len(recs), n_options))
 chk(len(recs) >= n_options, "记录数少于积分档位数", len(recs))
 
@@ -163,11 +170,18 @@ for plat, cells in readings.items():
                 for cell in cells if not isinstance(cell, str)]
     credits_expected.extend(str(n) for n in observed)
     for key in "mqy":
-        offers = [periods[key] for plan, periods in quotes_expected.items()
-                  if plan.startswith(plat + "/") and key in periods]
-        if offers:
-            unit = min(pay / (credits * MONTHS[key]) for pay, credits in offers)
-            prices_expected.extend("%.2f" % (unit * n) for n in observed)
+        for cell in cells:
+            if isinstance(cell, str):
+                continue
+            info = cell if isinstance(cell, dict) else {"credits": cell}
+            if key != info.get("period", key):
+                continue
+            offers = [periods[key] for plan, periods in quotes_expected.items()
+                      if plan.split("/")[0] == plat and key in periods
+                      and plan.split("/")[1] == info.get("tier", plan.split("/")[1])]
+            if offers:
+                unit = min(pay / (credits * MONTHS[key]) for pay, credits in offers)
+                prices_expected.append("%.2f" % (unit * info["credits"]))
 chk(re.findall(r'data-canvas-credit="(\d+)"', cost_h) == credits_expected, "画布积分与数据不一致")
 chk(re.findall(r'data-canvas-cost="([\d.]+)"', cost_h) == prices_expected, "分规格单条成本与重算不一致")
 chk(len(re.findall(r'data-membership=', cost_h)) == sum(len(p["credits"]) for p in C["plans"]),
@@ -189,7 +203,7 @@ print(f"  核对首页和方案对比的 {len(quotes_expected)} 个档位实付�
 
 bonus_expected = []
 for offer in C.get("offerBenefits", []):
-    if offer["platform"] not in CPV:
+    if offer["platform"] not in CPV or (offer.get("bonusClips") and offer["resolution"] != "480p"):
         continue
     row = next(r for r in recs if (
         r["plat"], r["key"], r["credits"]
