@@ -64,17 +64,12 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
     </fieldset>""" if workspace else ""
     heading = f"""
   <header class="compare-heading workspace-heading">
-    <div>
+    <nav class="workspace-links" aria-label="相关页面">
       <a class="workspace-back" id="compare-selection-back" href="index.html">返回成本榜</a>
-      <div class="workspace-title">
-        <h1>会员方案对比</h1>
-        <span id="compare-picked-count" class="workspace-count" role="status">已选 0 / 4</span>
-      </div>
-      <p>选 2 至 4 档，比较实付、月产能和单条成本。</p>
-    </div>
-    <nav class="compare-jump-links" aria-label="对比页操作">
-      <a href="{records_page}#membership-prices">会员报价</a>
+      <a class="workspace-quotes" href="{records_page}#membership-prices">会员报价</a>
     </nav>
+    <h1>会员方案对比</h1>
+    <p>在相同视频规格下，比较 2 至 4 个会员档位。</p>
   </header>
 """ if workspace else f"""
   <header id="cost" class="benchmark-heading">
@@ -156,12 +151,25 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
           <select id="compare-platform"><option value="">全部平台</option>{platform_options}</select>
         </label>
 """
-    picked_status = "" if workspace else '      <span id="compare-picked-count" role="status"></span>\n'
-    picked = f"""
+    picked = """
+    <aside id="compare-picked" class="workspace-tray" aria-labelledby="workspace-tray-title" data-has-picks="false">
+      <div class="workspace-tray-head">
+        <h2 id="workspace-tray-title">已选方案</h2>
+        <span id="compare-picked-count" role="status" aria-label="已选 0 档，共可选 4 档">0 / 4</span>
+      </div>
+      <p id="workspace-tray-empty">从列表选两档，即可并排查看价格和产能。</p>
+      <div id="compare-picked-plans" class="workspace-tray-plans" aria-label="已选档位"></div>
+      <div class="workspace-tray-actions">
+        <button type="button" id="compare-picked-clear" hidden>清空</button>
+        <button type="button" id="compare-picked-open" aria-controls="compare-selection" disabled>查看对比<i class="workspace-arrow" aria-hidden="true"></i></button>
+      </div>
+    </aside>
+""" if workspace else """
     <div id="compare-picked" class="compare-picked" hidden>
       <div id="compare-picked-plans" class="compare-picked-plans" aria-label="已选档位"></div>
-{picked_status}      <button type="button" id="compare-picked-clear">清空</button>
-      <button type="button" id="compare-picked-open">{"查看对比" if workspace else "并排比较"}</button>
+      <span id="compare-picked-count" role="status"></span>
+      <button type="button" id="compare-picked-clear">清空</button>
+      <button type="button" id="compare-picked-open">并排比较</button>
     </div>
 """
     record_links = f"""
@@ -210,7 +218,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
       <div id="compare-target-panel" class="compare-amount">
         <label class="compare-field" for="compare-target"><span class="filter-caption">每月生成条数</span>
           <span class="compare-input-unit">
-            <input id="compare-target" type="number" inputmode="numeric" min="1" max="10000" step="1" value="30" required>
+            <input id="compare-target" type="number" inputmode="numeric" min="1" max="10000" step="1" value="30" aria-describedby="compare-amount-error" required>
             <span aria-hidden="true">条/月</span>
           </span>
         </label>
@@ -223,8 +231,8 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
       <div id="compare-budget-panel" class="compare-amount" hidden>
         <label class="compare-field" for="compare-budget"><span class="filter-caption">本周期总预算</span>
           <span class="compare-input-unit">
-            <input id="compare-budget" type="number" inputmode="decimal" min="1" max="1000000" step="0.01" value="1000" required disabled>
-            <span aria-hidden="true">元预算</span>
+            <input id="compare-budget" type="number" inputmode="decimal" min="1" max="1000000" step="0.01" value="1000" aria-describedby="compare-amount-error" required disabled>
+            <span aria-hidden="true">元</span>
           </span>
         </label>
         <div class="compare-presets" aria-label="常用周期预算">
@@ -234,6 +242,7 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
         </div>
       </div>
 {platform_fields}
+            <p id="compare-amount-error" class="compare-amount-error" hidden></p>
             <div class="filter-popover-footer">
               <button id="compare-reset" type="button" aria-label="重置所有榜单条件">重置条件</button>
             </div>
@@ -308,30 +317,33 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
   </section>
 """
     selection = f"""
-  <section id="workspace-picker" class="workspace-picker" aria-labelledby="workspace-picker-title">
-    <header class="workspace-picker-heading">
-      <div>
-        <h2 id="workspace-picker-title">选择会员档位</h2>
-        <p id="workspace-picker-scope"></p>
-      </div>
-      <div id="workspace-shortcuts" class="workspace-shortcuts" aria-label="快速选择"></div>
-    </header>
-    <p id="workspace-picker-error" class="workspace-picker-error" role="status" hidden></p>
-    <div class="workspace-candidates">
-      <label class="compare-search workspace-search">
-        <input id="workspace-search" type="search" aria-label="搜索平台、档位或积分" placeholder="搜索平台、档位或积分" autocomplete="off">
-      </label>
+  <div id="workspace-shortcuts" class="workspace-shortcuts" role="group" aria-label="快速对比"></div>
+  <div class="workspace-layout">
+    <section id="workspace-picker" class="workspace-picker" aria-labelledby="workspace-picker-title">
+      <header class="workspace-picker-heading">
+        <div>
+          <h2 id="workspace-picker-title">选择会员档位</h2>
+          <p id="workspace-picker-scope"></p>
+        </div>
+        <label class="compare-search workspace-search">
+          <input id="workspace-search" type="search" aria-label="搜索平台、档位或积分" placeholder="搜索平台、档位或积分" autocomplete="off">
+        </label>
+      </header>
+      <p id="workspace-picker-error" class="workspace-picker-error" role="status" hidden></p>
       <div id="workspace-platforms" class="workspace-platforms" role="group" aria-label="按平台筛选"></div>
       <div class="workspace-list-head">
         <p id="workspace-plan-status" class="workspace-plan-status" role="status"></p>
         <button type="button" id="workspace-plan-more" class="workspace-plan-more" aria-controls="workspace-plan-grid" aria-expanded="false" hidden>显示全部档位</button>
         <button type="button" id="workspace-search-clear" class="workspace-plan-more" hidden>清除搜索</button>
       </div>
+      <div id="workspace-columns" class="workspace-columns" aria-hidden="true" hidden>
+        <span>平台与档位</span><span>月产能</span><span>首期实付</span>
+      </div>
       <div id="workspace-plan-grid" class="workspace-plan-grid" aria-label="可选档位"></div>
-    </div>
+      <noscript><p>启用 JavaScript 后可选择档位。<a href="cycles.html#allperiod">查看会员档位表</a></p></noscript>
+    </section>
 {picked}
-    <noscript><p>启用 JavaScript 后可选择档位。<a href="cycles.html#allperiod">查看会员档位表</a></p></noscript>
-  </section>
+  </div>
   <section id="compare-selection" class="compare-selection" aria-labelledby="compare-selection-title" hidden>
     <header>
       <div>
@@ -466,6 +478,7 @@ COMPARE_JS = r"""
   const budget = document.getElementById('compare-budget');
   const targetPanel = document.getElementById('compare-target-panel');
   const budgetPanel = document.getElementById('compare-budget-panel');
+  const amountError = document.getElementById('compare-amount-error');
   const platform = document.getElementById('compare-platform');
   const search = document.getElementById('compare-search');
   const showAll = document.getElementById('compare-all');
@@ -729,8 +742,8 @@ COMPARE_JS = r"""
 
   function syncPicks(){
     pickedBar.hidden = picked.size === 0;
-    pickedCount.textContent = '已选 ' + picked.size + ' / ' + pickLimit + (workspace ? '' : ' 个档位');
-    pickedOpen.disabled = picked.size < 2 || (workspace && selection.hidden);
+    pickedCount.textContent = '已选 ' + picked.size + ' / ' + pickLimit + ' 个档位';
+    pickedOpen.disabled = picked.size < 2;
     pickedPlans.replaceChildren();
     for (const id of picked) {
       const plan = data.plans[id];
@@ -769,7 +782,8 @@ COMPARE_JS = r"""
     const choices = [...picked].map(id => workspacePlan(data.plans[id], spec));
     const grid = document.createElement('table');
     grid.setAttribute('aria-label', '档位并排对比');
-    grid.style.setProperty('--comparison-width', (78 + choices.length * 112) + 'px');
+    grid.dataset.choices = choices.length;
+    grid.style.setProperty('--comparison-width', (78 + choices.length * 121) + 'px');
     const header = grid.createTHead().insertRow();
     const metricHead = document.createElement('th');
     metricHead.scope = 'col';
@@ -799,21 +813,32 @@ COMPARE_JS = r"""
       header.append(cell);
     }
     const metrics = [
-      ['首期实付', ({quote}) => quote ? money.format(quote[0]) : '—'],
-      ['月产能', ({offer}) => offer ? offer.capacity + ' 条' : '—'],
-      ['每条成本', ({offer}) => offer ? (fits(offer) ? perClip.format(unitCost(offer)) : reasonFor(offer)) : '—'],
-      ['每月积分', ({quote}) => quote ? quote[1].toLocaleString('zh-CN') : '—'],
-      ['画布扣分', ({reading}) => typeof reading === 'string' ? reading
+      ['pay', '首期实付', ({quote}) => quote ? money.format(quote[0]) : '—', ({quote}) => quote?.[0]],
+      ['capacity', '月产能', ({offer}) => offer ? offer.capacity + ' 条' : '—', ({offer}) => offer?.capacity],
+      ['unit', '每条成本', ({offer}) => offer ? (fits(offer) ? perClip.format(unitCost(offer)) : reasonFor(offer)) : '—'],
+      ['credits', '每月积分', ({quote}) => quote ? quote[1].toLocaleString('zh-CN') : '—'],
+      ['reading', '画布扣分', ({reading}) => typeof reading === 'string' ? reading
         : (reading.credits ?? reading).toLocaleString('zh-CN') + ' 分/条'],
     ];
     const body = grid.createTBody();
-    for (const [label, format] of metrics) {
+    for (const [metric, label, format, valueOf] of metrics) {
       const row = body.insertRow();
+      row.dataset.metric = metric;
       const heading = document.createElement('th');
       heading.scope = 'row';
       heading.textContent = label;
       row.append(heading);
-      for (const choice of choices) row.insertCell().textContent = format(choice);
+      const values = valueOf ? choices.map(valueOf).filter(Number.isFinite) : [];
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const best = metric === 'pay' ? min : max;
+      for (const choice of choices) {
+        const cell = row.insertCell();
+        cell.append(pickerNode('span', 'workspace-result-value', format(choice)));
+        if (values.length > 1 && min !== max && valueOf(choice) === best) {
+          cell.append(pickerNode('small', 'workspace-result-best', metric === 'pay' ? '最低' : '最高'));
+        }
+      }
     }
     selectionTable.append(grid);
     syncSelectionScroll();
@@ -836,6 +861,9 @@ COMPARE_JS = r"""
     budget.disabled = budgetPanel.hidden = !byBudget;
     const issue = input.validity.valid ? '' : (byBudget ? '请输入 ¥1 至 ¥1,000,000 的预算，最多保留两位小数。'
       : '请输入 1 到 10,000 之间的整数条数。');
+    input.setAttribute('aria-invalid', String(Boolean(issue)));
+    amountError.hidden = !issue;
+    amountError.textContent = issue;
     filterScope.textContent = cycle[0] + (issue ? '' : ' · ' + scenario);
     for (const preset of presets) {
       const activeValue = preset.dataset.budget ? budget.valueAsNumber : target.valueAsNumber;
@@ -853,7 +881,7 @@ COMPARE_JS = r"""
       const scope = specName + ' · ' + cycle[0] + (issue ? '' : ' · ' + scenario);
       renderSelection(spec, scope, fits, unitCost, reasonFor, issue);
       renderWorkspacePicker(spec, scope, byBudget, fits, issue);
-      syncPicks();
+      syncWorkspaceTray(spec);
       if (!issue) {
         const link = stateLink(true, true);
         if (link.href !== location.href) history.replaceState(null, '', link);
@@ -1120,7 +1148,8 @@ COMPARE_JS = r"""
     if (!button) return;
     picked.delete(Number(button.dataset.removePlan));
     render();
-    (workspace ? pickerSearch : (pickedBar.hidden ? result : pickedClear)).focus({preventScroll:true});
+    if (workspace) (pickedPlans.querySelector('button') || pickerSearch).focus();
+    else (pickedBar.hidden ? result : pickedClear).focus({preventScroll:true});
   });
   if (workspace) {
     bindWorkspacePicker();

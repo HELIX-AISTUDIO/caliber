@@ -670,9 +670,9 @@ th{background:var(--studio-control);color:var(--studio-muted);font-weight:700;fo
    被【静默压制】，改了没有任何反应（调手机端滑块时才暴露：改完 height 与 background，
    量出来还是旧值）。滑块现已统一到 .cqr 一套（全站 2 个 range 输入框都带这个类），
    原来的 width:min(320px,62vw) 已并入 .cqr。新增/调整滑块请只改 .cqr。 */
-input[type=number]{width:110px;background:rgba(255,255,255,.06);
+input.nvi{width:110px;background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.14);border-radius:9px;color:#fff;font-family:__MONO__;
-  font-size:14px;font-weight:600;padding:7px 10px;outline:none;letter-spacing:-.02em}input[type=number]:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.presets{display:inline-flex;gap:5px}
+  font-size:14px;font-weight:600;padding:7px 10px;outline:none;letter-spacing:-.02em}input.nvi:focus{border-color:rgba(209,254,23,.55);background:rgba(209,254,23,.07)}.presets{display:inline-flex;gap:5px}
 /* 按预算反查 —— 与「按产量反查」互为反向：那个问「要 N 条花多少钱」，
    这个问「有多少钱能做多少条」。 */
 .bud{margin-top:13px;padding:13px 15px;border-radius:13px;

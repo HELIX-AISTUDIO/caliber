@@ -4,6 +4,8 @@
   const pickerMore = document.getElementById('workspace-plan-more');
   const pickerClear = document.getElementById('workspace-search-clear');
   const pickerShortcuts = document.getElementById('workspace-shortcuts');
+  const pickerColumns = document.getElementById('workspace-columns');
+  const trayEmpty = document.getElementById('workspace-tray-empty');
   const pickerPageSize = 12;
   let pickerPlatform = '';
   let pickerExpanded = false;
@@ -56,7 +58,8 @@
     pickerClear.hidden = !keyword || matching.length > 0;
     pickerMore.textContent = pickerExpanded ? '收起档位列表' : '显示全部 ' + matching.length + ' 个档位';
     pickerMore.setAttribute('aria-expanded', String(pickerExpanded && !pickerMore.hidden));
-    pickerGrid.replaceChildren(...visible.map(({plan, quote, reading}) => {
+    pickerColumns.hidden = visible.length === 0;
+    pickerGrid.replaceChildren(...visible.map(({plan, quote, reading, offer}) => {
       const active = picked.has(plan.id);
       const card = pickerNode('button', 'workspace-plan');
       card.dataset.workspacePlan = plan.id;
@@ -66,11 +69,39 @@
       label.append(pickerNode('b', '', nameOf(plan.platform) + ' · ' + plan.tier));
       const availability = quote ? quote[1].toLocaleString('zh-CN') + ' 分/月' : '无' + data.periods[period.value][0];
       label.append(pickerNode('small', '', availability + (quote && typeof reading === 'string' ? ' · ' + reading : '')));
+      const identity = pickerNode('span', 'workspace-plan-identity');
+      identity.append(platformLogo({plan}), label);
+      const capacity = pickerNode('span', 'workspace-plan-capacity', offer ? offer.capacity + ' 条' : '—');
+      capacity.prepend(pickerNode('small', 'workspace-compact-label', '月产能'));
       const price = pickerNode('span', 'workspace-plan-price', quote ? money.format(quote[0]) : '—');
       const action = pickerNode('i', 'workspace-pick-icon');
       action.setAttribute('aria-hidden', 'true');
-      card.append(platformLogo({plan}), label, price, action);
+      card.append(identity, capacity, price, action);
       return card;
+    }));
+  }
+
+  function syncWorkspaceTray(spec) {
+    pickedBar.dataset.hasPicks = String(picked.size > 0);
+    pickedCount.textContent = picked.size + ' / ' + pickLimit;
+    pickedCount.setAttribute('aria-label', '已选 ' + picked.size + ' 档，共可选 ' + pickLimit + ' 档');
+    pickedOpen.disabled = selection.hidden;
+    trayEmpty.hidden = picked.size > 0;
+    pickedClear.hidden = picked.size === 0;
+    pickedPlans.replaceChildren(...[...picked].map(id => {
+      const {plan, quote} = workspacePlan(data.plans[id], spec);
+      const name = nameOf(plan.platform) + ' · ' + plan.tier;
+      const credits = quote ? quote[1].toLocaleString('zh-CN') + ' 分/月' : '无' + data.periods[period.value][0];
+      const meta = quote ? money.format(quote[0]) + ' · ' + credits : credits;
+      const remove = pickerNode('button', 'workspace-tray-plan');
+      remove.dataset.removePlan = id;
+      remove.setAttribute('aria-label', '移除 ' + name + '，' + credits);
+      const info = pickerNode('span', 'workspace-tray-plan-info');
+      info.append(pickerNode('b', '', name), pickerNode('small', '', meta));
+      const close = pickerNode('i', 'workspace-tray-remove');
+      close.setAttribute('aria-hidden', 'true');
+      remove.append(platformLogo({plan}), info, close);
+      return remove;
     }));
   }
 
@@ -100,7 +131,13 @@
       const description = firstName === nextName
         ? firstName + ' · ' + first.quote[1].toLocaleString('zh-CN') + ' / ' + next.quote[1].toLocaleString('zh-CN') + ' 分/月'
         : firstName + ' / ' + nextName;
-      button.append(pickerNode('b', '', label), pickerNode('span', '', description));
+      const marks = pickerNode('span', 'workspace-shortcut-marks');
+      marks.append(platformLogo(first), platformLogo(next));
+      const copy = pickerNode('span', 'workspace-shortcut-copy');
+      copy.append(pickerNode('b', '', label), pickerNode('small', '', description));
+      const arrow = pickerNode('i', 'workspace-arrow');
+      arrow.setAttribute('aria-hidden', 'true');
+      button.append(marks, copy, arrow);
       button.disabled = picked.size > 0;
       pickerShortcuts.append(button);
     }
