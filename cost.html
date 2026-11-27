@@ -963,13 +963,6 @@ body :is(a,button,input,select,summary,[tabindex]):focus-visible { outline: 2px 
 .benchmark-page .compare-rank-view input:checked + span { background: var(--studio-panel); color: var(--toolbar-ink); font-weight: 600; box-shadow: 0 1px 4px var(--studio-shadow); }
 .benchmark-page .board-sort > summary { color: var(--toolbar-muted); font-weight: 400; }
 .board-sort summary b { color: var(--toolbar-ink); font-weight: 600; }
-.board-sort .filter-popover { width: min(19rem,100%); }
-.board-sort-options { display: grid; overflow-y: auto; }
-.board-sort-options button { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 8px 14px; border: 0; border-radius: 15px; background: transparent; font-size: 14px; cursor: pointer; }
-.board-sort-options button::after { content: ""; display: grid; place-items: center; width: 19px; height: 19px; border-radius: 50%; background: var(--toolbar-bg); }
-.board-sort-options button:hover { background: var(--toolbar-bg); }
-.board-sort-options button[aria-pressed=true] { background: var(--toolbar-selected); font-weight: 600; }
-.board-sort-options button[aria-pressed=true]::after { content: "✓" / ""; background: var(--data-blue); color: var(--studio-bg); }
 .benchmark-page .compare-specs :is(.compare-axis,.compare-mode-choice) span { min-height: 44px; padding-inline: 18px; font-size: 15px; }
 .benchmark-page .compare-specs .compare-resolution span { min-height: 44px; min-width: 66px; font-size: 14px; }
 .compare-specs, .compare-toolbar, .cycle-toolbar { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
@@ -991,10 +984,40 @@ body :is(a,button,input,select,summary,[tabindex]):focus-visible { outline: 2px 
 .filter-popover-close:hover { background: var(--studio-soft); }
 .filter-popover-close::before, .filter-popover-close::after { content: ""; grid-area: 1 / 1; width: 12px; height: 1.5px; background: currentColor; transform: rotate(45deg); }
 .filter-popover-close::after { transform: rotate(-45deg); }
-.compare-option-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; gap: 14px 12px; }
-.compare-option-fields > .compare-choice, .filter-popover-footer, .compare-workspace .compare-option-fields .compare-amount { grid-column: 1 / -1; }
-.compare-option-fields .compare-amount-error { grid-column: 1 / -1; margin: 0; color: var(--studio-muted); font-size: var(--type-caption); line-height: 1.45; overflow-wrap: anywhere; }
-.filter-popover-footer { display: flex; justify-content: flex-end; padding-top: 10px; border-top: 1px solid var(--studio-line); }
+.compare-options .filter-popover { width: min(25rem,100%); max-height: min(33rem,var(--filter-space,72dvh)); padding: 15px; border-color: var(--studio-line); border-radius: 24px; font-family: var(--toolbar-font); }
+.board-sort .filter-popover { max-height: min(36rem,var(--filter-space,72dvh)); }
+.compare-options .filter-popover-heading { margin: 0; padding: 3px 5px 12px 8px; }
+.filter-tabs { display: flex; flex: none; gap: 18px; margin: 0 8px 8px; border-bottom: 1px solid var(--studio-line); }
+.filter-tabs button { position: relative; padding: 5px 0 9px; border: 0; background: transparent; color: var(--toolbar-muted); font-size: 14px; line-height: 1.4; cursor: pointer; }
+.filter-tabs button[aria-selected=true] { color: var(--toolbar-ink); font-weight: 600; }
+.filter-tabs button[aria-selected=true]::after { content: ""; position: absolute; inset: auto 0 -1px; height: 2px; border-radius: 2px; background: currentColor; }
+.compare-option-fields, .board-sort-options { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.filter-option { display: block; position: relative; cursor: pointer; }
+.filter-option input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.filter-option-face, .board-sort-options button { display: flex; align-items: center; gap: 13px; width: 100%; min-height: 71px; padding: 10px 15px; border: 0; border-radius: 19px; color: var(--toolbar-ink); background: transparent; text-align: left; cursor: pointer; }
+.filter-option + .filter-option, .board-sort-options button + button { margin-top: 3px; }
+.filter-option-copy { flex: 1 1 auto; min-width: 0; }
+.filter-option-copy strong, .filter-option-copy small { display: block; }
+.filter-option-copy strong { color: var(--toolbar-ink); font: 600 15px/1.45 var(--toolbar-font); }
+.filter-option-copy small, .filter-popover-footer small { color: var(--toolbar-muted); font: 400 13px/1.5 var(--toolbar-font); }
+.filter-option-copy small { margin-top: 3px; }
+.filter-option-face .comparison-mark { flex: none; width: 30px; height: 30px; margin: 0; }
+.filter-check { display: grid; place-items: center; flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--toolbar-bg); }
+.filter-option:hover .filter-option-face, .board-sort-options button:hover { background: var(--toolbar-bg); }
+.filter-option input:focus-visible + .filter-option-face, .board-sort-options button:focus-visible { outline: 2px solid var(--studio-accent); outline-offset: -2px; }
+.filter-option input:checked + .filter-option-face, .board-sort-options button[aria-pressed=true] { background: var(--toolbar-selected); }
+.filter-option input:checked + .filter-option-face .filter-check, .board-sort-options button[aria-pressed=true] .filter-check { background: var(--filter-tick); }
+.compare-options { --filter-tick: var(--data-blue); --filter-checkmark: #fff; }
+[data-theme=dark] .compare-options { --filter-tick: var(--studio-accent); --filter-checkmark: var(--studio-on-action); }
+.filter-option input:checked + .filter-option-face .filter-check::before, .board-sort-options button[aria-pressed=true] .filter-check::before { content: ""; width: 6px; height: 12px; margin-top: -3px; border: solid var(--filter-checkmark); border-width: 0 2px 2px 0; transform: rotate(38deg); }
+#filter-amount { padding: 8px; }
+#filter-amount fieldset { margin-bottom: 12px; }
+#filter-amount .compare-input-unit input { border-color: var(--studio-line); border-radius: 12px; background: var(--toolbar-bg); min-height: 44px; padding-inline-start: 12px; font-family: var(--toolbar-font); }
+#filter-amount .compare-presets { gap: 7px; margin-top: 8px; }
+#filter-amount .compare-presets button { min-height: 36px; border: 0; border-radius: 999px; background: var(--toolbar-bg); }
+#filter-amount .compare-presets button[aria-pressed=true] { color: var(--filter-tick); background: var(--toolbar-selected); }
+.compare-option-fields .compare-amount-error { margin: 8px 0 0; color: var(--studio-muted); font-size: var(--type-caption); line-height: 1.45; overflow-wrap: anywhere; }
+.filter-popover-footer { display: flex; flex: none; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 6px 1px; }
 .compare-search { position: relative; display: block; flex: 0 1 320px; min-width: 115px; }
 .compare-search::before { content: ""; position: absolute; top: 13px; left: 14px; width: 11px; height: 11px; border: 1.5px solid var(--studio-muted); border-radius: 50%; pointer-events: none; }
 .compare-search::after { content: ""; position: absolute; top: 24px; left: 24px; width: 6px; height: 1.5px; background: var(--studio-muted); transform: rotate(45deg); pointer-events: none; }
@@ -1909,7 +1932,7 @@ body :is(.budtip,.vptitle span,.scopenote,.pjh span,.pjnote,.note.warn b,.intro 
   .member-plan-numbers strong { font-size: 19px; }
 }
 @media (max-width: 390px) {
-  .compare-option-fields { grid-template-columns: minmax(0,1fr); gap: 11px; }
+  .compare-options .filter-popover { padding: 12px; }
   .profile-alternative .profile-identity > small { flex-basis: 100%; padding-inline-start: 32px; }
   .compare-frontier-x span:nth-child(even) { visibility: hidden; }
   .compare-results .compare-result-head { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: start; }
@@ -3970,7 +3993,7 @@ document.addEventListener('DOMContentLoaded', function(){
       const gap = 8;
       const below = window.innerHeight - anchor.bottom - 2 * gap;
       const above = anchor.top - Math.max(0, nav?.getBoundingClientRect().bottom ?? 0) - 2 * gap;
-      const opensAbove = below < 220 && above > below;
+      const opensAbove = below < Math.min(panel.scrollHeight, 440) && above > below;
       panel.style.left = left + 'px';
       panel.style.top = opensAbove ? 'auto' : (anchor.bottom - bounds.top + gap) + 'px';
       panel.style.bottom = opensAbove ? (bounds.bottom - anchor.top + gap) + 'px' : 'auto';

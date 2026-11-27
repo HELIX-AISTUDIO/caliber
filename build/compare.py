@@ -35,19 +35,21 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
     dataset = compare_dataset(rows, readings, periods, colors, logos, records_page)
     plans = dataset["plans"]
     data = json.dumps(dataset, ensure_ascii=False).replace("<", "\\u003c")
-    platform_options = "".join(
-        f'<option value="{escape(name)}">{escape(DISPLAY_NAMES.get(name, name))}</option>'
-        for name in platforms
-    )
+    def option_row(group, value, title, description, *, checked=False, mark=""):
+        icon = f'<i class="comparison-mark {escape(mark)}" aria-hidden="true"></i>' if mark else ""
+        return (f'<label class="filter-option"><input type="radio" name="{group}" value="{escape(value)}"'
+                f'{" checked" if checked else ""}><span class="filter-option-face">{icon}'
+                f'<span class="filter-option-copy"><strong>{escape(title)}</strong><small>{escape(description)}</small></span>'
+                f'<i class="filter-check" aria-hidden="true"></i></span></label>')
+
     resolution_options = "".join(
         f'<label><input type="radio" name="resolution" value="{index}"'
         f'{" checked" if label == DEFAULT_RESOLUTION else ""}><span>{label}</span></label>'
         for index, label in enumerate(RESOLUTIONS)
     )
     period_options = "".join(
-        f'<label><input type="radio" name="period" value="{key}"{" checked" if key == "m" else ""}>'
-        f'<span>{label}</span></label>'
-        for key, label, _, _ in periods
+        option_row("period", key, label, f"比较 {months} 个月的首期实付。", checked=key == "m")
+        for key, label, months, _ in periods
     )
     # Icons belong to the comparison criteria. View tabs use text alone.
     def criterion(path, label):
@@ -161,9 +163,17 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
       <div class="board-guide"><span>默认展示每家平台的达标档位，可切换档位或加入对比。</span>
         <a href="glossary.html#scope">计算口径说明 <span aria-hidden="true">→</span></a></div>"""
     sort_options = "".join(
-        f'<button type="button" data-order="{key}" data-direction="{direction}" aria-pressed="false">{label}{order}</button>'
-        for key, label in (("pay", "首期实付"), ("capacity", "月产能"), ("unit", "每条成本"))
-        for direction, order in (("asc", "从低到高"), ("desc", "从高到低"))
+        f'<button type="button" data-order="{key}" data-direction="{direction}" aria-pressed="false">'
+        f'<span class="filter-option-copy"><strong>{title}</strong><small>{description}</small></span>'
+        f'<i class="filter-check" aria-hidden="true"></i></button>'
+        for key, direction, title, description in (
+            ("pay", "asc", "首期实付最低", "优先查看本周期付款最少的方案。"),
+            ("pay", "desc", "首期实付最高", "优先查看本周期付款最多的方案。"),
+            ("capacity", "desc", "月产能最高", "每月可生成条数最多的方案排在前面。"),
+            ("capacity", "asc", "月产能最低", "每月可生成条数最少的方案排在前面。"),
+            ("unit", "asc", "每条成本最低", "优先查看平均每条视频成本最低的方案。"),
+            ("unit", "desc", "每条成本最高", "优先查看平均每条视频成本最高的方案。"),
+        )
     )
     sort_menu = "" if workspace else f"""
       <details class="compare-options board-sort" id="board-sort">
@@ -172,13 +182,24 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
           <header class="filter-popover-heading"><h2 id="board-sort-title">排名方式</h2>
             <button class="filter-popover-close" type="button" aria-label="关闭排名方式"></button></header>
           <div class="board-sort-options">{sort_options}</div>
+          <div class="filter-popover-footer"><small>排序适用于当前条件下符合要求的档位。</small></div>
         </div>
       </details>"""
-    platform_fields = "" if workspace else f"""
-        <label class="compare-field" for="compare-platform"><span class="filter-caption">平台</span>
-          <select id="compare-platform"><option value="">全部平台</option>{platform_options}</select>
-        </label>
-"""
+    tabs = [("period", "会员周期"), ("amount", "用量条件")]
+    platform_fields = ""
+    if not workspace:
+        tabs.append(("platform", "平台"))
+        choices = option_row("provider", "", "全部平台", f"比较收录的 {len(platforms)} 家平台。", checked=True)
+        for name in platforms:
+            count = sum(plan["platform"] == name for plan in plans)
+            choices += option_row("provider", name, DISPLAY_NAMES.get(name, name), f"收录 {count} 个会员档位。",
+                                  mark=logos[name])
+        platform_fields = f'<div id="filter-platform" role="tabpanel" aria-labelledby="tab-platform" hidden>{choices}</div>'
+    filter_tabs = "".join(
+        f'<button type="button" role="tab" id="tab-{key}" aria-controls="filter-{key}" '
+        f'aria-selected="{str(key == "period").lower()}" tabindex="{0 if key == "period" else -1}">{label}</button>'
+        for key, label in tabs
+    )
     picked = """
     <aside id="compare-picked" class="workspace-tray" aria-labelledby="workspace-tray-title" data-has-picks="false">
       <div class="workspace-tray-head">
@@ -238,12 +259,11 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
             <h2 id="compare-filter-title">{'调整对比条件' if workspace else '筛选会员档位'}</h2>
             <button type="button" class="filter-popover-close" aria-label="关闭筛选"></button>
           </header>
+          <div class="filter-tabs" role="tablist" aria-label="筛选条件">{filter_tabs}</div>
           <div class="compare-option-fields">
+            <div id="filter-period" role="tabpanel" aria-labelledby="tab-period">{period_options}</div>
+            <div id="filter-amount" role="tabpanel" aria-labelledby="tab-amount" hidden>
 {mode_fields}
-      <fieldset class="compare-choice">
-        <legend>会员周期</legend>
-        <div>{period_options}</div>
-      </fieldset>
       <div id="compare-target-panel" class="compare-amount">
         <label class="compare-field" for="compare-target"><span class="filter-caption">每月生成条数</span>
           <span class="compare-input-unit">
@@ -270,11 +290,13 @@ def compare_view(rows, readings, updated, periods, colors, logos, records_page="
           <button type="button" data-budget="3000" aria-pressed="false">¥3,000</button>
         </div>
       </div>
-{platform_fields}
             <p id="compare-amount-error" class="compare-amount-error" hidden></p>
-            <div class="filter-popover-footer">
-              <button id="compare-reset" type="button" aria-label="重置所有榜单条件">重置条件</button>
             </div>
+{platform_fields}
+          </div>
+          <div class="filter-popover-footer">
+              <small>更改条件后自动重算。</small>
+              <button id="compare-reset" type="button" aria-label="重置所有榜单条件">重置条件</button>
           </div>
         </div>
       </details>
@@ -509,7 +531,7 @@ COMPARE_JS = r"""
   const targetPanel = document.getElementById('compare-target-panel');
   const budgetPanel = document.getElementById('compare-budget-panel');
   const amountError = document.getElementById('compare-amount-error');
-  const platform = document.getElementById('compare-platform');
+  const platform = form.elements.namedItem('provider');
   const search = document.getElementById('compare-search');
   const showAll = document.getElementById('compare-all');
   const rankView = document.getElementById('compare-rank-view');
@@ -563,7 +585,7 @@ COMPARE_JS = r"""
     initialAmount.value = query.get('amount');
     if (!initialAmount.validity.valid) initialAmount.value = value;
   }
-  if (platform && [...platform.options].some(option => option.value === query.get('platform'))) platform.value = query.get('platform');
+  if (platform && [...platform].some(option => option.value === query.get('platform'))) platform.value = query.get('platform');
   if (search) search.value = query.get('q') || '';
   if (chartView && query.get('view') === 'chart') chartView.checked = true;
   includeAll = query.get('all') === '1';
@@ -877,6 +899,27 @@ COMPARE_JS = r"""
     syncSelectionScroll();
   }
 
+  const filterTabs = [...form.querySelectorAll('.filter-tabs [role=tab]')];
+  const amountTab = document.getElementById('tab-amount');
+  function selectFilterTab(selected) {
+    for (const tab of filterTabs) {
+      const active = tab === selected;
+      tab.tabIndex = active ? 0 : -1;
+      tab.setAttribute('aria-selected', String(active));
+      document.getElementById(tab.getAttribute('aria-controls')).hidden = !active;
+    }
+  }
+  filterTabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => selectFilterTab(tab));
+    tab.addEventListener('keydown', event => {
+      const next = {Home:0, End:filterTabs.length - 1, ArrowLeft:index - 1, ArrowRight:index + 1}[event.key];
+      if (next === undefined) return;
+      event.preventDefault();
+      const selected = filterTabs[(next + filterTabs.length) % filterTabs.length];
+      selectFilterTab(selected);
+      selected.focus();
+    });
+  });
   function render(){
     const byBudget = mode.value === 'budget';
     const byChart = Boolean(chartView?.checked);
@@ -892,6 +935,7 @@ COMPARE_JS = r"""
     const offers = [];
     target.disabled = targetPanel.hidden = byBudget;
     budget.disabled = budgetPanel.hidden = !byBudget;
+    amountTab.textContent = byBudget ? '预算条件' : '用量条件';
     const issue = input.validity.valid ? '' : (byBudget ? '请输入 ¥1 至 ¥1,000,000 的预算，最多保留两位小数。'
       : '请输入 1 到 10,000 之间的整数条数。');
     input.setAttribute('aria-invalid', String(Boolean(issue)));
@@ -1274,7 +1318,7 @@ DISCLOSURE_JS = r"""
       const gap = 8;
       const below = window.innerHeight - anchor.bottom - 2 * gap;
       const above = anchor.top - Math.max(0, nav?.getBoundingClientRect().bottom ?? 0) - 2 * gap;
-      const opensAbove = below < 220 && above > below;
+      const opensAbove = below < Math.min(panel.scrollHeight, 440) && above > below;
       panel.style.left = left + 'px';
       panel.style.top = opensAbove ? 'auto' : (anchor.bottom - bounds.top + gap) + 'px';
       panel.style.bottom = opensAbove ? (bounds.bottom - anchor.top + gap) + 'px' : 'auto';
